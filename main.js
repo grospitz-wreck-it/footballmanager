@@ -101,7 +101,7 @@ function initEventBindings(){
 // =========================
 function normalizeId(id){
   if(id === null || id === undefined) return null;
-  return String(id);
+  return String(id).trim().toLowerCase();
 }
 
 // =========================
