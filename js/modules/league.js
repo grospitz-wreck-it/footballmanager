@@ -244,6 +244,21 @@ function initLeagueSelect(){
 
   initLeague(game.league.current);
   populateTeamSelect();
+  // 🔥 FIX: erstes Match setzen
+const round = league.schedule?.[0];
+
+if(round && round.length > 0){
+  game.match.current = round[0];
+
+  game.match.live = {
+    minute: 0,
+    running: false,
+    score: { home: 0, away: 0 },
+    events: []
+  };
+
+  console.log("⚽ Erstes Match gesetzt:", game.match.current);
+}
 }
 
 // =========================
