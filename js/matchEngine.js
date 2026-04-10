@@ -128,7 +128,7 @@ function isMyMatch(match){
 }
 
 // =========================
-// 🎮 INIT MATCH (UNVERÄNDERT + SAFE IDS)
+// 🎮 INIT MATCH (FIXED MINIMAL)
 // =========================
 function initMatch(round){
 
@@ -137,8 +137,23 @@ function initMatch(round){
   const playerMatch = round.find(m => isMyMatch(m)) || round[0];
   if(!playerMatch) return false;
 
-  const homeId = normalizeId(playerMatch.homeTeamId);
-  const awayId = normalizeId(playerMatch.awayTeamId);
+  // 🔥 MINIMAL FIX: fallback wenn IDs fehlen
+  let homeId = normalizeId(playerMatch.homeTeamId);
+  let awayId = normalizeId(playerMatch.awayTeamId);
+
+  if(!homeId && playerMatch.home){
+    const t = (game.data?.teams || []).find(
+      t => t.name === (playerMatch.home.name || playerMatch.home)
+    );
+    homeId = normalizeId(t?.id);
+  }
+
+  if(!awayId && playerMatch.away){
+    const t = (game.data?.teams || []).find(
+      t => t.name === (playerMatch.away.name || playerMatch.away)
+    );
+    awayId = normalizeId(t?.id);
+  }
 
   if(!homeId || !awayId){
     console.error("❌ MATCH INIT FAILED (IDs fehlen)", playerMatch);
@@ -386,7 +401,7 @@ function simulateOtherMatches(round){
 }
 
 // =========================
-// 🔁 LOOP (STABILISIERT, KEINE LOGIK ENTFERNT)
+// 🔁 LOOP (UNVERÄNDERT)
 // =========================
 function runMatchLoop({ onTick, onEnd } = {}){
 
@@ -407,7 +422,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
     const live = game.match?.live;
     if(!live) return;
 
-    let safety = 0; // 🔒 verhindert Infinite Loops
+    let safety = 0;
 
     while(accumulator >= STEP && safety < 10){
 
@@ -419,7 +434,6 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
       const ctx = { match: game.match.current };
 
-      // 🔒 Reihenfolge unverändert, aber sicher
       rollRandomEvents(ctx);
       simulateLiveEvent(ctx);
       updateEvents();
