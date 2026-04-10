@@ -479,3 +479,40 @@ tr:hover {
 .league-option:hover {
   background: rgba(34,197,94,0.15);
 }
+/* =========================
+🎯 SELECT STYLE MATCH (ADD ONLY)
+========================= */
+#splash select,
+#leagueSelect,
+#teamSelect {
+  background: #020617;
+  color: white;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  transition: all 0.2s ease;
+}
+
+#splash select:focus,
+#leagueSelect:focus,
+#teamSelect:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.2);
+}
+
+/* optional: kleiner Pfeil */
+#leagueSelect,
+#teamSelect {
+  background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+                    linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 3px),
+                       calc(100% - 11px) calc(50% - 3px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
