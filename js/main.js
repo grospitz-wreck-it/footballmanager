@@ -165,22 +165,36 @@ console.table(
 
     competitions.forEach(c => {
 
-      const leagueId = normalizeId(c.id);
-      if(leagueMap.has(leagueId)) return;
+  const leagueId = normalizeId(c.id);
+  if(leagueMap.has(leagueId)) return;
 
-      const leagueTeams = teams.filter(
-        t => normalizeId(t.competition_id) === leagueId
-      );
+  // ✅ NUR Kreisliga A
+  if(c.level !== 7) return;
+  if(!c.name?.toLowerCase().includes("kreisliga a")) return;
 
-      leagueMap.set(leagueId, {
-        id: leagueId,
-        name: `${c.name} ${c.regions?.name} ${c.group || ""}`.trim(),
-        teams: leagueTeams.map(t => ({
-          ...t,
-          id: normalizeId(t.id)
-        }))
-      });
-    });
+  const leagueTeams = teams.filter(
+    t => normalizeId(t.competition_id) === leagueId
+  );
+
+  // ❌ KEINE leeren Ligen anzeigen
+  if(!leagueTeams || leagueTeams.length === 0) return;
+
+  leagueMap.set(leagueId, {
+    id: leagueId,
+
+    // ✅ sauberer Name
+    name: `${c.name}${c.regions?.name ? " " + c.regions.name : ""}`,
+
+    teams: leagueTeams.map(t => ({
+      ...t,
+      id: normalizeId(t.id)
+    })),
+
+    // 🔥 NEU (für später wichtig!)
+    region_id: c.region_id,
+    level: c.level
+  });
+});
 
     const leagues = Array.from(leagueMap.values());
 
