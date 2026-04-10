@@ -105,6 +105,36 @@ function normalizeId(id){
 }
 
 // =========================
+// 🔥 PLZ FEATURE (NEU)
+// =========================
+async function getRegionsByCode(code){
+  return supabase
+    .from("region_codes")
+    .select("region_id")
+    .eq("country", "DE")
+    .eq("code", code);
+}
+
+async function findLeaguesByCode(input){
+
+  if(!input || input.length < 2) return [];
+
+  const code = input.slice(0,3);
+
+  const { data } = await getRegionsByCode(code);
+
+  if(!data || data.length === 0){
+    return [];
+  }
+
+  const regionIds = data.map(r => r.region_id);
+
+  return game.league.available.filter(
+    l => regionIds.includes(l.region_id)
+  );
+}
+
+// =========================
 // 🚀 INIT
 // =========================
 async function init(){
@@ -143,66 +173,40 @@ async function init(){
           )
         )
       `);
-// =========================
-// 🔍 DEBUG SUPABASE
-// =========================
-console.log("=== COMPETITIONS RAW ===");
-console.table(competitions);
 
-console.log("=== LEAGUE NAMES ===");
-console.table(
-  competitions.map(c => ({
-    id: c.id,
-    name: c.name,
-    region: c.regions?.name,
-    group: c.group
-  }))
-);
-    // =========================
-    // 🔒 LEAGUE BUILD (FIXED)
-    // =========================
+    console.log("=== COMPETITIONS RAW ===");
+    console.table(competitions);
+
     const leagueMap = new Map();
 
     competitions.forEach(c => {
 
-  const leagueId = normalizeId(c.id);
-  if(leagueMap.has(leagueId)) return;
+      const leagueId = normalizeId(c.id);
+      if(leagueMap.has(leagueId)) return;
 
-  // ✅ NUR Kreisliga A
-  if(c.level !== 7) return;
-  if(!c.name?.toLowerCase().includes("kreisliga a")) return;
+      if(c.level !== 7) return;
+      if(!c.name?.toLowerCase().includes("kreisliga a")) return;
 
-      console.log("TOTAL TEAMS:", teams.length);
-      
-  const leagueTeams = teams.filter(
-    t => normalizeId(t.competition_id) === leagueId
-  );
+      const leagueTeams = teams.filter(
+        t => normalizeId(t.competition_id) === leagueId
+      );
 
-  // ❌ KEINE leeren Ligen anzeigen
-  if(!leagueTeams || leagueTeams.length === 0) return;
+      if(!leagueTeams || leagueTeams.length === 0) return;
 
-  leagueMap.set(leagueId, {
-    id: leagueId,
-
-    // ✅ sauberer Name
-    name: `${c.name}${c.regions?.name ? " " + c.regions.name : ""}`,
-
-    teams: leagueTeams.map(t => ({
-      ...t,
-      id: normalizeId(t.id)
-    })),
-
-    // 🔥 NEU (für später wichtig!)
-    region_id: c.region_id,
-    level: c.level
-  });
-});
+      leagueMap.set(leagueId, {
+        id: leagueId,
+        name: `${c.name}${c.regions?.name ? " " + c.regions.name : ""}`,
+        teams: leagueTeams.map(t => ({
+          ...t,
+          id: normalizeId(t.id)
+        })),
+        region_id: c.region_id,
+        level: c.level
+      });
+    });
 
     const leagues = Array.from(leagueMap.values());
 
-    // =========================
-    // 💾 STATE WRITE
-    // =========================
     game.data = {
       players,
       teams: teams.map(t => ({
@@ -213,26 +217,17 @@ console.table(
       leagues
     };
 
-    // 🔥 CRITICAL FIX (UI SOURCE)
     game.league = game.league || {};
     game.league.available = leagues;
 
     game.players = players;
     initPlayerPool(players);
 
-    console.log(`✅ Spieler: ${players.length}`);
-    console.log(`✅ Teams: ${teams.length}`);
-    console.log(`✅ Ligen: ${leagues.length}`);
-
     if(leagues.length === 0){
       throw new Error("❌ Keine Ligen aus DB geladen");
     }
 
     const loaded = loadGame();
-
-    if(loaded){
-      console.log("✅ Save geladen");
-    }
 
     if(!game.league.current){
       game.league.current = leagues[0];
@@ -246,12 +241,60 @@ console.table(
     }
 
     if(!game.league.schedule?.length){
-      console.log("📅 Generiere Spielplan...");
       generateSchedule();
     }
 
     initLeagueSelect();
     initTable();
+
+    // =========================
+    // 🔥 PLZ UI BINDING (NEU)
+    // =========================
+    const plzInput = document.getElementById("plzInput");
+    const results = document.getElementById("leagueResults");
+
+    if(plzInput && results){
+
+      plzInput.addEventListener("input", async (e) => {
+
+        const value = e.target.value;
+
+        if(value.length < 2){
+          results.innerHTML = "";
+          return;
+        }
+
+        const leagues = await findLeaguesByCode(value);
+
+        results.innerHTML = leagues.map(l => `
+          <div class="league-option" data-id="${l.id}">
+            ${l.name}
+          </div>
+        `).join("");
+      });
+
+      results.addEventListener("click", (e) => {
+
+        const el = e.target.closest(".league-option");
+        if(!el) return;
+
+        const leagueId = el.dataset.id;
+
+        const league = game.league.available.find(l => l.id === leagueId);
+
+        if(league){
+          game.league.current = league;
+
+          // 🔥 Dropdown Sync
+          const leagueSelect = document.getElementById("leagueSelect");
+          if(leagueSelect){
+            leagueSelect.value = league.id;
+          }
+
+          updateUI();
+        }
+      });
+    }
 
     const hasSave = !!loaded;
 
