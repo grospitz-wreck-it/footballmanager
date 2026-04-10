@@ -13,6 +13,9 @@ function normalizeId(id){
   return String(id);
 }
 
+// 🔥 NEU: Map für externes Setzen (PLZ)
+let leagueIndexMap = [];
+
 function ensureTeamPlayers(team){
 
   if(team.players && team.players.length > 0){
@@ -55,15 +58,11 @@ function initLeague(league){
     return;
   }
 
-  // 🔒 ID NORMALIZATION
   league.teams = league.teams.map(t => ({
     ...t,
     id: normalizeId(t.id)
   }));
 
-  // =========================
-  // 📊 TABELLE
-  // =========================
   league.table = league.teams.map(team => ({
     id: normalizeId(team.id),
     name: team.name,
@@ -76,9 +75,6 @@ function initLeague(league){
 
   console.log("📊 Tabelle erstellt");
 
-  // =========================
-  // 📅 SPIELPLAN
-  // =========================
   if(!league.schedule || league.schedule.length === 0){
 
     const baseTeams = league.teams.map(t => t.name);
@@ -116,9 +112,6 @@ function initLeague(league){
     console.log("📅 Spielplan erstellt:", league.schedule.length);
   }
 
-  // =========================
-  // 🔄 RESET
-  // =========================
   league.currentRound = 0;
 
   console.log("✅ Liga initialisiert:", league.name);
@@ -178,7 +171,6 @@ function nextMatch(){
 // =========================
 function initLeagueSelect(){
 
-  // 🔥 HARTE DOM RESET STRATEGIE
   function resetSelect(id){
     const el = document.getElementById(id);
     if(!el) return null;
@@ -202,7 +194,6 @@ function initLeagueSelect(){
 
   console.log("🏆 LeagueSelect FINAL:", source.length);
 
-  // 🔒 DOUBLE DEDUP (ID + NAME)
   const seen = new Set();
   const leagues = [];
 
@@ -213,9 +204,9 @@ function initLeagueSelect(){
     leagues.push(l);
   });
 
-  // =========================
-  // 🧼 OPTIONS BUILD
-  // =========================
+  // 🔥 NEU: Mapping speichern
+  leagueIndexMap = leagues;
+
   selects.forEach(select => {
 
     while(select.firstChild){
@@ -253,6 +244,40 @@ function initLeagueSelect(){
 
   initLeague(game.league.current);
   populateTeamSelect();
+}
+
+// =========================
+// 🔥 NEU: EXTERNES SETZEN (PLZ)
+// =========================
+function setLeagueById(leagueId){
+
+  const league = leagueIndexMap.find(
+    l => normalizeId(l.id) === normalizeId(leagueId)
+  );
+
+  if(!league){
+    console.warn("❌ Liga nicht gefunden:", leagueId);
+    return;
+  }
+
+  const index = leagueIndexMap.indexOf(league);
+
+  const selects = [
+    document.getElementById("leagueSelect"),
+    document.getElementById("leagueSelectMenu")
+  ].filter(Boolean);
+
+  game.league.current = league;
+
+  initLeague(league);
+
+  selects.forEach(select => {
+    select.value = index;
+  });
+
+  populateTeamSelect();
+
+  console.log("✅ Liga extern gesetzt:", league.name);
 }
 
 // =========================
@@ -359,5 +384,6 @@ export {
   getSelectedTeam,
   initLeague,
   nextMatch,
-  getCurrentRound
+  getCurrentRound,
+  setLeagueById // 🔥 NEU
 };
