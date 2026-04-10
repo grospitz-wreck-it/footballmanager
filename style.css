@@ -451,3 +451,31 @@ tr:hover {
     transform: translateY(0);
   }
 }
+/* =========================
+🔍 PLZ SEARCH (ADD ONLY)
+========================= */
+#plzSearch {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#leagueResults {
+  max-height: 140px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: #020617;
+  border: 1px solid #1e293b;
+}
+
+.league-option {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #1e293b;
+  font-size: 14px;
+}
+
+.league-option:hover {
+  background: rgba(34,197,94,0.15);
+}
