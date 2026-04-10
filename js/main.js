@@ -288,7 +288,8 @@ async function init(){
           // 🔥 Dropdown Sync
           const leagueSelect = document.getElementById("leagueSelect");
           if(leagueSelect){
-            leagueSelect.value = league.id;
+        import { setLeagueById } from "./modules/league.js";
+        setLeagueById(league.id);         
           }
 
           updateUI();
