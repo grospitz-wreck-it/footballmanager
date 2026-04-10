@@ -76,7 +76,7 @@ function initLeague(league){
   console.log("📊 Tabelle erstellt");
 
   if(!league.schedule || league.schedule.length === 0){
-
+  console.warn("⚠️ Fallback Scheduler aktiv (sollte nicht passieren)");
     const baseTeams = league.teams.map(t => t.name);
     const teams = [...baseTeams];
 
