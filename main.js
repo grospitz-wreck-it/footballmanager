@@ -129,8 +129,8 @@ async function init(){
     window.playerPool = players;
 
     const { data: teams } = await supabase
-      .from("teams")
-      .select("*");
+  .from("teams")
+  .select("id, name, competition_id");
 
     const { data: competitions } = await supabase
       .from("competitions")
