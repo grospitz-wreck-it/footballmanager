@@ -4,7 +4,7 @@
 import { renderCurrentMatch } from "../ui/ui.js";
 import { game } from "../core/state.js";
 import { generateTeam } from "./teamLoader.js";
-
+import { initMatch } from "../matchEngine.js"; 
 // =========================
 // 🧠 HELPERS
 // =========================
@@ -276,18 +276,18 @@ function setLeagueById(leagueId){
   populateTeamSelect();
 
   // 🔥 FIX: erstes Match sauber setzen
-  const round = league.schedule?.[0];
 
-  if(round && round.length > 0){
-    game.match.current = round[0];
+const round = league.schedule?.[0];
 
-    game.match.live = {
-      minute: 0,
-      running: false,
-      score: { home: 0, away: 0 },
-      events: []
-    };
+if(round && round.length > 0){
+
+  const ok = initMatch(round);
+
+  if(ok){
+    game.match.live.running = false;
+    console.log("⚽ Erstes Match sauber initialisiert");
   }
+}
 
   console.log("✅ Liga extern gesetzt:", league.name);
 }
