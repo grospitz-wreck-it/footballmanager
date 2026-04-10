@@ -244,21 +244,22 @@ function initLeagueSelect(){
 
   initLeague(game.league.current);
   populateTeamSelect();
-  // 🔥 FIX: erstes Match setzen
-const round = league.schedule?.[0];
 
-if(round && round.length > 0){
-  game.match.current = round[0];
+  // 🔥 FIX: hier war dein Fehler
+  const round = game.league.current?.schedule?.[0];
 
-  game.match.live = {
-    minute: 0,
-    running: false,
-    score: { home: 0, away: 0 },
-    events: []
-  };
+  if(round && round.length > 0){
+    game.match.current = round[0];
 
-  console.log("⚽ Erstes Match gesetzt:", game.match.current);
-}
+    game.match.live = {
+      minute: 0,
+      running: false,
+      score: { home: 0, away: 0 },
+      events: []
+    };
+
+    console.log("⚽ Erstes Match gesetzt:", game.match.current);
+  }
 }
 
 // =========================
@@ -400,5 +401,5 @@ export {
   initLeague,
   nextMatch,
   getCurrentRound,
-  setLeagueById // 🔥 NEU
+  setLeagueById
 };
