@@ -14,7 +14,7 @@ function normalizeId(val){
 function resolveTeamId(team){
   if(!team) return null;
 
-  if(typeof team === "string") return normalizeId(team);
+  if(typeof team === "string") return null; // 🔥 STRIKTER (kein String mehr als ID)
   if(typeof team === "number") return normalizeId(team);
 
   if(typeof team === "object"){
@@ -35,18 +35,16 @@ function getTeamName(team){
 
 function getTeamId(team){
   if(!team) return null;
-  if(typeof team === "string") return null; // 🔥 bleibt (NO-LOSS)
-  return normalizeId(team.id || null); // 🔒 FIX
+  if(typeof team === "string") return null;
+  return normalizeId(team.id || null);
 }
 
 function normalizeTeam(team){
 
-  // 👉 Strings bleiben Strings (NO-LOSS)
   if(typeof team === "string"){
     return { name: team };
   }
 
-  // 🔒 ensure ID is string if present
   if(team && team.id !== undefined){
     return {
       ...team,
@@ -85,7 +83,8 @@ function generateSchedule(){
 
   teamsRaw.forEach(t => {
 
-    const key = resolveTeamId(t) || t.name; // 🔒 FIX
+    const id = resolveTeamId(t);
+    const key = id || t.name;
 
     if(!key){
       console.error("❌ Team ohne Key:", t);
@@ -125,9 +124,11 @@ function generateSchedule(){
       const home = rotation[i];
       const away = rotation[rotation.length - 1 - i];
 
-      // 🔒 FIX: stabile ID-Vergleiche
-      const homeKey = resolveTeamId(home) || home.name;
-      const awayKey = resolveTeamId(away) || away.name;
+      const homeId = resolveTeamId(home);
+      const awayId = resolveTeamId(away);
+
+      const homeKey = homeId || home.name;
+      const awayKey = awayId || away.name;
 
       if(homeKey === awayKey){
         console.error("❌ Selbstduell verhindert:", homeKey);
@@ -135,12 +136,15 @@ function generateSchedule(){
       }
 
       if(home.name !== "BYE" && away.name !== "BYE"){
+
         round.push({
           id: crypto.randomUUID(),
 
-          homeTeamId: resolveTeamId(home), // 🔒 FIX
-          awayTeamId: resolveTeamId(away), // 🔒 FIX
+          // 🔥 PRIMARY SOURCE
+          homeTeamId: homeId,
+          awayTeamId: awayId,
 
+          // 🔥 KEEP FOR UI (NO-LOSS)
           home,
           away,
 
@@ -166,8 +170,8 @@ function generateSchedule(){
     round.map(match => ({
       id: crypto.randomUUID(),
 
-      homeTeamId: normalizeId(match.awayTeamId), // 🔒 FIX
-      awayTeamId: normalizeId(match.homeTeamId), // 🔒 FIX
+      homeTeamId: normalizeId(match.awayTeamId),
+      awayTeamId: normalizeId(match.homeTeamId),
 
       home: match.away,
       away: match.home,
@@ -208,8 +212,8 @@ function validateSchedule(expectedTeamCount){
   const teams = [];
 
   firstRound.forEach(match => {
-    teams.push(normalizeId(match.homeTeamId) || getTeamName(match.home)); // 🔒 FIX
-    teams.push(normalizeId(match.awayTeamId) || getTeamName(match.away)); // 🔒 FIX
+    teams.push(normalizeId(match.homeTeamId));
+    teams.push(normalizeId(match.awayTeamId));
   });
 
   const unique = new Set(teams);
@@ -227,7 +231,7 @@ function validateSchedule(expectedTeamCount){
 }
 
 // =========================
-// 👉 NEXT MATCH (ID SAFE)
+// 👉 NEXT MATCH (ID FIRST)
 // =========================
 function nextMatch(){
 
@@ -238,14 +242,7 @@ function nextMatch(){
     return null;
   }
 
-  const myTeamId = normalizeId(game.team?.id); // 🔒 FIX
-
-  const myTeamName =
-    String(
-      game.team?.name ||
-      game.team?.selected ||
-      ""
-    ).toLowerCase().trim();
+  const myTeamId = normalizeId(game.team?.selectedId || game.team?.id);
 
   let r = game.league.currentRound || 0;
   let m = game.league.currentMatchIndex || 0;
@@ -257,7 +254,6 @@ function nextMatch(){
 
       if(match._processed) continue;
 
-      // 🔒 ID FIRST (SAFE)
       if(myTeamId){
         if(
           normalizeId(match.homeTeamId) === myTeamId ||
@@ -269,24 +265,9 @@ function nextMatch(){
         }
       }
 
-      // 🔥 fallback (NO-LOSS)
-      if(myTeamName){
-
-        const homeName = normalize(getTeamName(match.home));
-        const awayName = normalize(getTeamName(match.away));
-
-        if(homeName === myTeamName || awayName === myTeamName){
-          game.league.currentRound = r;
-          game.league.currentMatchIndex = m;
-          return match;
-        }
-      }
-
-      if(!myTeamId && !myTeamName){
-        game.league.currentRound = r;
-        game.league.currentMatchIndex = m;
-        return match;
-      }
+      game.league.currentRound = r;
+      game.league.currentMatchIndex = m;
+      return match;
     }
     m = 0;
   }
@@ -317,7 +298,7 @@ function advanceSchedule(){
 }
 
 // =========================
-// 🏁 SEASON END CHECK (UNCHANGED)
+// 🏁 SEASON END CHECK
 // =========================
 function isSeasonFinished(){
 
@@ -330,7 +311,7 @@ function isSeasonFinished(){
 }
 
 // =========================
-// 📅 RENDER (UNCHANGED)
+// 📅 RENDER (UNVERÄNDERT)
 // =========================
 function renderSchedule(){
 
