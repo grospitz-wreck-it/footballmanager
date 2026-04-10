@@ -172,6 +172,8 @@ console.table(
   if(c.level !== 7) return;
   if(!c.name?.toLowerCase().includes("kreisliga a")) return;
 
+      console.log("TOTAL TEAMS:", teams.length);
+      
   const leagueTeams = teams.filter(
     t => normalizeId(t.competition_id) === leagueId
   );
