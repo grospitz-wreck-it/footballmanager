@@ -131,7 +131,12 @@ async function init(){
     const { data: teams } = await supabase
   .from("teams")
   .select("id, name, competition_id");
-
+  console.table(
+  teams.map(t => ({
+    name: t.name,
+    comp: t.competition_id
+  }))
+);
     const { data: competitions } = await supabase
       .from("competitions")
       .select(`
