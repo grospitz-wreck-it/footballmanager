@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>📊 Ad Dashboard</h1>
+
+<!-- TABS -->
+
+<div class="tabs">
+  <button id="tabAds" class="active">📢 Ads</button>
+  <button id="tabEvents">🎮 Events</button>
+  <button id="tabInsights">📈 Insights</button>
+</div>
+
+<!-- ========================= -->
+
+<!-- ADS TAB -->
+
+<!-- ========================= -->
+
+<div id="adsTab" class="tabContent active">
+
+<div class="kpiGrid">
+  <div class="kpiCard"><span>Impressions</span><h2 id="kpiImpressions">0</h2></div>
+  <div class="kpiCard"><span>Klicks</span><h2 id="kpiClicks">0</h2></div>
+  <div class="kpiCard"><span>Revenue</span><h2 id="kpiRevenue">0€</h2></div>
+</div>
+
+<div class="box">
+  <h2>Neue Kampagne</h2>
+
+  <div class="grid">
+    <input id="name" placeholder="Name">
+    <input id="customer" placeholder="Kunde">
+    <input id="budget" type="number" placeholder="Budget €">
+
+
+<select id="scope">
+  <option value="global">Global</option>
+  <option value="league">Liga</option>
+  <option value="team">Team</option>
+</select>
+
+<input id="scopeRef" placeholder="Liga oder Team IDs (comma)">
+
+<select id="adFormat">
+  <option value="banner">Banner</option>
+  <option value="video">Video</option>
+  <option value="sponsored">Sponsored</option>
+</select>
+
+<input id="cpm" placeholder="CPM €">
+<input id="cpc" placeholder="CPC €">
+
+<input type="date" id="startDate">
+<input type="date" id="endDate">
+
+<input id="link" placeholder="https://...">
+<input type="file" id="image">
+
+<button id="saveBtn">💾 Speichern</button>
+
+
+  </div>
+</div>
+
+<div class="box">
+  <h2>Kampagnen</h2>
+  <div id="list"></div>
+</div>
+
+</div>
+
+<!-- ========================= -->
+
+<!-- EVENTS TAB -->
+
+<!-- ========================= -->
+
+<div id="eventsTab" class="tabContent">
+
+<div class="box">
+  <h2>🎮 Neues Event</h2>
+
+  <div class="grid">
+
+
+<input id="eventTitle" placeholder="Titel">
+<textarea id="eventDescription" placeholder="Beschreibung"></textarea>
+
+<!-- SCOPE -->
+<select id="eventScope">
+  <option value="global">Global</option>
+  <option value="league">Liga</option>
+  <option value="team">Team</option>
+</select>
+
+<input id="eventScopeRef" placeholder="Team IDs (comma möglich)">
+
+<!-- GAME LOGIC -->
+<input id="eventProbability" type="number" step="0.01" placeholder="Wahrscheinlichkeit (0-1)">
+<input id="eventDuration" type="number" placeholder="Dauer (Minuten)">
+
+<select id="eventEffectType">
+  <option value="goal">⚽ Tor</option>
+  <option value="modifier">📊 Modifier</option>
+  <option value="pause">⏸ Pause</option>
+  <option value="resume">▶️ Resume</option>
+  <option value="end">🏁 Spiel beenden</option>
+</select>
+
+<select id="eventTarget">
+  <option value="home">Home</option>
+  <option value="away">Away</option>
+  <option value="both">Beide</option>
+</select>
+
+<input id="eventValue" type="number" placeholder="Wert (z.B. Tore +1)">
+
+<input id="eventAttack" type="number" placeholder="Attack Modifier">
+<input id="eventDefense" type="number" placeholder="Defense Modifier">
+
+<!-- MEDIA -->
+<input type="file" id="eventMedia" multiple>
+
+<button id="createEventBtn">🎬 Event speichern</button>
+
+
+  </div>
+</div>
+
+<div class="box">
+  <h2>📋 Events</h2>
+  <div id="eventList"></div>
+</div>
+
+</div>
+
+<!-- ========================= -->
+
+<!-- INSIGHTS -->
+
+<!-- ========================= -->
+
+<div id="insightsTab" class="tabContent">
+  <div class="box">
+    <h2>📈 Insights</h2>
+    <p>Tracking coming soon...</p>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script type="module" src="./js/admin.js"></script>
+
+</body>
+</html>

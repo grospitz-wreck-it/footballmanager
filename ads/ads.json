@@ -1,0 +1,67 @@
+[
+  {
+    "id": 1,
+    "name": "Hauptsponsor",
+    "image": "https://grospitz-wreck-it.github.io/kreisliga-manager/ads/ad1.jpg",
+    "link": "https://example.com",
+    "start": null,
+    "end": null,
+    "targeting": {
+      "global": true,
+      "league": null,
+      "team": null
+    }
+  },
+  {
+    "id": 2,
+    "name": "Liga Sponsor Kreisliga",
+    "image": "https://grospitz-wreck-it.github.io/kreisliga-manager/ads/ad2.jpg",
+    "link": "https://example.com",
+    "start": null,
+    "end": null,
+    "targeting": {
+      "global": false,
+      "league": "kreisliga",
+      "team": null
+    }
+  },
+  {
+    "id": 3,
+    "name": "Team Sponsor",
+    "image": "https://grospitz-wreck-it.github.io/kreisliga-manager/ads/ad3.jpg",
+    "link": "https://example.com",
+    "start": null,
+    "end": null,
+    "targeting": {
+      "global": false,
+      "league": null,
+      "team": "team_1"
+    }
+  },
+  {
+    "id": 4,
+    "name": "Winter Event Kampagne",
+    "image": "https://grospitz-wreck-it.github.io/kreisliga-manager/ads/ad4.jpg",
+    "link": "https://example.com",
+    "start": "2026-01-01",
+    "end": "2026-01-31",
+    "targeting": {
+      "global": true,
+      "league": null,
+      "team": null
+    }
+  },
+  {
+    "id": 5,
+    "name": "Wochenend Push",
+    "image": "https://grospitz-wreck-it.github.io/kreisliga-manager/ads/ad5.jpg",
+    "link": "https://example.com",
+    "start": "2026-04-01T00:00:00",
+    "end": "2026-04-30T23:59:59",
+    "targeting": {
+      "global": true,
+      "league": null,
+      "team": null
+    }
+  }
+]
