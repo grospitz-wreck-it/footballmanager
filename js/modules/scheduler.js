@@ -4,7 +4,7 @@
 import { game } from "../core/state.js";
 
 // =========================
-// 🧠 ID HELPERS (ADD ONLY)
+// 🧠 ID HELPERS
 // =========================
 function normalizeId(val){
   if(val === null || val === undefined) return null;
@@ -14,30 +14,24 @@ function normalizeId(val){
 function resolveTeamId(team){
   if(!team) return null;
 
-  if(typeof team === "string") return null; // 🔥 STRICT
   if(typeof team === "number") return normalizeId(team);
 
   if(typeof team === "object"){
     return normalizeId(team.id);
   }
 
-  return null;
+  return null; // 🔥 STRICT: kein String mehr erlaubt
 }
 
 // =========================
-// 🧠 HELPERS (EXISTING)
+// 🧠 HELPERS (UI bleibt)
 // =========================
 function getTeamName(team){
   if(!team) return "Unbekannt";
-  if(typeof team === "string") return team;
   return team.name || "Unbekannt";
 }
 
 function normalizeTeam(team){
-
-  if(typeof team === "string"){
-    return { name: team };
-  }
 
   if(team && team.id !== undefined){
     return {
@@ -61,7 +55,8 @@ function generateSchedule(){
     return;
   }
 
-  if(game.league.schedule && game.league.schedule.length > 0){
+  // 🔥 FIX: nur noch current.schedule
+  if(league.schedule && league.schedule.length > 0){
     console.log("ℹ️ Spielplan existiert bereits → wird nicht neu erstellt");
     return;
   }
@@ -75,7 +70,6 @@ function generateSchedule(){
 
     const id = resolveTeamId(t);
 
-    // 🔥 STRICT: KEIN NAME FALLBACK MEHR
     if(!id){
       console.error("❌ Team ohne ID (wird ignoriert):", t);
       return;
@@ -130,7 +124,7 @@ function generateSchedule(){
           homeTeamId: homeId,
           awayTeamId: awayId,
 
-          // 🔥 UI bleibt erhalten
+          // UI bleibt erhalten
           home,
           away,
 
@@ -167,16 +161,17 @@ function generateSchedule(){
     }))
   );
 
-  game.league.schedule = [...rounds, ...returnRounds];
+  // 🔥 FIX: zentrale Quelle
+  league.schedule = [...rounds, ...returnRounds];
 
-  game.league.schedule.forEach(round => {
+  league.schedule.forEach(round => {
     round._simulated = false;
   });
 
-  game.league.currentRound = 0;
-  game.league.currentMatchIndex = 0;
+  league.currentRound = 0;
+  league.currentMatchIndex = 0;
 
-  console.log("✅ Spielplan erstellt:", game.league.schedule.length);
+  console.log("✅ Spielplan erstellt:", league.schedule.length);
 
   validateSchedule(originalCount);
 }
@@ -186,7 +181,7 @@ function generateSchedule(){
 // =========================
 function validateSchedule(expectedTeamCount){
 
-  const schedule = game.league.schedule;
+  const schedule = game.league.current?.schedule;
 
   if(!schedule?.length){
     console.error("❌ Kein Spielplan vorhanden");
@@ -221,7 +216,7 @@ function validateSchedule(expectedTeamCount){
 // =========================
 function nextMatch(){
 
-  const schedule = game.league?.schedule;
+  const schedule = game.league?.current?.schedule;
 
   if(!schedule?.length){
     console.warn("❌ Kein Spielplan");
@@ -269,7 +264,7 @@ function advanceSchedule(){
   let roundIndex = game.league.currentRound || 0;
   let matchIndex = game.league.currentMatchIndex || 0;
 
-  const schedule = game.league.schedule;
+  const schedule = game.league.current?.schedule;
   if(!schedule?.length) return;
 
   matchIndex++;
@@ -288,7 +283,7 @@ function advanceSchedule(){
 // =========================
 function isSeasonFinished(){
 
-  const schedule = game.league.schedule;
+  const schedule = game.league.current?.schedule;
   if(!schedule?.length) return true;
 
   return schedule.every(round =>
@@ -297,14 +292,14 @@ function isSeasonFinished(){
 }
 
 // =========================
-// 📅 RENDER
+// 📅 RENDER (UI bleibt)
 // =========================
 function renderSchedule(){
 
   const container = document.getElementById("scheduleView");
   if(!container) return;
 
-  const schedule = game.league?.schedule;
+  const schedule = game.league?.current?.schedule;
 
   if(!schedule?.length){
     container.innerHTML = "<p>Kein Spielplan vorhanden</p>";
