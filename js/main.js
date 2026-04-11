@@ -234,10 +234,15 @@ async function init(){
     // =========================
     // 🔥 FIX 1: SCHEDULE VOR UI
     // =========================
-    if(!game.league.current.schedule?.length){
-      console.log("📅 Generiere Spielplan...");
-      generateSchedule();
-    }
+    initLeagueSelect();
+
+// 🔥 JETZT ist league.current korrekt
+if(!game.league.current.schedule?.length){
+  console.log("📅 Generiere Spielplan (korrekte Liga)");
+  generateSchedule();
+}
+
+initTable();
 
     // =========================
     // 🔥 FIX 2: UI DANACH
