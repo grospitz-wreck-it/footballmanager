@@ -232,18 +232,19 @@ function ensureLiveTableLoop(){
 // =========================
 const FORMATIONS = {
   "4-4-2": [
-    { role: "GK", top: "90%", left: "50%" },
-    { role: "DEF", top: "70%", left: "15%" },
-    { role: "DEF", top: "70%", left: "35%" },
-    { role: "DEF", top: "70%", left: "65%" },
-    { role: "DEF", top: "70%", left: "85%" },
-    { role: "MID", top: "50%", left: "15%" },
-    { role: "MID", top: "50%", left: "35%" },
-    { role: "MID", top: "50%", left: "65%" },
-    { role: "MID", top: "50%", left: "85%" },
-    { role: "ST", top: "20%", left: "40%" },
-    { role: "ST", top: "20%", left: "60%" }
-  ],
+  { role: "GK", top: "50%", left: "10%" },
+
+  { role: "DEF", top: "20%", left: "25%" },
+  { role: "DEF", top: "40%", left: "25%" },
+  { role: "DEF", top: "60%", left: "25%" },
+  { role: "DEF", top: "80%", left: "25%" },
+  { role: "MID", top: "20%", left: "50%" },
+  { role: "MID", top: "40%", left: "50%" },
+  { role: "MID", top: "60%", left: "50%" },
+  { role: "MID", top: "80%", left: "50%" },
+  { role: "ST", top: "40%", left: "75%" },
+  { role: "ST", top: "60%", left: "75%" }
+]
 
   "4-3-3": [
     { role: "GK", top: "90%", left: "50%" },
@@ -302,7 +303,10 @@ function renderTeam(){
     const type = p.position_type || "MID";
     (byType[type] || byType.MID).push(p);
   });
-
+// sortiere nach Stärke
+Object.values(byType).forEach(arr => {
+  arr.sort((a, b) => (b.overall || 0) - (a.overall || 0));
+});
   const starters = [
     ...byType.GK.slice(0,1),
     ...byType.DEF.slice(0,4),
@@ -382,6 +386,21 @@ function renderPlayerDot(player){
          data-id="${player.id}" 
          data-tier="${player.tier}">
       ${initials}
+    </div>
+  `;
+}
+
+function renderStat(label, value){
+
+  const v = value ?? 0;
+
+  return `
+    <div class="stat-row">
+      <span>${label}</span>
+      <div class="stat-bar">
+        <div class="fill" style="width:${v}%"></div>
+      </div>
+      <span>${v}</span>
     </div>
   `;
 }
