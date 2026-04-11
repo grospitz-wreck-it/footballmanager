@@ -199,6 +199,21 @@ function initLeagueSelect(){
 
       initLeague(game.league.current);
 
+      // 🔥 FIX 1: Schedule sicherstellen
+      if(!league.schedule || !league.schedule.length){
+        console.log("📅 Generiere Spielplan (LeagueSelect)");
+        generateSchedule();
+      }
+
+      // 🔥 FIX 2: MATCH IMMER NEU LADEN
+      const round = league.schedule?.[0];
+      if(round && round.length > 0){
+        const ok = initMatch(round);
+        if(ok){
+          game.match.live.running = false;
+        }
+      }
+
       selects.forEach(s => {
         if(s !== select) s.value = index;
       });
@@ -211,9 +226,16 @@ function initLeagueSelect(){
   game.league.current = leagues[0];
 
   initLeague(game.league.current);
+
+  // 🔥 FIX 3: INITIALER SCHEDULE
+  if(!game.league.current.schedule || !game.league.current.schedule.length){
+    console.log("📅 Generiere Spielplan (Init)");
+    generateSchedule();
+  }
+
   populateTeamSelect();
 
-  // 🔥 Match init
+  // 🔥 FIX 4: INITIAL MATCH
   const round = game.league.current?.schedule?.[0];
 
   if(round && round.length > 0){
@@ -226,7 +248,6 @@ function initLeagueSelect(){
     }
   }
 }
-
 // =========================
 // 🔥 SET LEAGUE (PLZ)
 // =========================
