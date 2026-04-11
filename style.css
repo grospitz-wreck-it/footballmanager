@@ -678,3 +678,28 @@ tr:hover {
   font-size: 11px;
   padding: 6px;
 }
+.player-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+
+  background: #3b82f6; /* blau */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  cursor: pointer;
+
+  transition: transform 0.15s ease;
+}
+
+.player-dot:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
