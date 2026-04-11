@@ -171,7 +171,8 @@ function initEventBindings(){
     }
 
     advanceSchedule(); // bleibt!
-
+    // 🔥 Sync back
+    game.league.playerRound = game.league.currentRound;
     updateUI();
     renderEvents();
     renderSchedule();
