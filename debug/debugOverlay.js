@@ -1,7 +1,8 @@
 // =========================
-// 🧪 DEBUG OVERLAY (READ ONLY)
+// 🐞 DEBUG OVERLAY (FINAL)
 // =========================
-import { game } from "../js/core/state.js";
+
+import { game } from "../core/state.js";
 
 // =========================
 // 🧠 HELPERS
@@ -26,7 +27,7 @@ function createOverlay(){
     position: "fixed",
     bottom: "10px",
     right: "10px",
-    width: "320px",
+    width: "340px",
     maxHeight: "80vh",
     overflow: "auto",
     background: "rgba(0,0,0,0.9)",
@@ -36,7 +37,8 @@ function createOverlay(){
     padding: "10px",
     borderRadius: "8px",
     zIndex: 99999,
-    boxShadow: "0 0 10px rgba(0,255,136,0.3)"
+    boxShadow: "0 0 10px rgba(0,255,136,0.3)",
+    userSelect: "text"
   });
 
   const header = el("div", {
@@ -45,20 +47,31 @@ function createOverlay(){
     cursor: "pointer"
   });
 
-  header.textContent = "🐞 DEBUG (click to toggle)";
-
   const content = el("div");
 
+  let frozen = false;
+
+  header.textContent = "🐞 DEBUG";
+
+  // Klick = ein/ausblenden
   header.onclick = () => {
     content.style.display =
       content.style.display === "none" ? "block" : "none";
+  };
+
+  // Doppelklick = freeze
+  header.ondblclick = () => {
+    frozen = !frozen;
+    header.textContent = frozen
+      ? "🐞 DEBUG (FROZEN)"
+      : "🐞 DEBUG";
   };
 
   container.appendChild(header);
   container.appendChild(content);
   document.body.appendChild(container);
 
-  return content;
+  return { content, getFrozen: () => frozen };
 }
 
 // =========================
@@ -105,20 +118,30 @@ Phase: ${safe(game.phase)}
 // =========================
 // 🚀 INIT
 // =========================
-let isHovering = false;
+function initDebugOverlay(){
 
-content.addEventListener("mouseenter", () => {
-  isHovering = true;
-});
+  const { content, getFrozen } = createOverlay();
 
-content.addEventListener("mouseleave", () => {
-  isHovering = false;
-});
+  let isHovering = false;
 
-setInterval(() => {
-  if(!isHovering){
-    render(content);
-  }
-}, 500);
+  content.addEventListener("mouseenter", () => {
+    isHovering = true;
+  });
 
+  content.addEventListener("mouseleave", () => {
+    isHovering = false;
+  });
+
+  setInterval(() => {
+    if(!isHovering && !getFrozen()){
+      render(content);
+    }
+  }, 500);
+
+  console.log("🐞 Debug Overlay aktiv");
+}
+
+// =========================
+// 📦 EXPORT
+// =========================
 export { initDebugOverlay };
