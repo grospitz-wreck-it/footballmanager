@@ -198,12 +198,11 @@ function initLeagueSelect(){
 
       game.league.current = league;
 
-      initLeague(game.league.current);
+ if(!game.league.current.schedule || !game.league.current.schedule.length){
+  generateSchedule();
+}
 
-      // 🔥 Schedule fix
-      if(!league.schedule || !league.schedule.length){
-        generateSchedule();
-      }
+initLeague(game.league.current);
 
       // 🔥 Match fix
       const round = league.schedule?.[0];
