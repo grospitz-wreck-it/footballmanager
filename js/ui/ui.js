@@ -327,9 +327,31 @@ const bench = players.filter(p => !usedIds.has(p.id));
     <div class="team-field">
   `;
   
-  starters.forEach(p => {
-    html += renderPlayerCard(p);
-  });
+  const positions = [
+  { top: "90%", left: "50%" }, // GK
+
+  { top: "70%", left: "20%" },
+  { top: "70%", left: "40%" },
+  { top: "70%", left: "60%" },
+  { top: "70%", left: "80%" },
+
+  { top: "45%", left: "25%" },
+  { top: "45%", left: "50%" },
+  { top: "45%", left: "75%" },
+
+  { top: "20%", left: "35%" },
+  { top: "20%", left: "65%" }
+];
+
+starters.forEach((p, i) => {
+  const pos = positions[i] || { top: "50%", left: "50%" };
+
+  html += `
+    <div class="player-pos" style="top:${pos.top}; left:${pos.left}">
+      ${renderPlayerCard(p)}
+    </div>
+  `;
+});
 
   html += `</div>`;
 
