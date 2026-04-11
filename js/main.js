@@ -224,8 +224,12 @@ async function init(){
     game.players = players;
     initPlayerPool(players);
 
-    const loaded = loadGame();
+const loaded = loadGame();
 
+// 🔥 FIX: Wenn kein Team gewählt → als neues Spiel behandeln
+if(!game.team?.selectedId){
+  game.phase = "setup";
+}
     if(!game.league.current){
       game.league.current = leagues[0];
     }
