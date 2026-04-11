@@ -273,6 +273,48 @@ function renderCurrentMatch(){
   console.log("⚽ renderCurrentMatch");
 }
 
+
+function renderTeam(){
+
+  const container = document.getElementById("teamView");
+  if(!container) return;
+
+  const players = game.team?.players || [];
+
+  if(!players.length){
+    container.innerHTML = "<p>Keine Spieler vorhanden</p>";
+    return;
+  }
+
+  const starters = players.slice(0, 11);
+  const bench = players.slice(11);
+
+  let html = `
+    <h3>Starting XI</h3>
+    <div class="team-grid">
+  `;
+
+  starters.forEach(p => {
+    html += renderPlayerCard(p);
+  });
+
+  html += `</div>`;
+
+  html += `
+    <h3>Bench</h3>
+    <div class="bench-row">
+  `;
+
+  bench.forEach(p => {
+    html += renderPlayerCard(p, true);
+  });
+
+  html += `</div>`;
+
+  container.innerHTML = html;
+}
+
+
 // =========================
 // 📦 EXPORTS
 // =========================
