@@ -471,6 +471,4 @@ document.getElementById("resetBtn")?.addEventListener("click", () => {
 // =========================
 // ▶️ START
 // =========================
-document.addEventListener("DOMContentLoaded", init);
-
-export { init };
+init();
