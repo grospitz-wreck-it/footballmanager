@@ -127,15 +127,20 @@ function generateSchedule(){
 
     for(let i = 0; i < half; i++){
 
-      const home = rotation[i];
-      const away = rotation[rotation.length - 1 - i];
+  let home = rotation[i];
+  let away = rotation[rotation.length - 1 - i];
 
-      const homeId = resolveTeamId(home);
-      const awayId = resolveTeamId(away);
+  // 🔥 FIX: Heim/Auswärts pro Runde wechseln
+  if(r % 2 === 1){
+    [home, away] = [away, home];
+  }
 
-      if(!homeId || !awayId || homeId === awayId){
-        continue;
-      }
+  const homeId = resolveTeamId(home);
+  const awayId = resolveTeamId(away);
+
+  if(!homeId || !awayId || homeId === awayId){
+    continue;
+  }
 
       if(home.name !== "BYE" && away.name !== "BYE"){
 
