@@ -102,7 +102,6 @@ function normalizeId(id){
   return String(id);
 }
 
-// 🔥 NEU: dein Match holen
 function getMatchForMyTeam(round){
 
   const myTeamId = game.team?.selectedId;
@@ -200,10 +199,6 @@ async function init(){
 
     const leagues = Array.from(leagueMap.values());
 
-    if(!leagues.length){
-      throw new Error("❌ Keine Ligen geladen");
-    }
-
     game.data = {
       players,
       teams: teams.map(t => ({ ...t, id: normalizeId(t.id) })),
@@ -233,7 +228,7 @@ async function init(){
     renderSchedule();
 
     // =========================
-    // 🔥 PLZ UI (WIEDER DRIN)
+    // 🔥 PLZ UI
     // =========================
     const plzInput = document.getElementById("plzInput");
     const results = document.getElementById("leagueResults");
@@ -282,6 +277,12 @@ async function init(){
 
           if(match){
             initMatch([match]);
+
+            // 🔥 FIX (fehlte!)
+            const live = game.match.live;
+            live.running = false;
+            live.minute = 0;
+            live.phase = "first_half";
           }
 
           renderSchedule();
@@ -295,7 +296,7 @@ async function init(){
   }
 
   // =========================
-  // ▶️ MAIN BUTTON (DEIN FIX)
+  // ▶️ MAIN BUTTON
   // =========================
   const mainBtn = document.getElementById("mainButton");
 
@@ -337,13 +338,15 @@ async function init(){
       if(match){
         initMatch([match]);
         live = game.match.live;
+
+        // 🔥 FIX
+        live.running = false;
+        live.minute = 0;
+        live.phase = "first_half";
       }
     }
 
-    if(!live){
-      console.warn("❌ Kein Match");
-      return;
-    }
+    if(!live) return;
 
     if(live.minute >= 90){
 
@@ -355,17 +358,16 @@ async function init(){
       if(match){
         initMatch([match]);
 
-        game.match.live.running = true;
+        const l = game.match.live;
+
+        // 🔥 FIX
+        l.running = true;
+        l.minute = 0;
+        l.phase = "first_half";
 
         runMatchLoop({
-          onTick: () => {
-            updateUI();
-            updateMainButtonText();
-          },
-          onEnd: () => {
-            updateUI();
-            updateMainButtonText();
-          }
+          onTick: () => updateUI(),
+          onEnd: () => updateUI()
         });
       }
 
@@ -377,20 +379,11 @@ async function init(){
 
     if(live.phase === "halftime"){
 
+      // 🔥 FIX
       live.phase = "second_half";
-      live.running = true;
+      live.running = false;
 
-      runMatchLoop({
-        onTick: () => {
-          updateUI();
-          updateMainButtonText();
-        },
-        onEnd: () => {
-          updateUI();
-          updateMainButtonText();
-        }
-      });
-
+      updateMainButtonText();
       return;
     }
 
@@ -399,14 +392,8 @@ async function init(){
       live.running = true;
 
       runMatchLoop({
-        onTick: () => {
-          updateUI();
-          updateMainButtonText();
-        },
-        onEnd: () => {
-          updateUI();
-          updateMainButtonText();
-        }
+        onTick: () => updateUI(),
+        onEnd: () => updateUI()
       });
 
       updateMainButtonText();
