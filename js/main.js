@@ -96,7 +96,7 @@ function initEventBindings(){
 }
 
 // =========================
-// 🧠 HELPERS (ADD ONLY)
+// 🧠 HELPERS
 // =========================
 function normalizeId(id){
   if(id === null || id === undefined) return null;
@@ -104,7 +104,7 @@ function normalizeId(id){
 }
 
 // =========================
-// 🔥 PLZ FEATURE (NEU)
+// 🔥 PLZ FEATURE
 // =========================
 async function getRegionsByCode(code){
   return supabase
@@ -151,15 +151,10 @@ async function init(){
 
     console.log("⚽ Lade Supabase Daten...");
 
-    const { data: players } = await supabase
-      .from("players")
-      .select("*");
-
+    const { data: players } = await supabase.from("players").select("*");
     window.playerPool = players;
 
-    const { data: teams } = await supabase
-      .from("teams")
-      .select("*");
+    const { data: teams } = await supabase.from("teams").select("*");
 
     const { data: competitions } = await supabase
       .from("competitions")
@@ -172,9 +167,6 @@ async function init(){
           )
         )
       `);
-
-    console.log("=== COMPETITIONS RAW ===");
-    console.table(competitions);
 
     const leagueMap = new Map();
 
@@ -190,7 +182,7 @@ async function init(){
         t => normalizeId(t.competition_id) === leagueId
       );
 
-      if(!leagueTeams || leagueTeams.length === 0) return;
+      if(!leagueTeams.length) return;
 
       leagueMap.set(leagueId, {
         id: leagueId,
@@ -239,15 +231,22 @@ async function init(){
       }
     }
 
-    if(!game.league.schedule?.length){
+    // =========================
+    // 🔥 FIX 1: SCHEDULE VOR UI
+    // =========================
+    if(!game.league.current.schedule?.length){
+      console.log("📅 Generiere Spielplan...");
       generateSchedule();
     }
 
+    // =========================
+    // 🔥 FIX 2: UI DANACH
+    // =========================
     initLeagueSelect();
     initTable();
 
     // =========================
-    // 🔥 PLZ UI BINDING (NEU)
+    // 🔥 PLZ UI
     // =========================
     const plzInput = document.getElementById("plzInput");
     const results = document.getElementById("leagueResults");
@@ -282,14 +281,7 @@ async function init(){
         const league = game.league.available.find(l => l.id === leagueId);
 
         if(league){
-          game.league.current = league;
-
-          // 🔥 Dropdown Sync
-          const leagueSelect = document.getElementById("leagueSelect");
-          if(leagueSelect){
-  setLeagueById(league.id);
-}
-
+          setLeagueById(league.id);
           updateUI();
         }
       });
@@ -314,7 +306,11 @@ async function init(){
         splash.style.display = "none";
         app.style.display = "block";
 
-        generateSchedule();
+        // 🔥 FIX 3: nochmal absichern
+        if(!game.league.current.schedule?.length){
+          generateSchedule();
+        }
+
         updateUI();
         renderEvents();
       });
