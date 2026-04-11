@@ -368,33 +368,17 @@ starters.forEach((p, i) => {
   container.innerHTML = html;
 }
 
-function renderPlayerCard(player, small = false){
+function renderPlayerDot(player){
 
-  const name = player.name || "Unknown";
-  const position = player.position || "-";
-  const rating = Math.round(player.overall || 50);
+  const initials =
+    (player.first_name?.[0] || "") +
+    (player.last_name?.[0] || "");
 
   return `
-    <div class="player-card ${small ? "small" : ""}">
-      
-      <div class="card-header">
-        <span>${position}</span>
-        <span>${rating}</span>
-      </div>
-
-      <div class="player-name">
-        ${name}
-      </div>
-
-      ${
-        small ? "" : `
-        <div class="stats">
-          ${renderStat("SHO", player.shooting)}
-          ${renderStat("PAS", player.passing)}
-          ${renderStat("DEF", player.defending)}
-        </div>
-      `}
-      
+    <div class="player-dot" 
+         data-id="${player.id}" 
+         data-tier="${player.tier}">
+      ${initials}
     </div>
   `;
 }
