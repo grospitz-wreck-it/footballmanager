@@ -105,13 +105,20 @@ Phase: ${safe(game.phase)}
 // =========================
 // 🚀 INIT
 // =========================
-function initDebugOverlay(){
+let isHovering = false;
 
-  const content = createOverlay();
+content.addEventListener("mouseenter", () => {
+  isHovering = true;
+});
 
-  setInterval(() => {
+content.addEventListener("mouseleave", () => {
+  isHovering = false;
+});
+
+setInterval(() => {
+  if(!isHovering){
     render(content);
-  }, 300);
-}
+  }
+}, 500);
 
 export { initDebugOverlay };
