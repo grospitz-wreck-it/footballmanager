@@ -145,7 +145,7 @@ function generateSchedule(){
       }
     }
 
-    // 🔥 NEW: Shuffle pro Spieltag
+    // 🔥 NEW: Shuffle
     shuffleArray(round);
 
     rounds.push(round);
@@ -157,7 +157,7 @@ function generateSchedule(){
     rotation = [fixed, ...rest];
   }
 
-  // 🔥 FIXED: Rückrunde + Shuffle
+  // 🔁 Rückrunde
   const returnRounds = rounds.map(round => {
 
     const newRound = round.map(match => ({
@@ -305,7 +305,7 @@ function isSeasonFinished(){
 }
 
 // =========================
-// 📅 RENDER (FIXED HIGHLIGHT)
+// 📅 RENDER (LIVE + FIXED)
 // =========================
 function renderSchedule(){
 
@@ -341,6 +341,13 @@ function renderSchedule(){
       const home = getTeamName(match.home);
       const away = getTeamName(match.away);
 
+      const scoreText =
+        match._processed
+          ? `${match.result.home}:${match.result.away}`
+          : match.live
+            ? `${match.live.score.home}:${match.live.score.away} (${match.live.minute}')`
+            : "vs";
+
       html += `
         <li style="
           padding:6px;
@@ -348,7 +355,7 @@ function renderSchedule(){
           border-radius:4px;
           ${isActive ? "background:#1a1a1a;color:#00ff88;font-weight:bold;" : ""}
         ">
-${home} ${match.result ? match.result.home + ":" + match.result.away : "vs"} ${away}
+${home} ${scoreText} ${away}
 ${match._processed ? " ✅" : ""}
         </li>
       `;
