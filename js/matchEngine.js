@@ -79,7 +79,7 @@ if (process?.env?.NODE_ENV !== "production") {
 }
 
 emit(EVENTS.MATCH_EVENT, event);
-
+}
 // =========================
 // 👥 PLAYER ACCESS
 // =========================
