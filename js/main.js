@@ -232,22 +232,18 @@ async function init(){
     }
 
     // =========================
-    // 🔥 FIX 1: SCHEDULE VOR UI
+    // 🔥 RICHTIGE REIHENFOLGE
     // =========================
     initLeagueSelect();
 
-// 🔥 JETZT ist league.current korrekt
-if(!game.league.current.schedule?.length){
-  console.log("📅 Generiere Spielplan (korrekte Liga)");
-  generateSchedule();
-}
+    // 🔥 CRITICAL: Schedule gehört zur Liga
+    game.league.current.schedule = game.league.current.schedule || [];
 
-initTable();
+    if(!game.league.current.schedule.length){
+      console.log("📅 Generiere Spielplan (richtige Liga)");
+      generateSchedule();
+    }
 
-    // =========================
-    // 🔥 FIX 2: UI DANACH
-    // =========================
-    initLeagueSelect();
     initTable();
 
     // =========================
@@ -311,8 +307,8 @@ initTable();
         splash.style.display = "none";
         app.style.display = "block";
 
-        // 🔥 FIX 3: nochmal absichern
-        if(!game.league.current.schedule?.length){
+        if(!game.league.current?.schedule?.length){
+          game.league.current.schedule = [];
           generateSchedule();
         }
 
