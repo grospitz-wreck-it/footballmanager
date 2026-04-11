@@ -27,7 +27,7 @@ window.buildAllTeams = buildAllTeams;
 // =========================
 // 🎮 ENGINE
 // =========================
-import { runMatchLoop, initMatch } from "./matchEngine.js"; // 🔥 FIX
+import { runMatchLoop, initMatch } from "./matchEngine.js";
 
 // =========================
 // 💾 STORAGE
@@ -215,9 +215,7 @@ async function init(){
       game.league.current = leagues[0];
     }
 
-    // =========================
-    // 🔥 SCHEDULE
-    // =========================
+    // 🔥 Schedule sicherstellen
     if(!game.league.current.schedule || !game.league.current.schedule.length){
       generateSchedule();
     }
@@ -274,7 +272,7 @@ async function init(){
             generateSchedule();
           }
 
-          // 🔥 CRITICAL FIX: MATCH NEU LADEN
+          // 🔥 MATCH RESET (WICHTIG!)
           const round = league.schedule?.[0];
           if(round && round.length > 0){
             initMatch(round);
@@ -315,17 +313,35 @@ async function init(){
   }
 
   // =========================
-  // ▶️ MAIN BUTTON (FIXED)
+  // ▶️ MAIN BUTTON (FINAL FIX)
   // =========================
   document.getElementById("mainButton")?.addEventListener("click", () => {
 
-    const live = game.match?.live;
+    let live = game.match?.live;
+
+    // 🔥 Phase fix
+    if(game.phase === "setup"){
+      game.phase = "idle";
+    }
+
+    // 🔥 Wenn Match kaputt → neu laden
+    if(!live || live.minute >= 90){
+
+      const league = game.league.current;
+      const round = league?.schedule?.[league.currentRound || 0];
+
+      if(round && round.length > 0){
+        initMatch(round);
+        live = game.match.live;
+      }
+    }
 
     if(!live){
       console.warn("❌ Kein Match");
       return;
     }
 
+    // 🔥 sicherer Start
     live.running = true;
 
     runMatchLoop({
