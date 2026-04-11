@@ -318,6 +318,7 @@ function isSeasonFinished(){
 // =========================
 
 function renderSchedule(){
+
   const container = document.getElementById("scheduleView");
   if(!container) return;
 
@@ -328,28 +329,58 @@ function renderSchedule(){
     return;
   }
 
-let currentRound = 0;
-let roundRef = null;
-let myMatch = null;
+  // =========================
+  // 🔥 EINZIGE WAHRHEIT
+  // =========================
+  const currentRound = game.league.playerRound ?? 0;
+  const roundRef = schedule[currentRound];
 
-let currentRound = game.league.playerRound ?? 0;
-const roundRef = schedule[currentRound];
-const myMatch = getMatchForMyTeam(roundRef);
-  
-  console.log("FULL SCHEDULE:", schedule);
+  // 👉 dein Match in diesem Spieltag
+  const myMatch = getMatchForMyTeam(roundRef);
 
+  let html = "";
 
-  if(!myMatch){
-    for(let i = 0; i < schedule.length; i++){
-      const testMatch = getMatchForMyTeam(schedule[i]);
-      if(testMatch){
-        currentRound = i;
-        roundRef = schedule[i];
-        myMatch = testMatch;
-        break;
-      }
-    }
-  }
+  schedule.forEach((round, rIndex) => {
+
+    html += `<div class="round">
+      <h3>Spieltag ${rIndex + 1}</h3>
+      <ul style="list-style:none;padding:0;">`;
+
+    round.forEach((match) => {
+
+      const isActive =
+        rIndex === currentRound &&
+        myMatch &&
+        match.id === myMatch.id;
+
+      const home = getTeamName(match.home);
+      const away = getTeamName(match.away);
+
+      const scoreText =
+        match._processed
+          ? `${match.result.home}:${match.result.away}`
+          : match.live
+            ? `${match.live.score.home}:${match.live.score.away} (${match.live.minute}')`
+            : "vs";
+
+      html += `
+        <li style="
+          padding:6px;
+          margin:2px 0;
+          border-radius:4px;
+          ${isActive ? "background:#1a1a1a;color:#00ff88;font-weight:bold;" : ""}
+        ">
+${home} ${scoreText} ${away}
+${match._processed ? " ✅" : ""}
+        </li>
+      `;
+    });
+
+    html += `</ul></div>`;
+  });
+
+  container.innerHTML = html;
+}
 
   // =========================
   // 🔥 DEBUG START
