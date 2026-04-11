@@ -332,8 +332,8 @@ function renderSchedule(){
   const currentRound = game.league.playerRound ?? 0;
   const roundRef = schedule[currentRound];
 
-  // 🔥 EINZIGE WAHRHEIT
-  const myMatch = game.match?.data?.[0] || null;
+// 🔥 KORREKT: aus Schedule bestimmen
+const myMatch = getMatchForMyTeam(roundRef);
 
   let html = "";
 
