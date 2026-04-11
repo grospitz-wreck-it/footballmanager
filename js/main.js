@@ -50,6 +50,56 @@ import { initDebugOverlay } from "../debug/debugOverlay.js";
 let matchLoopRunning = false;
 
 // =========================
+// 🔥 BACKGROUND SIM (NEW)
+// =========================
+let simInterval = null;
+
+// =========================
+// 🤖 BACKGROUND SIMULATION (NEW)
+// =========================
+function startBackgroundSimulation(){
+
+  if(simInterval) return;
+
+  simInterval = setInterval(() => {
+
+    const league = game.league.current;
+    const round = league?.schedule?.[league.currentRound || 0];
+
+    if(!round) return;
+
+    round.forEach(match => {
+
+      // ❗ eigenes Spiel überspringen
+      if(
+        match.homeTeamId === game.team?.selectedId ||
+        match.awayTeamId === game.team?.selectedId
+      ) return;
+
+      // ❗ schon verarbeitet → skip
+      if(match._processed) return;
+
+      match.result = {
+        home: Math.floor(Math.random() * 5),
+        away: Math.floor(Math.random() * 5)
+      };
+
+      match._processed = true;
+    });
+
+    updateUI();
+
+  }, 2000);
+}
+
+function stopBackgroundSimulation(){
+  if(simInterval){
+    clearInterval(simInterval);
+    simInterval = null;
+  }
+}
+
+// =========================
 // 🔥 EVENT RENDER
 // =========================
 function renderEvents(){
@@ -86,6 +136,8 @@ function initEventBindings(){
   });
 
   on(EVENTS.MATCH_FINISHED, () => {
+
+    stopBackgroundSimulation(); // 🔥 NEW
 
     matchLoopRunning = false;
 
@@ -407,6 +459,8 @@ async function init(){
       if(match){
         initMatch([match]);
 
+        startBackgroundSimulation(); // 🔥 NEW
+
         game.match.live.running = true;
         matchLoopRunning = true;
 
@@ -429,7 +483,6 @@ async function init(){
       return;
     }
 
-    // 🔥 FINAL HALFTIME FIX
     if(
       live.phase === "halftime" ||
       (live.minute === 45 && !live.running)
@@ -440,6 +493,8 @@ async function init(){
       }
 
       if(matchLoopRunning && live.running) return;
+
+      startBackgroundSimulation(); // 🔥 NEW
 
       live.phase = "second_half";
       live.running = true;
@@ -467,6 +522,8 @@ async function init(){
       if(live.minute === 0){
         live.phase = "first_half";
       }
+
+      startBackgroundSimulation(); // 🔥 NEW
 
       live.running = true;
       matchLoopRunning = true;
