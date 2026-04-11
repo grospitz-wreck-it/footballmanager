@@ -420,7 +420,9 @@ function openPlayerModal(player){
 
   document.body.appendChild(div);
 }
-
+function renderCurrentMatch(){
+  console.log("⚽ renderCurrentMatch");
+}
 // =========================
 // 📦 EXPORTS
 // =========================
