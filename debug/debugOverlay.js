@@ -1,7 +1,7 @@
 // =========================
 // 🧪 DEBUG OVERLAY (READ ONLY)
 // =========================
-import { game } from "../core/state.js";
+import { game } from "../js/core/state.js";
 
 // =========================
 // 🧠 HELPERS
