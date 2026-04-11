@@ -75,15 +75,17 @@ function updateUI(){
   updateEvents();
   updateTabs();
 
-  // 🔥 LIVE TABLE (nur wenn sichtbar)
+  // 🔥 LIVE TABLE
   if(game.ui.tab === "table"){
     renderLiveTable();
     ensureLiveTableLoop();
   }
-  if(game.ui.tab === "team"){
-  updateUI();}
-}
 
+  // ✅ FIX: keine Rekursion mehr
+  if(game.ui.tab === "team"){
+    renderTeam();
+  }
+}
 // =========================
 // ⚽ SCORE
 // =========================
