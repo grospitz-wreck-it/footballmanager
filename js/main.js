@@ -299,6 +299,48 @@ async function init(){
       });
     }
 
+// =========================
+// 🎬 START FLOW (FEHLTE!)
+// =========================
+if(loaded){
+  splash.style.display = "none";
+  app.style.display = "block";
+
+  updateUI();
+  renderEvents();
+
+} else {
+
+  game.phase = "setup";
+  splash.style.display = "flex";
+  app.style.display = "none";
+
+  document.getElementById("startBtn")?.addEventListener("click", () => {
+
+    game.phase = "idle";
+    splash.style.display = "none";
+    app.style.display = "block";
+
+    // 🔥 CRITICAL FIX: ERSTES MATCH LADEN
+    const league = game.league?.current;
+    const round = league?.schedule?.[league.currentRound || 0];
+    const match = getMatchForMyTeam(round);
+
+    if(match){
+      initMatch([match]);
+
+      const live = game.match.live;
+      live.running = false;
+      live.minute = 0;
+      live.phase = "first_half";
+    }
+
+    updateUI();
+    renderEvents();
+  });
+}
+
+    
   } catch (e){
     console.error("❌ INIT ERROR:", e);
   }
