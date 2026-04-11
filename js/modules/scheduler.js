@@ -127,22 +127,20 @@ function generateSchedule(){
 
     for(let i = 0; i < half; i++){
 
-  const teamA = rotation[i];
-const teamB = rotation[rotation.length - 1 - i];
+      const teamA = rotation[i];
+      const teamB = rotation[rotation.length - 1 - i];
 
-// 🔥 FIX: nur Rollen tauschen, Paarung bleibt gleich
-const isSwap = r % 2 === 1;
+      const isSwap = r % 2 === 1;
 
-const home = isSwap ? teamB : teamA;
-const away = isSwap ? teamA : teamB;
-      
+      const home = isSwap ? teamB : teamA;
+      const away = isSwap ? teamA : teamB;
 
-  const homeId = resolveTeamId(home);
-  const awayId = resolveTeamId(away);
+      const homeId = resolveTeamId(home);
+      const awayId = resolveTeamId(away);
 
-  if(!homeId || !awayId || homeId === awayId){
-    continue;
-  }
+      if(!homeId || !awayId || homeId === awayId){
+        continue;
+      }
 
       if(home.name !== "BYE" && away.name !== "BYE"){
 
@@ -158,7 +156,6 @@ const away = isSwap ? teamA : teamB;
       }
     }
 
-    // 🔥 NUR HIER SHUFFLEN (korrekt)
     shuffleArray(round);
 
     rounds.push(round);
@@ -177,21 +174,16 @@ const away = isSwap ? teamA : teamB;
 
     return round.map(match => ({
       id: crypto.randomUUID(),
-
-      // 🔁 exakt gespiegelt
       homeTeamId: normalizeId(match.awayTeamId),
       awayTeamId: normalizeId(match.homeTeamId),
-
       home: match.away,
       away: match.home,
-
       result: null,
       _processed: false
     }));
 
   });
 
-  // 🔥 FINAL
   league.schedule = [...rounds, ...returnRounds];
 
   league.schedule.forEach(round => {
@@ -336,24 +328,44 @@ function renderSchedule(){
     return;
   }
 
- let currentRound = game.league.playerRound ?? 0;
+  let currentRound = game.league.playerRound ?? 0;
 
-// 🔥 Finde den echten Spieltag deines Teams
-let roundRef = schedule[currentRound];
-let myMatch = getMatchForMyTeam(roundRef);
+  let roundRef = schedule[currentRound];
+  let myMatch = getMatchForMyTeam(roundRef);
 
-// ❗ FALLBACK: suche im ganzen Schedule
-if(!myMatch){
-  for(let i = 0; i < schedule.length; i++){
-    const testMatch = getMatchForMyTeam(schedule[i]);
-    if(testMatch){
-      currentRound = i;
-      roundRef = schedule[i];
-      myMatch = testMatch;
-      break;
+  if(!myMatch){
+    for(let i = 0; i < schedule.length; i++){
+      const testMatch = getMatchForMyTeam(schedule[i]);
+      if(testMatch){
+        currentRound = i;
+        roundRef = schedule[i];
+        myMatch = testMatch;
+        break;
+      }
     }
   }
-}
+
+  // =========================
+  // 🔥 DEBUG START
+  // =========================
+  console.log("=== DEBUG SCHEDULE ===");
+  console.log("Player Team:", game.team?.selectedId);
+  console.log("Current Round (UI):", currentRound);
+
+  console.log("Matches in Round:");
+  roundRef.forEach(m => {
+    console.log({
+      id: m.id,
+      home: m.homeTeamId,
+      away: m.awayTeamId
+    });
+  });
+
+  console.log("MATCH FROM HELPER:");
+  console.log(myMatch);
+  // =========================
+  // 🔥 DEBUG END
+  // =========================
 
   let html = "";
 
