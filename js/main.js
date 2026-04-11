@@ -315,45 +315,158 @@ async function init(){
   // =========================
   // ▶️ MAIN BUTTON (FINAL FIX)
   // =========================
-  document.getElementById("mainButton")?.addEventListener("click", () => {
+  const mainBtn = document.getElementById("mainButton");
 
-    let live = game.match?.live;
+function updateMainButtonText(){
 
-    // 🔥 Phase fix
-    if(game.phase === "setup"){
-      game.phase = "idle";
+  const live = game.match?.live;
+  if(!mainBtn || !live) return;
+
+  if(live.minute >= 90){
+    mainBtn.textContent = "Next Match";
+  }
+  else if(live.phase === "halftime"){
+    mainBtn.textContent = "Start 2nd Half";
+  }
+  else if(live.running){
+    mainBtn.textContent = "Pause";
+  }
+  else if(live.minute > 0){
+    mainBtn.textContent = "Resume";
+  }
+  else{
+    mainBtn.textContent = "Start Match";
+  }
+}
+
+mainBtn?.addEventListener("click", () => {
+
+  let live = game.match?.live;
+  const league = game.league?.current;
+
+  // =========================
+  // 🔥 SETUP → START
+  // =========================
+  if(game.phase === "setup"){
+    game.phase = "idle";
+  }
+
+  // =========================
+  // 🔥 KEIN MATCH → INIT
+  // =========================
+  if(!live){
+
+    const round = league?.schedule?.[league.currentRound || 0];
+
+    if(round && round.length > 0){
+      initMatch(round);
+      live = game.match.live;
     }
+  }
 
-    // 🔥 Wenn Match kaputt → neu laden
-    if(!live || live.minute >= 90){
+  if(!live){
+    console.warn("❌ Kein Match");
+    return;
+  }
 
-      const league = game.league.current;
-      const round = league?.schedule?.[league.currentRound || 0];
+  // =========================
+  // 🏁 MATCH FERTIG → NEXT
+  // =========================
+  if(live.minute >= 90){
 
-      if(round && round.length > 0){
-        initMatch(round);
-        live = game.match.live;
-      }
-    }
+    const round = league?.schedule?.[league.currentRound || 0];
 
-    if(!live){
-      console.warn("❌ Kein Match");
+    if(round && round.length > 0){
+      initMatch(round);
+      updateUI();
+      updateMainButtonText();
       return;
     }
+  }
 
-    // 🔥 sicherer Start
+  // =========================
+  // 🧠 HALBZEIT → 2. HALBZEIT
+  // =========================
+  if(live.phase === "halftime"){
+
+    live.phase = "second_half";
     live.running = true;
 
     runMatchLoop({
-      onTick: () => updateUI(),
-      onEnd: () => updateUI()
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        updateUI();
+        updateMainButtonText();
+      }
     });
-  });
 
-  document.getElementById("resetBtn")?.addEventListener("click", () => {
-    import("./services/storage.js").then(m => m.resetGame());
-  });
-}
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ⏸ PAUSE → RESUME
+  // =========================
+  if(live.running === false && live.minute > 0){
+
+    live.running = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ▶️ START MATCH
+  // =========================
+  if(live.running === false && live.minute === 0){
+
+    live.running = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ⏸ PAUSE MATCH
+  // =========================
+  if(live.running === true){
+    live.running = false;
+    updateMainButtonText();
+    return;
+  }
+});
+
+// =========================
+// 🔁 RESET
+// =========================
+document.getElementById("resetBtn")?.addEventListener("click", () => {
+  import("./services/storage.js").then(m => m.resetGame());
+});
 
 // =========================
 // ▶️ START
