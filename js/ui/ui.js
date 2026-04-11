@@ -418,22 +418,31 @@ function openPlayerModal(player){
 
   div.innerHTML = `
     <div class="modal-overlay">
-      <div class="modal-card">
 
-        <h2>${player.name}</h2>
-        <p>${player.position} • ${player.overall}</p>
+      <div class="player-card">
 
-        <p>Tier: ${player.tier}</p>
+        <button class="close-btn" onclick="this.closest('#playerModal').remove()">✕</button>
 
-        <div class="stats">
-          ${renderStat("SHO", player.shooting)}
-          ${renderStat("PAS", player.passing)}
-          ${renderStat("DEF", player.defending)}
+        <div class="card-header">
+          <h1>${player.name}</h1>
+          <span class="overall">${player.overall}</span>
         </div>
 
-        <button onclick="this.closest('#playerModal').remove()">Close</button>
+        <div class="card-body">
+
+          <div class="position">${player.position}</div>
+          <div class="tier">${player.tier}</div>
+
+          <div class="stats">
+            ${renderStat("SHO", player.shooting)}
+            ${renderStat("PAS", player.passing)}
+            ${renderStat("DEF", player.defending)}
+          </div>
+
+        </div>
 
       </div>
+
     </div>
   `;
 
