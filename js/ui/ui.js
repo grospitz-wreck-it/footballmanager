@@ -80,6 +80,9 @@ function updateUI(){
     renderLiveTable();
     ensureLiveTableLoop();
   }
+  if(game.ui.tab === "team"){
+  renderTeam();
+}
 }
 
 // =========================
