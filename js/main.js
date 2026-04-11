@@ -170,11 +170,9 @@ function initEventBindings(){
       game.events.history = [];
     }
 
-    advanceSchedule();
-
-// 🔥 WICHTIG: Anzeige folgt deinem Fortschritt
-game.league.currentRound = game.league.playerRound;
-game.league.currentMatchIndex = 0;
+    advanceSchedule(); // bleibt!
+// 🔥 Sync back
+game.league.playerRound = game.league.currentRound;
     updateUI();
     renderEvents();
     renderSchedule();
