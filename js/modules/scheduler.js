@@ -326,8 +326,7 @@ function renderSchedule(){
 
   const currentRound = game.league.playerRound ?? 0;
   const roundRef = schedule[currentRound];
-  const myMatch = getMatchForMyTeam(roundRef);
-
+const myMatch = game.match?.current || null;
   let html = "";
 
   schedule.forEach((round, rIndex) => {
@@ -339,9 +338,8 @@ function renderSchedule(){
     round.forEach((match) => {
 
       const isActive =
-        rIndex === currentRound &&
-        myMatch &&
-        match.id === myMatch.id;
+  myMatch &&
+  match.id === myMatch.id;
 
       const home = getTeamName(match.home);
       const away = getTeamName(match.away);
