@@ -329,14 +329,32 @@ function renderSchedule(){
     return;
   }
 
-  // =========================
-  // 🔥 EINZIGE WAHRHEIT
-  // =========================
-  const currentRound = game.league.playerRound ?? 0;
-  const roundRef = schedule[currentRound];
+  let currentRound = game.league.playerRound;
+  let roundRef = null;
+  let myMatch = null;
 
-  // 👉 dein Match in diesem Spieltag
-  const myMatch = getMatchForMyTeam(roundRef);
+  // =========================
+  // 🔥 FALL 1: Spiel läuft → nutze playerRound
+  // =========================
+  if(currentRound !== undefined && schedule[currentRound]){
+    roundRef = schedule[currentRound];
+    myMatch = getMatchForMyTeam(roundRef);
+  }
+
+  // =========================
+  // 🔥 FALL 2: Setup / Fallback
+  // =========================
+  if(!myMatch){
+    for(let i = 0; i < schedule.length; i++){
+      const testMatch = getMatchForMyTeam(schedule[i]);
+      if(testMatch){
+        currentRound = i;
+        roundRef = schedule[i];
+        myMatch = testMatch;
+        break;
+      }
+    }
+  }
 
   let html = "";
 
@@ -349,7 +367,6 @@ function renderSchedule(){
     round.forEach((match) => {
 
       const isActive =
-        rIndex === currentRound &&
         myMatch &&
         match.id === myMatch.id;
 
