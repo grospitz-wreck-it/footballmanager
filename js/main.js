@@ -45,6 +45,11 @@ import { updateUI } from "./ui/ui.js";
 import { initDebugOverlay } from "../debug/debugOverlay.js";
 
 // =========================
+// 🔥 LOOP GUARD (NEU)
+// =========================
+let matchLoopRunning = false;
+
+// =========================
 // 🔥 EVENT RENDER
 // =========================
 function renderEvents(){
@@ -82,6 +87,8 @@ function initEventBindings(){
 
   on(EVENTS.MATCH_FINISHED, () => {
 
+    matchLoopRunning = false; // 🔥 FIX
+
     if(game.events){
       game.events.history = [];
     }
@@ -102,6 +109,7 @@ function normalizeId(id){
   return String(id);
 }
 
+// 🔥 dein helper bleibt
 function getMatchForMyTeam(round){
 
   const myTeamId = game.team?.selectedId;
@@ -199,6 +207,10 @@ async function init(){
 
     const leagues = Array.from(leagueMap.values());
 
+    if(!leagues.length){
+      throw new Error("❌ Keine Ligen geladen");
+    }
+
     game.data = {
       players,
       teams: teams.map(t => ({ ...t, id: normalizeId(t.id) })),
@@ -227,9 +239,7 @@ async function init(){
     initDebugOverlay();
     renderSchedule();
 
-    // =========================
-    // 🔥 PLZ UI
-    // =========================
+    // 🔥 PLZ UI bleibt vollständig drin
     const plzInput = document.getElementById("plzInput");
     const results = document.getElementById("leagueResults");
 
@@ -278,11 +288,9 @@ async function init(){
           if(match){
             initMatch([match]);
 
-            // 🔥 FIX (fehlte!)
-            const live = game.match.live;
-            live.running = false;
-            live.minute = 0;
-            live.phase = "first_half";
+            // 🔥 FIX
+            game.match.live.running = false;
+            game.match.live.phase = "first_half";
           }
 
           renderSchedule();
@@ -296,7 +304,7 @@ async function init(){
   }
 
   // =========================
-  // ▶️ MAIN BUTTON
+  // ▶️ MAIN BUTTON (FINAL FIX)
   // =========================
   const mainBtn = document.getElementById("mainButton");
 
@@ -341,12 +349,14 @@ async function init(){
 
         // 🔥 FIX
         live.running = false;
-        live.minute = 0;
         live.phase = "first_half";
       }
     }
 
-    if(!live) return;
+    if(!live){
+      console.warn("❌ Kein Match");
+      return;
+    }
 
     if(live.minute >= 90){
 
@@ -358,16 +368,19 @@ async function init(){
       if(match){
         initMatch([match]);
 
-        const l = game.match.live;
-
-        // 🔥 FIX
-        l.running = true;
-        l.minute = 0;
-        l.phase = "first_half";
+        game.match.live.running = true;
+        matchLoopRunning = true;
 
         runMatchLoop({
-          onTick: () => updateUI(),
-          onEnd: () => updateUI()
+          onTick: () => {
+            updateUI();
+            updateMainButtonText();
+          },
+          onEnd: () => {
+            matchLoopRunning = false;
+            updateUI();
+            updateMainButtonText();
+          }
         });
       }
 
@@ -379,21 +392,48 @@ async function init(){
 
     if(live.phase === "halftime"){
 
-      // 🔥 FIX
-      live.phase = "second_half";
-      live.running = false;
+      if(matchLoopRunning) return; // 🔥 FIX
 
-      updateMainButtonText();
+      live.phase = "second_half";
+      live.running = true;
+      matchLoopRunning = true;
+
+      runMatchLoop({
+        onTick: () => {
+          updateUI();
+          updateMainButtonText();
+        },
+        onEnd: () => {
+          matchLoopRunning = false;
+          updateUI();
+          updateMainButtonText();
+        }
+      });
+
       return;
     }
 
     if(live.running === false){
 
+      if(matchLoopRunning) return; // 🔥 FIX
+
+      if(live.minute === 0){
+        live.phase = "first_half";
+      }
+
       live.running = true;
+      matchLoopRunning = true;
 
       runMatchLoop({
-        onTick: () => updateUI(),
-        onEnd: () => updateUI()
+        onTick: () => {
+          updateUI();
+          updateMainButtonText();
+        },
+        onEnd: () => {
+          matchLoopRunning = false;
+          updateUI();
+          updateMainButtonText();
+        }
       });
 
       updateMainButtonText();
@@ -402,6 +442,7 @@ async function init(){
 
     if(live.running === true){
       live.running = false;
+      matchLoopRunning = false;
       updateMainButtonText();
       return;
     }
