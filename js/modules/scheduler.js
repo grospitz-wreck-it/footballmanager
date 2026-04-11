@@ -328,12 +328,11 @@ function renderSchedule(){
     return;
   }
 
-let currentRound = game.league.playerRound ?? 0;
-
-// 🔥 IMMER erst global suchen (sicher)
-let myMatch = null;
+let currentRound = 0;
 let roundRef = null;
+let myMatch = null;
 
+// 🔥 IMMER global suchen (keine Abhängigkeit mehr)
 for(let i = 0; i < schedule.length; i++){
   const testMatch = getMatchForMyTeam(schedule[i]);
   if(testMatch){
