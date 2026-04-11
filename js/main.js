@@ -103,6 +103,19 @@ function normalizeId(id){
 }
 
 // =========================
+// 🔥 MATCH HELPER (NEU - MINIMAL)
+// =========================
+function getMatchForMyTeam(round){
+
+  const myTeamId = game.team?.selectedId;
+
+  return round?.find(m =>
+    m.homeTeamId === myTeamId ||
+    m.awayTeamId === myTeamId
+  ) || round?.[0];
+}
+
+// =========================
 // 🔥 PLZ FEATURE
 // =========================
 async function getRegionsByCode(code){
@@ -226,24 +239,6 @@ async function init(){
 
     if(plzInput && results){
 
-      plzInput.addEventListener("input", async (e) => {
-
-        const value = e.target.value;
-
-        if(value.length < 2){
-          results.innerHTML = "";
-          return;
-        }
-
-        const leagues = await findLeaguesByCode(value);
-
-        results.innerHTML = leagues.map(l => `
-          <div class="league-option" data-id="${l.id}">
-            ${l.name}
-          </div>
-        `).join("");
-      });
-
       results.addEventListener("click", (e) => {
 
         const el = e.target.closest(".league-option");
@@ -263,12 +258,8 @@ async function init(){
             generateSchedule();
           }
 
-          // 🔥 FIX: korrektes Match laden
-          const roundIndex = league.currentRound || 0;
-          const matchIndex = league.currentMatchIndex || 0;
-
-          const round = league.schedule?.[roundIndex];
-          const match = round?.[matchIndex];
+          const round = league.schedule?.[league.currentRound || 0];
+          const match = getMatchForMyTeam(round);
 
           if(match){
             initMatch([match]);
@@ -277,28 +268,6 @@ async function init(){
           renderSchedule();
           updateUI();
         }
-      });
-    }
-
-    if(loaded){
-      splash.style.display = "none";
-      app.style.display = "block";
-      updateUI();
-      renderEvents();
-    } else {
-
-      game.phase = "setup";
-      splash.style.display = "flex";
-      app.style.display = "none";
-
-      document.getElementById("startBtn")?.addEventListener("click", () => {
-
-        game.phase = "idle";
-        splash.style.display = "none";
-        app.style.display = "block";
-
-        updateUI();
-        renderEvents();
       });
     }
 
@@ -342,13 +311,9 @@ async function init(){
       game.phase = "idle";
     }
 
-    // 🔥 FIX: korrektes Match laden
     if(!live){
-      const roundIndex = league.currentRound || 0;
-      const matchIndex = league.currentMatchIndex || 0;
-
-      const round = league?.schedule?.[roundIndex];
-      const match = round?.[matchIndex];
+      const round = league?.schedule?.[league.currentRound || 0];
+      const match = getMatchForMyTeam(round);
 
       if(match){
         initMatch([match]);
@@ -361,16 +326,12 @@ async function init(){
       return;
     }
 
-    // 🔥 FIX: Next Match korrekt + AUTO START
     if(live.minute >= 90){
 
       advanceSchedule();
 
-      const roundIndex = league.currentRound || 0;
-      const matchIndex = league.currentMatchIndex || 0;
-
-      const round = league?.schedule?.[roundIndex];
-      const match = round?.[matchIndex];
+      const round = league?.schedule?.[league.currentRound || 0];
+      const match = getMatchForMyTeam(round);
 
       if(match){
         initMatch([match]);
@@ -395,7 +356,6 @@ async function init(){
       return;
     }
 
-    // 🔥 FIX: Halbzeit direkt weiter
     if(live.phase === "halftime"){
 
       live.phase = "second_half";
