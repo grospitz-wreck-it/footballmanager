@@ -316,8 +316,8 @@ function isSeasonFinished(){
 // =========================
 // 📅 RENDER
 // =========================
+
 function renderSchedule(){
-console.log("FULL SCHEDULE:", schedule);
   const container = document.getElementById("scheduleView");
   if(!container) return;
 
@@ -343,7 +343,8 @@ for(let i = 0; i < schedule.length; i++){
     break;
   }
 }
-  
+  console.log("FULL SCHEDULE:", schedule);
+
 
   if(!myMatch){
     for(let i = 0; i < schedule.length; i++){
