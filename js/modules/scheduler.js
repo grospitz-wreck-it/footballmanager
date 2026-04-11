@@ -421,3 +421,4 @@ export {
   isSeasonFinished,
   renderSchedule
 };
+window.renderSchedule = renderSchedule;
