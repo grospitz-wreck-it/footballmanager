@@ -415,15 +415,17 @@ let html = `
     { top: "20%", left: "65%" }
   ];
 
-  starters.forEach((p, i) => {
-    const pos = positions[i] || { top: "50%", left: "50%" };
+  layout.forEach(slot => {
 
-    html += `
-      <div class="player-pos" style="top:${pos.top}; left:${pos.left}">
-        ${renderPlayerDot(p)}
-      </div>
-    `;
-  });
+  const player = pickPlayer(slot.role, pool);
+  if(!player) return;
+
+  html += `
+    <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
+      ${renderPlayerDot(player)}
+    </div>
+  `;
+});
 
   html += `</div>`;
 
