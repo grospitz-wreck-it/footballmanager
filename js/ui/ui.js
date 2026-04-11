@@ -360,7 +360,7 @@ starters.forEach((p, i) => {
   `;
 
   bench.forEach(p => {
-    html += renderPlayerCard(p, true);
+    html += renderPlayerDot(p, true);
   });
 
   html += `</div>`;
