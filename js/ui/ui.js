@@ -421,7 +421,7 @@ function renderPlayerDot(player){
          data-id="${player.id}" 
          data-tier="${player.tier}">
 
-      <img src="./gfx/dot.webp" alt="player" />
+      <img src="/gfx/dot.webp" />
 
       <span class="label">${initials}</span>
 
