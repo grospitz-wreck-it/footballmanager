@@ -294,8 +294,33 @@ const players = pool.filter(p =>
     return;
   }
 
-  const starters = players.slice(0, 11);
-  const bench = players.slice(11);
+ const byType = {
+  GK: [],
+  DEF: [],
+  MID: [],
+  ST: []
+};
+
+players.forEach(p => {
+  const type = p.position_type || "MID";
+  if(byType[type]){
+    byType[type].push(p);
+  } else {
+    byType.MID.push(p);
+  }
+});
+
+// 🔥 Formation (4-3-2-1 leicht angepasst)
+const starters = [
+  ...byType.GK.slice(0,1),
+  ...byType.DEF.slice(0,4),
+  ...byType.MID.slice(0,4),
+  ...byType.ST.slice(0,2)
+];
+
+// Rest = Bank
+const usedIds = new Set(starters.map(p => p.id));
+const bench = players.filter(p => !usedIds.has(p.id));
 
   let html = `
     <h3>Starting XI</h3>
