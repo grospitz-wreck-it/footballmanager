@@ -81,8 +81,7 @@ function updateUI(){
     ensureLiveTableLoop();
   }
   if(game.ui.tab === "team"){
-  renderTeam();
-}
+  updateUI();}
 }
 
 // =========================
@@ -448,15 +447,17 @@ let html = `
   // =========================
   // 🖱 CLICK HANDLER
   // =========================
-  setTimeout(() => {
-    document.querySelectorAll(".player-dot").forEach(el => {
-      el.onclick = () => {
-        const id = el.dataset.id;
-        const player = game.players.find(p => p.id === id);
-        if(player) openPlayerModal(player);
-      };
-    });
-  }, 0);
+ if(!game.ui._teamBound){
+
+  document.querySelectorAll(".player-dot").forEach(el => {
+    el.onclick = () => {
+      const id = el.dataset.id;
+      const player = game.players.find(p => p.id === id);
+      if(player) openPlayerModal(player);
+    };
+  });
+
+  game.ui._teamBound = true;
 }
 
 // =========================
