@@ -85,6 +85,61 @@ function getLiveTable(){
   // 👉 saubere Kopie (keine Mutation!)
   const table = league.table.map(t => ({ ...t }));
 
+  // =========================
+  // 🔥 APPLY SIMULATED MATCHES (NEW)
+  // =========================
+  const round = league.schedule?.[league.currentRound || 0];
+
+  if(round){
+
+    round.forEach(match => {
+
+      if(!match._processed) return;
+
+      // ❗ eigenes Match wird unten separat behandelt
+      if(
+        match.homeTeamId === game.team?.selectedId ||
+        match.awayTeamId === game.team?.selectedId
+      ) return;
+
+      const home = table.find(t => t.name === match.home?.name);
+      const away = table.find(t => t.name === match.away?.name);
+
+      if(!home || !away || !match.result) return;
+
+      const h = match.result.home;
+      const a = match.result.away;
+
+      home.goalsFor += h;
+      home.goalsAgainst += a;
+
+      away.goalsFor += a;
+      away.goalsAgainst += h;
+
+      home.played += 1;
+      away.played += 1;
+
+      if(h > a){
+        home.points += 3;
+        home.wins += 1;
+        away.losses += 1;
+      }
+      else if(a > h){
+        away.points += 3;
+        away.wins += 1;
+        home.losses += 1;
+      }
+      else{
+        home.points += 1;
+        away.points += 1;
+        home.draws += 1;
+        away.draws += 1;
+      }
+
+    });
+
+  }
+
   const match = game.match?.current;
   if(!match) return table;
 
@@ -244,5 +299,5 @@ export {
   renderLiveTable,
   getLiveTable,
   sortTable,
-  applyMatchToTable // 🔥 NEU (wichtig!)
+  applyMatchToTable
 };
