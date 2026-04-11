@@ -64,8 +64,7 @@ function startBackgroundSimulation(){
   simInterval = setInterval(() => {
 
     const league = game.league.current;
-    const round = league?.schedule?.[league.currentRound || 0];
-
+    const round = league?.schedule?.[game.league.playerRound || 0];
     if(!round) return;
 
     round.forEach(match => {
