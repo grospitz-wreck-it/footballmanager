@@ -348,8 +348,7 @@ starters.forEach((p, i) => {
 
   html += `
     <div class="player-pos" style="top:${pos.top}; left:${pos.left}">
-      ${renderPlayerCard(p)}
-    </div>
+    ${renderPlayerDot(p)}    </div>
   `;
 });
 
