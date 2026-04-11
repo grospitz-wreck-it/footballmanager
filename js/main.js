@@ -16,7 +16,7 @@ import { supabase } from "./client.js";
 // 🔧 MODULES
 // =========================
 import { startAdEngine } from "./modules/ads.js";
-import { generateSchedule, advanceSchedule, renderSchedule } from "./modules/scheduler.js"; // 🔥 FIX
+import { generateSchedule, advanceSchedule, renderSchedule } from "./modules/scheduler.js";
 import { initTable } from "./modules/table.js";
 import { initPlayerPool } from "./modules/playerPool.js";
 import { importPlayers } from "../tools/importer.js";
@@ -86,11 +86,11 @@ function initEventBindings(){
       game.events.history = [];
     }
 
-    advanceSchedule(); // 🔥 FIX
+    advanceSchedule();
 
     updateUI();
     renderEvents();
-    renderSchedule(); // 🔥 FIX
+    renderSchedule();
   });
 }
 
@@ -219,7 +219,7 @@ async function init(){
     initLeagueSelect();
     initTable();
     initDebugOverlay();
-    renderSchedule(); // 🔥 FIX
+    renderSchedule();
 
     const plzInput = document.getElementById("plzInput");
     const results = document.getElementById("leagueResults");
@@ -263,12 +263,18 @@ async function init(){
             generateSchedule();
           }
 
-          const round = league.schedule?.[league.currentRound || 0];
-          if(round && round.length > 0){
-            initMatch(round);
+          // 🔥 FIX: korrektes Match laden
+          const roundIndex = league.currentRound || 0;
+          const matchIndex = league.currentMatchIndex || 0;
+
+          const round = league.schedule?.[roundIndex];
+          const match = round?.[matchIndex];
+
+          if(match){
+            initMatch([match]);
           }
 
-          renderSchedule(); // 🔥 FIX
+          renderSchedule();
           updateUI();
         }
       });
@@ -336,10 +342,16 @@ async function init(){
       game.phase = "idle";
     }
 
+    // 🔥 FIX: korrektes Match laden
     if(!live){
-      const round = league?.schedule?.[league.currentRound || 0];
-      if(round && round.length > 0){
-        initMatch(round);
+      const roundIndex = league.currentRound || 0;
+      const matchIndex = league.currentMatchIndex || 0;
+
+      const round = league?.schedule?.[roundIndex];
+      const match = round?.[matchIndex];
+
+      if(match){
+        initMatch([match]);
         live = game.match.live;
       }
     }
@@ -349,27 +361,57 @@ async function init(){
       return;
     }
 
+    // 🔥 FIX: Next Match korrekt + AUTO START
     if(live.minute >= 90){
 
-      advanceSchedule(); // 🔥 FIX
+      advanceSchedule();
 
-      const round = league?.schedule?.[league.currentRound || 0];
-      if(round && round.length > 0){
-        initMatch(round);
+      const roundIndex = league.currentRound || 0;
+      const matchIndex = league.currentMatchIndex || 0;
+
+      const round = league?.schedule?.[roundIndex];
+      const match = round?.[matchIndex];
+
+      if(match){
+        initMatch([match]);
+
+        game.match.live.running = true;
+
+        runMatchLoop({
+          onTick: () => {
+            updateUI();
+            updateMainButtonText();
+          },
+          onEnd: () => {
+            updateUI();
+            updateMainButtonText();
+          }
+        });
       }
 
-      renderSchedule(); // 🔥 FIX
+      renderSchedule();
       updateUI();
       updateMainButtonText();
       return;
     }
 
+    // 🔥 FIX: Halbzeit direkt weiter
     if(live.phase === "halftime"){
 
       live.phase = "second_half";
-      live.running = false; // 🔥 FIX
+      live.running = true;
 
-      updateMainButtonText();
+      runMatchLoop({
+        onTick: () => {
+          updateUI();
+          updateMainButtonText();
+        },
+        onEnd: () => {
+          updateUI();
+          updateMainButtonText();
+        }
+      });
+
       return;
     }
 
