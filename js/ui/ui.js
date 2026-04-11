@@ -389,6 +389,60 @@ function renderTeam(){
 }
 
 // =========================
+// 🔵 PLAYER DOT (FIELD)
+// =========================
+function renderPlayerDot(player){
+
+  const initials =
+    (player.first_name?.[0] || "") +
+    (player.last_name?.[0] || "");
+
+  return `
+    <div class="player-dot" 
+         data-id="${player.id}" 
+         data-tier="${player.tier}">
+      ${initials}
+    </div>
+  `;
+}
+
+
+// =========================
+// 🪟 PLAYER MODAL
+// =========================
+function openPlayerModal(player){
+
+  const existing = document.getElementById("playerModal");
+  if(existing) existing.remove();
+
+  const div = document.createElement("div");
+  div.id = "playerModal";
+
+  div.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal-card">
+
+        <h2>${player.name}</h2>
+        <p>${player.position} • ${player.overall}</p>
+
+        <p>Tier: ${player.tier}</p>
+
+        <div class="stats">
+          ${renderStat("SHO", player.shooting)}
+          ${renderStat("PAS", player.passing)}
+          ${renderStat("DEF", player.defending)}
+        </div>
+
+        <button onclick="this.closest('#playerModal').remove()">Close</button>
+
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(div);
+}
+
+// =========================
 // 📦 EXPORTS
 // =========================
 export {
