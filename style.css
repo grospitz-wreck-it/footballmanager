@@ -651,10 +651,10 @@ tr:hover {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
-  background: radial-gradient(circle at center, #166534, #14532d);
+  background: url("/gfx/field.svg") center/cover no-repeat;
   border-radius: 14px;
   margin-bottom: 12px;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+  overflow: hidden;
 }
 
 /* Linien (optional cool) */
