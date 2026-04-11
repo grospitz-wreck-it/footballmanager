@@ -4,3 +4,4 @@ import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 console.log("🔥 Supabase Client erstellt");
+window.supabase = supabase;
