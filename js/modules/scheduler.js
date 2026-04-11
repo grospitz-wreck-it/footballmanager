@@ -329,11 +329,24 @@ function renderSchedule(){
     return;
   }
 
-  const currentRound = game.league.playerRound ?? 0;
-  const roundRef = schedule[currentRound];
+ let currentRound = game.league.playerRound ?? 0;
 
-// 🔥 KORREKT: aus Schedule bestimmen
-const myMatch = getMatchForMyTeam(roundRef);
+// 🔥 Finde den echten Spieltag deines Teams
+let roundRef = schedule[currentRound];
+let myMatch = getMatchForMyTeam(roundRef);
+
+// ❗ FALLBACK: suche im ganzen Schedule
+if(!myMatch){
+  for(let i = 0; i < schedule.length; i++){
+    const testMatch = getMatchForMyTeam(schedule[i]);
+    if(testMatch){
+      currentRound = i;
+      roundRef = schedule[i];
+      myMatch = testMatch;
+      break;
+    }
+  }
+}
 
   let html = "";
 
