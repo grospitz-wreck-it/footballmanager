@@ -367,6 +367,28 @@ Object.values(benchByType).forEach(arr => {
   arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
 });
 
+  html += `<div class="bench-container">`;
+
+Object.entries(benchByType).forEach(([role, players]) => {
+
+  if(players.length === 0) return;
+
+  html += `
+    <div class="bench-group">
+      <div class="bench-title">${role}</div>
+      <div class="bench-row">
+  `;
+
+  players.forEach(p => {
+    html += renderPlayerDot(p);
+  });
+
+  html += `
+      </div>
+    </div>
+  `;
+});
+  
   html += `</div>`;
 
   container.innerHTML = html;
