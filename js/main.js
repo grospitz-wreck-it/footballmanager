@@ -16,7 +16,7 @@ import { supabase } from "./client.js";
 // 🔧 MODULES
 // =========================
 import { startAdEngine } from "./modules/ads.js";
-import { generateSchedule } from "./modules/scheduler.js";
+import { generateSchedule, advanceSchedule, renderSchedule } from "./modules/scheduler.js"; // 🔥 FIX
 import { initTable } from "./modules/table.js";
 import { initPlayerPool } from "./modules/playerPool.js";
 import { importPlayers } from "../tools/importer.js";
@@ -86,8 +86,11 @@ function initEventBindings(){
       game.events.history = [];
     }
 
+    advanceSchedule(); // 🔥 FIX
+
     updateUI();
     renderEvents();
+    renderSchedule(); // 🔥 FIX
   });
 }
 
@@ -141,9 +144,6 @@ async function init(){
 
   try {
 
-    // =========================
-    // 📦 LOAD DATA
-    // =========================
     const { data: players } = await supabase.from("players").select("*");
     window.playerPool = players;
 
@@ -193,9 +193,6 @@ async function init(){
       throw new Error("❌ Keine Ligen geladen");
     }
 
-    // =========================
-    // 📦 STATE SETUP
-    // =========================
     game.data = {
       players,
       teams: teams.map(t => ({ ...t, id: normalizeId(t.id) })),
@@ -215,21 +212,15 @@ async function init(){
       game.league.current = leagues[0];
     }
 
-    // 🔥 Schedule sicherstellen
     if(!game.league.current.schedule || !game.league.current.schedule.length){
       generateSchedule();
     }
 
-    // =========================
-    // 🏗 UI INIT
-    // =========================
     initLeagueSelect();
     initTable();
     initDebugOverlay();
+    renderSchedule(); // 🔥 FIX
 
-    // =========================
-    // 🔥 PLZ UI
-    // =========================
     const plzInput = document.getElementById("plzInput");
     const results = document.getElementById("leagueResults");
 
@@ -272,20 +263,17 @@ async function init(){
             generateSchedule();
           }
 
-          // 🔥 MATCH RESET (WICHTIG!)
-          const round = league.schedule?.[0];
+          const round = league.schedule?.[league.currentRound || 0];
           if(round && round.length > 0){
             initMatch(round);
           }
 
+          renderSchedule(); // 🔥 FIX
           updateUI();
         }
       });
     }
 
-    // =========================
-    // 🎬 START FLOW
-    // =========================
     if(loaded){
       splash.style.display = "none";
       app.style.display = "block";
@@ -313,162 +301,112 @@ async function init(){
   }
 
   // =========================
-  // ▶️ MAIN BUTTON (FINAL FIX)
+  // ▶️ MAIN BUTTON
   // =========================
   const mainBtn = document.getElementById("mainButton");
 
-function updateMainButtonText(){
+  function updateMainButtonText(){
 
-  const live = game.match?.live;
-  if(!mainBtn || !live) return;
+    const live = game.match?.live;
+    if(!mainBtn || !live) return;
 
-  if(live.minute >= 90){
-    mainBtn.textContent = "Next Match";
-  }
-  else if(live.phase === "halftime"){
-    mainBtn.textContent = "Start 2nd Half";
-  }
-  else if(live.running){
-    mainBtn.textContent = "Pause";
-  }
-  else if(live.minute > 0){
-    mainBtn.textContent = "Resume";
-  }
-  else{
-    mainBtn.textContent = "Start Match";
-  }
-}
-
-mainBtn?.addEventListener("click", () => {
-
-  let live = game.match?.live;
-  const league = game.league?.current;
-
-  // =========================
-  // 🔥 SETUP → START
-  // =========================
-  if(game.phase === "setup"){
-    game.phase = "idle";
-  }
-
-  // =========================
-  // 🔥 KEIN MATCH → INIT
-  // =========================
-  if(!live){
-
-    const round = league?.schedule?.[league.currentRound || 0];
-
-    if(round && round.length > 0){
-      initMatch(round);
-      live = game.match.live;
+    if(live.minute >= 90){
+      mainBtn.textContent = "Next Match";
+    }
+    else if(live.phase === "halftime"){
+      mainBtn.textContent = "Start 2nd Half";
+    }
+    else if(live.running){
+      mainBtn.textContent = "Pause";
+    }
+    else if(live.minute > 0){
+      mainBtn.textContent = "Resume";
+    }
+    else{
+      mainBtn.textContent = "Start Match";
     }
   }
 
-  if(!live){
-    console.warn("❌ Kein Match");
-    return;
-  }
+  mainBtn?.addEventListener("click", () => {
 
-  // =========================
-  // 🏁 MATCH FERTIG → NEXT
-  // =========================
-  if(live.minute >= 90){
+    let live = game.match?.live;
+    const league = game.league?.current;
 
-    const round = league?.schedule?.[league.currentRound || 0];
+    if(game.phase === "setup"){
+      game.phase = "idle";
+    }
 
-    if(round && round.length > 0){
-      initMatch(round);
+    if(!live){
+      const round = league?.schedule?.[league.currentRound || 0];
+      if(round && round.length > 0){
+        initMatch(round);
+        live = game.match.live;
+      }
+    }
+
+    if(!live){
+      console.warn("❌ Kein Match");
+      return;
+    }
+
+    if(live.minute >= 90){
+
+      advanceSchedule(); // 🔥 FIX
+
+      const round = league?.schedule?.[league.currentRound || 0];
+      if(round && round.length > 0){
+        initMatch(round);
+      }
+
+      renderSchedule(); // 🔥 FIX
       updateUI();
       updateMainButtonText();
       return;
     }
-  }
 
-  // =========================
-  // 🧠 HALBZEIT → 2. HALBZEIT
-  // =========================
-  if(live.phase === "halftime"){
+    if(live.phase === "halftime"){
 
-    live.phase = "second_half";
-    live.running = true;
+      live.phase = "second_half";
+      live.running = false; // 🔥 FIX
 
-    runMatchLoop({
-      onTick: () => {
-        updateUI();
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        updateUI();
-        updateMainButtonText();
-      }
-    });
+      updateMainButtonText();
+      return;
+    }
 
-    updateMainButtonText();
-    return;
-  }
+    if(live.running === false){
 
-  // =========================
-  // ⏸ PAUSE → RESUME
-  // =========================
-  if(live.running === false && live.minute > 0){
+      live.running = true;
 
-    live.running = true;
+      runMatchLoop({
+        onTick: () => {
+          updateUI();
+          updateMainButtonText();
+        },
+        onEnd: () => {
+          updateUI();
+          updateMainButtonText();
+        }
+      });
 
-    runMatchLoop({
-      onTick: () => {
-        updateUI();
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        updateUI();
-        updateMainButtonText();
-      }
-    });
+      updateMainButtonText();
+      return;
+    }
 
-    updateMainButtonText();
-    return;
-  }
+    if(live.running === true){
+      live.running = false;
+      updateMainButtonText();
+      return;
+    }
+  });
 
-  // =========================
-  // ▶️ START MATCH
-  // =========================
-  if(live.running === false && live.minute === 0){
-
-    live.running = true;
-
-    runMatchLoop({
-      onTick: () => {
-        updateUI();
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        updateUI();
-        updateMainButtonText();
-      }
-    });
-
-    updateMainButtonText();
-    return;
-  }
-
-  // =========================
-  // ⏸ PAUSE MATCH
-  // =========================
-  if(live.running === true){
-    live.running = false;
-    updateMainButtonText();
-    return;
-  }
-});
-
-// =========================
-// 🔁 RESET
-// =========================
-document.getElementById("resetBtn")?.addEventListener("click", () => {
-  import("./services/storage.js").then(m => m.resetGame());
-});
+  document.getElementById("resetBtn")?.addEventListener("click", () => {
+    import("./services/storage.js").then(m => m.resetGame());
+  });
 }
+
 // =========================
 // ▶️ START
 // =========================
-init();
+document.addEventListener("DOMContentLoaded", init);
+
+export { init };
