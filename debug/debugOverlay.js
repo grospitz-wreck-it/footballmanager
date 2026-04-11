@@ -2,7 +2,7 @@
 // 🐞 DEBUG OVERLAY (FINAL)
 // =========================
 
-import { game } from "/js/core/state.js";
+import { game } from "../js/core/state.js";
 // =========================
 // 🧠 HELPERS
 // =========================
