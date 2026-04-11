@@ -350,9 +350,22 @@ Object.values(byType).forEach(arr => {
     <div class="bench-row">
   `;
 
-  bench.forEach(p => {
-    html += renderPlayerDot(p);
-  });
+  const benchByType = {
+  GK: [],
+  DEF: [],
+  MID: [],
+  ST: []
+};
+
+bench.forEach(p => {
+  const type = p.position_type || "MID";
+  (benchByType[type] || benchByType.MID).push(p);
+});
+
+// Sortieren (beste zuerst)
+Object.values(benchByType).forEach(arr => {
+  arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+});
 
   html += `</div>`;
 
