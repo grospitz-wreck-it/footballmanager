@@ -56,22 +56,29 @@ function getPlayerName(p){
 // 🆕 EVENT EMITTER (UNVERÄNDERT)
 // =========================
 function emitMatchEvent(type, payload = {}) {
+const live = game.match?.live;
+if (!live) return;
 
-  const live = game.match?.live;
-  if (!live) return;
+// 🔒 payload absichern (kein Crash bei undefined)
+const safePayload = payload || {};
 
-  const event = {
-    id: crypto.randomUUID(),
-    type,
-    minute: live.minute,
-    ...payload,
-    text: payload?.text || null
-  };
+// 🔒 fallback type (failsafe)
+const safeType = type || "UNKNOWN_EVENT";
 
+const event = {
+  id: crypto.randomUUID(),
+  type: safeType,
+  minute: live.minute ?? 0,
+  ...safePayload,
+  text: safePayload.text ?? null
+};
+
+// 🔥 Debug bleibt, aber stabiler
+if (process?.env?.NODE_ENV !== "production") {
   console.log("📡 Event:", event);
-
-  emit(EVENTS.MATCH_EVENT, event);
 }
+
+emit(EVENTS.MATCH_EVENT, event);
 
 // =========================
 // 👥 PLAYER ACCESS
