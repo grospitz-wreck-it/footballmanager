@@ -282,118 +282,110 @@ function renderTeam(){
   const container = document.getElementById("teamView");
   if(!container) return;
 
-const teamId = game.team?.selectedId;
+  const teamId = game.team?.selectedId;
 
-const pool = window.playerPool || game.players || [];
+  const players = (game.players || []).filter(p => 
+    String(p.team_id) === String(teamId)
+  );
 
-const players = pool.filter(p => 
-  String(p.team_id) === String(teamId)
-);
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
 
- const byType = {
-  GK: [],
-  DEF: [],
-  MID: [],
-  ST: []
-};
+  // =========================
+  // ⚽ SORTIERUNG
+  // =========================
+  const byType = {
+    GK: [],
+    DEF: [],
+    MID: [],
+    ST: []
+  };
 
-players.forEach(p => {
-  const type = p.position_type || "MID";
-  if(byType[type]){
-    byType[type].push(p);
-  } else {
-    byType.MID.push(p);
-  }
-});
+  players.forEach(p => {
+    const type = p.position_type || "MID";
+    if(byType[type]){
+      byType[type].push(p);
+    } else {
+      byType.MID.push(p);
+    }
+  });
 
-// 🔥 Formation (4-3-2-1 leicht angepasst)
-const starters = [
-  ...byType.GK.slice(0,1),
-  ...byType.DEF.slice(0,4),
-  ...byType.MID.slice(0,4),
-  ...byType.ST.slice(0,2)
-];
+  const starters = [
+    ...byType.GK.slice(0,1),
+    ...byType.DEF.slice(0,4),
+    ...byType.MID.slice(0,4),
+    ...byType.ST.slice(0,2)
+  ];
 
-// Rest = Bank
-const usedIds = new Set(starters.map(p => p.id));
-const bench = players.filter(p => !usedIds.has(p.id));
+  const usedIds = new Set(starters.map(p => p.id));
+  const bench = players.filter(p => !usedIds.has(p.id));
 
+  // =========================
+  // 🎨 FIELD
+  // =========================
   let html = `
     <h3>Starting XI</h3>
     <div class="team-field">
   `;
-  
+
   const positions = [
-  { top: "90%", left: "50%" }, // GK
+    { top: "90%", left: "50%" }, // GK
 
-  { top: "70%", left: "20%" },
-  { top: "70%", left: "40%" },
-  { top: "70%", left: "60%" },
-  { top: "70%", left: "80%" },
+    { top: "70%", left: "20%" },
+    { top: "70%", left: "40%" },
+    { top: "70%", left: "60%" },
+    { top: "70%", left: "80%" },
 
-  { top: "45%", left: "25%" },
-  { top: "45%", left: "50%" },
-  { top: "45%", left: "75%" },
+    { top: "45%", left: "25%" },
+    { top: "45%", left: "50%" },
+    { top: "45%", left: "75%" },
 
-  { top: "20%", left: "35%" },
-  { top: "20%", left: "65%" }
-];
+    { top: "20%", left: "35%" },
+    { top: "20%", left: "65%" }
+  ];
 
-starters.forEach((p, i) => {
-  const pos = positions[i] || { top: "50%", left: "50%" };
+  starters.forEach((p, i) => {
+    const pos = positions[i] || { top: "50%", left: "50%" };
 
-  html += `
-    <div class="player-pos" style="top:${pos.top}; left:${pos.left}">
-    ${renderPlayerDot(p)}    </div>
-  `;
-});
+    html += `
+      <div class="player-pos" style="top:${pos.top}; left:${pos.left}">
+        ${renderPlayerDot(p)}
+      </div>
+    `;
+  });
 
   html += `</div>`;
 
+  // =========================
+  // 🪑 BENCH
+  // =========================
   html += `
     <h3>Bench</h3>
     <div class="bench-row">
   `;
 
   bench.forEach(p => {
-    html += renderPlayerDot(p, true);
+    html += renderPlayerDot(p);
   });
 
   html += `</div>`;
 
   container.innerHTML = html;
-}
 
-function renderPlayerDot(player){
-
-  const initials =
-    (player.first_name?.[0] || "") +
-    (player.last_name?.[0] || "");
-
-  return `
-    <div class="player-dot" 
-         data-id="${player.id}" 
-         data-tier="${player.tier}">
-      ${initials}
-    </div>
-  `;
-}
-
-function renderStat(label, value){
-  const val = Math.round(value || 50);
-
-  return `
-    <div class="stat">
-      <span>${label}</span>
-      <div class="stat-bar">
-        <div style="width:${val}%"></div>
-      </div>
-    </div>
-  `;
+  // =========================
+  // 🖱 CLICK HANDLER
+  // =========================
+  setTimeout(() => {
+    document.querySelectorAll(".player-dot").forEach(el => {
+      el.onclick = () => {
+        const id = el.dataset.id;
+        const player = game.players.find(p => p.id === id);
+        if(player) openPlayerModal(player);
+      };
+    });
+  }, 0);
 }
 
 // =========================
