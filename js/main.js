@@ -27,7 +27,7 @@ window.buildAllTeams = buildAllTeams;
 // =========================
 // 🎮 ENGINE
 // =========================
-import { handleMainAction } from "./core/engine.js";
+import { runMatchLoop, initMatch } from "./matchEngine.js"; // 🔥 FIX
 
 // =========================
 // 💾 STORAGE
@@ -209,9 +209,6 @@ async function init(){
     game.players = players;
     initPlayerPool(players);
 
-    // =========================
-    // 🧠 LOAD SAVE
-    // =========================
     const loaded = loadGame();
 
     if(!game.league.current){
@@ -219,7 +216,7 @@ async function init(){
     }
 
     // =========================
-    // 🔥 SCHEDULE (FIXED)
+    // 🔥 SCHEDULE
     // =========================
     if(!game.league.current.schedule || !game.league.current.schedule.length){
       generateSchedule();
@@ -230,10 +227,6 @@ async function init(){
     // =========================
     initLeagueSelect();
     initTable();
-
-    // =========================
-    // 🔥 DEBUG START (HIER!)
-    // =========================
     initDebugOverlay();
 
     // =========================
@@ -274,10 +267,17 @@ async function init(){
         );
 
         if(league){
+
           setLeagueById(league.id);
 
           if(!league.schedule || !league.schedule.length){
             generateSchedule();
+          }
+
+          // 🔥 CRITICAL FIX: MATCH NEU LADEN
+          const round = league.schedule?.[0];
+          if(round && round.length > 0){
+            initMatch(round);
           }
 
           updateUI();
@@ -314,7 +314,25 @@ async function init(){
     console.error("❌ INIT ERROR:", e);
   }
 
-  document.getElementById("mainButton")?.addEventListener("click", handleMainAction);
+  // =========================
+  // ▶️ MAIN BUTTON (FIXED)
+  // =========================
+  document.getElementById("mainButton")?.addEventListener("click", () => {
+
+    const live = game.match?.live;
+
+    if(!live){
+      console.warn("❌ Kein Match");
+      return;
+    }
+
+    live.running = true;
+
+    runMatchLoop({
+      onTick: () => updateUI(),
+      onEnd: () => updateUI()
+    });
+  });
 
   document.getElementById("resetBtn")?.addEventListener("click", () => {
     import("./services/storage.js").then(m => m.resetGame());
