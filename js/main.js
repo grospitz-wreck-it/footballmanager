@@ -440,8 +440,7 @@ if(loaded){
       live.phase === "halftime" ||
       (live.minute === 45 && !live.running)
     ){
-      if(matchLoopRunning) return; // 🔥 FIX
-
+if(matchLoopRunning && live.running) return;
       live.phase = "second_half";
       live.running = true;
       matchLoopRunning = true;
