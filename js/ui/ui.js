@@ -3,8 +3,6 @@
 // =========================
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
-
-// 🔥 FIX: richtiger Import (DEIN PFAD)
 import { renderLiveTable } from "../modules/table.js";
 
 // =========================
@@ -75,23 +73,20 @@ function updateUI(){
   updateEvents();
   updateTabs();
 
-  // 🔥 LIVE TABLE
   if(game.ui.tab === "table"){
     renderLiveTable();
     ensureLiveTableLoop();
   }
 
-  // ✅ FIX: keine Rekursion mehr
   if(game.ui.tab === "team"){
     renderTeam();
   }
 }
+
 // =========================
 // ⚽ SCORE
 // =========================
 function updateScore(){
-
-  console.log("CURRENT MATCH:", game.match?.current);
 
   const match = game.match?.live;
   if(!match) return;
@@ -124,13 +119,8 @@ function updateScore(){
 
   if(!scoreEl || !teamsEl || !minuteEl) return;
 
-  const home = match.score?.home ?? 0;
-  const away = match.score?.away ?? 0;
-
-  scoreEl.textContent = `${home} : ${away}`;
-
-  const minute = match.minute ?? 0;
-  minuteEl.textContent = `${minute}'`;
+  scoreEl.textContent = `${match.score?.home ?? 0} : ${match.score?.away ?? 0}`;
+  minuteEl.textContent = `${match.minute ?? 0}'`;
 }
 
 // =========================
@@ -148,7 +138,7 @@ function updateProgress(){
 }
 
 // =========================
-// 📰 EVENTS (UNVERÄNDERT)
+// 📰 EVENTS
 // =========================
 function updateEvents(){
 
@@ -167,11 +157,8 @@ function updateEvents(){
 
   if(!text){
     try {
-      console.warn("⚠️ Missing text → fallback engine", newest);
       text = buildCommentary(newest);
-    } catch(e){
-      console.warn("⚠️ Commentary error", e);
-    }
+    } catch(e){}
   }
 
   if(!text) return;
@@ -183,26 +170,7 @@ function updateEvents(){
     <span>${text}</span>
   `;
 
-  if(newest.type === "GOAL"){
-    div.style.color = "#00ff88";
-    div.style.fontWeight = "bold";
-  }
-
-  if(newest.type === "FOUL"){
-    div.style.color = "#ffcc00";
-  }
-
-  if(newest.type === "SAVE" || newest.type === "SHOT_SAVED"){
-    div.style.color = "#00ccff";
-  }
-
-  if(newest.type === "CORNER"){
-    div.style.color = "#ffaa00";
-  }
-
-  if(!game.events?.history?.length) return;
-
-  console.log("🧠 UI updateEvents (skipped - main handles rendering)");
+  container.appendChild(div);
 }
 
 // =========================
@@ -216,11 +184,7 @@ function updateTabs(){
 
     const name = tab.dataset.tab;
 
-    if(name === game.ui.tab){
-      tab.classList.add("active");
-    } else {
-      tab.classList.remove("active");
-    }
+    tab.classList.toggle("active", name === game.ui.tab);
 
     tab.onclick = () => {
 
@@ -264,53 +228,32 @@ function ensureLiveTableLoop(){
 }
 
 // =========================
-// 📅 SCHEDULE
-// =========================
-function renderSchedule(){
-  console.log("📅 renderSchedule");
-}
-
-// =========================
-// ⚽ CURRENT MATCH
-// =========================
-function renderCurrentMatch(){
-  console.log("⚽ renderCurrentMatch");
-}
-
-
-// =========================
-// ⚽ FORMATIONS (ADD ONLY)
+// ⚽ FORMATIONS
 // =========================
 const FORMATIONS = {
   "4-4-2": [
     { role: "GK", top: "90%", left: "50%" },
-
     { role: "DEF", top: "70%", left: "15%" },
     { role: "DEF", top: "70%", left: "35%" },
     { role: "DEF", top: "70%", left: "65%" },
     { role: "DEF", top: "70%", left: "85%" },
-
     { role: "MID", top: "50%", left: "15%" },
     { role: "MID", top: "50%", left: "35%" },
     { role: "MID", top: "50%", left: "65%" },
     { role: "MID", top: "50%", left: "85%" },
-
     { role: "ST", top: "20%", left: "40%" },
     { role: "ST", top: "20%", left: "60%" }
   ],
 
   "4-3-3": [
     { role: "GK", top: "90%", left: "50%" },
-
     { role: "DEF", top: "70%", left: "15%" },
     { role: "DEF", top: "70%", left: "35%" },
     { role: "DEF", top: "70%", left: "65%" },
     { role: "DEF", top: "70%", left: "85%" },
-
     { role: "MID", top: "50%", left: "30%" },
     { role: "MID", top: "50%", left: "50%" },
     { role: "MID", top: "50%", left: "70%" },
-
     { role: "ST", top: "20%", left: "15%" },
     { role: "ST", top: "20%", left: "50%" },
     { role: "ST", top: "20%", left: "85%" }
@@ -318,7 +261,7 @@ const FORMATIONS = {
 };
 
 // =========================
-// 🧠 ROLE PICKER (ADD ONLY)
+// 🧠 ROLE PICKER
 // =========================
 function pickPlayer(role, byType){
 
@@ -326,7 +269,6 @@ function pickPlayer(role, byType){
     return byType[role].shift();
   }
 
-  // fallback
   return (
     byType.GK.shift() ||
     byType.DEF.shift() ||
@@ -335,7 +277,9 @@ function pickPlayer(role, byType){
   );
 }
 
-
+// =========================
+// ⚽ TEAM
+// =========================
 function renderTeam(){
 
   const container = document.getElementById("teamView");
@@ -352,23 +296,11 @@ function renderTeam(){
     return;
   }
 
-  // =========================
-  // ⚽ SORTIERUNG
-  // =========================
-  const byType = {
-    GK: [],
-    DEF: [],
-    MID: [],
-    ST: []
-  };
+  const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
   players.forEach(p => {
     const type = p.position_type || "MID";
-    if(byType[type]){
-      byType[type].push(p);
-    } else {
-      byType.MID.push(p);
-    }
+    (byType[type] || byType.MID).push(p);
   });
 
   const starters = [
@@ -378,12 +310,8 @@ function renderTeam(){
     ...byType.ST.slice(0,2)
   ];
 
-  // ✅ FIX: Bench definieren
   const bench = players.filter(p => !starters.includes(p));
 
-  // =========================
-  // ⚽ FORMATION
-  // =========================
   const formation = game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
@@ -394,9 +322,6 @@ function renderTeam(){
     ST: [...byType.ST]
   };
 
-  // =========================
-  // 🎨 FIELD
-  // =========================
   let html = `
     <h3>Starting XI</h3>
     <div class="team-field">
@@ -416,9 +341,6 @@ function renderTeam(){
 
   html += `</div>`;
 
-  // =========================
-  // 🪑 BENCH
-  // =========================
   html += `
     <h3>Bench</h3>
     <div class="bench-row">
@@ -432,9 +354,6 @@ function renderTeam(){
 
   container.innerHTML = html;
 
-  // =========================
-  // 🖱 CLICK HANDLER
-  // =========================
   if(!game.ui._teamBound){
 
     document.querySelectorAll(".player-dot").forEach(el => {
@@ -449,118 +368,8 @@ function renderTeam(){
   }
 }
 
-  // =========================
-  // ⚽ SORTIERUNG
-  // =========================
-  const byType = {
-    GK: [],
-    DEF: [],
-    MID: [],
-    ST: []
-  };
-
-  players.forEach(p => {
-    const type = p.position_type || "MID";
-    if(byType[type]){
-      byType[type].push(p);
-    } else {
-      byType.MID.push(p);
-    }
-  });
-
-  const starters = [
-    ...byType.GK.slice(0,1),
-    ...byType.DEF.slice(0,4),
-    ...byType.MID.slice(0,4),
-    ...byType.ST.slice(0,2)
-  ];
-
-  // =========================
-// ⚽ FORMATION (NEU)
 // =========================
-const formation = game.team?.formation || "4-4-2";
-const layout = FORMATIONS[formation];
-
-// clone arrays (wichtig!)
-const pool = {
-  GK: [...byType.GK],
-  DEF: [...byType.DEF],
-  MID: [...byType.MID],
-  ST: [...byType.ST]
-};
-
-// =========================
-// 🎨 FIELD
-// =========================
-let html = `
-  <h3>Starting XI</h3>
-  <div class="team-field">
-`;
-
-  const positions = [
-    { top: "90%", left: "50%" }, // GK
-
-    { top: "70%", left: "20%" },
-    { top: "70%", left: "40%" },
-    { top: "70%", left: "60%" },
-    { top: "70%", left: "80%" },
-
-    { top: "45%", left: "25%" },
-    { top: "45%", left: "50%" },
-    { top: "45%", left: "75%" },
-
-    { top: "20%", left: "35%" },
-    { top: "20%", left: "65%" }
-  ];
-
-  layout.forEach(slot => {
-
-  const player = pickPlayer(slot.role, pool);
-  if(!player) return;
-
-  html += `
-    <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
-      ${renderPlayerDot(player)}
-    </div>
-  `;
-});
-
-  html += `</div>`;
-
-  // =========================
-  // 🪑 BENCH
-  // =========================
-  html += `
-    <h3>Bench</h3>
-    <div class="bench-row">
-  `;
-
-  bench.forEach(p => {
-    html += renderPlayerDot(p);
-  });
-
-  html += `</div>`;
-
-  container.innerHTML = html;
-
-  // =========================
-  // 🖱 CLICK HANDLER
-  // =========================
- if(!game.ui._teamBound){
-
-  document.querySelectorAll(".player-dot").forEach(el => {
-    el.onclick = () => {
-      const id = el.dataset.id;
-      const player = game.players.find(p => p.id === id);
-      if(player) openPlayerModal(player);
-    };
-  });
-
-  game.ui._teamBound = true;
-}
-
-// =========================
-// 🔵 PLAYER DOT (FIELD)
+// 🔵 PLAYER DOT
 // =========================
 function renderPlayerDot(player){
 
@@ -576,7 +385,6 @@ function renderPlayerDot(player){
     </div>
   `;
 }
-
 
 // =========================
 // 🪟 PLAYER MODAL
