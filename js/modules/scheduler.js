@@ -54,6 +54,16 @@ function getMatchForMyTeam(round){
 }
 
 // =========================
+// 🔥 NEW: SHUFFLE
+// =========================
+function shuffleArray(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// =========================
 // 📅 GENERATE (ID ONLY)
 // =========================
 function generateSchedule(){
@@ -135,6 +145,9 @@ function generateSchedule(){
       }
     }
 
+    // 🔥 NEW: Shuffle pro Spieltag
+    shuffleArray(round);
+
     rounds.push(round);
 
     const fixed = rotation[0];
@@ -144,8 +157,10 @@ function generateSchedule(){
     rotation = [fixed, ...rest];
   }
 
-  const returnRounds = rounds.map(round =>
-    round.map(match => ({
+  // 🔥 FIXED: Rückrunde + Shuffle
+  const returnRounds = rounds.map(round => {
+
+    const newRound = round.map(match => ({
       id: crypto.randomUUID(),
       homeTeamId: normalizeId(match.awayTeamId),
       awayTeamId: normalizeId(match.homeTeamId),
@@ -153,8 +168,12 @@ function generateSchedule(){
       away: match.home,
       result: null,
       _processed: false
-    }))
-  );
+    }));
+
+    shuffleArray(newRound); // 🔥 NEW
+
+    return newRound;
+  });
 
   league.schedule = [...rounds, ...returnRounds];
 
@@ -300,7 +319,6 @@ function renderSchedule(){
     return;
   }
 
-  // 🔥 FIX: Player-System
   const currentRound = game.league.playerRound ?? 0;
   const roundRef = schedule[currentRound];
   const myMatch = getMatchForMyTeam(roundRef);
@@ -315,7 +333,6 @@ function renderSchedule(){
 
     round.forEach((match) => {
 
-      // 🔥 FIX: Highlight dein Match
       const isActive =
         rIndex === currentRound &&
         myMatch &&
