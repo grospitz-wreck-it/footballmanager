@@ -121,8 +121,13 @@ function generateSchedule(){
 
     for(let i = 0; i < half; i++){
 
-      const home = rotation[i];
-      const away = rotation[rotation.length - 1 - i];
+      const isSwap = r % 2 === 1;
+
+const teamA = rotation[i];
+const teamB = rotation[rotation.length - 1 - i];
+
+const home = isSwap ? teamB : teamA;
+const away = isSwap ? teamA : teamB;
 
       const homeId = resolveTeamId(home);
       const awayId = resolveTeamId(away);
