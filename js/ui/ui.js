@@ -284,7 +284,9 @@ function renderTeam(){
 
 const teamId = game.team?.selectedId;
 
-const players = (window.playerPool || []).filter(p => 
+const pool = window.playerPool || game.players || [];
+
+const players = pool.filter(p => 
   String(p.team_id) === String(teamId)
 );
   if(!players.length){
