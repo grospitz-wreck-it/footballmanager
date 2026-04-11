@@ -331,7 +331,9 @@ function renderSchedule(){
 
   const currentRound = game.league.playerRound ?? 0;
   const roundRef = schedule[currentRound];
-  const myMatch = getMatchForMyTeam(roundRef);
+
+  // 🔥 EINZIGE WAHRHEIT
+  const myMatch = game.match?.data?.[0] || null;
 
   let html = "";
 
