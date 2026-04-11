@@ -332,16 +332,10 @@ let currentRound = 0;
 let roundRef = null;
 let myMatch = null;
 
-// 🔥 IMMER global suchen (keine Abhängigkeit mehr)
-for(let i = 0; i < schedule.length; i++){
-  const testMatch = getMatchForMyTeam(schedule[i]);
-  if(testMatch){
-    currentRound = i;
-    roundRef = schedule[i];
-    myMatch = testMatch;
-    break;
-  }
-}
+let currentRound = game.league.playerRound ?? 0;
+const roundRef = schedule[currentRound];
+const myMatch = getMatchForMyTeam(roundRef);
+  
   console.log("FULL SCHEDULE:", schedule);
 
 
