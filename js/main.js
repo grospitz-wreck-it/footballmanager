@@ -385,8 +385,8 @@ if(loaded){
       game.phase = "idle";
     }
 
-    if(!live){
-      const round = league?.schedule?.[league.currentRound || 0];
+  if(!live || live.minute >= 90){
+  const round = league?.schedule?.[league.currentRound || 0];
       const match = getMatchForMyTeam(round);
 
       if(match){
