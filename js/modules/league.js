@@ -4,6 +4,7 @@
 import { renderCurrentMatch } from "../ui/ui.js";
 import { game } from "../core/state.js";
 import { generateTeam } from "./teamLoader.js";
+import { initMatch } from "../matchEngine.js"; // 🔥 NEU
 
 // =========================
 // 🧠 HELPERS
@@ -75,41 +76,10 @@ function initLeague(league){
 
   console.log("📊 Tabelle erstellt");
 
+  // 🔥 FIX: KEIN alter Scheduler mehr
   if(!league.schedule || league.schedule.length === 0){
-  console.warn("⚠️ Fallback Scheduler aktiv (sollte nicht passieren)");
-    const baseTeams = league.teams.map(t => t.name);
-    const teams = [...baseTeams];
-
-    const firstLeg = [];
-    const secondLeg = [];
-
-    for(let i = 0; i < teams.length - 1; i++){
-
-      const round = [];
-
-      for(let j = 0; j < teams.length / 2; j++){
-
-        const home = teams[j];
-        const away = teams[teams.length - 1 - j];
-
-        round.push({ home, away });
-      }
-
-      firstLeg.push(round);
-      teams.splice(1, 0, teams.pop());
-    }
-
-    firstLeg.forEach(round => {
-      const mirrored = round.map(match => ({
-        home: match.away,
-        away: match.home
-      }));
-      secondLeg.push(mirrored);
-    });
-
-    league.schedule = [...firstLeg, ...secondLeg];
-
-    console.log("📅 Spielplan erstellt:", league.schedule.length);
+    console.warn("⚠️ Kein Schedule vorhanden → muss aus scheduler.js kommen");
+    return;
   }
 
   league.currentRound = 0;
@@ -167,7 +137,7 @@ function nextMatch(){
 }
 
 // =========================
-// 🏆 INIT LEAGUE SELECT (FINAL FIX)
+// 🏆 INIT LEAGUE SELECT
 // =========================
 function initLeagueSelect(){
 
@@ -204,7 +174,6 @@ function initLeagueSelect(){
     leagues.push(l);
   });
 
-  // 🔥 NEU: Mapping speichern
   leagueIndexMap = leagues;
 
   selects.forEach(select => {
@@ -245,25 +214,22 @@ function initLeagueSelect(){
   initLeague(game.league.current);
   populateTeamSelect();
 
-  // 🔥 FIX: hier war dein Fehler
+  // 🔥 FIX: Match sauber initialisieren
   const round = game.league.current?.schedule?.[0];
 
   if(round && round.length > 0){
-    game.match.current = round[0];
 
-    game.match.live = {
-      minute: 0,
-      running: false,
-      score: { home: 0, away: 0 },
-      events: []
-    };
+    const ok = initMatch(round);
 
-    console.log("⚽ Erstes Match gesetzt:", game.match.current);
+    if(ok){
+      game.match.live.running = false;
+      console.log("⚽ Erstes Match sauber initialisiert");
+    }
   }
 }
 
 // =========================
-// 🔥 NEU: EXTERNES SETZEN (PLZ)
+// 🔥 SET LEAGUE (PLZ)
 // =========================
 function setLeagueById(leagueId){
 
@@ -292,6 +258,18 @@ function setLeagueById(leagueId){
   });
 
   populateTeamSelect();
+
+  // 🔥 FIX: auch hier korrekt
+  const round = league.schedule?.[0];
+
+  if(round && round.length > 0){
+
+    const ok = initMatch(round);
+
+    if(ok){
+      game.match.live.running = false;
+    }
+  }
 
   console.log("✅ Liga extern gesetzt:", league.name);
 }
