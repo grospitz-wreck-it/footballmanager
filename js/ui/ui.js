@@ -324,9 +324,9 @@ const bench = players.filter(p => !usedIds.has(p.id));
 
   let html = `
     <h3>Starting XI</h3>
-    <div class="team-grid">
+    <div class="team-field">
   `;
-
+  
   starters.forEach(p => {
     html += renderPlayerCard(p);
   });
