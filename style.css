@@ -678,6 +678,10 @@ tr:hover {
   font-size: 11px;
   padding: 6px;
 }
+
+/* =========================
+🟡 Player DOT
+========================= */
 .player-dot {
   width: 48px;
   height: 48px;
