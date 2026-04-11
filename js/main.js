@@ -102,9 +102,7 @@ function normalizeId(id){
   return String(id);
 }
 
-// =========================
-// 🔥 MATCH HELPER (NEU - MINIMAL)
-// =========================
+// 🔥 NEU: dein Match holen
 function getMatchForMyTeam(round){
 
   const myTeamId = game.team?.selectedId;
@@ -234,10 +232,31 @@ async function init(){
     initDebugOverlay();
     renderSchedule();
 
+    // =========================
+    // 🔥 PLZ UI (WIEDER DRIN)
+    // =========================
     const plzInput = document.getElementById("plzInput");
     const results = document.getElementById("leagueResults");
 
     if(plzInput && results){
+
+      plzInput.addEventListener("input", async (e) => {
+
+        const value = e.target.value;
+
+        if(value.length < 2){
+          results.innerHTML = "";
+          return;
+        }
+
+        const leagues = await findLeaguesByCode(value);
+
+        results.innerHTML = leagues.map(l => `
+          <div class="league-option" data-id="${l.id}">
+            ${l.name}
+          </div>
+        `).join("");
+      });
 
       results.addEventListener("click", (e) => {
 
@@ -276,7 +295,7 @@ async function init(){
   }
 
   // =========================
-  // ▶️ MAIN BUTTON
+  // ▶️ MAIN BUTTON (DEIN FIX)
   // =========================
   const mainBtn = document.getElementById("mainButton");
 
