@@ -314,6 +314,45 @@ function renderTeam(){
   container.innerHTML = html;
 }
 
+function renderPlayerCard(player, small = false){
+
+  return `
+    <div class="player-card ${small ? "small" : ""}">
+      
+      <div class="card-header">
+        <span>${player.Position || "-"}</span>
+        <span>${Math.round(player.overall || 50)}</span>
+      </div>
+
+      <div class="player-name">
+        ${player.Name || "Unknown"}
+      </div>
+
+      ${
+        small ? "" : `
+        <div class="stats">
+          ${renderStat("SHO", player.shooting)}
+          ${renderStat("PAS", player.passing)}
+          ${renderStat("DEF", player.defending)}
+        </div>
+      `}
+      
+    </div>
+  `;
+}
+
+function renderStat(label, value){
+  const val = Math.round(value || 50);
+
+  return `
+    <div class="stat">
+      <span>${label}</span>
+      <div class="stat-bar">
+        <div style="width:${val}%"></div>
+      </div>
+    </div>
+  `;
+}
 
 // =========================
 // 📦 EXPORTS
