@@ -244,21 +244,21 @@ const FORMATIONS = {
   { role: "MID", top: "80%", left: "50%" },
   { role: "ST", top: "40%", left: "75%" },
   { role: "ST", top: "60%", left: "75%" }
-]
+],
 
   "4-3-3": [
-    { role: "GK", top: "90%", left: "50%" },
-    { role: "DEF", top: "70%", left: "15%" },
-    { role: "DEF", top: "70%", left: "35%" },
-    { role: "DEF", top: "70%", left: "65%" },
-    { role: "DEF", top: "70%", left: "85%" },
-    { role: "MID", top: "50%", left: "30%" },
-    { role: "MID", top: "50%", left: "50%" },
-    { role: "MID", top: "50%", left: "70%" },
-    { role: "ST", top: "20%", left: "15%" },
-    { role: "ST", top: "20%", left: "50%" },
-    { role: "ST", top: "20%", left: "85%" }
-  ]
+  { role: "GK", top: "50%", left: "10%" },
+  { role: "DEF", top: "20%", left: "25%" },
+  { role: "DEF", top: "40%", left: "25%" },
+  { role: "DEF", top: "60%", left: "25%" },
+  { role: "DEF", top: "80%", left: "25%" },
+  { role: "MID", top: "30%", left: "50%" },
+  { role: "MID", top: "50%", left: "50%" },
+  { role: "MID", top: "70%", left: "50%" },
+  { role: "ST", top: "20%", left: "75%" },
+  { role: "ST", top: "50%", left: "75%" },
+  { role: "ST", top: "80%", left: "75%" }
+]
 };
 
 // =========================
@@ -332,7 +332,7 @@ Object.values(byType).forEach(arr => {
   `;
 
   layout.forEach(slot => {
-
+    
     const player = pickPlayer(slot.role, pool);
     if(!player) return;
 
