@@ -379,7 +379,7 @@ async function init(){
           const match = getMatchForMyTeam(round);
 
           if(match){
-            initMatch([match]);
+           initMatch(round);
 
             game.match.live.running = false;
             game.match.live.phase = "first_half";
@@ -415,7 +415,7 @@ async function init(){
         const match = getMatchForMyTeam(round);
 
         if(match){
-          initMatch([match]);
+          initMatch(round);
 
           const live = game.match.live;
           live.running = false;
@@ -473,7 +473,7 @@ async function init(){
       const match = getMatchForMyTeam(round);
 
       if(match){
-        initMatch([match]);
+        initMatch(round);
         live = game.match.live;
 
         live.running = false;
@@ -495,7 +495,7 @@ async function init(){
       const match = getMatchForMyTeam(round);
 
       if(match){
-        initMatch([match]);
+        initMatch(round);
 
         startBackgroundSimulation();
 
