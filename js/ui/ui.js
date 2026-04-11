@@ -277,6 +277,64 @@ function renderCurrentMatch(){
 }
 
 
+// =========================
+// ⚽ FORMATIONS (ADD ONLY)
+// =========================
+const FORMATIONS = {
+  "4-4-2": [
+    { role: "GK", top: "90%", left: "50%" },
+
+    { role: "DEF", top: "70%", left: "15%" },
+    { role: "DEF", top: "70%", left: "35%" },
+    { role: "DEF", top: "70%", left: "65%" },
+    { role: "DEF", top: "70%", left: "85%" },
+
+    { role: "MID", top: "50%", left: "15%" },
+    { role: "MID", top: "50%", left: "35%" },
+    { role: "MID", top: "50%", left: "65%" },
+    { role: "MID", top: "50%", left: "85%" },
+
+    { role: "ST", top: "20%", left: "40%" },
+    { role: "ST", top: "20%", left: "60%" }
+  ],
+
+  "4-3-3": [
+    { role: "GK", top: "90%", left: "50%" },
+
+    { role: "DEF", top: "70%", left: "15%" },
+    { role: "DEF", top: "70%", left: "35%" },
+    { role: "DEF", top: "70%", left: "65%" },
+    { role: "DEF", top: "70%", left: "85%" },
+
+    { role: "MID", top: "50%", left: "30%" },
+    { role: "MID", top: "50%", left: "50%" },
+    { role: "MID", top: "50%", left: "70%" },
+
+    { role: "ST", top: "20%", left: "15%" },
+    { role: "ST", top: "20%", left: "50%" },
+    { role: "ST", top: "20%", left: "85%" }
+  ]
+};
+
+// =========================
+// 🧠 ROLE PICKER (ADD ONLY)
+// =========================
+function pickPlayer(role, byType){
+
+  if(byType[role]?.length){
+    return byType[role].shift();
+  }
+
+  // fallback
+  return (
+    byType.GK.shift() ||
+    byType.DEF.shift() ||
+    byType.MID.shift() ||
+    byType.ST.shift()
+  );
+}
+
+
 function renderTeam(){
 
   const container = document.getElementById("teamView");
@@ -319,16 +377,27 @@ function renderTeam(){
     ...byType.ST.slice(0,2)
   ];
 
-  const usedIds = new Set(starters.map(p => p.id));
-  const bench = players.filter(p => !usedIds.has(p.id));
+  // =========================
+// ⚽ FORMATION (NEU)
+// =========================
+const formation = game.team?.formation || "4-4-2";
+const layout = FORMATIONS[formation];
 
-  // =========================
-  // 🎨 FIELD
-  // =========================
-  let html = `
-    <h3>Starting XI</h3>
-    <div class="team-field">
-  `;
+// clone arrays (wichtig!)
+const pool = {
+  GK: [...byType.GK],
+  DEF: [...byType.DEF],
+  MID: [...byType.MID],
+  ST: [...byType.ST]
+};
+
+// =========================
+// 🎨 FIELD
+// =========================
+let html = `
+  <h3>Starting XI</h3>
+  <div class="team-field">
+`;
 
   const positions = [
     { top: "90%", left: "50%" }, // GK
