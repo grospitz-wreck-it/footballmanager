@@ -324,16 +324,20 @@ const players = pool.filter(p =>
 
 function renderPlayerCard(player, small = false){
 
+  const name = player.name || "Unknown";
+  const position = player.position || "-";
+  const rating = Math.round(player.overall || 50);
+
   return `
     <div class="player-card ${small ? "small" : ""}">
       
       <div class="card-header">
-        <span>${player.Position || "-"}</span>
-        <span>${Math.round(player.overall || 50)}</span>
+        <span>${position}</span>
+        <span>${rating}</span>
       </div>
 
       <div class="player-name">
-        ${player.Name || "Unknown"}
+        ${name}
       </div>
 
       ${
