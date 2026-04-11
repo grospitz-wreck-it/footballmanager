@@ -43,7 +43,7 @@ function normalizeTeam(team){
   return team;
 }
 
-// 🔥 NEW (nur für UI Highlight)
+// 🔥 UI Helper
 function getMatchForMyTeam(round){
   const myTeamId = game.team?.selectedId;
 
@@ -54,7 +54,7 @@ function getMatchForMyTeam(round){
 }
 
 // =========================
-// 🔥 NEW: SHUFFLE
+// 🔥 SHUFFLE
 // =========================
 function shuffleArray(arr){
   for(let i = arr.length - 1; i > 0; i--){
@@ -115,6 +115,9 @@ function generateSchedule(){
   const rounds = [];
   let rotation = [...teams];
 
+  // =========================
+  // 🔁 HINRUNDE
+  // =========================
   for(let r = 0; r < totalRounds; r++){
 
     const round = [];
@@ -145,7 +148,7 @@ function generateSchedule(){
       }
     }
 
-    // 🔥 NEW: Shuffle
+    // 🔥 NUR HIER SHUFFLEN (korrekt)
     shuffleArray(round);
 
     rounds.push(round);
@@ -157,24 +160,28 @@ function generateSchedule(){
     rotation = [fixed, ...rest];
   }
 
-  // 🔁 Rückrunde
+  // =========================
+  // 🔁 RÜCKRUNDE (ECHTE SPIEGELUNG)
+  // =========================
   const returnRounds = rounds.map(round => {
 
-    const newRound = round.map(match => ({
+    return round.map(match => ({
       id: crypto.randomUUID(),
+
+      // 🔁 exakt gespiegelt
       homeTeamId: normalizeId(match.awayTeamId),
       awayTeamId: normalizeId(match.homeTeamId),
+
       home: match.away,
       away: match.home,
+
       result: null,
       _processed: false
     }));
 
-    shuffleArray(newRound); // 🔥 NEW
-
-    return newRound;
   });
 
+  // 🔥 FINAL
   league.schedule = [...rounds, ...returnRounds];
 
   league.schedule.forEach(round => {
@@ -305,7 +312,7 @@ function isSeasonFinished(){
 }
 
 // =========================
-// 📅 RENDER (LIVE + FIXED)
+// 📅 RENDER
 // =========================
 function renderSchedule(){
 
