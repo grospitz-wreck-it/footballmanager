@@ -14,7 +14,7 @@ function normalizeId(val){
 function resolveTeamId(team){
   if(!team) return null;
 
-  if(typeof team === "string") return null; // 🔥 STRIKTER (kein String mehr als ID)
+  if(typeof team === "string") return null; // 🔥 STRICT
   if(typeof team === "number") return normalizeId(team);
 
   if(typeof team === "object"){
@@ -33,12 +33,6 @@ function getTeamName(team){
   return team.name || "Unbekannt";
 }
 
-function getTeamId(team){
-  if(!team) return null;
-  if(typeof team === "string") return null;
-  return normalizeId(team.id || null);
-}
-
 function normalizeTeam(team){
 
   if(typeof team === "string"){
@@ -55,12 +49,8 @@ function normalizeTeam(team){
   return team;
 }
 
-function normalize(val){
-  return String(val || "").toLowerCase().trim();
-}
-
 // =========================
-// 📅 GENERATE
+// 📅 GENERATE (ID ONLY)
 // =========================
 function generateSchedule(){
 
@@ -84,19 +74,19 @@ function generateSchedule(){
   teamsRaw.forEach(t => {
 
     const id = resolveTeamId(t);
-    const key = id || t.name;
 
-    if(!key){
-      console.error("❌ Team ohne Key:", t);
+    // 🔥 STRICT: KEIN NAME FALLBACK MEHR
+    if(!id){
+      console.error("❌ Team ohne ID (wird ignoriert):", t);
       return;
     }
 
-    if(seen.has(key)){
-      console.warn("⚠️ Duplicate Team erkannt:", key);
+    if(seen.has(id)){
+      console.warn("⚠️ Duplicate Team erkannt:", id);
       return;
     }
 
-    seen.add(key);
+    seen.add(id);
     teams.push(t);
   });
 
@@ -127,11 +117,8 @@ function generateSchedule(){
       const homeId = resolveTeamId(home);
       const awayId = resolveTeamId(away);
 
-      const homeKey = homeId || home.name;
-      const awayKey = awayId || away.name;
-
-      if(homeKey === awayKey){
-        console.error("❌ Selbstduell verhindert:", homeKey);
+      // 🔥 STRICT ID CHECK
+      if(!homeId || !awayId || homeId === awayId){
         continue;
       }
 
@@ -140,11 +127,10 @@ function generateSchedule(){
         round.push({
           id: crypto.randomUUID(),
 
-          // 🔥 PRIMARY SOURCE
           homeTeamId: homeId,
           awayTeamId: awayId,
 
-          // 🔥 KEEP FOR UI (NO-LOSS)
+          // 🔥 UI bleibt erhalten
           home,
           away,
 
@@ -196,7 +182,7 @@ function generateSchedule(){
 }
 
 // =========================
-// 🧪 VALIDIERUNG
+// 🧪 VALIDIERUNG (ID ONLY)
 // =========================
 function validateSchedule(expectedTeamCount){
 
@@ -276,7 +262,7 @@ function nextMatch(){
 }
 
 // =========================
-// 👉 ADVANCE (UNCHANGED)
+// 👉 ADVANCE
 // =========================
 function advanceSchedule(){
 
@@ -311,7 +297,7 @@ function isSeasonFinished(){
 }
 
 // =========================
-// 📅 RENDER (UNVERÄNDERT)
+// 📅 RENDER
 // =========================
 function renderSchedule(){
 
