@@ -70,13 +70,11 @@ function startBackgroundSimulation(){
 
     round.forEach(match => {
 
-      // ❗ eigenes Spiel überspringen
       if(
         match.homeTeamId === game.team?.selectedId ||
         match.awayTeamId === game.team?.selectedId
       ) return;
 
-      // ❗ schon verarbeitet → skip
       if(match._processed) return;
 
       match.result = {
@@ -137,11 +135,10 @@ function initEventBindings(){
 
   on(EVENTS.MATCH_FINISHED, () => {
 
-    stopBackgroundSimulation(); // 🔥 NEW
+    stopBackgroundSimulation();
 
     matchLoopRunning = false;
 
-    // 🔥 NEU: Live-State sauber resetten
     if(game.match?.live){
       game.match.live.running = false;
     }
@@ -150,7 +147,7 @@ function initEventBindings(){
       game.events.history = [];
     }
 
-    advanceSchedule();
+    advanceSchedule(); // bleibt!
 
     updateUI();
     renderEvents();
@@ -293,6 +290,11 @@ async function init(){
       generateSchedule();
     }
 
+    // 🔥 FIX
+    if(game.league.playerRound === undefined){
+      game.league.playerRound = 0;
+    }
+
     initLeagueSelect();
     initTable();
     initDebugOverlay();
@@ -340,7 +342,12 @@ async function init(){
             generateSchedule();
           }
 
-          const round = league.schedule?.[league.currentRound || 0];
+          // 🔥 FIX
+          if(game.league.playerRound === undefined){
+            game.league.playerRound = 0;
+          }
+
+          const round = league.schedule?.[game.league.playerRound || 0];
           const match = getMatchForMyTeam(round);
 
           if(match){
@@ -374,7 +381,9 @@ async function init(){
         app.style.display = "block";
 
         const league = game.league?.current;
-        const round = league?.schedule?.[league.currentRound || 0];
+
+        // 🔥 FIX
+        const round = league?.schedule?.[game.league.playerRound || 0];
         const match = getMatchForMyTeam(round);
 
         if(match){
@@ -432,7 +441,7 @@ async function init(){
     }
 
     if(!live){
-      const round = league?.schedule?.[league.currentRound || 0];
+      const round = league?.schedule?.[game.league.playerRound || 0];
       const match = getMatchForMyTeam(round);
 
       if(match){
@@ -451,15 +460,16 @@ async function init(){
 
     if(live.minute >= 90){
 
-      advanceSchedule();
+      // 🔥 FIX
+      game.league.playerRound++;
 
-      const round = league?.schedule?.[league.currentRound || 0];
+      const round = league?.schedule?.[game.league.playerRound || 0];
       const match = getMatchForMyTeam(round);
 
       if(match){
         initMatch([match]);
 
-        startBackgroundSimulation(); // 🔥 NEW
+        startBackgroundSimulation();
 
         game.match.live.running = true;
         matchLoopRunning = true;
@@ -494,7 +504,7 @@ async function init(){
 
       if(matchLoopRunning && live.running) return;
 
-      startBackgroundSimulation(); // 🔥 NEW
+      startBackgroundSimulation();
 
       live.phase = "second_half";
       live.running = true;
@@ -523,7 +533,7 @@ async function init(){
         live.phase = "first_half";
       }
 
-      startBackgroundSimulation(); // 🔥 NEW
+      startBackgroundSimulation();
 
       live.running = true;
       matchLoopRunning = true;
