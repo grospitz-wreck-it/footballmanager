@@ -64,7 +64,7 @@ function startBackgroundSimulation(){
   simInterval = setInterval(() => {
 
     const league = game.league.current;
-    const round = league?.schedule?.[game.league.playerRound || 0];
+    const round = league?.schedule?.[game.league.currentRound || 0];
     if(!round) return;
 
     round.forEach(match => {
@@ -172,7 +172,7 @@ function initEventBindings(){
 
     advanceSchedule(); // bleibt!
 // 🔥 Sync back
-game.league.playerRound = game.league.currentRound;
+game.league.currentRound = game.league.currentRound;
     updateUI();
     renderEvents();
     renderSchedule();
@@ -319,8 +319,8 @@ async function init(){
     }
 
     // 🔥 FIX
-    if(game.league.playerRound === undefined){
-      game.league.playerRound = 0;
+    if(game.league.currentRound === undefined){
+      game.league.currentRound = 0;
     }
 
     initLeagueSelect();
@@ -371,11 +371,11 @@ async function init(){
           }
 
           // 🔥 FIX
-          if(game.league.playerRound === undefined){
-            game.league.playerRound = 0;
+          if(game.league.currentRound === undefined){
+            game.league.currentRound = 0;
           }
 
-          const round = league.schedule?.[game.league.playerRound || 0];
+          const round = league.schedule?.[game.league.currentRound || 0];
           const match = getMatchForMyTeam(round);
 
           if(match){
@@ -411,7 +411,7 @@ async function init(){
         const league = game.league?.current;
 
         // 🔥 FIX
-        const round = league?.schedule?.[game.league.playerRound || 0];
+        const round = league?.schedule?.[game.league.currentRound || 0];
         const match = getMatchForMyTeam(round);
 
         if(match){
@@ -469,7 +469,7 @@ async function init(){
     }
 
     if(!live){
-      const round = league?.schedule?.[game.league.playerRound || 0];
+      const round = league?.schedule?.[game.league.currentRound || 0];
       const match = getMatchForMyTeam(round);
 
       if(match){
@@ -489,9 +489,8 @@ async function init(){
     if(live.minute >= 90){
 
       // 🔥 FIX
-      game.league.playerRound++;
-
-      const round = league?.schedule?.[game.league.playerRound || 0];
+game.league.currentRound++;
+      const round = league?.schedule?.[game.league.currentRound|| 0];
       const match = getMatchForMyTeam(round);
 
       if(match){
