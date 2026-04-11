@@ -45,7 +45,7 @@ import { updateUI } from "./ui/ui.js";
 import { initDebugOverlay } from "../debug/debugOverlay.js";
 
 // =========================
-// 🔥 LOOP GUARD (NEU)
+// 🔥 LOOP GUARD
 // =========================
 let matchLoopRunning = false;
 
@@ -87,7 +87,12 @@ function initEventBindings(){
 
   on(EVENTS.MATCH_FINISHED, () => {
 
-    matchLoopRunning = false; // 🔥 FIX
+    matchLoopRunning = false;
+
+    // 🔥 NEU: Live-State sauber resetten
+    if(game.match?.live){
+      game.match.live.running = false;
+    }
 
     if(game.events){
       game.events.history = [];
@@ -109,9 +114,7 @@ function normalizeId(id){
   return String(id);
 }
 
-// 🔥 dein helper bleibt
 function getMatchForMyTeam(round){
-
   const myTeamId = game.team?.selectedId;
 
   return round?.find(m =>
@@ -224,12 +227,12 @@ async function init(){
     game.players = players;
     initPlayerPool(players);
 
-const loaded = loadGame();
+    const loaded = loadGame();
 
-// 🔥 FIX: Wenn kein Team gewählt → als neues Spiel behandeln
-if(!game.team?.selectedId){
-  game.phase = "setup";
-}
+    if(!game.team?.selectedId){
+      game.phase = "setup";
+    }
+
     if(!game.league.current){
       game.league.current = leagues[0];
     }
@@ -243,7 +246,6 @@ if(!game.team?.selectedId){
     initDebugOverlay();
     renderSchedule();
 
-    // 🔥 PLZ UI bleibt vollständig drin
     const plzInput = document.getElementById("plzInput");
     const results = document.getElementById("leagueResults");
 
@@ -292,7 +294,6 @@ if(!game.team?.selectedId){
           if(match){
             initMatch([match]);
 
-            // 🔥 FIX
             game.match.live.running = false;
             game.match.live.phase = "first_half";
           }
@@ -303,54 +304,47 @@ if(!game.team?.selectedId){
       });
     }
 
-// =========================
-// 🎬 START FLOW (FEHLTE!)
-// =========================
-if(loaded){
-  splash.style.display = "none";
-  app.style.display = "block";
+    if(loaded){
+      splash.style.display = "none";
+      app.style.display = "block";
+      updateUI();
+      renderEvents();
+    } else {
 
-  updateUI();
-  renderEvents();
+      game.phase = "setup";
+      splash.style.display = "flex";
+      app.style.display = "none";
 
-} else {
+      document.getElementById("startBtn")?.addEventListener("click", () => {
 
-  game.phase = "setup";
-  splash.style.display = "flex";
-  app.style.display = "none";
+        game.phase = "idle";
+        splash.style.display = "none";
+        app.style.display = "block";
 
-  document.getElementById("startBtn")?.addEventListener("click", () => {
+        const league = game.league?.current;
+        const round = league?.schedule?.[league.currentRound || 0];
+        const match = getMatchForMyTeam(round);
 
-    game.phase = "idle";
-    splash.style.display = "none";
-    app.style.display = "block";
+        if(match){
+          initMatch([match]);
 
-    // 🔥 CRITICAL FIX: ERSTES MATCH LADEN
-    const league = game.league?.current;
-    const round = league?.schedule?.[league.currentRound || 0];
-    const match = getMatchForMyTeam(round);
+          const live = game.match.live;
+          live.running = false;
+          live.minute = 0;
+          live.phase = "first_half";
+        }
 
-    if(match){
-      initMatch([match]);
-
-      const live = game.match.live;
-      live.running = false;
-      live.minute = 0;
-      live.phase = "first_half";
+        updateUI();
+        renderEvents();
+      });
     }
 
-    updateUI();
-    renderEvents();
-  });
-}
-
-    
   } catch (e){
     console.error("❌ INIT ERROR:", e);
   }
 
   // =========================
-  // ▶️ MAIN BUTTON (FINAL FIX)
+  // ▶️ MAIN BUTTON
   // =========================
   const mainBtn = document.getElementById("mainButton");
 
@@ -385,15 +379,14 @@ if(loaded){
       game.phase = "idle";
     }
 
-  if(!live || live.minute >= 90){
-  const round = league?.schedule?.[league.currentRound || 0];
+    if(!live){
+      const round = league?.schedule?.[league.currentRound || 0];
       const match = getMatchForMyTeam(round);
 
       if(match){
         initMatch([match]);
         live = game.match.live;
 
-        // 🔥 FIX
         live.running = false;
         live.phase = "first_half";
       }
@@ -436,11 +429,18 @@ if(loaded){
       return;
     }
 
+    // 🔥 FINAL HALFTIME FIX
     if(
       live.phase === "halftime" ||
       (live.minute === 45 && !live.running)
     ){
-if(matchLoopRunning && live.running) return;
+
+      if(!live.running){
+        matchLoopRunning = false;
+      }
+
+      if(matchLoopRunning && live.running) return;
+
       live.phase = "second_half";
       live.running = true;
       matchLoopRunning = true;
@@ -462,7 +462,7 @@ if(matchLoopRunning && live.running) return;
 
     if(live.running === false){
 
-      if(matchLoopRunning) return; // 🔥 FIX
+      if(matchLoopRunning) return;
 
       if(live.minute === 0){
         live.phase = "first_half";
