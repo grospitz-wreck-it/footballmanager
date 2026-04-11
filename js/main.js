@@ -75,14 +75,38 @@ function startBackgroundSimulation(){
         match.awayTeamId === game.team?.selectedId
       ) return;
 
+      // 🔥 LIVE INIT (NEU)
+      if(!match.live){
+        match.live = {
+          minute: 0,
+          score: { home: 0, away: 0 }
+        };
+      }
+
       if(match._processed) return;
 
-      match.result = {
-        home: Math.floor(Math.random() * 5),
-        away: Math.floor(Math.random() * 5)
-      };
+      // 🔥 Minute läuft hoch
+      match.live.minute += Math.floor(Math.random() * 5);
 
-      match._processed = true;
+      // 🔥 Tore fallen zufällig
+      if(Math.random() < 0.2){
+        if(Math.random() < 0.5){
+          match.live.score.home++;
+        } else {
+          match.live.score.away++;
+        }
+      }
+
+      // 🔥 Spiel wird beendet
+      if(match.live.minute >= 90){
+
+        match.result = {
+          home: match.live.score.home,
+          away: match.live.score.away
+        };
+
+        match._processed = true;
+      }
     });
 
     updateUI();
