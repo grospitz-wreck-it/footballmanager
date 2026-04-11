@@ -305,7 +305,7 @@ function renderTeam(){
   });
 // sortiere nach Stärke
 Object.values(byType).forEach(arr => {
-  arr.sort((a, b) => (b.overall || 0) - (a.overall || 0));
+  arr.sort((a, b) => (b.overall ?? 0) - (a.overall || 0));
 });
   const starters = [
     ...byType.GK.slice(0,1),
