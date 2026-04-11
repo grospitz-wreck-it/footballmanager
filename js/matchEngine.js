@@ -33,22 +33,23 @@ function normalizeId(id){
 // 🧠 HELPERS
 // =========================
 function getTeamById(id){
+
   const nid = normalizeId(id);
-  return (game.data?.teams || []).find(t => normalizeId(t.id) === nid);
-}
 
-function getTeamNameById(id){
-  return getTeamById(id)?.name || "Unbekannt";
-}
+  // 🔥 FIX: erst aktuelle Liga prüfen
+  const leagueTeams = game.league?.current?.teams || [];
 
-function getPlayerName(p){
-  if(!p) return "Unbekannt";
+  const leagueMatch = leagueTeams.find(
+    t => normalizeId(t.id) === nid
+  );
 
-  return (
-    p.Name ||
-    p.name ||
-    `${p.firstName || ""} ${p.lastName || ""}`.trim() ||
-    "Spieler"
+  if(leagueMatch){
+    return leagueMatch;
+  }
+
+  // 🔁 fallback (NO LOSS)
+  return (game.data?.teams || []).find(
+    t => normalizeId(t.id) === nid
   );
 }
 
