@@ -40,6 +40,11 @@ import { loadGame } from "./services/storage.js";
 import { updateUI } from "./ui/ui.js";
 
 // =========================
+// 🐞 DEBUG
+// =========================
+import { initDebugOverlay } from "./debug/debugOverlay.js";
+
+// =========================
 // 🔥 EVENT RENDER
 // =========================
 function renderEvents(){
@@ -217,14 +222,19 @@ async function init(){
     // 🔥 SCHEDULE (FIXED)
     // =========================
     if(!game.league.current.schedule || !game.league.current.schedule.length){
-      generateSchedule(); // 👉 schreibt in current.schedule
+      generateSchedule();
     }
 
     // =========================
-    // 🏗 UI INIT (NACH SCHEDULE)
+    // 🏗 UI INIT
     // =========================
     initLeagueSelect();
     initTable();
+
+    // =========================
+    // 🔥 DEBUG START (HIER!)
+    // =========================
+    initDebugOverlay();
 
     // =========================
     // 🔥 PLZ UI
@@ -266,7 +276,6 @@ async function init(){
         if(league){
           setLeagueById(league.id);
 
-          // 🔥 wichtig: schedule sicherstellen
           if(!league.schedule || !league.schedule.length){
             generateSchedule();
           }
