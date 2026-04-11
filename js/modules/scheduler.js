@@ -328,10 +328,22 @@ function renderSchedule(){
     return;
   }
 
-  let currentRound = game.league.playerRound ?? 0;
+let currentRound = game.league.playerRound ?? 0;
 
-  let roundRef = schedule[currentRound];
-  let myMatch = getMatchForMyTeam(roundRef);
+// 🔥 IMMER erst global suchen (sicher)
+let myMatch = null;
+let roundRef = null;
+
+for(let i = 0; i < schedule.length; i++){
+  const testMatch = getMatchForMyTeam(schedule[i]);
+  if(testMatch){
+    currentRound = i;
+    roundRef = schedule[i];
+    myMatch = testMatch;
+    break;
+  }
+}
+  
 
   if(!myMatch){
     for(let i = 0; i < schedule.length; i++){
