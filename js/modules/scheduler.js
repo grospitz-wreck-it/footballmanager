@@ -127,13 +127,15 @@ function generateSchedule(){
 
     for(let i = 0; i < half; i++){
 
-  let home = rotation[i];
-  let away = rotation[rotation.length - 1 - i];
+  const teamA = rotation[i];
+const teamB = rotation[rotation.length - 1 - i];
 
-  // 🔥 FIX: Heim/Auswärts pro Runde wechseln
-  if(r % 2 === 1){
-    [home, away] = [away, home];
-  }
+// 🔥 FIX: nur Rollen tauschen, Paarung bleibt gleich
+const isSwap = r % 2 === 1;
+
+const home = isSwap ? teamB : teamA;
+const away = isSwap ? teamA : teamB;
+      
 
   const homeId = resolveTeamId(home);
   const awayId = resolveTeamId(away);
