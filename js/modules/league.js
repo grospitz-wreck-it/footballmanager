@@ -83,7 +83,7 @@ function initLeague(league){
   }
 
   league.currentRound = 0;
-
+  league.playerRound = 0; // 🔥 NEW (Player Progress)
   console.log("✅ Liga initialisiert:", league.name);
 }
 
