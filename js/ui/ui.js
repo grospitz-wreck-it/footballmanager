@@ -232,33 +232,32 @@ function ensureLiveTableLoop(){
 // =========================
 const FORMATIONS = {
   "4-4-2": [
-  { role: "GK", top: "50%", left: "10%" },
-
-  { role: "DEF", top: "20%", left: "25%" },
-  { role: "DEF", top: "40%", left: "25%" },
-  { role: "DEF", top: "60%", left: "25%" },
-  { role: "DEF", top: "80%", left: "25%" },
-  { role: "MID", top: "20%", left: "50%" },
-  { role: "MID", top: "40%", left: "50%" },
-  { role: "MID", top: "60%", left: "50%" },
-  { role: "MID", top: "80%", left: "50%" },
-  { role: "ST", top: "40%", left: "75%" },
-  { role: "ST", top: "60%", left: "75%" }
-],
+    { role: "GK", top: "50%", left: "10%" },
+    { role: "DEF", top: "20%", left: "25%" },
+    { role: "DEF", top: "40%", left: "25%" },
+    { role: "DEF", top: "60%", left: "25%" },
+    { role: "DEF", top: "80%", left: "25%" },
+    { role: "MID", top: "20%", left: "50%" },
+    { role: "MID", top: "40%", left: "50%" },
+    { role: "MID", top: "60%", left: "50%" },
+    { role: "MID", top: "80%", left: "50%" },
+    { role: "ST", top: "40%", left: "75%" },
+    { role: "ST", top: "60%", left: "75%" }
+  ],
 
   "4-3-3": [
-  { role: "GK", top: "50%", left: "10%" },
-  { role: "DEF", top: "20%", left: "25%" },
-  { role: "DEF", top: "40%", left: "25%" },
-  { role: "DEF", top: "60%", left: "25%" },
-  { role: "DEF", top: "80%", left: "25%" },
-  { role: "MID", top: "30%", left: "50%" },
-  { role: "MID", top: "50%", left: "50%" },
-  { role: "MID", top: "70%", left: "50%" },
-  { role: "ST", top: "20%", left: "75%" },
-  { role: "ST", top: "50%", left: "75%" },
-  { role: "ST", top: "80%", left: "75%" }
-]
+    { role: "GK", top: "50%", left: "10%" },
+    { role: "DEF", top: "20%", left: "25%" },
+    { role: "DEF", top: "40%", left: "25%" },
+    { role: "DEF", top: "60%", left: "25%" },
+    { role: "DEF", top: "80%", left: "25%" },
+    { role: "MID", top: "30%", left: "50%" },
+    { role: "MID", top: "50%", left: "50%" },
+    { role: "MID", top: "70%", left: "50%" },
+    { role: "ST", top: "20%", left: "75%" },
+    { role: "ST", top: "50%", left: "75%" },
+    { role: "ST", top: "80%", left: "75%" }
+  ]
 };
 
 // =========================
@@ -303,10 +302,12 @@ function renderTeam(){
     const type = p.position_type || "MID";
     (byType[type] || byType.MID).push(p);
   });
-// sortiere nach Stärke
-Object.values(byType).forEach(arr => {
-  arr.sort((a, b) => arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0)););
-});
+
+  // Sortieren
+  Object.values(byType).forEach(arr => {
+    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+  });
+
   const starters = [
     ...byType.GK.slice(0,1),
     ...byType.DEF.slice(0,4),
@@ -332,7 +333,7 @@ Object.values(byType).forEach(arr => {
   `;
 
   layout.forEach(slot => {
-    
+
     const player = pickPlayer(slot.role, pool);
     if(!player) return;
 
@@ -345,66 +346,54 @@ Object.values(byType).forEach(arr => {
 
   html += `</div>`;
 
-  html += `
-    <h3>Bench</h3>
-    <div class="bench-row">
-  `;
+  // Bench
+  html += `<h3>Bench</h3>`;
 
-  const benchByType = {
-  GK: [],
-  DEF: [],
-  MID: [],
-  ST: []
-};
+  const benchByType = { GK: [], DEF: [], MID: [], ST: [] };
 
-bench.forEach(p => {
-  const type = p.position_type || "MID";
-  (benchByType[type] || benchByType.MID).push(p);
-});
+  bench.forEach(p => {
+    const type = p.position_type || "MID";
+    (benchByType[type] || benchByType.MID).push(p);
+  });
 
-// Sortieren (beste zuerst)
-Object.values(benchByType).forEach(arr => {
-  arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-});
+  Object.values(benchByType).forEach(arr => {
+    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+  });
 
   html += `<div class="bench-container">`;
 
-Object.entries(benchByType).forEach(([role, players]) => {
+  Object.entries(benchByType).forEach(([role, players]) => {
 
-  if(players.length === 0) return;
+    if(players.length === 0) return;
 
-  html += `
-    <div class="bench-group">
-      <div class="bench-title">${role}</div>
-      <div class="bench-row">
-  `;
+    html += `
+      <div class="bench-group">
+        <div class="bench-title">${role}</div>
+        <div class="bench-row">
+    `;
 
-  players.forEach(p => {
-    html += renderPlayerDot(p);
+    players.forEach(p => {
+      html += renderPlayerDot(p);
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
   });
 
-  html += `
-      </div>
-    </div>
-  `;
-});
-  
   html += `</div>`;
 
   container.innerHTML = html;
 
-  if(!game.ui._teamBound){
-
-    document.querySelectorAll(".player-dot").forEach(el => {
-      el.onclick = () => {
-        const id = el.dataset.id;
-        const player = game.players.find(p => String(p.id) === String(id));
-        if(player) openPlayerModal(player);
-      };
-    });
-
-    game.ui._teamBound = true;
-  }
+  // Clicks
+  document.querySelectorAll(".player-dot").forEach(el => {
+    el.onclick = () => {
+      const id = el.dataset.id;
+      const player = game.players.find(p => String(p.id) === String(id));
+      if(player) openPlayerModal(player);
+    };
+  });
 }
 
 // =========================
@@ -417,18 +406,16 @@ function renderPlayerDot(player){
     (player.last_name?.[0] || "");
 
   return `
-    <div class="player-dot" 
-         data-id="${player.id}" 
-         data-tier="${player.tier}">
-
+    <div class="player-dot" data-id="${player.id}" data-tier="${player.tier}">
       <img src="/gfx/dot.webp" />
-
       <span class="label">${initials}</span>
-
     </div>
   `;
 }
 
+// =========================
+// 📊 STATS
+// =========================
 function renderStat(label, value){
 
   const v = value ?? 0;
@@ -457,7 +444,6 @@ function openPlayerModal(player){
 
   div.innerHTML = `
     <div class="modal-overlay">
-
       <div class="player-card">
 
         <button class="close-btn" onclick="this.closest('#playerModal').remove()">✕</button>
@@ -468,7 +454,6 @@ function openPlayerModal(player){
         </div>
 
         <div class="card-body">
-
           <div class="position">${player.position}</div>
           <div class="tier">${player.tier}</div>
 
@@ -477,25 +462,26 @@ function openPlayerModal(player){
             ${renderStat("PAS", player.passing)}
             ${renderStat("DEF", player.defending)}
           </div>
-
         </div>
 
       </div>
-
     </div>
   `;
 
   document.body.appendChild(div);
 }
-function renderCurrentMatch(){
-  console.log("⚽ renderCurrentMatch");
-}
-function renderSchedule(){
-  console.log("📅 renderSchedule");
-}
+
 // =========================
 // 📦 EXPORTS
 // =========================
+function renderCurrentMatch(){
+  console.log("⚽ renderCurrentMatch");
+}
+
+function renderSchedule(){
+  console.log("📅 renderSchedule");
+}
+
 export {
   updateUI,
   renderSchedule,
