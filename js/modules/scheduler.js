@@ -20,7 +20,7 @@ function resolveTeamId(team){
     return normalizeId(team.id);
   }
 
-  return null; // 🔥 STRICT: kein String mehr erlaubt
+  return null;
 }
 
 // =========================
@@ -43,6 +43,16 @@ function normalizeTeam(team){
   return team;
 }
 
+// 🔥 NEW (nur für UI Highlight)
+function getMatchForMyTeam(round){
+  const myTeamId = game.team?.selectedId;
+
+  return round?.find(m =>
+    m.homeTeamId === myTeamId ||
+    m.awayTeamId === myTeamId
+  ) || null;
+}
+
 // =========================
 // 📅 GENERATE (ID ONLY)
 // =========================
@@ -55,7 +65,6 @@ function generateSchedule(){
     return;
   }
 
-  // 🔥 FIX: nur noch current.schedule
   if(league.schedule && league.schedule.length > 0){
     console.log("ℹ️ Spielplan existiert bereits → wird nicht neu erstellt");
     return;
@@ -96,9 +105,6 @@ function generateSchedule(){
   const rounds = [];
   let rotation = [...teams];
 
-  // =========================
-  // 🔁 HINRUNDE
-  // =========================
   for(let r = 0; r < totalRounds; r++){
 
     const round = [];
@@ -111,7 +117,6 @@ function generateSchedule(){
       const homeId = resolveTeamId(home);
       const awayId = resolveTeamId(away);
 
-      // 🔥 STRICT ID CHECK
       if(!homeId || !awayId || homeId === awayId){
         continue;
       }
@@ -120,14 +125,10 @@ function generateSchedule(){
 
         round.push({
           id: crypto.randomUUID(),
-
           homeTeamId: homeId,
           awayTeamId: awayId,
-
-          // UI bleibt erhalten
           home,
           away,
-
           result: null,
           _processed: false
         });
@@ -143,25 +144,18 @@ function generateSchedule(){
     rotation = [fixed, ...rest];
   }
 
-  // =========================
-  // 🔁 RÜCKRUNDE
-  // =========================
   const returnRounds = rounds.map(round =>
     round.map(match => ({
       id: crypto.randomUUID(),
-
       homeTeamId: normalizeId(match.awayTeamId),
       awayTeamId: normalizeId(match.homeTeamId),
-
       home: match.away,
       away: match.home,
-
       result: null,
       _processed: false
     }))
   );
 
-  // 🔥 FIX: zentrale Quelle
   league.schedule = [...rounds, ...returnRounds];
 
   league.schedule.forEach(round => {
@@ -177,7 +171,7 @@ function generateSchedule(){
 }
 
 // =========================
-// 🧪 VALIDIERUNG (ID ONLY)
+// 🧪 VALIDIERUNG
 // =========================
 function validateSchedule(expectedTeamCount){
 
@@ -212,7 +206,7 @@ function validateSchedule(expectedTeamCount){
 }
 
 // =========================
-// 👉 NEXT MATCH (ID FIRST)
+// 👉 NEXT MATCH
 // =========================
 function nextMatch(){
 
@@ -292,7 +286,7 @@ function isSeasonFinished(){
 }
 
 // =========================
-// 📅 RENDER (UI bleibt)
+// 📅 RENDER (FIXED HIGHLIGHT)
 // =========================
 function renderSchedule(){
 
@@ -306,8 +300,10 @@ function renderSchedule(){
     return;
   }
 
-  const currentRound = game.league.currentRound ?? 0;
-  const currentMatch = game.league.currentMatchIndex ?? 0;
+  // 🔥 FIX: Player-System
+  const currentRound = game.league.playerRound ?? 0;
+  const roundRef = schedule[currentRound];
+  const myMatch = getMatchForMyTeam(roundRef);
 
   let html = "";
 
@@ -317,11 +313,13 @@ function renderSchedule(){
       <h3>Spieltag ${rIndex + 1}</h3>
       <ul style="list-style:none;padding:0;">`;
 
-    round.forEach((match, mIndex) => {
+    round.forEach((match) => {
 
+      // 🔥 FIX: Highlight dein Match
       const isActive =
         rIndex === currentRound &&
-        mIndex === currentMatch;
+        myMatch &&
+        match.id === myMatch.id;
 
       const home = getTeamName(match.home);
       const away = getTeamName(match.away);
