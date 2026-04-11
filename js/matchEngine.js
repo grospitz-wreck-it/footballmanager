@@ -1,5 +1,5 @@
 // =========================
-// ⚽ MATCH ENGINE (ID BASED - FINAL + PRIO1) - STRICT NO LOSS
+// ⚽ MATCH ENGINE (STRICT ID ONLY - FINAL)
 // =========================
 
 import { game } from "./core/state.js";
@@ -22,7 +22,7 @@ import { getPlayerRating } from "./engine/playerEngine.js";
 let matchInterval = null;
 
 // =========================
-// 🧠 ID HELPERS (ADD ONLY)
+// 🧠 ID HELPERS
 // =========================
 function normalizeId(id){
   if(id === null || id === undefined) return null;
@@ -36,7 +36,6 @@ function getTeamById(id){
 
   const nid = normalizeId(id);
 
-  // 🔥 FIX: erst aktuelle Liga prüfen
   const leagueTeams = game.league?.current?.teams || [];
 
   const leagueMatch = leagueTeams.find(
@@ -47,40 +46,35 @@ function getTeamById(id){
     return leagueMatch;
   }
 
-  // 🔁 fallback (NO LOSS)
+  // 🔥 bleibt erhalten (kein Name-Fallback!)
   return (game.data?.teams || []).find(
     t => normalizeId(t.id) === nid
   );
 }
 
+function getTeamNameById(id){
+  return getTeamById(id)?.name || "Unbekannt";
+}
+
 // =========================
-// 🆕 EVENT EMITTER (UNVERÄNDERT)
+// 🆕 EVENT EMITTER
 // =========================
 function emitMatchEvent(type, payload = {}) {
-const live = game.match?.live;
-if (!live) return;
 
-// 🔒 payload absichern (kein Crash bei undefined)
-const safePayload = payload || {};
+  const live = game.match?.live;
+  if (!live) return;
 
-// 🔒 fallback type (failsafe)
-const safeType = type || "UNKNOWN_EVENT";
+  const event = {
+    id: crypto.randomUUID(),
+    type: type || "UNKNOWN_EVENT",
+    minute: live.minute ?? 0,
+    ...payload,
+    text: payload?.text ?? null
+  };
 
-const event = {
-  id: crypto.randomUUID(),
-  type: safeType,
-  minute: live.minute ?? 0,
-  ...safePayload,
-  text: safePayload.text ?? null
-};
-
-// 🔥 Debug bleibt, aber stabiler
-if (process?.env?.NODE_ENV !== "production") {
-  console.log("📡 Event:", event);
+  emit(EVENTS.MATCH_EVENT, event);
 }
 
-emit(EVENTS.MATCH_EVENT, event);
-}
 // =========================
 // 👥 PLAYER ACCESS
 // =========================
@@ -124,8 +118,8 @@ function getRandomPlayer(teamId){
 function isMyMatch(match){
 
   const myTeamId =
-    normalizeId(game.team?.id) ||
-    normalizeId(game.team?.selectedId);
+    normalizeId(game.team?.selectedId) ||
+    normalizeId(game.team?.id);
 
   if(!myTeamId) return true;
 
@@ -136,7 +130,7 @@ function isMyMatch(match){
 }
 
 // =========================
-// 🎮 INIT MATCH (FIXED MINIMAL)
+// 🎮 INIT MATCH (STRICT ID)
 // =========================
 function initMatch(round){
 
@@ -145,26 +139,12 @@ function initMatch(round){
   const playerMatch = round.find(m => isMyMatch(m)) || round[0];
   if(!playerMatch) return false;
 
-  // 🔥 MINIMAL FIX: fallback wenn IDs fehlen
-  let homeId = normalizeId(playerMatch.homeTeamId);
-  let awayId = normalizeId(playerMatch.awayTeamId);
+  const homeId = normalizeId(playerMatch.homeTeamId);
+  const awayId = normalizeId(playerMatch.awayTeamId);
 
-  if(!homeId && playerMatch.home){
-    const t = (game.data?.teams || []).find(
-      t => t.name === (playerMatch.home.name || playerMatch.home)
-    );
-    homeId = normalizeId(t?.id);
-  }
-
-  if(!awayId && playerMatch.away){
-    const t = (game.data?.teams || []).find(
-      t => t.name === (playerMatch.away.name || playerMatch.away)
-    );
-    awayId = normalizeId(t?.id);
-  }
-
+  // 🔥 STRICT: KEIN FALLBACK MEHR
   if(!homeId || !awayId){
-    console.error("❌ MATCH INIT FAILED (IDs fehlen)", playerMatch);
+    console.error("❌ MATCH INIT FAILED (STRICT ID)", playerMatch);
     return false;
   }
 
@@ -218,7 +198,7 @@ function initMatch(round){
 }
 
 // =========================
-// ⚽ EVENTS (UNVERÄNDERT)
+// ⚽ EVENTS
 // =========================
 function createShot(ctx){
 
@@ -247,29 +227,29 @@ function createShot(ctx){
       game.match.score.away++;
     }
 
-    emitMatchEvent(EVENT_TYPES.GOAL || "GOAL", {
+    emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
       playerId: shooter?.id,
       relatedPlayerId: getRandomPlayer(teamId)?.id,
-      outcome: EVENT_OUTCOMES?.SUCCESS || "success"
+      outcome: EVENT_OUTCOMES.SUCCESS
     });
 
     return;
   }
 
   if(r < goalChance + saveChance){
-    emitMatchEvent(EVENT_TYPES.SHOT_SAVED || "SHOT_SAVED", {
+    emitMatchEvent(EVENT_TYPES.SHOT_SAVED, {
       teamId: opponentId,
       playerId: keeper?.id,
-      outcome: EVENT_OUTCOMES?.SAVED || "saved"
+      outcome: EVENT_OUTCOMES.SAVED
     });
     return;
   }
 
-  emitMatchEvent(EVENT_TYPES.SHOT || "SHOT", {
+  emitMatchEvent(EVENT_TYPES.SHOT, {
     teamId,
     playerId: shooter?.id,
-    outcome: EVENT_OUTCOMES?.FAIL || "fail"
+    outcome: EVENT_OUTCOMES.FAIL
   });
 }
 
@@ -280,10 +260,10 @@ function createFoul(ctx){
 
   const player = getRandomPlayer(teamId);
 
-  emitMatchEvent(EVENT_TYPES.FOUL || "FOUL", {
+  emitMatchEvent(EVENT_TYPES.FOUL, {
     teamId,
     playerId: player?.id,
-    outcome: EVENT_OUTCOMES?.NEUTRAL || "neutral"
+    outcome: EVENT_OUTCOMES.NEUTRAL
   });
 }
 
@@ -292,9 +272,7 @@ function createCorner(ctx){
     ? ctx.match.homeTeamId
     : ctx.match.awayTeamId;
 
-  emitMatchEvent(EVENT_TYPES.CORNER || "CORNER", {
-    teamId
-  });
+  emitMatchEvent(EVENT_TYPES.CORNER, { teamId });
 }
 
 function createDuel(ctx){
@@ -302,14 +280,14 @@ function createDuel(ctx){
   const p1 = getRandomPlayer(ctx.match.homeTeamId);
   const p2 = getRandomPlayer(ctx.match.awayTeamId);
 
-  emitMatchEvent(EVENT_TYPES.DUEL || "DUEL", {
+  emitMatchEvent(EVENT_TYPES.DUEL, {
     playerId: p1?.id,
     relatedPlayerId: p2?.id
   });
 }
 
 // =========================
-// 🔁 SIMULATION (UNVERÄNDERT)
+// 🔁 SIMULATION
 // =========================
 let momentum = 0;
 
@@ -375,7 +353,7 @@ function simulateLiveEvent(ctx){
 }
 
 // =========================
-// ▶️ CONTROL (UNVERÄNDERT)
+// ▶️ CONTROL
 // =========================
 function pauseMatch(){
   if(game.match?.live){
@@ -390,7 +368,7 @@ function resumeMatch(){
 }
 
 // =========================
-// 🤖 OTHER MATCHES (UNVERÄNDERT)
+// 🤖 OTHER MATCHES
 // =========================
 function simulateOtherMatches(round){
 
@@ -409,7 +387,7 @@ function simulateOtherMatches(round){
 }
 
 // =========================
-// 🔁 LOOP (UNVERÄNDERT)
+// 🔁 LOOP
 // =========================
 function runMatchLoop({ onTick, onEnd } = {}){
 
@@ -469,7 +447,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
 }
 
 // =========================
-// 🏁 END (UNVERÄNDERT)
+// 🏁 END
 // =========================
 function endMatch(onEnd){
 
