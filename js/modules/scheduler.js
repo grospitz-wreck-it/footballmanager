@@ -45,12 +45,15 @@ function normalizeTeam(team){
 
 // 🔥 UI Helper
 function getMatchForMyTeam(round){
-  const myTeamId = game.team?.selectedId;
 
-  return round?.find(m =>
-    m.homeTeamId === myTeamId ||
-    m.awayTeamId === myTeamId
-  ) || null;
+  const myTeamId = normalizeId(game.team?.selectedId);
+
+  const match = round?.find(m =>
+    normalizeId(m.homeTeamId) === myTeamId ||
+    normalizeId(m.awayTeamId) === myTeamId
+  );
+
+  return match || null;
 }
 
 // =========================
