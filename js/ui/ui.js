@@ -282,8 +282,11 @@ function renderTeam(){
   const container = document.getElementById("teamView");
   if(!container) return;
 
-  const players = game.team?.players || [];
+const teamId = game.team?.selectedId;
 
+const players = (window.playerPool || []).filter(p => 
+  String(p.team_id) === String(teamId)
+);
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
