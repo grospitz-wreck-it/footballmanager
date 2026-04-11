@@ -266,12 +266,13 @@ function setLeagueById(leagueId){
 
   game.league.current = league;
 
-  initLeague(league);
+  // 🔥 zuerst Schedule
+if(!league.schedule || !league.schedule.length){
+  generateSchedule();
+}
 
-  // 🔥 FIX: Schedule IMMER sicherstellen
-  if(!league.schedule || !league.schedule.length){
-    generateSchedule();
-  }
+// dann init
+initLeague(league);
 
   selects.forEach(select => {
     select.value = index;
