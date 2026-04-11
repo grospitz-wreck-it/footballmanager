@@ -423,6 +423,9 @@ function openPlayerModal(player){
 function renderCurrentMatch(){
   console.log("⚽ renderCurrentMatch");
 }
+function renderSchedule(){
+  console.log("📅 renderSchedule");
+}
 // =========================
 // 📦 EXPORTS
 // =========================
