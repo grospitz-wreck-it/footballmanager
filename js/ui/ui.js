@@ -378,6 +378,103 @@ function renderTeam(){
     ...byType.ST.slice(0,2)
   ];
 
+  // ✅ FIX: Bench definieren
+  const bench = players.filter(p => !starters.includes(p));
+
+  // =========================
+  // ⚽ FORMATION
+  // =========================
+  const formation = game.team?.formation || "4-4-2";
+  const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+
+  const pool = {
+    GK: [...byType.GK],
+    DEF: [...byType.DEF],
+    MID: [...byType.MID],
+    ST: [...byType.ST]
+  };
+
+  // =========================
+  // 🎨 FIELD
+  // =========================
+  let html = `
+    <h3>Starting XI</h3>
+    <div class="team-field">
+  `;
+
+  layout.forEach(slot => {
+
+    const player = pickPlayer(slot.role, pool);
+    if(!player) return;
+
+    html += `
+      <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
+        ${renderPlayerDot(player)}
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  // =========================
+  // 🪑 BENCH
+  // =========================
+  html += `
+    <h3>Bench</h3>
+    <div class="bench-row">
+  `;
+
+  bench.forEach(p => {
+    html += renderPlayerDot(p);
+  });
+
+  html += `</div>`;
+
+  container.innerHTML = html;
+
+  // =========================
+  // 🖱 CLICK HANDLER
+  // =========================
+  if(!game.ui._teamBound){
+
+    document.querySelectorAll(".player-dot").forEach(el => {
+      el.onclick = () => {
+        const id = el.dataset.id;
+        const player = game.players.find(p => String(p.id) === String(id));
+        if(player) openPlayerModal(player);
+      };
+    });
+
+    game.ui._teamBound = true;
+  }
+}
+
+  // =========================
+  // ⚽ SORTIERUNG
+  // =========================
+  const byType = {
+    GK: [],
+    DEF: [],
+    MID: [],
+    ST: []
+  };
+
+  players.forEach(p => {
+    const type = p.position_type || "MID";
+    if(byType[type]){
+      byType[type].push(p);
+    } else {
+      byType.MID.push(p);
+    }
+  });
+
+  const starters = [
+    ...byType.GK.slice(0,1),
+    ...byType.DEF.slice(0,4),
+    ...byType.MID.slice(0,4),
+    ...byType.ST.slice(0,2)
+  ];
+
   // =========================
 // ⚽ FORMATION (NEU)
 // =========================
