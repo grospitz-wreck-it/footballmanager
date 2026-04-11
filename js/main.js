@@ -42,7 +42,7 @@ import { updateUI } from "./ui/ui.js";
 // =========================
 // 🐞 DEBUG
 // =========================
-import { initDebugOverlay } from "./debug/debugOverlay.js";
+import { initDebugOverlay } from "../debug/debugOverlay.js";
 
 // =========================
 // 🔥 EVENT RENDER
