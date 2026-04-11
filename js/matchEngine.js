@@ -133,7 +133,11 @@ function isMyMatch(match){
 // 🎮 INIT MATCH (STRICT ID)
 // =========================
 function initMatch(round){
-
+  // 🔥 RESET MATCH LOOP
+if(matchInterval){
+  clearInterval(matchInterval);
+  matchInterval = null;
+}
   if(!round?.length) return false;
 
   const playerMatch = round.find(m => isMyMatch(m)) || round[0];
