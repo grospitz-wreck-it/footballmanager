@@ -432,31 +432,6 @@ function renderStat(label, value){
   `;
 }
 
-/* =========================
-🪟 MODAL LAYER
-========================= */
-
-#playerModal {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-}
-
-.modal-overlay {
-  position: absolute;
-  inset: 0;
-
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(8px);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  animation: fadeIn 0.2s ease;
-}
-
-
 
 // =========================
 // 📦 EXPORTS
