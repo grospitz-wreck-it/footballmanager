@@ -121,64 +121,7 @@ function createDNA(rand, country, quality){
 }
 
 
-  // =========================
-  // ⚽ ARCHETYPE SHAPING
-  // =========================
-
-  if(type === "winger"){
-    dna.headW = 14;
-    dna.headH = 20;
-    dna.eyeSpacing = 8;
-  }
-
-  if(type === "playmaker"){
-    dna.headH = 22;
-    dna.beard = rand() < 0.6 ? "short" : "none";
-    dna.glasses = rand() < 0.2;
-  }
-
-  if(type === "defender"){
-    dna.headW = 20;
-    dna.jawWidth = 5;
-    dna.eyeSpacing = 6;
-  }
-
-  if(type === "striker"){
-    dna.noseType = pick(rand, ["long","wide"]);
-    dna.eyeSpacing = 7;
-  }
-
-  if(type === "keeper"){
-    dna.headH = 24;
-    dna.eyeSpacing = 9;
-  }
-
-  if(type === "youth"){
-    dna.headW = 15;
-    dna.headH = 18;
-    dna.eyeSpacing = 8;
-    dna.beard = "none";
-  }
-
-  // =========================
-  // ⭐ QUALITY (STARS LOOK BETTER)
-  // =========================
-  if(rand() < quality){
-    dna.eyeSpacing += 1;
-    dna.headW += 1;
-  }
-
-  // =========================
-  // 🎲 ASYMMETRY (CRITICAL!)
-  // =========================
-  dna.eyeOffsetL = Math.floor(rand()*2);
-  dna.eyeOffsetR = Math.floor(rand()*2);
-
-  return dna;
-}
-
-
-
+  
 
 // ======================================
 // 👤 HEAD (MULTI-ZONE)
