@@ -301,7 +301,7 @@ document.querySelectorAll("#eventsTab input, #eventsTab textarea, #eventsTab sel
 }
 
 
-import { EVENT_REGISTRY } from "./eventRegistry.js";
+import { EVENT_REGISTRY } from "./engine/eventRegistry.js";
 
 function loadEventTypes(){
 
