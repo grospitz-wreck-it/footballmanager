@@ -1096,17 +1096,6 @@ tr:hover {
   transition: transform 0.4s ease;
 }
 
-/* ITEM */
-#adContainer .adItem {
-  min-width: 100%;
-  height: 100%;
-  flex-shrink: 0;
-
-  display: flex;                 /* 🔥 wichtig */
-  align-items: center;           /* 🔥 verhindert Stretch */
-  justify-content: center;
-}
-
 /* LINK */
 #adContainer .adItem a {
   display: flex;                 /* 🔥 statt block */
