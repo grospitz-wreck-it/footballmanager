@@ -121,7 +121,8 @@ function applyGameEventEffect(event, ctx){
       game.match.live.score.away++;
       game.match.score.away++;
     }
-
+    
+    console.log("🎯 GOAL ASSETS:", getGoalAssets());
     // 🔥 TEXT + ASSETS aus Admin übernehmen
     emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
