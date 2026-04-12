@@ -41,7 +41,40 @@ setTimeout(()=> el.remove(), 800);
 function toggleFullscreen(el){
 el.closest(".asset").classList.toggle("fullscreen");
 }
+function isDebugEnabled(){
+  return localStorage.getItem("debugOverlay") === "true";
+}
 
+function updateDebugButton(){
+
+  const btn = document.getElementById("toggleDebug");
+  if(!btn) return;
+
+  const enabled = isDebugEnabled();
+
+  btn.textContent = enabled
+    ? "🐞 Debug ON"
+    : "🐞 Debug OFF";
+
+  btn.style.color = enabled ? "#0f0" : "#888";
+}
+
+document.getElementById("toggleDebug")?.addEventListener("click", () => {
+
+  const next = !isDebugEnabled();
+
+  localStorage.setItem("debugOverlay", next.toString());
+
+  updateDebugButton();
+
+  // 🔥 optional: direkt reload triggern
+  window.dispatchEvent(new StorageEvent("storage", {
+    key: "debugOverlay"
+  }));
+});
+
+// INIT
+updateDebugButton();
 // =====================
 // FILE UPLOAD
 // =====================
