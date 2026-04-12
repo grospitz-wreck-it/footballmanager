@@ -320,6 +320,90 @@ function loadEventTypes(){
 
 
 // =====================
+// 🎮 GAME EVENTS (NEU)
+// =====================
+
+async function saveGameEvent(){
+
+  const assets = await uploadFiles("game-events", qs("geMedia")?.files || []);
+
+  const payload = {
+    title: qs("geTitle")?.value,
+    type: qs("geType")?.value,
+    trigger: qs("geTrigger")?.value,
+    probability: Number(qs("geProbability")?.value || 0),
+    value: Number(qs("geValue")?.value || 0),
+    duration: Number(qs("geDuration")?.value || 0),
+    assets,
+    active: true
+  };
+
+  await supabase.from("game_events").insert(payload);
+
+  loadGameEvents();
+}
+
+async function loadGameEvents(){
+
+  const { data } = await supabase
+    .from("game_events")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  renderGameEvents(data || []);
+}
+
+function renderGameEvents(list){
+
+  state.gameEvents = list;
+
+  const container = qs("gameEventList");
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  list.forEach(e => {
+
+    const assets = e.assets || [];
+
+    const assetHTML = assets.map(a=>`
+      <div class="asset small">
+        ${
+          a.type==="video"
+          ? `<video src="${a?.url || ''}" muted></video>`
+          : `<img src="${a?.url || ''}">`
+        }
+      </div>
+    `).join("");
+
+    const div = document.createElement("div");
+    div.className = "eventRow";
+
+    div.innerHTML = `
+      <div>
+        <strong>${e.title}</strong><br>
+        🧠 ${e.type} | 🎯 ${e.trigger}<br>
+        ⚡ ${e.probability} | ⏳ ${e.duration}
+      </div>
+
+      <div class="assetRow">${assetHTML}</div>
+
+      <div>
+        <button data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+async function deleteGameEvent(id){
+  await supabase.from("game_events").delete().eq("id", id);
+  loadGameEvents();
+}
+
+
+// =====================
 // INLINE EVENT UPDATE
 // =====================
 async function saveInlineEvent(id){
