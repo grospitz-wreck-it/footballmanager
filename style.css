@@ -1031,98 +1031,28 @@ tr:hover {
   justify-content: center;
 }
 }
+
 /* =========================
-🏟️ AD SYSTEM (DROP-IN FIXED 320x100)
+🏟️ AD SYSTEM (CLEAN FINAL)
 ========================= */
 
-/* 👉 SLOT (IMMER GLEICH GROSS) */
 #adContainer {
   width: 100%;
-  max-width: 320px;
-
   height: 100px;
-  min-height: 100px;
-  max-height: 100px;
 
-  margin: 10px auto;
-
-  position: relative;
   overflow: hidden;
-
-  background: #020617;
-  border-radius: 10px;
-
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-}
-
-/* 👉 TRACK (BANDEN SYSTEM) */
-#adContainer .adTrack {
-  display: flex;
-  height: 100%;
-  width: 100%;
-
-  transition: transform 0.4s ease;
-}
-
-
-/* =========================
-🏟️ AD SYSTEM (FINAL STABLE)
-========================= */
-
-/* SLOT */
-#adContainer {
-  width: 100%;
-  height: 100px;
-
-  min-height: 100px;
-  max-height: 100px;
-
   margin: 10px 0;
 
-  position: relative;
-  overflow: hidden;
-
   background: #020617;
   border-radius: 10px;
-
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
-/* TRACK */
-#adContainer .adTrack {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.4s ease;
-}
-
-/* LINK */
-#adContainer .adItem a {
-  display: flex;                 /* 🔥 statt block */
-  width: 100%;
-  height: 100%;
-
-  align-items: center;
-  justify-content: center;
-}
-
-/* IMAGE (ULTRA STABIL FIX) */
 #adContainer .adItem img {
-  max-width: 100%;               /* 🔥 statt width */
-  max-height: 100%;              /* 🔥 statt height */
-
-  width: auto;                   /* 🔥 verhindert aufblasen */
-  height: auto;
-
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  display: block;
 }
 
-/* OPTIONAL TAP FEEDBACK */
-#adContainer:active img {
-  transform: scale(0.98);
-  transition: transform 0.15s ease;
-}
 
 /* SMALL DEVICES SAFETY */
 @media (max-width: 360px) {
