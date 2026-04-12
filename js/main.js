@@ -6,7 +6,7 @@ import { on } from "./core/events.js";
 import { EVENTS } from "./core/events.constants.js";
 import { initLeagueSelect, setLeagueById } from "./modules/league.js";
 import "./core/eventStore.js";
-
+import { loadPlayers } from "./loader.js";
 // =========================
 // 🔌 SUPABASE
 // =========================
@@ -242,7 +242,6 @@ async function init(){
 
   try {
 
-    import { loadPlayers } from "./loader.js";
 
 const players = await loadPlayers();
 window.playerPool = players;
