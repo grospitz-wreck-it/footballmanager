@@ -408,7 +408,7 @@ function renderPlayerDot(player){
 
   return `
     <div class="player-dot" data-id="${player.id}" data-tier="${player.tier}">
-      <img src="./gfx/dotpurple1.webp" />
+      <img src="./gfx/dotred.webp" />
       <span class="label">${initials}</span>
     </div>
   `;
