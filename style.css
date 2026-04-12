@@ -1124,3 +1124,12 @@ tr:hover {
     max-width: 320px;
   }
 }
+#adContainer {
+  width: 320px !important;
+  height: 100px !important;
+
+  min-height: 100px !important;
+  max-height: 100px !important;
+
+  overflow: hidden !important;
+}
