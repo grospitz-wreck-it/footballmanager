@@ -474,9 +474,11 @@ gameEvents.forEach(ev => {
 
   if(!ev.active) return;
 
-  if(ev.trigger === "always"){
+ if(ev.trigger === "always"){
+  if(live.minute % 5 === 0){ // 🔥 nur alle 5 Minuten
     applyGameEventEffect(ev, ctx);
   }
+}
 
   if(ev.trigger === "random"){
     if(Math.random() < (ev.probability || 0)){
