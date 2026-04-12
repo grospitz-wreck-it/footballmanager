@@ -1,306 +1,518 @@
+// =========================
+// 🖥 UI ENGINE (FULL + LIVE TABLE SAFE)
+// =========================
+import { game } from "../core/state.js";
+import { buildCommentary } from "../engine/commentaryEngine.js";
+import { renderLiveTable } from "../modules/table.js";
+import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
+// =========================
+// 🔒 INTERNAL
+// =========================
+let initialized = false;
+let lastRenderedEventId = null;
+let liveTableInterval = null;
 
-// ======================================
-// ⚽ PIXEL MANAGER RENDERER V5 (EXPLOSIVE)
-// ======================================
+// =========================
+// 🚀 INIT (EINMAL!)
+// =========================
+function initUI(){
 
-export function drawPlayer(ctx, rand, country, mood="neutral", quality=0.5, prompt=""){
+  if(initialized) return;
+  initialized = true;
 
-  const size = 64;
-  ctx.clearRect(0,0,size,size);
-  ctx.imageSmoothingEnabled = false;
+  console.log("🧱 UI init");
 
-  const cx = 32;
+  const burger = document.getElementById("burgerBtn");
+  const wrapper = document.getElementById("sidebarWrapper");
+  const overlay = document.getElementById("sidebarOverlay");
 
-  const dna = createDNA(rand, country, quality, prompt);
-
-  // BASE
-  drawHead(ctx, cx, dna);
-  drawEars(ctx, cx, dna);
-
-  // STYLE PASS
-  drawHair(ctx, cx, dna, rand);
-  drawEyes(ctx, cx, dna);
-  drawNose(ctx, cx, dna);
-  drawMouth(ctx, cx, dna, mood);
-
-  // DETAIL PASS
-  drawBeard(ctx, cx, dna);
-  drawAccessories(ctx, cx, dna);
-
-  // CHAOS PASS 🔥
-  if(rand() < quality){
-    applyMutation(ctx, rand);
+  if(!burger || !wrapper){
+    console.error("❌ Sidebar DOM fehlt");
+    return;
   }
 
-  drawBody(ctx, cx, country, rand, dna);
+  burger.addEventListener("click", () => {
+    game.ui.sidebarOpen = !game.ui.sidebarOpen;
+    applySidebar();
+  });
+
+  overlay?.addEventListener("click", () => {
+    game.ui.sidebarOpen = false;
+    applySidebar();
+  });
 }
 
+// =========================
+// 📂 SIDEBAR APPLY
+// =========================
+let lastSidebarState = null;
 
-// ======================================
-// 🧬 DNA (PROMPT DRIVEN)
-// ======================================
+function applySidebar(){
 
-function createDNA(rand, country, quality, prompt){
+  if(game.ui.sidebarOpen === lastSidebarState) return;
 
-  const type = pick(rand, ["warrior","mage","rogue","ranger","knight","priest"]);
+  lastSidebarState = game.ui.sidebarOpen;
 
-  const skinSet = pick(rand, SKIN_TONES);
+  const wrapper = document.getElementById("sidebarWrapper");
+  if(!wrapper) return;
 
-  let dna = {
-    skinLight: skinSet[0],
-    skinMid: skinSet[1],
-    skinDark: skinSet[2],
+  wrapper.classList.toggle("open", game.ui.sidebarOpen);
+}
 
-    hairColor: pick(rand, HAIR_COLORS),
-    eyeColor: pick(rand, EYE_COLORS),
+// =========================
+// 🔄 GLOBAL UI UPDATE
+// =========================
+function updateUI(){
 
-    hairStyle: pick(rand, ["crop","messy","flat","buzz","afro","receding"]),
-    hairHeight: 3 + Math.floor(rand()*6),
+  initUI();
 
-    beard: pick(rand, ["none","stubble","goatee","full","mustache"]),
+  applySidebar();
 
-    glasses: rand() < 0.1,
+  updateScore();
+  updateProgress();
+  updateEvents();
+  updateTabs();
 
-    headW: 14 + Math.floor(rand()*6),
-    headH: 18 + Math.floor(rand()*6),
-
-    eyeSpacing: 6 + Math.floor(rand()*4),
-    eyeY: 24 + Math.floor(rand()*3),
-
-    noseType: pick(rand, ["small","wide","long"]),
-
-    chaos: rand()
-  };
-
-  // ======================================
-  // 🧠 PROMPT INJECTION (CLIP STYLE)
-  // ======================================
-
-  if(prompt.includes("blond")) dna.hairColor = "#d6a77a";
-  if(prompt.includes("old")) dna.beard = "full";
-  if(prompt.includes("young")) dna.beard = "none";
-  if(prompt.includes("wizard")) dna.hairStyle = "messy";
-  if(prompt.includes("knight")) dna.hairStyle = "flat";
-  if(prompt.includes("rogue")) dna.eyeSpacing += 2;
-  if(prompt.includes("berserk")) dna.chaos = 1;
-
-  // QUALITY BOOST
-  if(rand() < quality){
-    dna.eyeSpacing += 1;
-    dna.headW += 1;
+  if(game.ui.tab === "table"){
+    renderLiveTable();
+    ensureLiveTableLoop();
   }
 
-  return dna;
-}
-
-
-// ======================================
-// 👤 HEAD
-// ======================================
-
-function drawHead(ctx, cx, dna){
-
-  const cy = 28;
-
-  for(let y=-dna.headH; y<=dna.headH; y++){
-
-    let t = y / dna.headH;
-    let w = Math.round(dna.headW * Math.sqrt(1 - t*t));
-
-    let color = dna.skinMid;
-
-    if(y < -dna.headH*0.3) color = dna.skinLight;
-    if(y > dna.headH*0.4) color = dna.skinDark;
-
-    ctx.fillStyle = color;
-    ctx.fillRect(cx - w, cy + y, w*2, 1);
+  if(game.ui.tab === "team"){
+    renderTeam();
   }
 }
 
+// =========================
+// ⚽ SCORE
+// =========================
+function updateScore(){
 
-// ======================================
-// 👂 EARS
-// ======================================
+  const match = game.match?.live;
+  if(!match) return;
 
-function drawEars(ctx, cx, dna){
-  drawEar(ctx, cx - dna.headW - 2, 28, 3, 5, dna);
-  drawEar(ctx, cx + dna.headW + 2 - 3, 28, 3, 5, dna);
-}
+  const scoreEl = document.getElementById("topScore");
+  const teamsEl = document.getElementById("topTeams");
+  const minuteEl = document.getElementById("topMinute");
 
-function drawEar(ctx, x, y, w, h, dna){
-  ctx.fillStyle = dna.skinMid;
-  ctx.fillRect(x, y, w, h);
-}
+  if(teamsEl){
+    const current = game.match?.current;
 
+    if(current){
+      const homeName =
+        current.homeName ||
+        (typeof current.home === "string"
+          ? current.home
+          : current.home?.name || current.home?.Team) ||
+        "-";
 
-// ======================================
-// 💇 HAIR
-// ======================================
+      const awayName =
+        current.awayName ||
+        (typeof current.away === "string"
+          ? current.away
+          : current.away?.name || current.away?.Team) ||
+        "-";
 
-function drawHair(ctx, cx, dna, rand){
-
-  ctx.fillStyle = dna.hairColor;
-
-  const top = 10;
-  const w = dna.headW + 2;
-
-  for(let y=0;y<dna.hairHeight;y++){
-    let width = w - Math.floor(y/2);
-
-    let jitter = Math.floor(rand()*3)-1;
-
-    ctx.fillRect(cx - width + jitter, top + y, width*2, 1);
-  }
-
-  // CHAOS HAIR 🔥
-  if(dna.chaos > 0.7){
-    ctx.fillRect(cx - w - 2, top+2, 3, 1);
-  }
-}
-
-
-// ======================================
-// 👁 EYES
-// ======================================
-
-function drawEyes(ctx, cx, dna){
-
-  const y = dna.eyeY;
-
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(cx - dna.eyeSpacing, y, 4, 3);
-  ctx.fillRect(cx + dna.eyeSpacing - 4, y, 4, 3);
-
-  ctx.fillStyle = dna.eyeColor;
-  ctx.fillRect(cx - dna.eyeSpacing + 1, y, 2, 2);
-  ctx.fillRect(cx + dna.eyeSpacing - 3, y, 2, 2);
-
-  ctx.fillStyle = "#000";
-  ctx.fillRect(cx - dna.eyeSpacing + 1, y, 1, 1);
-  ctx.fillRect(cx + dna.eyeSpacing - 3, y, 1, 1);
-}
-
-
-// ======================================
-// 👃 NOSE
-// ======================================
-
-function drawNose(ctx, cx, dna){
-  ctx.fillStyle = dna.skinDark;
-  ctx.fillRect(cx-1,30,2,2);
-}
-
-
-// ======================================
-// 👄 MOUTH
-// ======================================
-
-function drawMouth(ctx, cx, dna, mood){
-  ctx.fillStyle = "#300";
-
-  if(mood==="happy") ctx.fillRect(cx-5,38,10,2);
-  else ctx.fillRect(cx-3,38,6,1);
-}
-
-
-// ======================================
-// 🧔 BEARD
-// ======================================
-
-function drawBeard(ctx, cx, dna){
-  if(dna.beard==="none") return;
-
-  ctx.fillStyle = dna.hairColor;
-
-  for(let x=-dna.headW+4;x<dna.headW-4;x+=2){
-    ctx.fillRect(cx+x,36,1,1);
-  }
-}
-
-
-// ======================================
-// 👓 ACCESSORIES
-// ======================================
-
-function drawAccessories(ctx, cx, dna){
-
-  if(!dna.glasses) return;
-
-  ctx.strokeStyle="#000";
-  ctx.strokeRect(cx-12,dna.eyeY,8,6);
-  ctx.strokeRect(cx+4,dna.eyeY,8,6);
-}
-
-
-// ======================================
-// 💥 MUTATION SYSTEM (NEW)
-// ======================================
-
-function applyMutation(ctx, rand){
-
-  for(let i=0;i<20;i++){
-    if(rand()<0.3){
-      ctx.fillStyle = "rgba(0,0,0,0.2)";
-      ctx.fillRect(Math.floor(rand()*64), Math.floor(rand()*64), 1, 1);
+      teamsEl.textContent = `${homeName} vs ${awayName}`;
     }
   }
+
+  if(!scoreEl || !teamsEl || !minuteEl) return;
+
+  scoreEl.textContent = `${match.score?.home ?? 0} : ${match.score?.away ?? 0}`;
+  minuteEl.textContent = `${match.minute ?? 0}'`;
 }
 
+// =========================
+// ⏱ PROGRESS
+// =========================
+function updateProgress(){
 
-// ======================================
-// 👕 BODY
-// ======================================
+  const el = document.getElementById("progressFill");
+  if(!el) return;
 
-function drawBody(ctx, cx, country, rand, dna){
+  const minute = game.match?.live?.minute || 0;
+  const percent = Math.min((minute / 90) * 100, 100);
 
-  const y = 46;
+  el.style.width = percent + "%";
+}
 
-  const base = getColor(country);
-  const secondary = getSecondaryColor(country);
+// =========================
+// 📰 EVENTS
+// =========================
+function updateEvents(){
 
-  ctx.fillStyle = base;
-  ctx.fillRect(cx-20, y, 40, 16);
+  const container = document.getElementById("liveFeed");
+  if(!container) return;
 
-  if(rand()<0.5){
-    ctx.fillStyle = secondary;
-    ctx.fillRect(cx-3,y,6,16);
+  const events = game.events?.history;
+  if(!events || events.length === 0) return;
+
+  const newest = events[events.length - 1];
+
+  if(newest.id === lastRenderedEventId) return;
+  lastRenderedEventId = newest.id;
+
+  let text = newest.text;
+
+  if(!text){
+    try {
+      text = buildCommentary(newest);
+    } catch(e){}
   }
+
+  if(!text) return;
+
+  const div = document.createElement("div");
+
+  div.innerHTML = `
+    <span style="color:#888">${newest.minute}'</span> 
+    <span>${text}</span>
+  `;
+
+  container.appendChild(div);
+  
 }
 
+// =========================
+// 📊 TABS
+// =========================
+function updateTabs(){
 
-// ======================================
-// 🎨 DATA
-// ======================================
+  const tabs = document.querySelectorAll(".tab");
 
-const SKIN_TONES = [
-  ["#f6e0c9","#e9c2a6","#d9a07a"],
-  ["#c68642","#a86b33","#7c4a1f"]
-];
+  tabs.forEach(tab => {
 
-const HAIR_COLORS = [
-  "#1c1c1c","#6b4f3a","#d6a77a"
-];
+    const name = tab.dataset.tab;
 
-const EYE_COLORS = [
-  "#000","#2a2a5a","#1f3b2f"
-];
+    tab.classList.toggle("active", name === game.ui.tab);
 
-function pick(rand, arr){
-  return arr[Math.floor(rand()*arr.length)];
+    tab.onclick = () => {
+
+      game.ui.tab = name;
+
+      document.querySelectorAll(".tab-view").forEach(v => {
+        v.style.display = "none";
+      });
+
+      if(name === "table"){
+        document.getElementById("tableView").style.display = "block";
+      }
+
+      if(name === "schedule"){
+        document.getElementById("scheduleView").style.display = "block";
+      }
+
+      if(name === "team"){
+        document.getElementById("teamView").style.display = "block";
+      }
+
+      updateUI();
+    };
+  });
 }
 
-function getColor(code){
-  return {
-    DE:"#dd0000",
-    FR:"#0055A4",
-    BR:"#009C3B"
-  }[code] || "#888";
+// =========================
+// 🔥 LIVE TABLE LOOP
+// =========================
+function ensureLiveTableLoop(){
+
+  if(liveTableInterval) return;
+
+  liveTableInterval = setInterval(() => {
+
+    if(game.ui.tab !== "table") return;
+
+    renderLiveTable();
+
+  }, 1000);
 }
 
-function getSecondaryColor(code){
-  return {
-    DE:"#000",
-    FR:"#fff",
-    BR:"#ffdf00"
-  }[code] || "#222";
+// =========================
+// ⚽ FORMATIONS
+// =========================
+const FORMATIONS = {
+  "4-4-2": [
+    { role: "GK", top: "50%", left: "10%" },
+    { role: "DEF", top: "20%", left: "25%" },
+    { role: "DEF", top: "40%", left: "25%" },
+    { role: "DEF", top: "60%", left: "25%" },
+    { role: "DEF", top: "80%", left: "25%" },
+    { role: "MID", top: "20%", left: "50%" },
+    { role: "MID", top: "40%", left: "50%" },
+    { role: "MID", top: "60%", left: "50%" },
+    { role: "MID", top: "80%", left: "50%" },
+    { role: "ST", top: "40%", left: "75%" },
+    { role: "ST", top: "60%", left: "75%" }
+  ],
+
+  "4-3-3": [
+    { role: "GK", top: "50%", left: "10%" },
+    { role: "DEF", top: "20%", left: "25%" },
+    { role: "DEF", top: "40%", left: "25%" },
+    { role: "DEF", top: "60%", left: "25%" },
+    { role: "DEF", top: "80%", left: "25%" },
+    { role: "MID", top: "30%", left: "50%" },
+    { role: "MID", top: "50%", left: "50%" },
+    { role: "MID", top: "70%", left: "50%" },
+    { role: "ST", top: "20%", left: "75%" },
+    { role: "ST", top: "50%", left: "75%" },
+    { role: "ST", top: "80%", left: "75%" }
+  ]
+};
+
+// =========================
+// 🧠 ROLE PICKER
+// =========================
+function pickPlayer(role, byType){
+
+  if(byType[role]?.length){
+    return byType[role].shift();
+  }
+
+  return (
+    byType.GK.shift() ||
+    byType.DEF.shift() ||
+    byType.MID.shift() ||
+    byType.ST.shift()
+  );
 }
+
+// =========================
+// ⚽ TEAM
+// =========================
+function renderTeam(){
+
+  const container = document.getElementById("teamView");
+  if(!container) return;
+
+  const teamId = game.team?.selectedId;
+
+  const players = (game.players || []).filter(p => 
+    String(p.team_id) === String(teamId)
+  );
+
+  if(!players.length){
+    container.innerHTML = "<p>Keine Spieler vorhanden</p>";
+    return;
+  }
+
+  const byType = { GK: [], DEF: [], MID: [], ST: [] };
+
+  players.forEach(p => {
+    const type = p.position_type || "MID";
+    (byType[type] || byType.MID).push(p);
+  });
+
+  // Sortieren
+  Object.values(byType).forEach(arr => {
+    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+  });
+
+  const starters = [
+    ...byType.GK.slice(0,1),
+    ...byType.DEF.slice(0,4),
+    ...byType.MID.slice(0,4),
+    ...byType.ST.slice(0,2)
+  ];
+
+  const bench = players.filter(p => !starters.includes(p));
+
+  const formation = game.team?.formation || "4-4-2";
+  const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+
+  const pool = {
+    GK: [...byType.GK],
+    DEF: [...byType.DEF],
+    MID: [...byType.MID],
+    ST: [...byType.ST]
+  };
+
+  let html = `
+    <h3>Starting XI</h3>
+    <div class="team-field">
+  `;
+
+  layout.forEach(slot => {
+
+    const player = pickPlayer(slot.role, pool);
+    if(!player) return;
+
+    html += `
+      <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
+        ${renderPlayerDot(player)}
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  // Bench
+  html += `<h3>Bench</h3>`;
+
+  const benchByType = { GK: [], DEF: [], MID: [], ST: [] };
+
+  bench.forEach(p => {
+    const type = p.position_type || "MID";
+    (benchByType[type] || benchByType.MID).push(p);
+  });
+
+  Object.values(benchByType).forEach(arr => {
+    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+  });
+
+  html += `<div class="bench-container">`;
+
+  Object.entries(benchByType).forEach(([role, players]) => {
+
+    if(players.length === 0) return;
+
+    html += `
+      <div class="bench-group">
+        <div class="bench-title">${role}</div>
+        <div class="bench-row">
+    `;
+
+    players.forEach(p => {
+      html += renderPlayerDot(p);
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  container.innerHTML = html;
+
+  // Clicks
+  document.querySelectorAll(".player-dot").forEach(el => {
+    el.onclick = () => {
+      const id = el.dataset.id;
+      const player = game.players.find(p => String(p.id) === String(id));
+      if(player) openPlayerModal(player);
+    };
+  });
+}
+
+// =========================
+// 🔵 PLAYER DOT
+// =========================
+function renderPlayerDot(player){
+
+  const initials =
+    (player.first_name?.[0] || "") +
+    (player.last_name?.[0] || "");
+
+  return `
+    <div class="player-dot" data-id="${player.id}" data-tier="${player.tier}">
+      <img src="./gfx/dotpurple1.webp" />
+      <span class="label">${initials}</span>
+    </div>
+  `;
+}
+
+// =========================
+// 📊 STATS
+// =========================
+function renderStat(label, value){
+
+  const v = value ?? 0;
+
+  return `
+    <div class="stat-row">
+      <span>${label}</span>
+      <div class="stat-bar">
+        <div class="fill" style="width:${v}%"></div>
+      </div>
+      <span>${v}</span>
+    </div>
+  `;
+}
+
+function openPlayerModal(player){
+
+  const existing = document.getElementById("playerModal");
+  if(existing) existing.remove();
+
+  const div = document.createElement("div");
+  div.id = "playerModal";
+
+  div.innerHTML = `
+    <div class="modal-overlay">
+      <div 
+        class="player-modal" 
+        data-tier="${player.tier || 'common'}"
+        data-stars="${player.stars || 1}"
+      >
+
+        <button class="close-btn">✕</button>
+
+        <div class="card-top">
+          <div class="rating">${player.overall ?? 0}</div>
+          <div class="stars-top">
+            <img src="./gfx/modal/star${player.stars}.webp" />
+          </div>
+        </div>
+
+        <div class="card-player">
+          <canvas id="player-avatar" width="64" height="64"></canvas>
+        </div>
+
+        <div class="card-name">${player.name}</div>
+
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(div);
+
+  // 🎯 MOOD SYSTEM
+  const mood =
+    (player.morale ?? 50) > 80 ? "happy" :
+    (player.morale ?? 50) < 40 ? "angry" :
+    (player.fitness ?? 100) < 50 ? "tired" :
+    "neutral";
+
+  // 🎨 Avatar rendern
+  const canvas = div.querySelector("#player-avatar");
+  const ctx = canvas.getContext("2d");
+
+  const texture = getPlayerTexture(
+    player.id,
+    player.nationality || player.Country || "DE",
+    mood
+  );
+
+  ctx.clearRect(0,0,64,64);
+  ctx.drawImage(texture, 0, 0);
+
+  // ❌ Close logic
+  const overlay = div.querySelector(".modal-overlay");
+  const closeBtn = div.querySelector(".close-btn");
+
+  closeBtn.onclick = () => div.remove();
+
+  overlay.onclick = (e) => {
+    if(e.target === overlay) div.remove();
+  };
+}
+
+// =========================
+// 📦 EXPORTS
+// =========================
+function renderCurrentMatch(){
+  console.log("⚽ renderCurrentMatch");
+}
+
+function renderSchedule(){
+  console.log("📅 renderSchedule");
+}
+
+export {
+  updateUI,
+  renderSchedule,
+  renderCurrentMatch
+};
