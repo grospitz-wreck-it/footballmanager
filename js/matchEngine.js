@@ -307,7 +307,7 @@ function createShot(ctx){
   outcome: EVENT_OUTCOMES.SUCCESS,
 
   // 🔥 WICHTIG: DAMIT WEBP KOMMT
-  assets: getGoalAssets?.() || []
+  assets: getGoalAssets()
 });
 
     return;
