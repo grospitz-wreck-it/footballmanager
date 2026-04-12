@@ -99,6 +99,7 @@ function applyGameEventEffect(event, ctx){
 
     const player = getRandomPlayer(teamId);
 
+    // 🔥 SCORE UPDATE
     if(isHome){
       game.match.live.score.home++;
       game.match.score.home++;
@@ -107,14 +108,24 @@ function applyGameEventEffect(event, ctx){
       game.match.score.away++;
     }
 
+    // 🔥 TEXT + ASSETS aus Admin übernehmen
     emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
       playerId: player?.id,
-      outcome: EVENT_OUTCOMES.SUCCESS
+      outcome: EVENT_OUTCOMES.SUCCESS,
+
+      // 👉 Text kommt jetzt aus deinem Admin Event
+      text: event.title || "⚽ Tor!",
+
+      // 👉 WEBP / Images
+      assets: event.assets || [],
+
+      // 👉 optional für später
+      eventId: event.id,
+      eventType: event.type
     });
   }
 }
-
 // =========================
 // 👥 PLAYER ACCESS
 // =========================
