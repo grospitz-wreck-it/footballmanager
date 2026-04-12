@@ -31,13 +31,54 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
   const skin = pick(rand, ["#f6d2be","#eac39b","#c68642","#8d5524"]);
   const hair = pick(rand, ["#1c1c1c","#3b2f2f","#6b4f3a","#d6a77a"]);
 
-  // =========================
-  // 👤 HEAD
-  // =========================
-  bctx.fillStyle = skin;
-  bctx.beginPath();
-  bctx.ellipse(cx, cy, 70, 90, 0, 0, Math.PI*2);
-  bctx.fill();
+// =========================
+// 👤 HEAD (HYBRID SYSTEM)
+// =========================
+
+const headTypes = [
+  { w: 65, h: 95 },   // lang
+  { w: 75, h: 85 },   // normal
+  { w: 85, h: 80 },   // breit
+  { w: 70, h: 70 }    // rund
+];
+
+const head = pick(rand, headTypes);
+
+drawHead(bctx, pts, cx, cy, head, skin);
+
+function drawHead(ctx, pts, cx, cy, head, skin){
+
+  ctx.fillStyle = skin;
+  ctx.beginPath();
+
+  // 👉 Start links unten (Kiefer)
+  ctx.moveTo(pts[0][0], pts[0][1]);
+
+  // 👉 echte Kieferlinie
+  for(let i=1;i<=16;i++){
+    ctx.lineTo(pts[i][0], pts[i][1]);
+  }
+
+  // 👉 rechte Seite hoch (zum Schädel)
+  ctx.quadraticCurveTo(
+    cx + head.w,
+    cy - head.h,
+    cx,
+    cy - head.h
+  );
+
+  // 👉 obere Rundung
+  ctx.quadraticCurveTo(
+    cx - head.w,
+    cy - head.h,
+    pts[0][0],
+    pts[0][1]
+  );
+
+  ctx.closePath();
+  ctx.fill();
+}
+
 
   // =========================
   // 💇 HAIR (moved BEFORE face details)
