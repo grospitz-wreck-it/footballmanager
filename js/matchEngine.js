@@ -468,8 +468,8 @@ function runMatchLoop({ onTick, onEnd } = {}){
       // =========================
 // 🎮 GAME EVENTS TRIGGER
 // =========================
-const gameEvents = game.data?.gameEvents || [];
-
+const gameEvents = game.data?.gameEvents;
+if(!Array.isArray(gameEvents)) return;
 gameEvents.forEach(ev => {
 
   if(!ev.active) return;
