@@ -457,7 +457,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
   const STEP = 400;
 
   matchInterval = setInterval(() => {
-
+  console.log("⏱ TICK", game.match?.live?.minute);
     const now = performance.now();
     const delta = now - lastTime;
     lastTime = now;
@@ -487,31 +487,34 @@ function runMatchLoop({ onTick, onEnd } = {}){
 // 🎮 GAME EVENTS TRIGGER
 // =========================
 const gameEvents = game.data?.gameEvents;
-if(!Array.isArray(gameEvents)) return;
-gameEvents.forEach(ev => {
 
-  if(!ev.active) return;
+if(Array.isArray(gameEvents)){
+  gameEvents.forEach(ev => {
 
- if(ev.trigger === "always"){
-  if(live.minute % 5 === 0){ // 🔥 nur alle 5 Minuten
-    applyGameEventEffect(ev, ctx);
-  }
+    if(!ev.active) return;
+
+    if(ev.trigger === "always"){
+      if(live.minute % 5 === 0){
+        applyGameEventEffect(ev, ctx);
+      }
+    }
+
+    if(ev._lastTrigger === undefined){
+      ev._lastTrigger = -999;
+    }
+
+    if(ev.trigger === "random"){
+      if(
+        live.minute - ev._lastTrigger > 1 &&
+        Math.random() < (ev.probability || 0)
+      ){
+        ev._lastTrigger = live.minute;
+        applyGameEventEffect(ev, ctx);
+      }
+    }
+
+  });
 }
-
-if(ev._lastTrigger === undefined){
-  ev._lastTrigger = -999;
-}
-if(ev.trigger === "random"){
-  if(
-    live.minute - ev._lastTrigger > 1 && // 🔥 cooldown 1 Minuten
-    Math.random() < (ev.probability || 0)
-  ){
-    ev._lastTrigger = live.minute;
-    applyGameEventEffect(ev, ctx);
-  }
-}
-
-});
       
       if(live.minute === 45 && live.phase === "first_half"){
         live.phase = "halftime";
