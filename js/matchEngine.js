@@ -412,7 +412,8 @@ function resumeMatch(){
 // 🤖 OTHER MATCHES
 // =========================
 function simulateOtherMatches(round){
-
+  const gameEvents = game.data?.gameEvents;
+if(!Array.isArray(gameEvents)) return;
   round.forEach(match => {
 
     if(isMyMatch(match)) return;
