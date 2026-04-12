@@ -27,6 +27,8 @@ async function loadCampaigns() {
       .select("*")
       .eq("active", true);
 
+    console.log("📦 SUPABASE DATA:", data);
+
     if (error) {
       console.error("❌ Supabase Fehler:", error);
       campaignsCache = [];
@@ -34,6 +36,8 @@ async function loadCampaigns() {
     }
 
     campaignsCache = data || [];
+
+    console.log("✅ campaignsCache gesetzt:", campaignsCache);
 
   } catch (e) {
     console.error("❌ Load Fehler:", e);
