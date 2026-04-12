@@ -1118,3 +1118,9 @@ tr:hover {
   transform: scale(0.98);
   transition: transform 0.15s ease;
 }
+@media (max-width: 360px) {
+  #adContainer {
+    width: 100%;
+    max-width: 320px;
+  }
+}
