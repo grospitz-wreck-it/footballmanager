@@ -440,6 +440,21 @@ state.inlineEventEditId = null;
 loadEvents();
 }
 
+async function saveInlineGameEvent(id){
+
+  const row = document.querySelector(`[data-id="${id}"]`);
+  if(!row) return;
+
+  const payload = {
+    title: row.querySelector("[data-field='title']").value
+  };
+
+  await supabase.from("game_events").update(payload).eq("id", id);
+
+  state.inlineGameEventEditId = null;
+  loadGameEvents();
+}
+
 // =====================
 // LOAD EVENTS
 // =====================
