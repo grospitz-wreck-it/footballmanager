@@ -453,7 +453,7 @@ function openPlayerModal(player){
         <div class="card-top">
           <div class="rating">${player.overall ?? 0}</div>
           <div class="stars-top">
-            <img src="/gfx/modal/star${player.stars || 1}.webp" />
+            <img src="./gfx/modal/star${player.stars}.webp" />
           </div>
         </div>
 
