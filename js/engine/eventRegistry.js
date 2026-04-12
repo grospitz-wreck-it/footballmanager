@@ -8,9 +8,7 @@ export const EVENT_REGISTRY = {
     id: "goal",
     label: "Tor",
     duration: 0,
-    effect: (ctx) => {
-      ctx.applyGoal();
-    }
+    effect: "goal" // 🔥 FIX: keine function mehr
   },
 
   foul: {
