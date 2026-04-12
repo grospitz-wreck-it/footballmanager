@@ -12,76 +12,67 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   const hair = pick(rand, ["#2b2b2b","#5a3a2e","#d6a77a"]);
 
-  const faceType = pick(rand, FACE_SHAPES);
-  const eyes     = pick(rand, EYES);
-  const mouth    = pick(rand, MOUTHS);
-  const brows    = pick(rand, BROWS);
+  const face = pick(rand, FACE_SHAPES);
+  const eyes = pick(rand, EYES);
+  const mouth = pick(rand, MOUTHS);
+  const brows = pick(rand, BROWS);
 
-  drawFaceBase(ctx, faceType, skin);
+  face(ctx, skin);
   drawHair(ctx, hair);
-  drawFeature(ctx, eyes, 26, 30);
-  drawFeature(ctx, eyes, 38, 30);
-  drawFeature(ctx, brows, 26, 26);
-  drawFeature(ctx, brows, 38, 26);
-  drawFeature(ctx, mouth, 30, 42);
+
+  drawFeature(ctx, eyes, 24, 30);
+  drawFeature(ctx, eyes, 36, 30);
+
+  drawFeature(ctx, brows, 24, 26);
+  drawFeature(ctx, brows, 36, 26);
+
+  drawFeature(ctx, mouth, 28, 42);
 
   drawBody(ctx, country);
 }
 
 
 // =========================
-// 🎨 FACE BASES
+// 👤 FACE BASES
 // =========================
 const FACE_SHAPES = [
-
-  // round
-  (ctx, skin) => {
-    drawEllipse(ctx,32,30,14,18,skin);
-  },
-
-  // narrow
-  (ctx, skin) => {
-    drawEllipse(ctx,32,30,12,18,skin);
-  },
-
-  // wide
-  (ctx, skin) => {
-    drawEllipse(ctx,32,30,16,18,skin);
-  }
+  (ctx, skin) => drawEllipse(ctx,32,30,14,18,skin),
+  (ctx, skin) => drawEllipse(ctx,32,30,12,18,skin),
+  (ctx, skin) => drawEllipse(ctx,32,30,16,18,skin)
 ];
 
 
 // =========================
-// 👁 EYES
+// 👁 EYES (BIG UPGRADE)
 // =========================
 const EYES = [
 
   // normal
   [
-    [1,1],
-    [1,0]
-  ],
-
-  // big
-  [
-    [1,1,1],
-    [1,0,1]
-  ],
-
-  // sleepy
-  [
-    [1,1,1]
+    "01110",
+    "11111",
+    "01110"
   ],
 
   // sharp
   [
-    [0,1,1],
-    [1,1,0]
+    "00111",
+    "11110",
+    "00111"
   ],
 
-  // tiny
+  // tired
   [
-    [1]
+    "11111",
+    "00000",
+    "11111"
+  ],
+
+  // wide
+  [
+    "11111",
+    "10101",
+    "11111"
   ]
 ];
 
@@ -93,30 +84,25 @@ const MOUTHS = [
 
   // smile
   [
-    [1,0,1],
-    [0,1,0]
+    "10001",
+    "01110"
   ],
 
   // neutral
   [
-    [1,1]
+    "11111"
   ],
 
   // sad
   [
-    [0,1,0],
-    [1,0,1]
+    "01110",
+    "10001"
   ],
 
   // open
   [
-    [1,1],
-    [1,1]
-  ],
-
-  // smirk
-  [
-    [1,1,0]
+    "01110",
+    "01110"
   ]
 ];
 
@@ -127,33 +113,33 @@ const MOUTHS = [
 const BROWS = [
 
   [
-    [1,1,1]
+    "11111"
   ],
 
   [
-    [1,1,0]
+    "11100"
   ],
 
   [
-    [0,1,1]
+    "00111"
   ],
 
   [
-    [1,0,1]
+    "10101"
   ]
 ];
 
 
 // =========================
-// 🧠 RENDER
+// 🎨 RENDER FEATURE
 // =========================
 function drawFeature(ctx, pattern, ox, oy){
 
   for(let y=0;y<pattern.length;y++){
     for(let x=0;x<pattern[y].length;x++){
 
-      if(pattern[y][x]){
-        px(ctx, ox + x, oy + y, "#000");
+      if(pattern[y][x] === "1"){
+        px(ctx, ox + x, oy + y, "#111");
       }
     }
   }
@@ -161,12 +147,8 @@ function drawFeature(ctx, pattern, ox, oy){
 
 
 // =========================
-// 👤 FACE BASE RENDER
+// 👤 FACE BASE
 // =========================
-function drawFaceBase(ctx, fn, skin){
-  fn(ctx, skin);
-}
-
 function drawEllipse(ctx,cx,cy,rx,ry,skin){
 
   const [l,m,d] = skin;
