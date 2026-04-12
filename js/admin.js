@@ -518,9 +518,10 @@ function switchTab(tab){
 document.querySelectorAll(".tabContent").forEach(t => t.classList.remove("active"));
 document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
 
-if(tab === "ads"){
-qs("adsTab").classList.add("active");
-qs("tabAds").classList.add("active");
+if(tab === "game"){
+  qs("gameEventsTab")?.classList.add("active");
+  qs("tabGameEvents")?.classList.add("active");
+  loadGameEvents();
 }
 
 if(tab === "events"){
