@@ -10,38 +10,41 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
     ["#c68642","#a47138","#7f5a2f","#5a3c22"]
   ]);
 
-  const hair = pick(rand, ["#2b2b2b","#5a3a2e","#d6a77a"]);
+  const hair = pick(rand, ["#2b2b2b","#5a3a2e","#d6a77a","#915c3a"]);
 
-  // 🔥 VARIATION DNA
+  // 🎲 DNA
   const faceType = Math.floor(rand()*3);
-  const eyeOffset = Math.floor(rand()*5) - 2;     // -2 bis +2
-  const eyeHeight = Math.floor(rand()*3) - 1;     // -1 bis +1
-  const mouthWidth = 6 + Math.floor(rand()*4);    // 6–9
-  const mouthOffset = Math.floor(rand()*3);       // asymmetry
+  const eyeOffset = Math.floor(rand()*5) - 2;
+  const eyeHeight = Math.floor(rand()*3) - 1;
   const eyeType = Math.floor(rand()*3);
+  const mouthWidth = 6 + Math.floor(rand()*4);
+  const beard = rand() > 0.6;
+  const glasses = rand() > 0.7;
+  const hairType = Math.floor(rand()*3);
 
   drawFace(ctx, skin, faceType);
-  drawHair(ctx, hair);
+  drawHair(ctx, hair, hairType);
 
-  // 👁 unterschiedliche Position!
   drawEye(ctx, 24 + eyeOffset, 26 + eyeHeight, mood, eyeType);
   drawEye(ctx, 40 - eyeOffset, 26 + eyeHeight, mood, eyeType);
 
   drawBrows(ctx, mood, eyeOffset, eyeHeight);
   drawNose(ctx, skin);
-  drawMouth(ctx, mood, mouthWidth, mouthOffset);
+  drawMouth(ctx, mood, mouthWidth);
+
+  if(beard) drawBeard(ctx, hair);
+  if(glasses) drawGlasses(ctx, eyeOffset, eyeHeight);
 
   drawBody(ctx, country);
 }
 
 
 // =========================
-// 👤 FACE (VARIANTS)
+// 👤 FACE
 // =========================
 function drawFace(ctx, skin, type){
 
   const [hl, l, m, d] = skin;
-
   const width = [18, 22, 20][type];
   const jaw   = [0.6, 0.9, 0.4][type];
 
@@ -54,14 +57,12 @@ function drawFace(ctx, skin, type){
       if(dx*dx + dy*dy > 1) continue;
 
       let col = m;
-
       let light = (-dx*0.6) + (-dy*0.8);
 
       if(light > 0.4) col = hl;
       else if(light > 0.1) col = l;
       else if(light < -0.4) col = d;
 
-      // jaw variation
       if(dy > 0.5 && Math.abs(dx) > jaw){
         col = d;
       }
@@ -73,27 +74,47 @@ function drawFace(ctx, skin, type){
 
 
 // =========================
-// 👁 EYES (VARIANTS)
+// 💇 HAIR (VARIANTS)
+// =========================
+function drawHair(ctx, hair, type){
+
+  if(type === 0){
+    fill(ctx,14,8,36,10,hair); // short
+  }
+
+  if(type === 1){
+    fill(ctx,14,8,36,12,hair);
+    fill(ctx,14,20,8,16,hair); // side
+  }
+
+  if(type === 2){
+    fill(ctx,14,8,36,14,hair);
+    fill(ctx,14,20,10,20,hair);
+    fill(ctx,40,20,10,20,hair); // long
+  }
+}
+
+
+// =========================
+// 👁 EYE
 // =========================
 function drawEye(ctx, cx, cy, mood, type){
 
-  const sizes = [3,4,2];
-  const s = sizes[type];
+  const size = [3,4,2][type];
 
-  for(let x=-s;x<=s;x++){
+  for(let x=-size;x<=size;x++){
     px(ctx,cx+x,cy,"#fff");
   }
 
   px(ctx,cx,cy,"#000");
   px(ctx,cx+1,cy,"#fff");
 
-  // lid
-  for(let x=-s;x<=s;x++){
+  for(let x=-size;x<=size;x++){
     px(ctx,cx+x,cy-1,"#000");
   }
 
   if(mood==="tired"){
-    for(let x=-s;x<=s;x++){
+    for(let x=-size;x<=size;x++){
       px(ctx,cx+x,cy+1,"#555");
     }
   }
@@ -130,7 +151,6 @@ function drawNose(ctx, skin){
 
   px(ctx,31,32,l);
   px(ctx,31,33,hl);
-
   px(ctx,33,34,d);
 
   px(ctx,31,38,d);
@@ -139,15 +159,15 @@ function drawNose(ctx, skin){
 
 
 // =========================
-// 👄 MOUTH (VARIANTS)
+// 👄 MOUTH
 // =========================
-function drawMouth(ctx, mood, width, offset){
+function drawMouth(ctx, mood, width){
 
   const start = 32 - Math.floor(width/2);
 
   if(mood==="happy"){
     for(let i=0;i<width;i++){
-      px(ctx,start+i,46 + (i===offset?1:0),"#722");
+      px(ctx,start+i,46,"#722");
     }
   }
 
@@ -162,21 +182,32 @@ function drawMouth(ctx, mood, width, offset){
 
 
 // =========================
-// 💇 HAIR
+// 🧔 BEARD
 // =========================
-function drawHair(ctx, hair){
+function drawBeard(ctx, hair){
 
-  for(let y=6;y<26;y++){
-    for(let x=12;x<52;x++){
-
-      let dx = (x-32)/20;
-      let dy = (y-20)/14;
-
-      if(dx*dx + dy*dy < 1){
+  for(let y=40;y<52;y++){
+    for(let x=22;x<42;x++){
+      if((x+y)%2===0){
         px(ctx,x,y,hair);
       }
     }
   }
+}
+
+
+// =========================
+// 🤓 GLASSES
+// =========================
+function drawGlasses(ctx, offset, height){
+
+  const y = 26 + height;
+
+  line(ctx,21 + offset,y,8,"#000");
+  line(ctx,35 - offset,y,8,"#000");
+
+  px(ctx,29,y,"#000");
+  px(ctx,30,y,"#000");
 }
 
 
