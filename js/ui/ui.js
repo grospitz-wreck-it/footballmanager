@@ -432,99 +432,285 @@ function renderStat(label, value){
   `;
 }
 
-// =========================
-// 🪟 PLAYER MODAL
-// =========================
-function renderStars(count = 1){
-  const safe = Math.max(1, Math.min(count, 5));
+/* =========================
+🪟 MODAL LAYER
+========================= */
 
-  return `
-    <div class="stars">
-      <img src="/gfx/modal/star${safe}.webp" alt="${safe} stars" />
-    </div>
-  `;
+#playerModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
 }
 
-function openPlayerModal(player){
+.modal-overlay {
+  position: absolute;
+  inset: 0;
 
-  const existing = document.getElementById("playerModal");
-  if(existing) existing.remove();
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
 
-  const div = document.createElement("div");
-  div.id = "playerModal";
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  div.innerHTML = `
-    <div class="modal-overlay">
-      <div 
-        class="player-modal fifa-card" 
-        data-tier="${player.tier || 'common'}"
-        data-stars="${player.stars || 1}"
-      >
+  animation: fadeIn 0.2s ease;
+}
 
-        <!-- ❌ CLOSE -->
-        <button class="close-btn">✕</button>
 
-        <!-- 🔝 TOP -->
-        <div class="card-top">
-          <div class="rating">${player.overall ?? 0}</div>
-          <div class="stars-top">
-            <img src="/gfx/modal/star${player.stars || 1}.webp" />
-          </div>
-        </div>
+/* =========================
+🎴 PLAYER CARD (FINAL)
+========================= */
 
-        <!-- 👤 PLAYER -->
-        <div class="card-player">
-          <canvas id="player-avatar" width="96" height="96"></canvas>
-        </div>
+.player-modal {
+  width: 260px;
+  max-width: 90%;
 
-        <!-- 📛 NAME -->
-        <div class="card-name">${player.name}</div>
+  border-radius: 22px;
+  padding: 16px;
 
-        <!-- 📊 STATS -->
-        <div class="card-stats">
-          ${renderStat("SHO", player.shooting)}
-          ${renderStat("PAS", player.passing)}
-          ${renderStat("DEF", player.defending)}
-        </div>
+  position: relative;
+  overflow: hidden;
 
-      </div>
-    </div>
-  `;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 
-  document.body.appendChild(div);
+  color: white;
 
-  // =========================
-  // 🎨 RENDER AVATAR
-  // =========================
-  const canvas = div.querySelector("#player-avatar");
-  const ctx = canvas.getContext("2d");
+  /* BASE */
+  background: linear-gradient(160deg, #111A2B, #0B1220);
 
-  const texture = getPlayerTexture(
-    player.id,
-    player.nationality || player.Country || "DE"
+  /* 🔥 STRUCTURE */
+  background-image:
+    linear-gradient(160deg, rgba(255,255,255,0.05), transparent),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+
+  /* 🔥 DEPTH */
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.9),
+    0 0 0 1px rgba(255,255,255,0.05),
+    inset 0 0 30px rgba(255,255,255,0.05);
+
+  /* 🎮 ENTRY */
+  transform: scale(0.85) translateY(30px);
+  opacity: 0;
+  animation: modalIn 0.25s ease forwards;
+
+  /* FX */
+  --glow: rgba(34,197,94,0.25);
+  --shine: rgba(255,255,255,0.2);
+}
+
+
+/* =========================
+✨ SHINE ANIMATION
+========================= */
+
+.player-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    var(--shine) 50%,
+    transparent 80%
   );
 
-  if(player.overall > 80){
-    ctx.shadowColor = "gold";
-    ctx.shadowBlur = 10;
+  opacity: 0.25;
+  pointer-events: none;
+
+  animation: shineMove 4s linear infinite;
+}
+
+
+/* =========================
+🔥 GLOW BORDER
+========================= */
+
+.player-modal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+
+  box-shadow:
+    0 0 0 2px var(--glow),
+    0 0 60px var(--glow);
+
+  pointer-events: none;
+}
+
+
+/* =========================
+🏆 TOP BAR
+========================= */
+
+.card-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-right: 28px; /* Platz für X */
+}
+
+.rating {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.stars-top img {
+  height: 20px;
+}
+
+
+/* =========================
+👤 PLAYER
+========================= */
+
+.card-player {
+  display: flex;
+  justify-content: center;
+}
+
+#player-avatar {
+  width: 96px;
+  height: 96px;
+
+  image-rendering: pixelated;
+
+  filter:
+    drop-shadow(0 10px 20px rgba(0,0,0,0.8))
+    contrast(1.1);
+}
+
+
+/* =========================
+📛 NAME
+========================= */
+
+.card-name {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+
+/* =========================
+📊 STATS
+========================= */
+
+.card-stats {
+  width: 100%;
+}
+
+
+/* =========================
+❌ CLOSE BUTTON (FIXED)
+========================= */
+
+.close-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 26px;
+  height: 26px;
+
+  border-radius: 50%;
+  border: none;
+
+  background: rgba(0,0,0,0.6);
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  z-index: 5;
+
+  transition: 
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+
+/* =========================
+🎨 TIERS
+========================= */
+
+.player-modal[data-tier="common"] {
+  --glow: rgba(107,114,128,0.4);
+}
+
+.player-modal[data-tier="rare"] {
+  --glow: rgba(59,130,246,0.5);
+}
+
+.player-modal[data-tier="epic"] {
+  --glow: rgba(139,92,246,0.6);
+}
+
+.player-modal[data-tier="legend"] {
+  --glow: rgba(251,191,36,0.9);
+
+  background:
+    linear-gradient(160deg, #3b2f00, #1a1200),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,215,0,0.08) 0px,
+      rgba(255,215,0,0.08) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+}
+
+
+/* =========================
+⭐ STAR BOOST
+========================= */
+
+.player-modal[data-stars="5"] {
+  transform: scale(1.05);
+}
+
+
+/* =========================
+🎬 ANIMATIONS
+========================= */
+
+@keyframes modalIn {
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
   }
+}
 
-  ctx.drawImage(texture, 0, 0, 96, 96);
-  ctx.shadowBlur = 0;
-
-  // =========================
-  // ❌ CLOSE LOGIC (FIXED)
-  // =========================
-  const overlay = div.querySelector(".modal-overlay");
-  const closeBtn = div.querySelector(".close-btn");
-
-  closeBtn.onclick = () => div.remove();
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target.classList.contains("modal-overlay")) {
-      div.remove();
-    }
-  });
+@keyframes shineMove {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(120%); }
 }
 
 // =========================
