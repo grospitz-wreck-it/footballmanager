@@ -3,151 +3,111 @@ export function drawPlayer(ctx, rand, country){
   ctx.clearRect(0, 0, 64, 64);
   ctx.imageSmoothingEnabled = false;
 
-  // =========================
-  // 🎨 PALETTES
-  // =========================
-  const skinTones = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524'];
-  const hairColors = ['#2c1b18', '#3b2f2f', '#000000', '#d2b48c', '#915c3a'];
-  const eyeColors = ['#000', '#222', '#444'];
+  const skin = pick(rand, ['#f1c27d','#e0ac69','#c68642','#8d5524']);
+  const hair = pick(rand, ['#2c1b18','#3b2f2f','#000','#d2b48c','#915c3a']);
 
-  const skin = pick(rand, skinTones);
-  const hair = pick(rand, hairColors);
-  const eyes = pick(rand, eyeColors);
-
-  const shadow = darken(skin);
-  const highlight = lighten(skin);
-
-  // =========================
-  // 👤 HEAD BASE
-  // =========================
-  fill(ctx, 20, 12, 24, 28, skin);
-
-  // Shading links/rechts
-  fill(ctx, 20, 12, 3, 28, shadow);
-  fill(ctx, 41, 12, 3, 28, shadow);
-
-  // Highlight oben
-  fill(ctx, 22, 12, 20, 2, highlight);
-
-  // =========================
-  // 💇 HAIR
-  // =========================
-  const hairType = Math.floor(rand() * 5);
-
-  if(hairType === 0){ // kurz
-    fill(ctx, 20, 8, 24, 6, hair);
+  // === HEAD (runde Form simuliert) ===
+  for(let y=0;y<28;y++){
+    for(let x=0;x<24;x++){
+      const dx = x-12;
+      const dy = y-14;
+      if(dx*dx + dy*dy < 140){
+        draw(ctx, 20+x, 12+y, skin);
+      }
+    }
   }
 
-  if(hairType === 1){ // voll
-    fill(ctx, 18, 6, 28, 10, hair);
+  // === SHADING (links dunkel, rechts hell) ===
+  for(let y=12;y<40;y++){
+    draw(ctx, 20, y, "#00000033");
+    draw(ctx, 43, y, "#ffffff22");
   }
 
-  if(hairType === 2){ // side fade
-    fill(ctx, 20, 8, 24, 4, hair);
-    fill(ctx, 20, 12, 4, 10, hair);
+  // === HAIR (organischer) ===
+  const hairDensity = rand();
+
+  for(let y=6;y<16;y++){
+    for(let x=18;x<46;x++){
+      if(rand() > 0.4 + hairDensity){
+        draw(ctx, x, y, hair);
+      }
+    }
   }
 
-  if(hairType === 3){ // mohawk
-    fill(ctx, 30, 6, 4, 10, hair);
+  // === EYES (mit Variation) ===
+  const eyeOffset = Math.floor(rand()*2);
+
+  draw(ctx, 27, 24, "#000");
+  draw(ctx, 35, 24, "#000");
+
+  draw(ctx, 27, 24, "#fff");
+  draw(ctx, 35, 24, "#fff");
+
+  // === NOSE (weich) ===
+  draw(ctx, 31, 26, "#00000033");
+  draw(ctx, 32, 27, "#00000022");
+
+  // === MOUTH (mehr Variation) ===
+  const mouth = rand();
+
+  if(mouth < 0.3){
+    drawLine(ctx, 28, 32, 8, "#522");
+  } else if(mouth < 0.6){
+    drawLine(ctx, 28, 32, 8, "#300");
+  } else {
+    draw(ctx, 30, 32, "#633");
+    draw(ctx, 31, 32, "#633");
   }
 
-  if(hairType === 4){ // glatze
-    // nichts
-  }
-
-  // =========================
-  // 🎩 CAP (selten)
-  // =========================
-  if(rand() > 0.8){
-    const capColor = getCountryColor(country).primary;
-
-    fill(ctx, 18, 6, 28, 6, capColor); // cap top
-    fill(ctx, 24, 12, 16, 3, capColor); // visor
-  }
-
-  // =========================
-  // 👀 EYES
-  // =========================
-  fill(ctx, 26, 24, 4, 2, eyes);
-  fill(ctx, 34, 24, 4, 2, eyes);
-
-  // Pupillen
-  fill(ctx, 27, 24, 1, 1, "#fff");
-  fill(ctx, 35, 24, 1, 1, "#fff");
-
-  // =========================
-  // 👃 NOSE
-  // =========================
-  fill(ctx, 31, 26, 2, 4, shadow);
-
-  // =========================
-  // 👄 MOUTH
-  // =========================
-  const mouth = Math.floor(rand() * 3);
-
-  if(mouth === 0) fill(ctx, 28, 32, 8, 2, "#522");
-  if(mouth === 1) fill(ctx, 28, 32, 8, 1, "#300");
-  if(mouth === 2) fill(ctx, 30, 32, 4, 2, "#633");
-
-  // =========================
-  // 🧔 BEARD
-  // =========================
+  // === BEARD (weich, nicht block) ===
   if(rand() > 0.6){
-    const beardType = Math.floor(rand() * 3);
-
-    if(beardType === 0){ // full beard
-      fill(ctx, 22, 30, 20, 8, hair);
-    }
-
-    if(beardType === 1){ // goatee
-      fill(ctx, 28, 32, 8, 6, hair);
-    }
-
-    if(beardType === 2){ // mustache
-      fill(ctx, 26, 30, 12, 2, hair);
+    for(let y=30;y<38;y++){
+      for(let x=22;x<42;x++){
+        if(rand() > 0.5){
+          draw(ctx, x, y, hair);
+        }
+      }
     }
   }
 
-  // =========================
-  // 🧥 BODY
-  // =========================
-  const shirt = getCountryColor(country);
+  // === CAP (besser geformt) ===
+  if(rand() > 0.8){
+    const c = getCountryColor(country).primary;
 
-  fill(ctx, 18, 42, 28, 10, shirt.primary);
+    fill(ctx, 20, 6, 24, 6, c);
+    fill(ctx, 24, 12, 16, 2, c);
+  }
 
-  // Hals
-  fill(ctx, 28, 38, 8, 4, skin);
+  // === BODY ===
+  fill(ctx, 18, 42, 28, 10, getCountryColor(country).primary);
 }
 
 
-// =========================
-// HELPERS
-// =========================
-function fill(ctx, x, y, w, h, color){
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, w, h);
+// helpers
+function draw(ctx,x,y,c){
+  ctx.fillStyle=c;
+  ctx.fillRect(x,y,1,1);
 }
 
-function pick(rand, arr){
-  return arr[Math.floor(rand() * arr.length)];
+function fill(ctx,x,y,w,h,c){
+  ctx.fillStyle=c;
+  ctx.fillRect(x,y,w,h);
 }
 
-function darken(hex){
-  return "#00000055";
+function drawLine(ctx,x,y,len,c){
+  for(let i=0;i<len;i++){
+    draw(ctx,x+i,y,c);
+  }
 }
 
-function lighten(hex){
-  return "#ffffff22";
+function pick(rand,a){
+  return a[Math.floor(rand()*a.length)];
 }
 
 function getCountryColor(code){
-  const map = {
-    DE: { primary: "#dd0000" },
-    FR: { primary: "#0055A4" },
-    BR: { primary: "#009C3B" },
-    ES: { primary: "#aa151b" },
-    IT: { primary: "#008C45" }
-  };
-
-  return map[code] || { primary: "#888" };
+  return {
+    DE:{primary:"#dd0000"},
+    FR:{primary:"#0055A4"},
+    BR:{primary:"#009C3B"}
+  }[code] || {primary:"#888"};
 }
