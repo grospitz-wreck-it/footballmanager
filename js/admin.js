@@ -575,29 +575,67 @@ qs("tabInsights").classList.add("active");
 // =====================
 document.addEventListener("click", (e)=>{
 
-const a = e.target.dataset.action;
-if(!a) return;
+  const a = e.target.dataset.action;
+  if(!a) return;
 
-if(a==="copy") copy(e.target.dataset.id);
+  // =====================
+  // GENERIC
+  // =====================
+  if(a==="copy") copy(e.target.dataset.id);
 
-if(a==="delete") deleteCampaign(e.target.dataset.id);
-if(a==="editInline") state.inlineEditId = e.target.dataset.id, loadCampaigns();
-if(a==="saveInline") saveInlineCampaign(e.target.dataset.id);
-if(a==="cancelInline") state.inlineEditId = null, loadCampaigns();
+  if(a==="fullscreen"){
+    e.target.closest(".asset")?.classList.toggle("fullscreen");
+  }
 
-if(a==="fullscreen"){
-e.target.closest(".asset").classList.toggle("fullscreen");
-}
+  // =====================
+  // CAMPAIGNS
+  // =====================
+  if(a==="delete") deleteCampaign(e.target.dataset.id);
+  if(a==="editInline"){
+    state.inlineEditId = e.target.dataset.id;
+    loadCampaigns();
+  }
+  if(a==="saveInline") saveInlineCampaign(e.target.dataset.id);
+  if(a==="cancelInline"){
+    state.inlineEditId = null;
+    loadCampaigns();
+  }
 
-if(a==="editInlineEvent") state.inlineEventEditId = e.target.dataset.id, loadEvents();
-if(a==="saveInlineEvent") saveInlineEvent(e.target.dataset.id);
-if(a==="cancelInlineEvent") state.inlineEventEditId = null, loadEvents();
-if(a==="deleteEvent") deleteEvent(e.target.dataset.id);
+  // =====================
+  // EVENTS
+  // =====================
+  if(a==="editInlineEvent"){
+    state.inlineEventEditId = e.target.dataset.id;
+    loadEvents();
+  }
+  if(a==="saveInlineEvent") saveInlineEvent(e.target.dataset.id);
+  if(a==="cancelInlineEvent"){
+    state.inlineEventEditId = null;
+    loadEvents();
+  }
+  if(a==="deleteEvent") deleteEvent(e.target.dataset.id);
+
+  // =====================
+  // 🎮 GAME EVENTS (FIX)
+  // =====================
+  if(a==="deleteGameEvent") deleteGameEvent(e.target.dataset.id);
+
+  if(a==="editGameEventInline"){
+    state.inlineGameEventEditId = e.target.dataset.id;
+    loadGameEvents();
+  }
+
+  if(a==="saveGameEventInline"){
+    saveInlineGameEvent(e.target.dataset.id);
+  }
+
+  if(a==="cancelGameEventInline"){
+    state.inlineGameEventEditId = null;
+    loadGameEvents();
+  }
+
 });
 
-// =====================
-// INIT
-// =====================
 // =====================
 // INIT
 // =====================
