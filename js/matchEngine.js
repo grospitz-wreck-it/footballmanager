@@ -56,6 +56,20 @@ function getTeamNameById(id){
   return getTeamById(id)?.name || "Unbekannt";
 }
 
+function getGoalAssets(){
+
+  const events = game.data?.gameEvents || [];
+
+  const goalEvent = events.find(e =>
+    e.type === "goal" || e.effect === "goal"
+  );
+
+  return Array.isArray(goalEvent?.assets)
+    ? goalEvent.assets
+    : [];
+}
+
+
 // =========================
 // 🆕 EVENT EMITTER
 // =========================
