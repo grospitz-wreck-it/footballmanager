@@ -1,5 +1,4 @@
-import { drawPlayer } from './playerRenderer.js';
-import { getPalette } from './palettes.js';
+import { drawPlayer } from "./playerRenderer.js";
 
 const cache = new Map();
 
@@ -21,17 +20,18 @@ function idToSeed(id) {
 
 export function getPlayerTexture(id, country) {
   const key = id + "_" + country;
+
   if (cache.has(key)) return cache.get(key);
 
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = 64;
   canvas.height = 64;
-  const ctx = canvas.getContext('2d');
+
+  const ctx = canvas.getContext("2d");
 
   const rand = createRNG(idToSeed(id));
-  const palette = getPalette(country);
 
-  drawPlayer(ctx, rand, palette);
+  drawPlayer(ctx, rand, country);
 
   cache.set(key, canvas);
   return canvas;
