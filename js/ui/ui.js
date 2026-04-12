@@ -439,7 +439,7 @@ function renderStars(count = 1){
 
   return `
     <div class="stars">
-      <img src="/gfx/modal/star${safe}.webp" alt="${safe} stars" />
+      <img src="./gfx/modal/star${safe}.webp" alt="${safe} stars" />
     </div>
   `;
 }
