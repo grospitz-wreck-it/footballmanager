@@ -12,43 +12,57 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   const hair = pick(rand, ["#2b2b2b","#5a3a2e","#d6a77a"]);
 
-  drawFace(ctx, skin);
+  // 🔥 VARIATION DNA
+  const faceType = Math.floor(rand()*3);
+  const eyeOffset = Math.floor(rand()*5) - 2;     // -2 bis +2
+  const eyeHeight = Math.floor(rand()*3) - 1;     // -1 bis +1
+  const mouthWidth = 6 + Math.floor(rand()*4);    // 6–9
+  const mouthOffset = Math.floor(rand()*3);       // asymmetry
+  const eyeType = Math.floor(rand()*3);
+
+  drawFace(ctx, skin, faceType);
   drawHair(ctx, hair);
-  drawEyes(ctx, 24, 26, mood);
-  drawEyes(ctx, 40, 26, mood);
-  drawBrows(ctx, mood);
+
+  // 👁 unterschiedliche Position!
+  drawEye(ctx, 24 + eyeOffset, 26 + eyeHeight, mood, eyeType);
+  drawEye(ctx, 40 - eyeOffset, 26 + eyeHeight, mood, eyeType);
+
+  drawBrows(ctx, mood, eyeOffset, eyeHeight);
   drawNose(ctx, skin);
-  drawMouth(ctx, mood);
+  drawMouth(ctx, mood, mouthWidth, mouthOffset);
+
   drawBody(ctx, country);
 }
 
 
 // =========================
-// 👤 FACE BASE (BIG UPGRADE)
+// 👤 FACE (VARIANTS)
 // =========================
-function drawFace(ctx, skin){
+function drawFace(ctx, skin, type){
 
   const [hl, l, m, d] = skin;
+
+  const width = [18, 22, 20][type];
+  const jaw   = [0.6, 0.9, 0.4][type];
 
   for(let y=8;y<60;y++){
     for(let x=10;x<54;x++){
 
-      let dx = (x-32)/20;
+      let dx = (x-32)/width;
       let dy = (y-32)/26;
 
       if(dx*dx + dy*dy > 1) continue;
 
       let col = m;
 
-      // light direction
       let light = (-dx*0.6) + (-dy*0.8);
 
       if(light > 0.4) col = hl;
       else if(light > 0.1) col = l;
       else if(light < -0.4) col = d;
 
-      // jaw shadow
-      if(dy > 0.5 && Math.abs(dx) > 0.5){
+      // jaw variation
+      if(dy > 0.5 && Math.abs(dx) > jaw){
         col = d;
       }
 
@@ -59,50 +73,27 @@ function drawFace(ctx, skin){
 
 
 // =========================
-// 💇 HAIR (NOT HELMET)
+// 👁 EYES (VARIANTS)
 // =========================
-function drawHair(ctx, hair){
+function drawEye(ctx, cx, cy, mood, type){
 
-  for(let y=6;y<26;y++){
-    for(let x=12;x<52;x++){
+  const sizes = [3,4,2];
+  const s = sizes[type];
 
-      let dx = (x-32)/20;
-      let dy = (y-20)/14;
-
-      if(dx*dx + dy*dy < 1){
-        px(ctx,x,y,hair);
-      }
-    }
-  }
-}
-
-
-// =========================
-// 👁 EYES (BIG & CLEAN)
-// =========================
-function drawEyes(ctx, cx, cy, mood){
-
-  // sclera
-  for(let x=-3;x<=3;x++){
+  for(let x=-s;x<=s;x++){
     px(ctx,cx+x,cy,"#fff");
   }
 
-  // iris
-  px(ctx,cx,cy,"#3b82f6");
-
-  // pupil
   px(ctx,cx,cy,"#000");
-
-  // highlight
   px(ctx,cx+1,cy,"#fff");
 
-  // eyelid
-  for(let x=-3;x<=3;x++){
+  // lid
+  for(let x=-s;x<=s;x++){
     px(ctx,cx+x,cy-1,"#000");
   }
 
   if(mood==="tired"){
-    for(let x=-3;x<=3;x++){
+    for(let x=-s;x<=s;x++){
       px(ctx,cx+x,cy+1,"#555");
     }
   }
@@ -112,20 +103,22 @@ function drawEyes(ctx, cx, cy, mood){
 // =========================
 // 👁 BROWS
 // =========================
-function drawBrows(ctx, mood){
+function drawBrows(ctx, mood, offset, height){
+
+  const y = 22 + height;
 
   if(mood==="angry"){
-    line(ctx,21,23,10,"#000");
-    line(ctx,33,23,10,"#000");
+    line(ctx,20 + offset,y,10,"#000");
+    line(ctx,34 - offset,y,10,"#000");
   }else{
-    line(ctx,21,22,10,"#222");
-    line(ctx,33,22,10,"#222");
+    line(ctx,20 + offset,y,10,"#222");
+    line(ctx,34 - offset,y,10,"#222");
   }
 }
 
 
 // =========================
-// 👃 NOSE (REAL SHAPE)
+// 👃 NOSE
 // =========================
 function drawNose(ctx, skin){
 
@@ -140,33 +133,49 @@ function drawNose(ctx, skin){
 
   px(ctx,33,34,d);
 
-  // nostrils
   px(ctx,31,38,d);
   px(ctx,33,38,d);
 }
 
 
 // =========================
-// 👄 MOUTH (VISIBLE)
+// 👄 MOUTH (VARIANTS)
 // =========================
-function drawMouth(ctx, mood){
+function drawMouth(ctx, mood, width, offset){
+
+  const start = 32 - Math.floor(width/2);
 
   if(mood==="happy"){
-    px(ctx,28,46,"#722");
-    px(ctx,29,47,"#722");
-    px(ctx,30,48,"#722");
-    px(ctx,31,48,"#722");
-    px(ctx,32,48,"#722");
-    px(ctx,33,47,"#722");
-    px(ctx,34,46,"#722");
+    for(let i=0;i<width;i++){
+      px(ctx,start+i,46 + (i===offset?1:0),"#722");
+    }
   }
 
   else if(mood==="angry"){
-    line(ctx,28,45,8,"#400");
+    line(ctx,start,45,width,"#400");
   }
 
   else{
-    line(ctx,29,46,6,"#633");
+    line(ctx,start,46,width,"#633");
+  }
+}
+
+
+// =========================
+// 💇 HAIR
+// =========================
+function drawHair(ctx, hair){
+
+  for(let y=6;y<26;y++){
+    for(let x=12;x<52;x++){
+
+      let dx = (x-32)/20;
+      let dy = (y-20)/14;
+
+      if(dx*dx + dy*dy < 1){
+        px(ctx,x,y,hair);
+      }
+    }
   }
 }
 
