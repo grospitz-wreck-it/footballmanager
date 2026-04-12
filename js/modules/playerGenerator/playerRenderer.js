@@ -1,6 +1,6 @@
 
 // ======================================
-// ⚽ HIGH QUALITY PIXEL MANAGER (PRO)
+// ⚽ PIXEL MANAGER RENDERER V3 (PURE PIXEL ART)
 // ======================================
 
 export function drawPlayer(ctx, rand, country, mood="neutral"){
@@ -11,13 +11,10 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   const cx = 32;
 
-  // =========================
-  // 🧬 DNA SYSTEM
-  // =========================
   const dna = createDNA(rand);
 
   // =========================
-  // 👤 HEAD
+  // 👤 HEAD (PIXEL BUILT)
   // =========================
   drawHead(ctx, cx, dna);
 
@@ -54,7 +51,7 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
 
 
 // ======================================
-// 🧬 DNA GENERATION
+// 🧬 DNA
 // ======================================
 
 function createDNA(rand){
@@ -69,96 +66,99 @@ function createDNA(rand){
     hairColor: pick(rand, HAIR_COLORS),
     eyeColor: pick(rand, EYE_COLORS),
 
-    headType: pick(rand, ["round","oval","wide"]),
-    hairStyle: pick(rand, ["short","long","bald"]),
-    eyeType: pick(rand, ["small","normal"]),
+    headW: 14 + Math.floor(rand()*6),
+    headH: 18 + Math.floor(rand()*6),
+
+    eyeSpacing: 6 + Math.floor(rand()*4),
+    eyeY: 25 + Math.floor(rand()*2),
+
+    hairStyle: pick(rand, ["short","flat","none"]),
     beard: pick(rand, ["none","short","full"]),
 
-    glasses: rand() < 0.25,
-    accessory: rand() < 0.15 ? "band" : null
+    glasses: rand() < 0.25
   };
 }
 
 
 // ======================================
-// 👤 HEAD
+// 👤 HEAD (TRUE PIXEL OVAL)
 // ======================================
 
 function drawHead(ctx, cx, dna){
 
-  ctx.fillStyle = dna.skinMid;
+  const cy = 28;
 
-  if(dna.headType === "round"){
-    ctx.beginPath();
-    ctx.arc(cx, 28, 18, 0, Math.PI*2);
-    ctx.fill();
+  for(let y=-dna.headH; y<=dna.headH; y++){
+
+    let t = y / dna.headH;
+    let w = Math.round(dna.headW * Math.sqrt(1 - t*t));
+
+    // shading zones
+    let color = dna.skinMid;
+
+    if(y < -dna.headH*0.3) color = dna.skinLight;
+    if(y > dna.headH*0.4) color = dna.skinDark;
+
+    ctx.fillStyle = color;
+
+    ctx.fillRect(cx - w, cy + y, w*2, 1);
   }
-
-  if(dna.headType === "oval"){
-    ctx.beginPath();
-    ctx.ellipse(cx, 28, 16, 20, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  if(dna.headType === "wide"){
-    ctx.beginPath();
-    ctx.ellipse(cx, 28, 20, 18, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  // shading bottom
-  ctx.fillStyle = dna.skinDark;
-  ctx.fillRect(cx-20, 28, 40, 16);
-
-  // highlight top
-  ctx.fillStyle = dna.skinLight;
-  ctx.fillRect(cx-20, 12, 40, 6);
 }
 
 
 // ======================================
-// 💇 HAIR
+// 💇 HAIR (BLOCK STYLE)
 // ======================================
 
 function drawHair(ctx, cx, dna){
 
-  if(dna.hairStyle === "bald") return;
+  if(dna.hairStyle === "none") return;
 
   ctx.fillStyle = dna.hairColor;
 
   if(dna.hairStyle === "short"){
-    ctx.fillRect(cx-18, 10, 36, 10);
+    ctx.fillRect(cx-16, 10, 32, 6);
   }
 
-  if(dna.hairStyle === "long"){
-    ctx.fillRect(cx-20, 10, 40, 18);
+  if(dna.hairStyle === "flat"){
+    ctx.fillRect(cx-18, 10, 36, 10);
   }
 }
 
 
 // ======================================
-// 👁 EYES
+// 👁 EYES (ICONIC)
 // ======================================
 
 function drawEyes(ctx, cx, dna){
 
-  const y = 26;
-  const offset = 8;
+  const y = dna.eyeY;
+  const o = dna.eyeSpacing;
 
+  // whites
   ctx.fillStyle = "#fff";
+  ctx.fillRect(cx-o, y, 4, 3);
+  ctx.fillRect(cx+o-4, y, 4, 3);
 
-  ctx.fillRect(cx-offset, y, 4, 3);
-  ctx.fillRect(cx+offset-4, y, 4, 3);
-
+  // iris
   ctx.fillStyle = dna.eyeColor;
+  ctx.fillRect(cx-o+1, y, 2, 2);
+  ctx.fillRect(cx+o-3, y, 2, 2);
 
-  ctx.fillRect(cx-offset+1, y, 2, 2);
-  ctx.fillRect(cx+offset-3, y, 2, 2);
-
+  // pupil
   ctx.fillStyle = "#000";
+  ctx.fillRect(cx-o+1, y, 1, 1);
+  ctx.fillRect(cx+o-3, y, 1, 1);
 
-  ctx.fillRect(cx-offset+1, y, 1, 1);
-  ctx.fillRect(cx+offset-3, y, 1, 1);
+  // highlight (critical!)
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(cx-o+2, y, 1, 1);
+  ctx.fillRect(cx+o-2, y, 1, 1);
+
+  // eyebrows
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  ctx.fillRect(cx-o, y-3, 4, 1);
+  ctx.fillRect(cx+o-4, y-3, 4, 1);
 }
 
 
@@ -168,14 +168,16 @@ function drawEyes(ctx, cx, dna){
 
 function drawMouth(ctx, cx, dna, mood){
 
-  ctx.fillStyle = "#400";
+  ctx.fillStyle = "#300";
 
   if(mood === "happy"){
-    ctx.fillRect(cx-6, 38, 12, 2);
-  } else if(mood === "angry"){
-    ctx.fillRect(cx-5, 38, 10, 1);
-  } else {
-    ctx.fillRect(cx-4, 38, 8, 2);
+    ctx.fillRect(cx-5, 38, 10, 2);
+  }
+  else if(mood === "angry"){
+    ctx.fillRect(cx-4, 38, 8, 1);
+  }
+  else{
+    ctx.fillRect(cx-3, 38, 6, 1);
   }
 }
 
@@ -188,10 +190,10 @@ function drawBeard(ctx, cx, dna){
 
   if(dna.beard === "none") return;
 
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.fillStyle = "rgba(0,0,0,0.3)";
 
   if(dna.beard === "short"){
-    ctx.fillRect(cx-10, 36, 20, 6);
+    ctx.fillRect(cx-10, 36, 20, 5);
   }
 
   if(dna.beard === "full"){
@@ -206,23 +208,18 @@ function drawBeard(ctx, cx, dna){
 
 function drawAccessories(ctx, cx, dna){
 
-  if(dna.glasses){
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 1;
+  if(!dna.glasses) return;
 
-    ctx.strokeRect(cx-12, 25, 8, 6);
-    ctx.strokeRect(cx+4, 25, 8, 6);
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 1;
 
-    ctx.beginPath();
-    ctx.moveTo(cx-4, 28);
-    ctx.lineTo(cx+4, 28);
-    ctx.stroke();
-  }
+  ctx.strokeRect(cx-12, 25, 8, 6);
+  ctx.strokeRect(cx+4, 25, 8, 6);
 
-  if(dna.accessory === "band"){
-    ctx.fillStyle = "#222";
-    ctx.fillRect(cx-20, 18, 40, 4);
-  }
+  ctx.beginPath();
+  ctx.moveTo(cx-4, 28);
+  ctx.lineTo(cx+4, 28);
+  ctx.stroke();
 }
 
 
@@ -231,8 +228,13 @@ function drawAccessories(ctx, cx, dna){
 // ======================================
 
 function drawBody(ctx, cx, country){
+
   ctx.fillStyle = getColor(country);
-  ctx.fillRect(cx-20, 46, 40, 18);
+  ctx.fillRect(cx-18, 46, 36, 18);
+
+  // collar
+  ctx.fillStyle = "rgba(0,0,0,0.2)";
+  ctx.fillRect(cx-18, 46, 36, 3);
 }
 
 
@@ -271,3 +273,4 @@ function getColor(code){
     BR:"#009C3B"
   }[code] || "#888";
 }
+
