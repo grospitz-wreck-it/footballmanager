@@ -1,6 +1,6 @@
 
 // ======================================
-// ⚽ PLAYER RENDERER (FULL FIXED VERSION)
+// ⚽ PLAYER RENDERER (ARCADE CLEAN VERSION)
 // ======================================
 
 export function drawPlayer(ctx, rand, country, mood="neutral", quality=0.5){
@@ -15,127 +15,61 @@ export function drawPlayer(ctx, rand, country, mood="neutral", quality=0.5){
 
   drawHead(ctx, cx, dna);
   drawEars(ctx, cx, dna);
-  drawHair(ctx, cx, dna, rand);
+  drawHair(ctx, cx, dna);
   drawEyes(ctx, cx, dna);
   drawNose(ctx, cx, dna);
   drawMouth(ctx, cx, dna, mood);
   drawBeard(ctx, cx, dna);
   drawAccessories(ctx, cx, dna);
   drawBody(ctx, cx, country, rand);
+
+  outline(ctx); // ✅ FIXED POSITION
 }
 
 
 // ======================================
-// 🧬 DNA
+// 🧬 DNA (REDUCED FOR ARCADE)
 // ======================================
 
 function createDNA(rand, country, quality){
 
-  const type = pick(rand, [
-    "winger","playmaker","defender","striker","keeper","youth"
-  ]);
+  const skinSet = SKIN_TONES[0]; // 🔥 fixed palette
 
-  const skinSet = pick(rand, SKIN_TONES);
-
-  let dna = {
+  return {
     skinLight: skinSet[0],
     skinMid: skinSet[1],
     skinDark: skinSet[2],
 
     hairColor: pick(rand, HAIR_COLORS),
-    eyeColor: pick(rand, EYE_COLORS),
+    eyeColor: "#000",
 
-    hairStyle: pick(rand, ["crop","messy","flat","sidecut","buzz","afro","receding","none"]),
-    hairHeight: 3 + Math.floor(rand()*6),
+    hairStyle: pick(rand, ["messy","flat","buzz","none"]),
+    beard: pick(rand, ["none","stubble"]),
 
-    beard: "none",
-    glasses: false,
-
-    headW: 16,
-    headH: 20,
-    eyeSpacing: 7,
-    eyeY: 25,
-    noseType: "small",
-    jawWidth: 2,
-    cheekWidth: 2,
-
-    earSize: 2 + Math.floor(rand()*2),
-
-    eyeOffsetL: Math.floor(rand()*2),
-    eyeOffsetR: Math.floor(rand()*2),
-    eyeOffsetYL: Math.floor(rand()*2),
-    eyeOffsetYR: Math.floor(rand()*2)
+    glasses: rand() < 0.1
   };
-
-  // Archetypes
-  if(type === "defender"){
-    dna.headW = 20;
-    dna.jawWidth = 5;
-    dna.beard = pick(rand, ["stubble","full"]);
-  }
-
-  if(type === "playmaker"){
-    dna.headH = 22;
-    dna.beard = pick(rand, ["goatee","mustache","none"]);
-    dna.glasses = rand() < 0.2;
-  }
-
-  if(type === "winger"){
-    dna.headW = 14;
-    dna.eyeSpacing = 8;
-  }
-
-  if(type === "keeper"){
-    dna.headH = 24;
-    dna.eyeSpacing = 9;
-  }
-
-  if(type === "striker"){
-    dna.noseType = pick(rand, ["long","wide"]);
-  }
-
-  if(dna.beard === "none"){
-    dna.beard = pick(rand, ["none","stubble","goatee","chin","full","mustache"]);
-  }
-
-  if(type === "youth"){
-    dna.beard = "none";
-    dna.headH = 18;
-  }
-
-  if(rand() < quality){
-    dna.eyeSpacing += 1;
-    dna.headW += 1;
-  }
-
-  return dna;
 }
 
 
 // ======================================
-// 👤 HEAD
+// 👤 HEAD (BLOCK SHAPE + OUTLINE)
 // ======================================
 
 function drawHead(ctx, cx, dna){
 
   const cy = 28;
 
-  const skin = [
-    dna.skinLight,
-    dna.skinMid,
-    dna.skinDark
-  ];
+  const skin = [dna.skinLight, dna.skinMid, dna.skinDark];
 
-  // 80s STYLE: harte Stufen statt Kurve
   const shape = [
-    {w:8, c:0},   // top highlight
+    {w:8, c:0},
     {w:10,c:0},
     {w:12,c:1},
     {w:13,c:1},
     {w:14,c:1},
     {w:15,c:1},
     {w:15,c:1},
-    {w:14,c:2},   // shadow start
+    {w:14,c:2},
     {w:13,c:2},
     {w:12,c:2},
     {w:10,c:2},
@@ -146,28 +80,32 @@ function drawHead(ctx, cx, dna){
     ctx.fillStyle = skin[row.c];
     ctx.fillRect(cx - row.w, cy - 10 + i, row.w*2, 1);
   }
+
+  // 🔥 HARD OUTLINE
+  ctx.fillStyle = "#000";
+  ctx.fillRect(cx-15, cy-10, 1, 11);
+  ctx.fillRect(cx+14, cy-10, 1, 11);
+  ctx.fillRect(cx-8, cy-11, 16, 1);
 }
 
+
 // ======================================
-// 👂 EARS
+// 👂 EARS (SIMPLIFIED)
 // ======================================
 
 function drawEars(ctx, cx, dna){
-  drawEar(ctx, cx - dna.headW - 2, 28, dna.earSize, 5, dna);
-  drawEar(ctx, cx + dna.headW + 2 - dna.earSize, 28, dna.earSize, 5, dna);
-}
 
-function drawEar(ctx, x, y, w, h, dna){
-  for(let i=0;i<h;i++){
-    let shrink = Math.floor(i/3);
-    ctx.fillStyle = dna.skinMid;
-    ctx.fillRect(x + shrink, y + i, w - shrink*2, 1);
-  }
+  const y = 26;
+
+  ctx.fillStyle = dna.skinMid;
+
+  ctx.fillRect(cx-16, y, 2, 4);
+  ctx.fillRect(cx+14, y, 2, 4);
 }
 
 
 // ======================================
-// 💇 HAIR (ALL STYLES)
+// 💇 HAIR (CLUSTERS)
 // ======================================
 
 function drawHair(ctx, cx, dna){
@@ -178,34 +116,43 @@ function drawHair(ctx, cx, dna){
 
   const y = 14;
 
-  // harte Pixel-Blöcke
   ctx.fillRect(cx-10, y, 20, 2);
 
-  ctx.fillRect(cx-12, y+2, 4, 2);
-  ctx.fillRect(cx+8, y+2, 4, 2);
+  if(dna.hairStyle === "messy"){
+    ctx.fillRect(cx-12, y+2, 4, 2);
+    ctx.fillRect(cx+8, y+2, 4, 2);
+  }
 
-  ctx.fillRect(cx-6, y+4, 12, 2);
+  if(dna.hairStyle === "flat"){
+    ctx.fillRect(cx-10, y+2, 20, 2);
+  }
+
+  if(dna.hairStyle === "buzz"){
+    for(let x=-10;x<=10;x+=2){
+      ctx.fillRect(cx+x, y, 1, 1);
+    }
+  }
 }
+
 
 // ======================================
 // 👁 EYES
 // ======================================
 
-function drawEyes(ctx, cx, dna){
+function drawEyes(ctx, cx){
 
   const y = 24;
   const d = 6;
 
-  // whites
   ctx.fillStyle = "#fff";
   ctx.fillRect(cx - d, y, 3, 2);
   ctx.fillRect(cx + d - 3, y, 3, 2);
 
-  // pupils (immer 1px!)
   ctx.fillStyle = "#000";
   ctx.fillRect(cx - d + 1, y, 1, 1);
   ctx.fillRect(cx + d - 2, y, 1, 1);
 }
+
 
 // ======================================
 // 👃 NOSE
@@ -234,6 +181,7 @@ function drawMouth(ctx, cx, dna, mood){
   }
 }
 
+
 // ======================================
 // 🧔 BEARD
 // ======================================
@@ -243,30 +191,31 @@ function drawBeard(ctx, cx, dna){
   if(dna.beard === "none") return;
 
   ctx.fillStyle = dna.hairColor;
-
-  // nur Andeutung
   ctx.fillRect(cx-4, 34, 8, 2);
 }
+
+
 // ======================================
 // 👓 ACCESSORIES
 // ======================================
 
 function drawAccessories(ctx, cx, dna){
+
   if(!dna.glasses) return;
 
   ctx.strokeStyle="#000";
-  ctx.strokeRect(cx-12,dna.eyeY,8,6);
-  ctx.strokeRect(cx+4,dna.eyeY,8,6);
+  ctx.strokeRect(cx-10,24,6,4);
+  ctx.strokeRect(cx+4,24,6,4);
 
   ctx.beginPath();
-  ctx.moveTo(cx-4,dna.eyeY+3);
-  ctx.lineTo(cx+4,dna.eyeY+3);
+  ctx.moveTo(cx-4,26);
+  ctx.lineTo(cx+4,26);
   ctx.stroke();
 }
 
 
 // ======================================
-// 👕 BODY
+// 👕 BODY (RETRO SIZE)
 // ======================================
 
 function drawBody(ctx, cx, country, rand){
@@ -277,62 +226,65 @@ function drawBody(ctx, cx, country, rand){
   const secondary = getSecondaryColor(country);
 
   ctx.fillStyle = base;
-  ctx.fillRect(cx-20, y, 40, 16);
+  ctx.fillRect(cx-14, y, 28, 14);
 
-  const pattern = pick(rand, ["plain","stripe","center","half"]);
+  const pattern = pick(rand, ["plain","stripe","center"]);
 
   ctx.fillStyle = secondary;
 
   if(pattern==="stripe"){
-    for(let x=-16;x<=16;x+=6){
-      ctx.fillRect(cx+x,y,2,16);
+    for(let x=-10;x<=10;x+=6){
+      ctx.fillRect(cx+x,y,2,14);
     }
   }
 
   if(pattern==="center"){
-    ctx.fillRect(cx-3,y,6,16);
-  }
-
-  if(pattern==="half"){
-    ctx.fillRect(cx,y,20,16);
+    ctx.fillRect(cx-2,y,4,14);
   }
 }
 
+
+// ======================================
+// 🧱 OUTLINE (FAST VERSION)
+// ======================================
+
 function outline(ctx){
+
+  const img = ctx.getImageData(0,0,64,64);
+  const data = img.data;
+
+  function empty(x,y){
+    if(x<0||y<0||x>=64||y>=64) return true;
+    return data[(y*64+x)*4+3] === 0;
+  }
 
   ctx.fillStyle = "#000";
 
   for(let y=0;y<64;y++){
     for(let x=0;x<64;x++){
 
-      const p = ctx.getImageData(x,y,1,1).data;
+      const a = data[(y*64+x)*4+3];
+      if(a === 0) continue;
 
-      if(p[3] === 0) continue;
-
-      // check neighbors
-      const n = ctx.getImageData(x+1,y,1,1).data;
-      if(n[3] === 0){
-        ctx.fillRect(x+1,y,1,1);
-      }
+      if(empty(x+1,y)) ctx.fillRect(x+1,y,1,1);
+      if(empty(x-1,y)) ctx.fillRect(x-1,y,1,1);
+      if(empty(x,y+1)) ctx.fillRect(x,y+1,1,1);
+      if(empty(x,y-1)) ctx.fillRect(x,y-1,1,1);
     }
   }
 }
-drawBody(...)
-outline(ctx)
+
+
 // ======================================
 // 🎨 DATA
 // ======================================
 
 const SKIN_TONES = [
-  ["#f2c9a0","#d99a6c","#8a5a3a"] // nur EIN Set nutzen!
+  ["#f2c9a0","#d99a6c","#8a5a3a"]
 ];
 
 const HAIR_COLORS = [
   "#2b1d14","#5a3a2a","#c9a36a"
-];
-
-const EYE_COLORS = [
-  "#000","#3b2f2f","#1f3b2f","#2a2a5a"
 ];
 
 function pick(rand, arr){
