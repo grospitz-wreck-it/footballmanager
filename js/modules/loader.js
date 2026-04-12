@@ -1,6 +1,5 @@
 
-import { supabase } from "./client.js";
-
+import { SUPABASE_URL, SUPABASE_KEY } from "../config.js";
 export async function loadPlayers(){
 
   const { data, error } = await supabase
