@@ -156,31 +156,158 @@ function drawHead(ctx, cx, dna){
 // 👂 EARS
 // ======================================
 
+
 function drawEars(ctx, cx, dna){
 
-  ctx.fillStyle = dna.skinMid;
+  const cy = 28;
 
-  ctx.fillRect(cx - dna.headW - 2, 28, dna.earSize, 6);
-  ctx.fillRect(cx + dna.headW + 2 - dna.earSize, 28, dna.earSize, 6);
+  const wL = dna.earSize + (dna.earOffsetL || 0);
+  const wR = dna.earSize + (dna.earOffsetR || 0);
+
+  const hL = 5 + (dna.earHeightL || 0);
+  const hR = 5 + (dna.earHeightR || 0);
+
+  const yL = cy + (dna.earYL || 0);
+  const yR = cy + (dna.earYR || 0);
+
+  // =========================
+  // 👂 LEFT EAR
+  // =========================
+  drawEar(ctx, cx - dna.headW - 2, yL, wL, hL, dna);
+
+  // =========================
+  // 👂 RIGHT EAR
+  // =========================
+  drawEar(ctx, cx + dna.headW + 2 - wR, yR, wR, hR, dna);
 }
+
+
+function drawEar(ctx, x, y, w, h, dna){
+
+  // Grundform (leicht oval)
+  for(let i=0; i<h; i++){
+
+    let shrink = Math.floor(i/3);
+
+    ctx.fillStyle = dna.skinMid;
+    ctx.fillRect(x + shrink, y + i, w - shrink*2, 1);
+  }
+
+  // Schatten innen (Tiefe!)
+  ctx.fillStyle = dna.skinDark;
+  ctx.fillRect(x + 1, y + 2, Math.max(1, w-2), 1);
+
+  // Highlight oben
+  ctx.fillStyle = dna.skinLight;
+  ctx.fillRect(x + 1, y, Math.max(1, w-2), 1);
+}
+
 
 
 // ======================================
 // 💇 HAIR
 // ======================================
 
-
-function drawHair(ctx, cx, dna){
+function drawHair(ctx, cx, dna, rand){
 
   if(dna.hairStyle === "none") return;
 
   ctx.fillStyle = dna.hairColor;
 
   const top = 10;
+  const w = dna.headW + 2;
 
-  // 🎲 Variation
-  const w = 14 + Math.floor(dna.headW); // passt zum Kopf
-  const h = 4 + Math.floor(Math.random()*4); // leicht variabel
+  // =========================
+  // ✂️ CROP (klassisch)
+  // =========================
+  if(dna.hairStyle === "crop"){
+
+    for(let y=0; y<dna.hairHeight; y++){
+      let width = w - Math.floor(y/2);
+      ctx.fillRect(cx - width, top + y, width*2, 1);
+    }
+  }
+
+  // =========================
+  // 🌊 MESSY (DOTT STYLE)
+  // =========================
+  if(dna.hairStyle === "messy"){
+
+    for(let y=0; y<dna.hairHeight; y++){
+
+      let width = w - Math.floor(y/3);
+
+      // asymmetrie!
+      let shift = Math.floor(rand()*3) - 1;
+
+      ctx.fillRect(cx - width + shift, top + y, width*2, 1);
+    }
+
+    // stray pixels (controlled!)
+    if(rand() < 0.3){
+      ctx.fillRect(cx - w - 1, top + 2, 2, 1);
+    }
+  }
+
+  // =========================
+  // 🧱 FLAT TOP
+  // =========================
+  if(dna.hairStyle === "flat"){
+
+    ctx.fillRect(cx - w, top, w*2, dna.hairHeight);
+
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(cx - w, top + dna.hairHeight - 1, w*2, 1);
+  }
+
+  // =========================
+  // 🔪 SIDECUT
+  // =========================
+  if(dna.hairStyle === "sidecut"){
+
+    ctx.fillRect(cx - w, top, w*2, dna.hairHeight);
+
+    // eine Seite kürzer
+    ctx.clearRect(cx, top, w, dna.hairHeight);
+  }
+
+  // =========================
+  // 🪖 BUZZ
+  // =========================
+  if(dna.hairStyle === "buzz"){
+
+    for(let x=-w; x<w; x+=2){
+      ctx.fillRect(cx + x, top, 1, 2);
+    }
+  }
+
+  // =========================
+  // 🌀 AFRO (pixel version!)
+  // =========================
+  if(dna.hairStyle === "afro"){
+
+    for(let y=0; y<dna.hairHeight+4; y++){
+
+      let width = w + 2 - Math.floor(y/2);
+
+      ctx.fillRect(cx - width, top + y, width*2, 1);
+    }
+  }
+
+  // =========================
+  // 👴 RECEDING
+  // =========================
+  if(dna.hairStyle === "receding"){
+
+    ctx.fillRect(cx - w, top, w*2, dna.hairHeight);
+
+    // Geheimratsecken
+    ctx.clearRect(cx - w, top, 6, 4);
+    ctx.clearRect(cx + w - 6, top, 6, 4);
+  }
+}
+
+
 
   // =========================
   // ✂️ SHORT HAIR (mit Struktur)
@@ -348,20 +475,76 @@ function drawMouth(ctx, cx, dna, mood){
 // 🧔 BEARD
 // ======================================
 
+
 function drawBeard(ctx, cx, dna){
 
   if(dna.beard === "none") return;
 
-  ctx.fillStyle = "rgba(0,0,0,0.3)";
+  const y = 36;
+  const w = dna.headW;
 
-  if(dna.beard === "short"){
-    ctx.fillRect(cx-10, 36, 20, 5);
+  ctx.fillStyle = dna.hairColor;
+
+  // =========================
+  // 🧔 STUBBLE (leicht)
+  // =========================
+  if(dna.beard === "stubble"){
+
+    for(let x=-w+4; x<w-4; x+=2){
+      ctx.fillRect(cx + x, y, 1, 1);
+    }
   }
 
+  // =========================
+  // 🧔 GOATEE
+  // =========================
+  if(dna.beard === "goatee"){
+
+    ctx.fillRect(cx-2, y, 4, 4);
+
+    // kleiner Kinnpunkt
+    ctx.fillRect(cx-1, y+4, 2, 2);
+  }
+
+  // =========================
+  // 🧔 CHIN STRAP
+  // =========================
+  if(dna.beard === "chin"){
+
+    ctx.fillRect(cx - w + 3, y, 2, 6);
+    ctx.fillRect(cx + w - 5, y, 2, 6);
+
+    // Verbindung unten
+    ctx.fillRect(cx - w + 3, y+5, w*2 - 6, 1);
+  }
+
+  // =========================
+  // 🧔 FULL (FORMED!)
+  // =========================
   if(dna.beard === "full"){
-    ctx.fillRect(cx-14, 34, 28, 10);
+
+    for(let i=0; i<6; i++){
+
+      let width = w - 2 - Math.floor(i/2);
+
+      ctx.fillRect(cx - width, y + i, width*2, 1);
+    }
+  }
+
+  // =========================
+  // 👨 MUSTACHE
+  // =========================
+  if(dna.beard === "mustache"){
+
+    ctx.fillRect(cx-6, y-4, 4, 1);
+    ctx.fillRect(cx+2, y-4, 4, 1);
+
+    // kleine Krümmung
+    ctx.fillRect(cx-4, y-3, 2, 1);
+    ctx.fillRect(cx+2, y-3, 2, 1);
   }
 }
+
 
 
 // ======================================
