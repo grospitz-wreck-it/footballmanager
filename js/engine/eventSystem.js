@@ -1,5 +1,5 @@
 // =========================
-// 🎮 EVENT SYSTEM (CLEAN + NO GOAL OVERRIDE)
+// 🎮 EVENT SYSTEM (CLEAN + NO GOAL OVERRIDE + VISUALS)
 // =========================
 
 import { resolveEvent } from "./eventResolver.js";
@@ -15,6 +15,38 @@ import { EVENTS } from "../core/events.constants.js";
 // 📦 AKTIVE EVENTS
 // =========================
 const activeEvents = [];
+
+// =========================
+// 🎨 ASSET HELPER
+// =========================
+function getAssetsByType(type){
+
+  const events = game.data?.gameEvents || [];
+
+  const e = events.find(ev =>
+    ev.type === type ||
+    ev.effect === type ||
+    ev.eventType === type
+  );
+
+  return Array.isArray(e?.assets) ? e.assets : [];
+}
+
+// =========================
+// 🎯 PRIORITY SYSTEM
+// =========================
+function getEventPriority(type){
+
+  switch(type){
+    case EVENT_TYPES.GOAL: return 100;
+    case EVENT_TYPES.SHOT_SAVED: return 80;
+    case EVENT_TYPES.RED_CARD: return 70;
+    case EVENT_TYPES.YELLOW_CARD: return 60;
+    case EVENT_TYPES.FOUL: return 40;
+    case EVENT_TYPES.SHOT: return 20;
+    default: return 10;
+  }
+}
 
 // =========================
 // 🧠 MATCH EVENT RESOLVER
@@ -34,16 +66,28 @@ function processMatchEvent(event){
 
     const result = resolveShot({ shooter, keeper });
 
-    // ❗ WICHTIG: GOAL NICHT HIER HANDLEN
+    // ❗ GOAL NICHT HIER (MatchEngine macht Assets korrekt)
     if(result === EVENT_TYPES.GOAL){
-      // 👉 MatchEngine macht Goal + Assets
       return false;
     }
+
+    const assets =
+      Array.isArray(event.assets) && event.assets.length
+        ? event.assets
+        : getAssetsByType(result);
 
     emit(EVENTS.MATCH_EVENT, {
       ...event,
       type: result,
       outcome: result,
+
+      // 🔥 FIX: Assets IMMER setzen
+      assets,
+
+      // 🔥 NEU: UI SYSTEM
+      priority: getEventPriority(result),
+      visualType: result,
+
       _resolved: true
     });
 
@@ -57,10 +101,21 @@ function processMatchEvent(event){
 
     const result = resolveFoul();
 
+    const assets =
+      Array.isArray(event.assets) && event.assets.length
+        ? event.assets
+        : getAssetsByType(result);
+
     emit(EVENTS.MATCH_EVENT, {
       ...event,
       type: result,
       outcome: result,
+
+      assets,
+
+      priority: getEventPriority(result),
+      visualType: result,
+
       _resolved: true
     });
 
@@ -143,7 +198,7 @@ function triggerEvent(eventId, context = {}){
     triggerEvent(next, context);
   }
 
-  // 👉 Nur UI-Log (kein echtes MATCH_EVENT!)
+  // 👉 UI LOG
   if(game.match?.live?.events){
     game.match.live.events.unshift(
       (game.match.live.minute ?? 0) + "' - " + (dbEvent?.title || eventId)
@@ -156,7 +211,7 @@ function triggerEvent(eventId, context = {}){
 }
 
 // =========================
-// ⏳ UPDATE EVENTS (MIT RESOLVER)
+// ⏳ UPDATE EVENTS
 // =========================
 function updateEvents(){
 
