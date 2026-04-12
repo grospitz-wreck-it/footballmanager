@@ -299,6 +299,25 @@ document.querySelectorAll("#eventsTab input, #eventsTab textarea, #eventsTab sel
 .forEach(i => i.value = "");
 }
 
+
+import { EVENT_REGISTRY } from "./eventRegistry.js";
+
+function loadEventTypes(){
+
+  const select = qs("geType");
+  select.innerHTML = "";
+
+  Object.values(EVENT_REGISTRY).forEach(e => {
+
+    const opt = document.createElement("option");
+    opt.value = e.id;
+    opt.textContent = e.label;
+
+    select.appendChild(opt);
+  });
+}
+
+
 // =====================
 // INLINE EVENT UPDATE
 // =====================
