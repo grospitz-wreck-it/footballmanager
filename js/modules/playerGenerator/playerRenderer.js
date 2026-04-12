@@ -15,7 +15,7 @@ export function drawPlayer(ctx, rand, country, mood="neutral", quality=0.5){
 
   drawHead(ctx, cx, dna);
   drawEars(ctx, cx, dna);
-  drawHair(ctx, cx, dna);
+  drawHair(ctx, cx, dna, rand);
   drawEyes(ctx, cx, dna);
   drawNose(ctx, cx, dna);
   drawMouth(ctx, cx, dna, mood);
