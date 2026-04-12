@@ -162,8 +162,10 @@ function initDebugOverlay(){
       render(content);
     }
   }, 500);
-window.addEventListener("storage", () => {
-  location.reload(); // simpel & stabil
+window.addEventListener("storage", (e) => {
+  if(e.key === "debugOverlay"){
+    location.reload();
+  }
 });
   console.log("🐞 Debug Overlay aktiv");
 }
