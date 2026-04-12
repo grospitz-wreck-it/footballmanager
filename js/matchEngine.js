@@ -196,7 +196,7 @@ const playerMatch = round.find(m => isMyMatch(m));
 if(!playerMatch){
   console.error("❌ Kein Match für dein Team gefunden!", round);
   return false;
-}  if(!playerMatch) return false;
+}
 
   const homeId = normalizeId(playerMatch.homeTeamId);
   const awayId = normalizeId(playerMatch.awayTeamId);
