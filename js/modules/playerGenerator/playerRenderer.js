@@ -1,6 +1,6 @@
 
 // ======================================
-// 🎮 PLAYER RENDERER (FIXED LANDMARK HYBRID)
+// 🎮 PLAYER RENDERER (FIXED + STABLE)
 // ======================================
 
 import faceData from "./faceData.js";
@@ -23,7 +23,7 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
   const raw = faceData[Math.floor(rand()*faceData.length)];
   const pts = toPoints(raw);
 
-  normalize(pts, cx, cy, 1.2);
+  normalize(pts, cx, cy, 1.0);
 
   // =========================
   // 🎨 COLORS
@@ -32,7 +32,7 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
   const hair = pick(rand, ["#1c1c1c","#3b2f2f","#6b4f3a","#d6a77a"]);
 
   // =========================
-  // 👤 HEAD (NOT from landmarks!)
+  // 👤 HEAD
   // =========================
   bctx.fillStyle = skin;
   bctx.beginPath();
@@ -40,22 +40,30 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
   bctx.fill();
 
   // =========================
-  // 🌗 SHADING
+  // 💇 HAIR (moved BEFORE face details)
+  // =========================
+  bctx.fillStyle = hair;
+  bctx.beginPath();
+  bctx.ellipse(cx, cy-80, 80, 50, 0, Math.PI, 0);
+  bctx.fill();
+
+  // =========================
+  // 🌗 SHADING (FIXED)
   // =========================
   let grad = bctx.createLinearGradient(0, 60, 0, 240);
   grad.addColorStop(0,"rgba(255,255,255,0.25)");
   grad.addColorStop(1,"rgba(0,0,0,0.5)");
   bctx.fillStyle = grad;
-  bctx.fill();
+  bctx.fillRect(0,0,256,256);
 
   // =========================
-  // 👁 EYE SOCKETS (DEPTH!)
+  // 👁 EYE SOCKETS
   // =========================
   drawEyeSocket(bctx, center(pts.slice(36,42)));
   drawEyeSocket(bctx, center(pts.slice(42,48)));
 
   // =========================
-  // 👁 EYES (from landmarks)
+  // 👁 EYES
   // =========================
   drawEye(bctx, pts.slice(36,42));
   drawEye(bctx, pts.slice(42,48));
@@ -70,22 +78,14 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
   bctx.fill();
 
   // =========================
-  // 👄 MOUTH (from landmarks)
+  // 👄 MOUTH (FIXED)
   // =========================
   drawMouth(bctx, pts.slice(48,60));
 
   // =========================
-  // 💇 HAIR (simple doom style)
+  // 🎨 NOISE (SEEDED FIX)
   // =========================
-  bctx.fillStyle = hair;
-  bctx.beginPath();
-  bctx.ellipse(cx, cy-60, 90, 60, 0, Math.PI, 0);
-  bctx.fill();
-
-  // =========================
-  // 🎨 NOISE (important!)
-  // =========================
-  addNoise(bctx, buffer.width, buffer.height, 12);
+  addNoise(bctx, buffer.width, buffer.height, 12, rand);
 
   // =========================
   // 🎨 PALETTE
@@ -143,11 +143,12 @@ function drawEyeSocket(ctx, c){
 
 
 // ======================================
-// 👄 MOUTH
+// 👄 MOUTH (FIXED → stroke statt blob)
 // ======================================
 function drawMouth(ctx, pts){
 
-  ctx.fillStyle = "#400";
+  ctx.strokeStyle = "#300";
+  ctx.lineWidth = 2;
   ctx.beginPath();
 
   ctx.moveTo(pts[0][0], pts[0][1]);
@@ -155,8 +156,7 @@ function drawMouth(ctx, pts){
     ctx.lineTo(p[0], p[1]);
   }
 
-  ctx.closePath();
-  ctx.fill();
+  ctx.stroke();
 }
 
 
@@ -172,14 +172,27 @@ function toPoints(row){
   return pts;
 }
 
+// 🔥 FIXED NORMALIZE
 function normalize(pts,cx,cy,scale){
-  let mx=0,my=0;
-  for(let p of pts){ mx+=p[0]; my+=p[1]; }
-  mx/=pts.length; my/=pts.length;
+
+  let minX=Infinity, maxX=-Infinity;
+  let minY=Infinity, maxY=-Infinity;
 
   for(let p of pts){
-    p[0]=(p[0]-mx)*scale+cx;
-    p[1]=(p[1]-my)*scale+cy;
+    if(p[0]<minX) minX=p[0];
+    if(p[0]>maxX) maxX=p[0];
+    if(p[1]<minY) minY=p[1];
+    if(p[1]>maxY) maxY=p[1];
+  }
+
+  let w = maxX - minX;
+  let h = maxY - minY;
+
+  let s = scale * Math.min(140/w, 180/h);
+
+  for(let p of pts){
+    p[0] = (p[0]-minX)*s + (cx - (w*s)/2);
+    p[1] = (p[1]-minY)*s + (cy - (h*s)/2);
   }
 }
 
@@ -191,14 +204,14 @@ function center(pts){
 
 
 // ======================================
-// 🎨 NOISE
+// 🎨 NOISE (SEEDED)
 // ======================================
-function addNoise(ctx,w,h,amount){
+function addNoise(ctx,w,h,amount,rand){
   let img=ctx.getImageData(0,0,w,h);
   let d=img.data;
 
   for(let i=0;i<d.length;i+=4){
-    let n=(Math.random()-0.5)*amount;
+    let n=(rand()-0.5)*amount;
     d[i]+=n; d[i+1]+=n; d[i+2]+=n;
   }
 
@@ -264,14 +277,9 @@ function pixelize(ctx,w,h,size){
   ctx.putImageData(img,0,0);
 }
 
-function pick(rand,a){
-  return a[Math.floor(rand()*a.length)];
-}
-
-
 
 // ======================================
-// HELPERS
+// 🧩 HELPERS
 // ======================================
 function pick(rand,a){
   return a[Math.floor(rand()*a.length)];
