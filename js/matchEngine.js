@@ -76,6 +76,39 @@ function emitMatchEvent(type, payload = {}) {
 }
 
 // =========================
+// 🎮 GAME EVENT EFFECT HANDLER
+// =========================
+function applyGameEventEffect(event, ctx){
+
+  if(!event) return;
+
+  // 🔥 GOAL EFFECT
+  if(event.effect === "goal"){
+
+    const isHome = Math.random() < 0.5;
+    const teamId = isHome
+      ? ctx.match.homeTeamId
+      : ctx.match.awayTeamId;
+
+    const player = getRandomPlayer(teamId);
+
+    if(isHome){
+      game.match.live.score.home++;
+      game.match.score.home++;
+    } else {
+      game.match.live.score.away++;
+      game.match.score.away++;
+    }
+
+    emitMatchEvent(EVENT_TYPES.GOAL, {
+      teamId,
+      playerId: player?.id,
+      outcome: EVENT_OUTCOMES.SUCCESS
+    });
+  }
+}
+
+// =========================
 // 👥 PLAYER ACCESS
 // =========================
 function getPlayersOfTeam(teamId){
