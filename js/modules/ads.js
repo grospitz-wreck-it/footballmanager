@@ -93,40 +93,41 @@ async function trackEvent(campaignId, type) {
 function renderAds() {
 
   const el = document.getElementById("adContainer");
-  console.log("🧱 adContainer:", el);
-
-  console.log("📦 campaignsCache (render):", campaignsCache);
-
-  const ads = getMatchingAds();
-  console.log("🎯 MATCHING ADS:", ads);
-
   if (!el) return;
 
+  const ads = getMatchingAds();
   if (!ads.length) {
     el.innerHTML = `<div>Keine Werbung</div>`;
     return;
   }
 
   const ad = ads[0];
-
   const img = ad.assets?.[0]?.url;
-  console.log("🖼 asset:", img);
 
   if (!img) {
     el.innerHTML = `<div>Kein Asset</div>`;
     return;
   }
 
-  el.innerHTML = `<img src="${img}">`;
+  // 🔥 Rendering (JETZT RICHTIG PLATZIERT)
+  el.innerHTML = ad.link
+    ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
+         <img src="${img}" alt="Ad" loading="lazy">
+       </a>`
+    : `<img src="${img}" alt="Ad" loading="lazy">`;
+
+  // 👁️ IMPRESSION
+  trackEvent(ad.id, "impression");
+
+  // 🖱 CLICK TRACKING
+  const linkEl = el.querySelector(".adLink");
+
+  if (linkEl) {
+    linkEl.addEventListener("click", () => {
+      trackEvent(ad.id, "click");
+    }, { once: true });
+  }
 }
-
-// 🔥 Rendering
-el.innerHTML = ad.link
-  ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
-       <img src="${img}" alt="Ad" loading="lazy">
-     </a>`
-  : `<img src="${img}" alt="Ad" loading="lazy">`;
-
   // =========================
   // 👁️ IMPRESSION
   // =========================
