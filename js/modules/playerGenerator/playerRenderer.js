@@ -1,7 +1,6 @@
 
 // ======================================
-// 🎮 PLAYER RENDERER (DOOM STYLE)
-// Datei: playerRenderer.js
+// 🎮 DOOM STYLE PLAYER RENDERER (UPGRADED)
 // ======================================
 
 export function drawPlayer(ctx, rand, country, mood = "neutral") {
@@ -13,99 +12,107 @@ export function drawPlayer(ctx, rand, country, mood = "neutral") {
 
   const bctx = buffer.getContext("2d");
 
-  // =========================
-  // 🎲 VARIATION
-  // =========================
-  const faceW = 60 + rand() * 20;
-  const faceH = 80 + rand() * 20;
-  const eyeY = 110 + rand() * 10;
-  const eyeSpacing = 50 + rand() * 10;
-  const mouthCurve = rand() * 20;
-
-  const skin = pick(rand, ["#f6d2be","#eac39b","#c68642"]);
-  const hair = pick(rand, ["#2b2b2b","#5a3a2e","#d6a77a"]);
-
   const cx = 128;
   const cy = 140;
 
   // =========================
-  // 👤 FACE (rough spline look)
+  // 🎲 VARIATION
+  // =========================
+  const faceW = 55 + rand()*30;
+  const faceH = 75 + rand()*30;
+  const eyeY = 105 + rand()*15;
+  const eyeSpacing = 45 + rand()*20;
+
+  const skin = pick(rand, ["#f6d2be","#eac39b","#c68642","#8d5524"]);
+  const hair = pick(rand, ["#1c1c1c","#3b2f2f","#6b4f3a","#d6a77a"]);
+
+  const hairStyle = pick(rand, ["short","long","bald","messy"]);
+  const beard = pick(rand, ["none","stubble","full"]);
+  const glasses = rand() < 0.25;
+
+  // =========================
+  // 👤 FACE BASE
   // =========================
   bctx.fillStyle = skin;
   bctx.beginPath();
 
-  for (let a = 0; a <= Math.PI * 2; a += 0.3) {
-    let x = cx + Math.cos(a) * faceW + (rand() - 0.5) * 6;
-    let y = cy + Math.sin(a) * faceH + (rand() - 0.5) * 6;
+  for(let a=0;a<=Math.PI*2;a+=0.25){
+    let x = cx + Math.cos(a)*faceW + (rand()-0.5)*8;
+    let y = cy + Math.sin(a)*faceH + (rand()-0.5)*8;
 
-    if (a === 0) bctx.moveTo(x, y);
-    else bctx.lineTo(x, y);
+    if(a===0) bctx.moveTo(x,y);
+    else bctx.lineTo(x,y);
   }
 
   bctx.closePath();
   bctx.fill();
 
   // =========================
-  // 🌗 SHADING (vertical doom)
+  // 🌗 LIGHT (TOP LIGHT)
   // =========================
-  const grad = bctx.createLinearGradient(0, 60, 0, 220);
-  grad.addColorStop(0, "rgba(255,255,255,0.25)");
-  grad.addColorStop(1, "rgba(0,0,0,0.4)");
+  let grad = bctx.createRadialGradient(cx, 80, 20, cx, 140, 180);
+  grad.addColorStop(0, "rgba(255,255,255,0.35)");
+  grad.addColorStop(1, "rgba(0,0,0,0.5)");
 
   bctx.fillStyle = grad;
   bctx.fill();
 
   // =========================
-  // 💇 HAIR
+  // 🧠 EYE SHADOWS (WICHTIG!)
   // =========================
-  bctx.fillStyle = hair;
+  drawEyeSocket(bctx, cx - eyeSpacing/2, eyeY);
+  drawEyeSocket(bctx, cx + eyeSpacing/2, eyeY);
+
+  // =========================
+  // 👁 EYES (mehr Doom)
+  // =========================
+  drawEye(bctx, cx - eyeSpacing/2, eyeY, rand);
+  drawEye(bctx, cx + eyeSpacing/2, eyeY, rand);
+
+  // =========================
+  // 👃 NOSE SHADOW
+  // =========================
+  bctx.fillStyle = "rgba(0,0,0,0.25)";
   bctx.beginPath();
-
-  for (let a = 0; a <= Math.PI; a += 0.25) {
-    let x = cx + Math.cos(a) * (faceW + 20) + (rand() - 0.5) * 8;
-    let y = 90 + Math.sin(a) * 70 + (rand() - 0.5) * 6;
-
-    if (a === 0) bctx.moveTo(x, y);
-    else bctx.lineTo(x, y);
-  }
-
-  bctx.closePath();
+  bctx.ellipse(cx, 150, 12, 25, 0, 0, Math.PI);
   bctx.fill();
 
   // =========================
-  // 👁 EYES
+  // 👄 MOUTH (volume!)
   // =========================
-  drawEye(bctx, cx - eyeSpacing / 2, eyeY, mood, rand);
-  drawEye(bctx, cx + eyeSpacing / 2, eyeY, mood, rand);
-
-  // =========================
-  // 👄 MOUTH
-  // =========================
-  bctx.strokeStyle = "#722";
-  bctx.lineWidth = 6;
+  bctx.fillStyle = "#400";
   bctx.beginPath();
+  bctx.ellipse(cx, 190, 30, 12 + rand()*6, 0, 0, Math.PI*2);
+  bctx.fill();
 
-  if (mood === "happy") {
-    bctx.moveTo(90, 190);
-    bctx.quadraticCurveTo(128, 190 + mouthCurve, 166, 190);
-  } else if (mood === "angry") {
-    bctx.moveTo(90, 195);
-    bctx.lineTo(166, 195);
-  } else {
-    bctx.moveTo(100, 190);
-    bctx.quadraticCurveTo(128, 185, 156, 190);
+  // lip shadow
+  bctx.fillStyle = "rgba(0,0,0,0.3)";
+  bctx.fillRect(cx-30, 185, 60, 4);
+
+  // =========================
+  // 💇 HAIR
+  // =========================
+  drawHair(bctx, cx, faceW, hairStyle, hair, rand);
+
+  // =========================
+  // 🧔 BEARD
+  // =========================
+  drawBeard(bctx, cx, cy, beard);
+
+  // =========================
+  // 👓 GLASSES
+  // =========================
+  if(glasses){
+    drawGlasses(bctx, cx-eyeSpacing/2, cx+eyeSpacing/2, eyeY);
   }
 
-  bctx.stroke();
+  // =========================
+  // 🎨 SKIN NOISE (WICHTIG)
+  // =========================
+  addNoise(bctx, buffer.width, buffer.height, 10);
 
   // =========================
-  // 👕 BODY
-  // =========================
-  bctx.fillStyle = getColor(country);
-  bctx.fillRect(80, 220, 96, 40);
-
-  // =========================
-  // 🎨 PALETTE REDUCTION
+  // 🎨 PALETTE
   // =========================
   applyPalette(bctx, buffer.width, buffer.height);
 
@@ -115,47 +122,115 @@ export function drawPlayer(ctx, rand, country, mood = "neutral") {
   pixelize(bctx, buffer.width, buffer.height, 4);
 
   // =========================
-  // ⬇️ FINAL DRAW
+  // FINAL
   // =========================
-  ctx.clearRect(0, 0, 64, 64);
+  ctx.clearRect(0,0,64,64);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(buffer, 0, 0, 64, 64);
 }
 
 
 // ======================================
-// 👁 EYE
+// 👁 EYE SOCKET (depth)
 // ======================================
-function drawEye(ctx, x, y, mood, rand) {
+function drawEyeSocket(ctx,x,y){
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  ctx.beginPath();
+  ctx.ellipse(x,y,20,14,0,0,Math.PI*2);
+  ctx.fill();
+}
+
+
+// ======================================
+// 👁 EYE (realer)
+// ======================================
+function drawEye(ctx,x,y,rand){
 
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.ellipse(
-    x + (rand() - 0.5) * 2,
-    y + (rand() - 0.5) * 2,
-    16, 10, 0, 0, Math.PI * 2
-  );
+  ctx.ellipse(x,y,14,9,0,0,Math.PI*2);
   ctx.fill();
 
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = "#222";
   ctx.beginPath();
-  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.arc(x + (rand()-0.5)*4, y, 5, 0, Math.PI*2);
   ctx.fill();
+}
 
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 4;
+
+// ======================================
+// 💇 HAIR
+// ======================================
+function drawHair(ctx,cx,faceW,style,color,rand){
+
+  if(style==="bald") return;
+
+  ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.moveTo(x - 16, y - 6);
-  ctx.lineTo(x + 16, y - 6);
-  ctx.stroke();
 
-  if (mood === "tired") {
-    ctx.strokeStyle = "#555";
-    ctx.beginPath();
-    ctx.moveTo(x - 16, y + 6);
-    ctx.lineTo(x + 16, y + 6);
-    ctx.stroke();
+  for(let a=0;a<=Math.PI;a+=0.2){
+    let x = cx + Math.cos(a)*(faceW+20) + (rand()-0.5)*10;
+    let y = 90 + Math.sin(a)*70 + (rand()-0.5)*10;
+
+    if(a===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
   }
+
+  ctx.closePath();
+  ctx.fill();
+}
+
+
+// ======================================
+// 🧔 BEARD
+// ======================================
+function drawBeard(ctx,cx,cy,type){
+
+  if(type==="none") return;
+
+  ctx.fillStyle="rgba(0,0,0,0.35)";
+
+  ctx.beginPath();
+  ctx.ellipse(cx,cy+40,50,40,0,0,Math.PI);
+  ctx.fill();
+}
+
+
+// ======================================
+// 👓 GLASSES
+// ======================================
+function drawGlasses(ctx,x1,x2,y){
+
+  ctx.strokeStyle="#000";
+  ctx.lineWidth=3;
+
+  ctx.strokeRect(x1-14,y-8,28,16);
+  ctx.strokeRect(x2-14,y-8,28,16);
+
+  ctx.beginPath();
+  ctx.moveTo(x1+14,y);
+  ctx.lineTo(x2-14,y);
+  ctx.stroke();
+}
+
+
+// ======================================
+// 🎨 NOISE
+// ======================================
+function addNoise(ctx,w,h,amount){
+
+  let img = ctx.getImageData(0,0,w,h);
+  let d = img.data;
+
+  for(let i=0;i<d.length;i+=4){
+    let n = (Math.random()-0.5)*amount;
+
+    d[i]+=n;
+    d[i+1]+=n;
+    d[i+2]+=n;
+  }
+
+  ctx.putImageData(img,0,0);
 }
 
 
@@ -163,83 +238,68 @@ function drawEye(ctx, x, y, mood, rand) {
 // 🎨 PALETTE
 // ======================================
 const palette = [
-  [0, 0, 0],
-  [80, 60, 40],
-  [120, 90, 60],
-  [160, 120, 80],
-  [200, 160, 120],
-  [240, 200, 160]
+  [0,0,0],
+  [80,60,40],
+  [120,90,60],
+  [160,120,80],
+  [200,160,120],
+  [240,200,160]
 ];
 
-function applyPalette(ctx, w, h) {
-  const img = ctx.getImageData(0, 0, w, h);
-  const d = img.data;
+function applyPalette(ctx,w,h){
+  let img = ctx.getImageData(0,0,w,h);
+  let d = img.data;
 
-  for (let i = 0; i < d.length; i += 4) {
+  for(let i=0;i<d.length;i+=4){
 
-    let best = palette[0];
-    let dist = Infinity;
+    let best,dist=999999;
 
-    for (let p of palette) {
-      let dd =
-        (d[i] - p[0]) ** 2 +
-        (d[i + 1] - p[1]) ** 2 +
-        (d[i + 2] - p[2]) ** 2;
-
-      if (dd < dist) {
-        dist = dd;
-        best = p;
-      }
+    for(let p of palette){
+      let dd=(d[i]-p[0])**2+(d[i+1]-p[1])**2+(d[i+2]-p[2])**2;
+      if(dd<dist){dist=dd;best=p;}
     }
 
-    d[i] = best[0];
-    d[i + 1] = best[1];
-    d[i + 2] = best[2];
+    d[i]=best[0];
+    d[i+1]=best[1];
+    d[i+2]=best[2];
   }
 
-  ctx.putImageData(img, 0, 0);
+  ctx.putImageData(img,0,0);
 }
 
 
 // ======================================
 // 🧱 PIXELIZE
 // ======================================
-function pixelize(ctx, w, h, size) {
-  const img = ctx.getImageData(0, 0, w, h);
-  const d = img.data;
+function pixelize(ctx,w,h,size){
 
-  for (let y = 0; y < h; y += size) {
-    for (let x = 0; x < w; x += size) {
+  let img = ctx.getImageData(0,0,w,h);
+  let d = img.data;
 
-      let i = (y * w + x) * 4;
+  for(let y=0;y<h;y+=size){
+    for(let x=0;x<w;x+=size){
 
-      for (let dy = 0; dy < size; dy++) {
-        for (let dx = 0; dx < size; dx++) {
-          let ii = ((y + dy) * w + (x + dx)) * 4;
-          d[ii] = d[i];
-          d[ii + 1] = d[i + 1];
-          d[ii + 2] = d[i + 2];
+      let i=(y*w+x)*4;
+
+      for(let dy=0;dy<size;dy++){
+        for(let dx=0;dx<size;dx++){
+          let ii=((y+dy)*w+(x+dx))*4;
+          d[ii]=d[i];
+          d[ii+1]=d[i+1];
+          d[ii+2]=d[i+2];
         }
       }
     }
   }
 
-  ctx.putImageData(img, 0, 0);
+  ctx.putImageData(img,0,0);
 }
 
 
 // ======================================
-// 🧩 HELPERS
+// HELPERS
 // ======================================
-function pick(rand, arr) {
-  return arr[Math.floor(rand() * arr.length)];
-}
-
-function getColor(code) {
-  return {
-    DE: "#dd0000",
-    FR: "#0055A4",
-    BR: "#009C3B"
-  }[code] || "#888";
+function pick(rand,a){
+  return a[Math.floor(rand()*a.length)];
 }
 
