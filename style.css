@@ -946,3 +946,12 @@ to { transform: translateX(100%); }
   display: block;
   margin-bottom: 8px;
 }
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#player-avatar {
+  flex-shrink: 0;
+}
