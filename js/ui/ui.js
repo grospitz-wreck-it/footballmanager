@@ -444,8 +444,7 @@ function openPlayerModal(player){
 
   div.innerHTML = `
     <div class="modal-overlay">
-      <div class="player-card">
-
+    <div class="player-modal">
         <button class="close-btn" onclick="this.closest('#playerModal').remove()">✕</button>
 
         <div class="card-header">
