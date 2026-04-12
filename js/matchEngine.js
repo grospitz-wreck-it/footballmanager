@@ -465,6 +465,27 @@ function runMatchLoop({ onTick, onEnd } = {}){
       simulateLiveEvent(ctx);
       updateEvents();
 
+      // =========================
+// 🎮 GAME EVENTS TRIGGER
+// =========================
+const gameEvents = game.data?.gameEvents || [];
+
+gameEvents.forEach(ev => {
+
+  if(!ev.active) return;
+
+  if(ev.trigger === "always"){
+    applyGameEventEffect(ev, ctx);
+  }
+
+  if(ev.trigger === "random"){
+    if(Math.random() < (ev.probability || 0)){
+      applyGameEventEffect(ev, ctx);
+    }
+  }
+
+});
+      
       if(live.minute === 45 && live.phase === "first_half"){
         live.phase = "halftime";
         live.running = false;
