@@ -184,15 +184,6 @@ if(newest.assets?.length){
   }
 }
 
-}
-
-  const img = newest.assets[0]?.url;
-
-  if(img){
-    showOverlay(img, text);
-  }
-}
-
 const overlayEl = document.getElementById("matchOverlay");
 const overlayImg = document.getElementById("overlayImage");
 const overlayText = document.getElementById("overlayText");
