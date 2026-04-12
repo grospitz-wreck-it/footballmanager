@@ -302,9 +302,10 @@ button {
 }
 
 .tab.active {
-  background: #22c55e;
-  color: #022c22;
+  background: #22C55E;
+  color: #04130A;
   font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.25);
 }
 
 .tab-view {
