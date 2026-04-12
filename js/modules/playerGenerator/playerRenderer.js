@@ -22,12 +22,14 @@ export function drawPlayer(ctx, rand, country, mood="neutral", quality=0.5){
   drawBeard(ctx, cx, dna);
   drawAccessories(ctx, cx, dna);
   drawBody(ctx, cx, country);
+  
 }
 
 
 // ======================================
 // 🧬 DNA SYSTEM (UPGRADED)
 // ======================================
+
 
 
 function createDNA(rand, country, quality){
@@ -58,6 +60,66 @@ function createDNA(rand, country, quality){
     jawWidth: 2,
     cheekWidth: 2
   };
+
+  // =========================
+  // 🎭 ARCHETYPES
+  // =========================
+
+  if(type === "defender"){
+    dna.headW = 20;
+    dna.jawWidth = 5;
+    dna.beard = pick(rand, ["stubble","full"]);
+  }
+
+  if(type === "playmaker"){
+    dna.headH = 22;
+    dna.beard = pick(rand, ["goatee","mustache","none"]);
+    dna.glasses = rand() < 0.2;
+  }
+
+  if(type === "winger"){
+    dna.headW = 14;
+    dna.eyeSpacing = 8;
+  }
+
+  if(type === "keeper"){
+    dna.headH = 24;
+    dna.eyeSpacing = 9;
+  }
+
+  if(type === "striker"){
+    dna.noseType = pick(rand, ["long","wide"]);
+  }
+
+  // =========================
+  // 🎲 GENERAL VARIATION
+  // =========================
+
+  // nur wenn noch kein Bart gesetzt wurde
+  if(dna.beard === "none"){
+    dna.beard = pick(rand, [
+      "none",
+      "stubble",
+      "goatee",
+      "chin",
+      "full",
+      "mustache"
+    ]);
+  }
+
+  // =========================
+  // 🚫 HARD OVERRIDES
+  // =========================
+
+  if(type === "youth"){
+    dna.beard = "none";
+    dna.headH = 18;
+    dna.eyeSpacing = 8;
+  }
+
+  return dna;
+}
+
 
   // =========================
   // ⚽ ARCHETYPE SHAPING
