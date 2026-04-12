@@ -444,8 +444,9 @@ function openPlayerModal(player){
 
   div.innerHTML = `
     <div class="modal-overlay">
-    <div class="player-modal">
-        <button class="close-btn" onclick="this.closest('#playerModal').remove()">✕</button>
+      <div class="player-modal">
+
+        <button class="close-btn">✕</button>
 
         <div class="card-header">
           <h1>${player.name}</h1>
@@ -468,6 +469,18 @@ function openPlayerModal(player){
   `;
 
   document.body.appendChild(div);
+
+  const overlay = div.querySelector(".modal-overlay");
+  const modal = div.querySelector(".player-modal");
+  const closeBtn = div.querySelector(".close-btn");
+
+  // ❌ Button
+  closeBtn.onclick = () => div.remove();
+
+  // ❌ Klick außerhalb
+  overlay.onclick = (e) => {
+    if(e.target === overlay) div.remove();
+  };
 }
 
 // =========================
