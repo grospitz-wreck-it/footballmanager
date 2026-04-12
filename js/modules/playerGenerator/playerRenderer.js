@@ -4,7 +4,7 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
   ctx.imageSmoothingEnabled = false;
 
   // =========================
-  // 🎨 PALETTEN (3-stufig!)
+  // 🎨 PALETTEN
   // =========================
   const skinSet = pick(rand, [
     ["#f1c27d","#e0ac69","#c68642"],
@@ -16,15 +16,15 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
   const hair = pick(rand, ["#2c1b18","#3b2f2f","#000","#915c3a"]);
 
   // =========================
-  // 👤 FACE SHAPE
+  // 👤 FACE SHAPE (CLEANER)
   // =========================
   const faceType = Math.floor(rand()*3);
 
   for(let y=0;y<42;y++){
     for(let x=0;x<40;x++){
 
-      let dx = x-20;
-      let dy = y-22;
+      const dx = x-20;
+      const dy = y-22;
 
       let inside = false;
 
@@ -34,14 +34,14 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
 
       if(!inside) continue;
 
-      // Licht
       let col = skinSet[1];
 
-      if(dx < -4 || dy < -6) col = skinSet[0];
+      // Licht von links oben
+      if(dx < -5 || dy < -6) col = skinSet[0];
       if(dx > 6 || dy > 6) col = skinSet[2];
 
-      // Noise
-      if(rand() > 0.94){
+      // viel weniger noise!
+      if(rand() > 0.97){
         col = skinSet[Math.floor(rand()*3)];
       }
 
@@ -50,27 +50,35 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
   }
 
   // =========================
-  // 💇 HAIR
+  // 💇 HAIR (STRUCTURED)
   // =========================
-  for(let y=0;y<18;y++){
-    for(let x=0;x<44;x++){
-      if(rand() > 0.4){
-        px(ctx,10+x,6+y,hair);
+  for(let y=0;y<14;y++){
+    for(let x=0;x<40;x++){
+      if(rand() > 0.25){
+        px(ctx,12+x,6+y,hair);
       }
     }
   }
 
-  // =========================
-  // 👁 AUGEN + BRAUEN
-  // =========================
-  const eyeY = 28 + Math.floor(rand()*2);
+  // Hairline cleaner
+  for(let x=14;x<50;x++){
+    if(rand() > 0.5){
+      px(ctx,x,20,hair);
+    }
+  }
 
-  drawEye(ctx,26,eyeY,rand,mood);
-  drawEye(ctx,36,eyeY,rand,mood);
+  // =========================
+  // 👁 EYES
+  // =========================
+  const eyeY = 28;
 
+  drawEye(ctx,26,eyeY,mood);
+  drawEye(ctx,36,eyeY,mood);
+
+  // Augenbrauen
   if(rand() > 0.3){
-    line(ctx,26,eyeY-2,4,hair);
-    line(ctx,36,eyeY-2,4,hair);
+    line(ctx,26,eyeY-3,4,hair);
+    line(ctx,36,eyeY-3,4,hair);
   }
 
   // =========================
@@ -81,19 +89,19 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
   px(ctx,33,31,"#ffffff11");
 
   // =========================
-  // 👄 MOUTH (EMOTION!)
+  // 👄 MOUTH
   // =========================
   drawMouth(ctx,36,mood);
 
   // =========================
-  // 😓 SWEAT (tired)
+  // 😓 SWEAT
   // =========================
-  if(mood === "tired" && rand() > 0.5){
+  if(mood === "tired" && rand() > 0.6){
     px(ctx,38,30,"#9ca3af");
   }
 
   // =========================
-  // 😡 RED EYES (angry)
+  // 😡 RED EYES
   // =========================
   if(mood === "angry"){
     px(ctx,26,29,"#550000");
@@ -101,12 +109,12 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
   }
 
   // =========================
-  // 🧔 BEARD
+  // 🧔 BEARD (CLEANER)
   // =========================
   if(rand() > 0.6){
     for(let y=34;y<44;y++){
-      for(let x=20;x<44;x++){
-        if(rand() > 0.65){
+      for(let x=22;x<42;x++){
+        if(rand() > 0.7){
           px(ctx,x,y,hair);
         }
       }
@@ -116,9 +124,9 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
   // =========================
   // 🎩 CAP
   // =========================
-  if(rand() > 0.85){
+  if(rand() > 0.9){
     const c = getColor(country);
-    fill(ctx,12,6,40,6,c);
+    fill(ctx,14,6,36,6,c);
     fill(ctx,22,12,20,3,c);
   }
 
@@ -130,24 +138,24 @@ export function drawPlayer(ctx, rand, country, mood = "neutral"){
 
 
 // =========================
-// 👁 EYE (mit Emotion)
+// 👁 EYE (IMPROVED)
 // =========================
-function drawEye(ctx,x,y,rand,mood){
+function drawEye(ctx,x,y,mood){
 
+  // white
   px(ctx,x,y,"#fff");
   px(ctx,x+1,y,"#fff");
 
+  // pupil
   px(ctx,x,y,"#000");
 
   if(mood === "angry"){
     px(ctx,x,y-2,"#000");
-    px(ctx,x+1,y-1,"#000");
   }
 
   if(mood === "tired"){
-    px(ctx,x,y,"#000");
-    px(ctx,x+1,y,"#000");
     px(ctx,x,y-1,"#000");
+    px(ctx,x+1,y-1,"#000");
   }
 
   if(mood === "happy"){
@@ -157,7 +165,7 @@ function drawEye(ctx,x,y,rand,mood){
 
 
 // =========================
-// 👄 MOUTH (mit Emotion)
+// 👄 MOUTH (IMPROVED)
 // =========================
 function drawMouth(ctx,y,mood){
 
