@@ -1,5 +1,4 @@
 
-```js
 export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   ctx.clearRect(0,0,64,64);
@@ -209,4 +208,4 @@ function getColor(code){
     BR:"#009C3B"
   }[code] || "#888";
 }
-```
+
