@@ -440,12 +440,15 @@ function openPlayerModal(player){
   const div = document.createElement("div");
   div.id = "playerModal";
 
+  // ⭐ FIX: saubere Stars (kein undefined / falsche Werte)
+  const stars = Math.min(Math.max(player.stars || 1, 1), 5);
+
   div.innerHTML = `
     <div class="modal-overlay">
       <div 
         class="player-modal" 
         data-tier="${player.tier || 'common'}"
-        data-stars="${player.stars || 1}"
+        data-stars="${stars}"
       >
 
         <button class="close-btn">✕</button>
@@ -453,7 +456,7 @@ function openPlayerModal(player){
         <div class="card-top">
           <div class="rating">${player.overall ?? 0}</div>
           <div class="stars-top">
-            <img src="./gfx/modal/star${player.stars}.webp" />
+            <img src="./gfx/modal/star${stars}.webp" />
           </div>
         </div>
 
@@ -469,14 +472,14 @@ function openPlayerModal(player){
 
   document.body.appendChild(div);
 
-  // 🎯 MOOD SYSTEM
+  // 🎯 MOOD SYSTEM (unverändert)
   const mood =
     (player.morale ?? 50) > 80 ? "happy" :
     (player.morale ?? 50) < 40 ? "angry" :
     (player.fitness ?? 100) < 50 ? "tired" :
     "neutral";
 
-  // 🎨 Avatar rendern
+  // 🎨 Avatar rendern (unverändert)
   const canvas = div.querySelector("#player-avatar");
   const ctx = canvas.getContext("2d");
 
@@ -489,7 +492,7 @@ function openPlayerModal(player){
   ctx.clearRect(0,0,64,64);
   ctx.drawImage(texture, 0, 0);
 
-  // ❌ Close logic
+  // ❌ Close logic (unverändert)
   const overlay = div.querySelector(".modal-overlay");
   const closeBtn = div.querySelector(".close-btn");
 
