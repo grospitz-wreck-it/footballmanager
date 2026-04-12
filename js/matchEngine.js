@@ -480,11 +480,17 @@ gameEvents.forEach(ev => {
   }
 }
 
-  if(ev.trigger === "random"){
-    if(Math.random() < (ev.probability || 0)){
-      applyGameEventEffect(ev, ctx);
-    }
+ ev._lastTrigger = ev._lastTrigger || -999;
+
+if(ev.trigger === "random"){
+  if(
+    live.minute - ev._lastTrigger > 1 && // 🔥 cooldown 1 Minuten
+    Math.random() < (ev.probability || 0)
+  ){
+    ev._lastTrigger = live.minute;
+    applyGameEventEffect(ev, ctx);
   }
+}
 
 });
       
