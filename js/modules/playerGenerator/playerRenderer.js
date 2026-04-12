@@ -1,14 +1,16 @@
 
 // ======================================
-// 🎮 DOOM STYLE PLAYER RENDERER (UPGRADED)
+// 🎮 PLAYER RENDERER (FIXED LANDMARK HYBRID)
 // ======================================
+
 import faceData from "./faceData.js";
-export function drawPlayer(ctx, rand, country, mood = "neutral") {
+
+export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   const scale = 4;
   const buffer = document.createElement("canvas");
-  buffer.width = 64 * scale;
-  buffer.height = 64 * scale;
+  buffer.width = 256;
+  buffer.height = 256;
 
   const bctx = buffer.getContext("2d");
 
@@ -16,100 +18,74 @@ export function drawPlayer(ctx, rand, country, mood = "neutral") {
   const cy = 140;
 
   // =========================
-  // 🎲 VARIATION
+  // 🧬 PICK FACE
   // =========================
-  const faceW = 55 + rand()*30;
-  const faceH = 75 + rand()*30;
-  const eyeY = 105 + rand()*15;
-  const eyeSpacing = 45 + rand()*20;
+  const raw = faceData[Math.floor(rand()*faceData.length)];
+  const pts = toPoints(raw);
 
+  normalize(pts, cx, cy, 1.2);
+
+  // =========================
+  // 🎨 COLORS
+  // =========================
   const skin = pick(rand, ["#f6d2be","#eac39b","#c68642","#8d5524"]);
   const hair = pick(rand, ["#1c1c1c","#3b2f2f","#6b4f3a","#d6a77a"]);
 
-  const hairStyle = pick(rand, ["short","long","bald","messy"]);
-  const beard = pick(rand, ["none","stubble","full"]);
-  const glasses = rand() < 0.25;
-
   // =========================
-  // 👤 FACE BASE
+  // 👤 HEAD (NOT from landmarks!)
   // =========================
   bctx.fillStyle = skin;
   bctx.beginPath();
-
-  for(let a=0;a<=Math.PI*2;a+=0.25){
-    let x = cx + Math.cos(a)*faceW + (rand()-0.5)*8;
-    let y = cy + Math.sin(a)*faceH + (rand()-0.5)*8;
-
-    if(a===0) bctx.moveTo(x,y);
-    else bctx.lineTo(x,y);
-  }
-
-  bctx.closePath();
+  bctx.ellipse(cx, cy, 70, 90, 0, 0, Math.PI*2);
   bctx.fill();
 
   // =========================
-  // 🌗 LIGHT (TOP LIGHT)
+  // 🌗 SHADING
   // =========================
-  let grad = bctx.createRadialGradient(cx, 80, 20, cx, 140, 180);
-  grad.addColorStop(0, "rgba(255,255,255,0.35)");
-  grad.addColorStop(1, "rgba(0,0,0,0.5)");
-
+  let grad = bctx.createLinearGradient(0, 60, 0, 240);
+  grad.addColorStop(0,"rgba(255,255,255,0.25)");
+  grad.addColorStop(1,"rgba(0,0,0,0.5)");
   bctx.fillStyle = grad;
   bctx.fill();
 
   // =========================
-  // 🧠 EYE SHADOWS (WICHTIG!)
+  // 👁 EYE SOCKETS (DEPTH!)
   // =========================
-  drawEyeSocket(bctx, cx - eyeSpacing/2, eyeY);
-  drawEyeSocket(bctx, cx + eyeSpacing/2, eyeY);
+  drawEyeSocket(bctx, center(pts.slice(36,42)));
+  drawEyeSocket(bctx, center(pts.slice(42,48)));
 
   // =========================
-  // 👁 EYES (mehr Doom)
+  // 👁 EYES (from landmarks)
   // =========================
-  drawEye(bctx, cx - eyeSpacing/2, eyeY, rand);
-  drawEye(bctx, cx + eyeSpacing/2, eyeY, rand);
+  drawEye(bctx, pts.slice(36,42));
+  drawEye(bctx, pts.slice(42,48));
 
   // =========================
   // 👃 NOSE SHADOW
   // =========================
+  const nose = center(pts.slice(27,36));
   bctx.fillStyle = "rgba(0,0,0,0.25)";
   bctx.beginPath();
-  bctx.ellipse(cx, 150, 12, 25, 0, 0, Math.PI);
+  bctx.ellipse(nose[0], nose[1]+10, 10, 20, 0, 0, Math.PI);
   bctx.fill();
 
   // =========================
-  // 👄 MOUTH (volume!)
+  // 👄 MOUTH (from landmarks)
   // =========================
-  bctx.fillStyle = "#400";
+  drawMouth(bctx, pts.slice(48,60));
+
+  // =========================
+  // 💇 HAIR (simple doom style)
+  // =========================
+  bctx.fillStyle = hair;
   bctx.beginPath();
-  bctx.ellipse(cx, 190, 30, 12 + rand()*6, 0, 0, Math.PI*2);
+  bctx.ellipse(cx, cy-60, 90, 60, 0, Math.PI, 0);
   bctx.fill();
 
-  // lip shadow
-  bctx.fillStyle = "rgba(0,0,0,0.3)";
-  bctx.fillRect(cx-30, 185, 60, 4);
-
   // =========================
-  // 💇 HAIR
+  // 🎨 NOISE (important!)
   // =========================
-  drawHair(bctx, cx, faceW, hairStyle, hair, rand);
-
-  // =========================
-  // 🧔 BEARD
-  // =========================
-  drawBeard(bctx, cx, cy, beard);
-
-  // =========================
-  // 👓 GLASSES
-  // =========================
-  if(glasses){
-    drawGlasses(bctx, cx-eyeSpacing/2, cx+eyeSpacing/2, eyeY);
-  }
-
-  // =========================
-  // 🎨 SKIN NOISE (WICHTIG)
-  // =========================
-  addNoise(bctx, buffer.width, buffer.height, 10);
+  addNoise(bctx, buffer.width, buffer.height, 12);
 
   // =========================
   // 🎨 PALETTE
@@ -131,49 +107,52 @@ export function drawPlayer(ctx, rand, country, mood = "neutral") {
 
 
 // ======================================
-// 👁 EYE SOCKET (depth)
+// 👁 EYE
 // ======================================
-function drawEyeSocket(ctx,x,y){
-  ctx.fillStyle = "rgba(0,0,0,0.35)";
-  ctx.beginPath();
-  ctx.ellipse(x,y,20,14,0,0,Math.PI*2);
-  ctx.fill();
-}
-
-
-// ======================================
-// 👁 EYE (realer)
-// ======================================
-function drawEye(ctx,x,y,rand){
+function drawEye(ctx, pts){
 
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.ellipse(x,y,14,9,0,0,Math.PI*2);
+
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for(let p of pts){
+    ctx.lineTo(p[0], p[1]);
+  }
+
+  ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = "#222";
+  const c = center(pts);
+
+  ctx.fillStyle = "#000";
   ctx.beginPath();
-  ctx.arc(x + (rand()-0.5)*4, y, 5, 0, Math.PI*2);
+  ctx.arc(c[0], c[1], 4, 0, Math.PI*2);
   ctx.fill();
 }
 
 
 // ======================================
-// 💇 HAIR
+// 👁 SOCKET
 // ======================================
-function drawHair(ctx,cx,faceW,style,color,rand){
+function drawEyeSocket(ctx, c){
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  ctx.beginPath();
+  ctx.ellipse(c[0], c[1], 18, 12, 0, 0, Math.PI*2);
+  ctx.fill();
+}
 
-  if(style==="bald") return;
 
-  ctx.fillStyle = color;
+// ======================================
+// 👄 MOUTH
+// ======================================
+function drawMouth(ctx, pts){
+
+  ctx.fillStyle = "#400";
   ctx.beginPath();
 
-  for(let a=0;a<=Math.PI;a+=0.2){
-    let x = cx + Math.cos(a)*(faceW+20) + (rand()-0.5)*10;
-    let y = 90 + Math.sin(a)*70 + (rand()-0.5)*10;
-
-    if(a===0) ctx.moveTo(x,y);
-    else ctx.lineTo(x,y);
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for(let p of pts){
+    ctx.lineTo(p[0], p[1]);
   }
 
   ctx.closePath();
@@ -182,35 +161,32 @@ function drawHair(ctx,cx,faceW,style,color,rand){
 
 
 // ======================================
-// 🧔 BEARD
+// 🧬 HELPERS
 // ======================================
-function drawBeard(ctx,cx,cy,type){
 
-  if(type==="none") return;
-
-  ctx.fillStyle="rgba(0,0,0,0.35)";
-
-  ctx.beginPath();
-  ctx.ellipse(cx,cy+40,50,40,0,0,Math.PI);
-  ctx.fill();
+function toPoints(row){
+  let pts=[];
+  for(let i=0;i<row.length;i+=2){
+    pts.push([row[i],row[i+1]]);
+  }
+  return pts;
 }
 
+function normalize(pts,cx,cy,scale){
+  let mx=0,my=0;
+  for(let p of pts){ mx+=p[0]; my+=p[1]; }
+  mx/=pts.length; my/=pts.length;
 
-// ======================================
-// 👓 GLASSES
-// ======================================
-function drawGlasses(ctx,x1,x2,y){
+  for(let p of pts){
+    p[0]=(p[0]-mx)*scale+cx;
+    p[1]=(p[1]-my)*scale+cy;
+  }
+}
 
-  ctx.strokeStyle="#000";
-  ctx.lineWidth=3;
-
-  ctx.strokeRect(x1-14,y-8,28,16);
-  ctx.strokeRect(x2-14,y-8,28,16);
-
-  ctx.beginPath();
-  ctx.moveTo(x1+14,y);
-  ctx.lineTo(x2-14,y);
-  ctx.stroke();
+function center(pts){
+  let x=0,y=0;
+  for(let p of pts){ x+=p[0]; y+=p[1]; }
+  return [x/pts.length,y/pts.length];
 }
 
 
@@ -218,16 +194,12 @@ function drawGlasses(ctx,x1,x2,y){
 // 🎨 NOISE
 // ======================================
 function addNoise(ctx,w,h,amount){
-
-  let img = ctx.getImageData(0,0,w,h);
-  let d = img.data;
+  let img=ctx.getImageData(0,0,w,h);
+  let d=img.data;
 
   for(let i=0;i<d.length;i+=4){
-    let n = (Math.random()-0.5)*amount;
-
-    d[i]+=n;
-    d[i+1]+=n;
-    d[i+2]+=n;
+    let n=(Math.random()-0.5)*amount;
+    d[i]+=n; d[i+1]+=n; d[i+2]+=n;
   }
 
   ctx.putImageData(img,0,0);
@@ -247,11 +219,10 @@ const palette = [
 ];
 
 function applyPalette(ctx,w,h){
-  let img = ctx.getImageData(0,0,w,h);
-  let d = img.data;
+  let img=ctx.getImageData(0,0,w,h);
+  let d=img.data;
 
   for(let i=0;i<d.length;i+=4){
-
     let best,dist=999999;
 
     for(let p of palette){
@@ -272,13 +243,11 @@ function applyPalette(ctx,w,h){
 // 🧱 PIXELIZE
 // ======================================
 function pixelize(ctx,w,h,size){
-
-  let img = ctx.getImageData(0,0,w,h);
-  let d = img.data;
+  let img=ctx.getImageData(0,0,w,h);
+  let d=img.data;
 
   for(let y=0;y<h;y+=size){
     for(let x=0;x<w;x+=size){
-
       let i=(y*w+x)*4;
 
       for(let dy=0;dy<size;dy++){
@@ -294,6 +263,11 @@ function pixelize(ctx,w,h,size){
 
   ctx.putImageData(img,0,0);
 }
+
+function pick(rand,a){
+  return a[Math.floor(rand()*a.length)];
+}
+
 
 
 // ======================================
