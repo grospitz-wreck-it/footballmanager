@@ -366,6 +366,7 @@ function renderGameEvents(list){
 
   list.forEach(e => {
 
+    const isEdit = state.inlineGameEventEditId === e.id;
     const assets = e.assets || [];
 
     const assetHTML = assets.map(a=>`
@@ -380,10 +381,16 @@ function renderGameEvents(list){
 
     const div = document.createElement("div");
     div.className = "eventRow";
+    div.dataset.id = e.id;
 
     div.innerHTML = `
       <div>
-        <strong>${e.title}</strong><br>
+        ${
+          isEdit
+          ? `<input data-field="title" value="${e.title}">`
+          : `<strong>${e.title}</strong>`
+        }
+        <br>
         🧠 ${e.type} | 🎯 ${e.trigger}<br>
         ⚡ ${e.probability} | ⏳ ${e.duration}
       </div>
@@ -391,7 +398,17 @@ function renderGameEvents(list){
       <div class="assetRow">${assetHTML}</div>
 
       <div>
-        <button data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
+        ${
+          isEdit
+          ? `
+            <button data-action="saveGameEventInline" data-id="${e.id}">💾</button>
+            <button data-action="cancelGameEventInline">❌</button>
+          `
+          : `
+            <button data-action="editGameEventInline" data-id="${e.id}">✏️</button>
+            <button class="danger" data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
+          `
+        }
       </div>
     `;
 
