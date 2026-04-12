@@ -509,10 +509,11 @@ ctx.shadowBlur = 0;
   // ❌ Close Button
   closeBtn.onclick = () => div.remove();
 
-  // ❌ Klick außerhalb
-  overlay.onclick = (e) => {
-    if(e.target === overlay) div.remove();
-  };
+  overlay.addEventListener("click", (e) => {
+  if (e.target.classList.contains("modal-overlay")) {
+    div.remove();
+  }
+});
 }
 
 // =========================
