@@ -61,8 +61,8 @@ function getGoalAssets(){
   const events = game.data?.gameEvents || [];
 
   const goalEvent = events.find(e =>
-    e.type === "goal" || e.effect === "goal"
-  );
+  e.type === "goal" || e.effect === "goal" || e.eventType === "goal"
+);
 
   return Array.isArray(goalEvent?.assets)
     ? goalEvent.assets
