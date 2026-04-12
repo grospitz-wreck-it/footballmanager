@@ -68,8 +68,15 @@ function emitMatchEvent(type, payload = {}) {
     id: crypto.randomUUID(),
     type: type || "UNKNOWN_EVENT",
     minute: live.minute ?? 0,
+
+    // 🔥 PAYLOAD zuerst
     ...payload,
-    text: payload?.text ?? null
+
+    // 🔥 SAFETY: TEXT fallback
+    text: payload?.text || payload?.title || null,
+
+    // 🔥 NEU: ASSETS (für WEBP etc.)
+    assets: payload?.assets || []
   };
 
   emit(EVENTS.MATCH_EVENT, event);
