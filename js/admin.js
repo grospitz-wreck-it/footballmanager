@@ -549,25 +549,32 @@ loadEvents();
 // =====================
 function switchTab(tab){
 
-document.querySelectorAll(".tabContent").forEach(t => t.classList.remove("active"));
-document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tabContent").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
 
-if(tab === "game"){
-  qs("gameEventsTab")?.classList.add("active");
-  qs("tabGameEvents")?.classList.add("active");
-  loadGameEvents();
-}
+  // 🔥 FIX: ADS TAB (fehlte)
+  if(tab === "ads"){
+    qs("adsTab")?.classList.add("active");
+    qs("tabAds")?.classList.add("active");
+    loadCampaigns();
+  }
 
-if(tab === "events"){
-qs("eventsTab").classList.add("active");
-qs("tabEvents").classList.add("active");
-loadEvents();
-}
+  if(tab === "game"){
+    qs("gameEventsTab")?.classList.add("active");
+    qs("tabGameEvents")?.classList.add("active");
+    loadGameEvents();
+  }
 
-if(tab === "insights"){
-qs("insightsTab").classList.add("active");
-qs("tabInsights").classList.add("active");
-}
+  if(tab === "events"){
+    qs("eventsTab")?.classList.add("active");
+    qs("tabEvents")?.classList.add("active");
+    loadEvents();
+  }
+
+  if(tab === "insights"){
+    qs("insightsTab")?.classList.add("active");
+    qs("tabInsights")?.classList.add("active");
+  }
 }
 
 // =====================
