@@ -457,8 +457,11 @@ function runMatchLoop({ onTick, onEnd } = {}){
   const STEP = 400;
 
   matchInterval = setInterval(() => {
-  console.log("⏱ TICK", game.match?.live?.minute);
-    const now = performance.now();
+console.log("⏱", {
+  minute: live.minute,
+  running: live.running,
+  phase: live.phase
+});    const now = performance.now();
     const delta = now - lastTime;
     lastTime = now;
 
