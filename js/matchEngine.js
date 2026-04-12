@@ -72,11 +72,11 @@ function emitMatchEvent(type, payload = {}) {
     // 🔥 PAYLOAD zuerst
     ...payload,
 
-    // 🔥 SAFETY: TEXT fallback
-    text: payload?.text || payload?.title || null,
+    // 🔥 SAFETY: TEXT fallback (payload darf NICHT überschrieben werden)
+    text: payload?.text ?? payload?.title ?? null,
 
-    // 🔥 NEU: ASSETS (für WEBP etc.)
-    assets: payload?.assets || []
+    // 🔥 ASSETS sauber absichern (kein undefined / kein Müll)
+    assets: Array.isArray(payload?.assets) ? payload.assets : []
   };
 
   emit(EVENTS.MATCH_EVENT, event);
