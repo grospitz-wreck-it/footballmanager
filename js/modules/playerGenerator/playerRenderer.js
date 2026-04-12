@@ -16,82 +16,90 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   const hair = pick(rand, ["#1c1c1c","#2b2b2b","#5a3a2e","#d6a77a"]);
 
-  // =========================
-  // 👤 FACE SHAPE (elliptisch)
-  // =========================
-  const cx = 32;
-  const cy = 30;
+ function drawFace(ctx, skin){
 
-  for(let y=10;y<52;y++){
-    for(let x=12;x<52;x++){
+  const light = skin[0];
+  const mid   = skin[1];
+  const dark  = skin[2];
 
-      let dx = (x-cx)/18;
-      let dy = (y-cy)/22;
+  // =========================
+  // BASE SHAPE (Planes!)
+  // =========================
+  for(let y=12;y<52;y++){
+    for(let x=16;x<48;x++){
+
+      let dx = (x-32)/16;
+      let dy = (y-30)/20;
 
       if(dx*dx + dy*dy > 1) continue;
 
-      // 💡 echtes Lighting
-      let light = (-dx*0.7) + (-dy*0.9);
+      let col = mid;
 
-      let col = skin[1];
-      if(light > 0.25) col = skin[0];
-      if(light < -0.25) col = skin[2];
+      // 🔥 PLANES statt Noise
+      if(dy < -0.3) col = light;        // Stirn
+      if(dy > 0.4) col = dark;          // Kinn
+      if(dx > 0.5) col = dark;          // Schattenseite
+      if(dx < -0.4) col = light;        // Lichtseite
 
       px(ctx,x,y,col);
     }
   }
 
   // =========================
-  // 💇 HAIR (Form statt Noise)
+  // 👁 EYE SOCKETS (entscheidend!)
   // =========================
-  for(let y=10;y<22;y++){
-    for(let x=14;x<50;x++){
-
-      let dx = (x-32)/18;
-      let dy = (y-20)/10;
-
-      if(dx*dx + dy*dy < 1){
-        px(ctx,x,y,hair);
-      }
-    }
+  for(let x=24;x<=28;x++){
+    px(ctx,x,30,dark);
+  }
+  for(let x=36;x<=40;x++){
+    px(ctx,x,30,dark);
   }
 
   // =========================
-  // 👁 EYES
+  // 👁 EYES (sauber!)
   // =========================
-  drawEye(ctx,26,30,rand,mood);
-  drawEye(ctx,38,30,rand,mood);
+  drawEyeHQ(ctx,26,30);
+  drawEyeHQ(ctx,38,30);
 
   // =========================
-  // 👃 NOSE
+  // 👁 EYELIDS (macht 80% Realismus)
   // =========================
-  for(let i=0;i<4;i++){
-    px(ctx,32,32+i,"#00000033");
+  line(ctx,24,29,6,"#000");
+  line(ctx,36,29,6,"#000");
+
+  // =========================
+  // 👁 EYEBROWS
+  // =========================
+  line(ctx,24,27,6,"#111");
+  line(ctx,36,27,6,"#111");
+
+  // =========================
+  // 👃 NOSE (volumetrisch)
+  // =========================
+  for(let y=30;y<38;y++){
+    px(ctx,32,y,dark);
   }
-  px(ctx,31,33,"#ffffff22");
+
+  px(ctx,31,34,light); // highlight
+  px(ctx,33,34,dark);  // shadow edge
+
+  // Nasenspitze
+  px(ctx,31,38,dark);
+  px(ctx,32,38,dark);
+  px(ctx,33,38,dark);
 
   // =========================
-  // 👄 MOUTH
+  // 👄 MOUTH (Form, nicht Linie)
   // =========================
-  drawMouth(ctx,36,mood);
+  px(ctx,29,42,dark);
+  px(ctx,30,43,dark);
+  px(ctx,31,43,dark);
+  px(ctx,32,43,dark);
+  px(ctx,33,42,dark);
 
-  // =========================
-  // 👁️ EYEBROWS (super wichtig)
-  // =========================
-  drawBrows(ctx,mood);
-
-  // =========================
-  // 🧔 BEARD (weich, kein Noise)
-  // =========================
-  if(rand()>0.6){
-    for(let y=36;y<48;y++){
-      for(let x=20;x<44;x++){
-        if((x+y)%2===0){
-          px(ctx,x,y,hair);
-        }
-      }
-    }
-  }
+  // Unterlippen-Highlight
+  px(ctx,31,44,light);
+}
 
   // =========================
   // 👕 BODY
