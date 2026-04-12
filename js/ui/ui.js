@@ -469,19 +469,27 @@ function openPlayerModal(player){
 
   document.body.appendChild(div);
 
+  // 🎯 MOOD SYSTEM
+  const mood =
+    (player.morale ?? 50) > 80 ? "happy" :
+    (player.morale ?? 50) < 40 ? "angry" :
+    (player.fitness ?? 100) < 50 ? "tired" :
+    "neutral";
+
   // 🎨 Avatar rendern
   const canvas = div.querySelector("#player-avatar");
   const ctx = canvas.getContext("2d");
 
   const texture = getPlayerTexture(
     player.id,
-    player.nationality || player.Country || "DE"
+    player.nationality || player.Country || "DE",
+    mood
   );
 
   ctx.clearRect(0,0,64,64);
   ctx.drawImage(texture, 0, 0);
 
-  // ❌ Close logic (FIXED)
+  // ❌ Close logic
   const overlay = div.querySelector(".modal-overlay");
   const closeBtn = div.querySelector(".close-btn");
 
