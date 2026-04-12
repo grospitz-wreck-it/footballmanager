@@ -169,18 +169,72 @@ function drawEars(ctx, cx, dna){
 // 💇 HAIR
 // ======================================
 
+
 function drawHair(ctx, cx, dna){
 
   if(dna.hairStyle === "none") return;
 
   ctx.fillStyle = dna.hairColor;
 
+  const top = 10;
+
+  // 🎲 Variation
+  const w = 14 + Math.floor(dna.headW); // passt zum Kopf
+  const h = 4 + Math.floor(Math.random()*4); // leicht variabel
+
+  // =========================
+  // ✂️ SHORT HAIR (mit Struktur)
+  // =========================
   if(dna.hairStyle === "short"){
-    ctx.fillRect(cx-16, 10, 32, 6);
+
+    for(let y=0; y<h; y++){
+      let width = w - Math.floor(y/2);
+
+      ctx.fillRect(cx - width, top + y, width*2, 1);
+    }
+
+    // kleine Unregelmäßigkeit (🔥 wichtig)
+    if(Math.random() < 0.5){
+      ctx.fillRect(cx - w - 1, top + 2, 2, 1);
+    }
   }
 
+  // =========================
+  // 🧱 FLAT HAIR (Top Cut)
+  // =========================
   if(dna.hairStyle === "flat"){
-    ctx.fillRect(cx-18, 10, 36, 10);
+
+    ctx.fillRect(cx - w, top, w*2, h);
+
+    // Kante betonen
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(cx - w, top + h - 1, w*2, 1);
+  }
+
+  // =========================
+  // 🌊 MESSY HAIR (NEU!)
+  // =========================
+  if(dna.hairStyle === "messy"){
+
+    for(let y=0; y<h; y++){
+      let width = w - Math.floor(y/3);
+
+      let jitter = Math.floor(Math.random()*2);
+
+      ctx.fillRect(cx - width + jitter, top + y, width*2, 1);
+    }
+  }
+
+  // =========================
+  // 🪖 BUZZ CUT (NEU!)
+  // =========================
+  if(dna.hairStyle === "buzz"){
+
+    ctx.fillStyle = dna.hairColor;
+
+    for(let x=-w; x<w; x+=2){
+      ctx.fillRect(cx + x, top, 1, 2);
+    }
   }
 }
 
@@ -335,14 +389,69 @@ function drawAccessories(ctx, cx, dna){
 // 👕 BODY
 // ======================================
 
-function drawBody(ctx, cx, country){
 
-  ctx.fillStyle = getColor(country);
-  ctx.fillRect(cx-18, 46, 36, 18);
+function drawBody(ctx, cx, country, rand){
 
+  const y = 46;
+
+  const base = getColor(country);
+  const secondary = getSecondaryColor(country);
+
+  // =========================
+  // 👕 SHIRT BASE (mit Schultern)
+  // =========================
+  ctx.fillStyle = base;
+
+  // Schultern breiter
+  ctx.fillRect(cx-20, y, 40, 16);
+
+  // leicht verjüngen unten
+  ctx.fillRect(cx-18, y+12, 36, 8);
+
+  // =========================
+  // 🎨 PATTERN (Team Identity!)
+  // =========================
+  const pattern = pick(rand, ["plain","stripe","center","half"]);
+
+  ctx.fillStyle = secondary;
+
+  if(pattern === "stripe"){
+    // vertikale Streifen
+    for(let x=-16; x<=16; x+=6){
+      ctx.fillRect(cx+x, y, 2, 16);
+    }
+  }
+
+  if(pattern === "center"){
+    // Bruststreifen (PSG style)
+    ctx.fillRect(cx-3, y, 6, 16);
+  }
+
+  if(pattern === "half"){
+    // halb/halb
+    ctx.fillRect(cx, y, 20, 16);
+  }
+
+  // =========================
+  // 🧣 COLLAR
+  // =========================
+  ctx.fillStyle = "#fff";
+
+  ctx.fillRect(cx-4, y, 8, 2);
+
+  // V-Ausschnitt
+  ctx.clearRect(cx-2, y, 4, 2);
+
+  // =========================
+  // 🌗 SHADING
+  // =========================
   ctx.fillStyle = "rgba(0,0,0,0.2)";
-  ctx.fillRect(cx-18, 46, 36, 3);
+  ctx.fillRect(cx-20, y, 40, 2);
+
+  ctx.fillStyle = "rgba(0,0,0,0.15)";
+  ctx.fillRect(cx-18, y+14, 36, 2);
 }
+
 
 
 // ======================================
