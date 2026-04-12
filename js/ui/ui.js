@@ -444,8 +444,11 @@ function openPlayerModal(player){
 
   div.innerHTML = `
     <div class="modal-overlay">
-      <div class="player-modal">
-
+    <div 
+      class="player-modal" 
+      data-tier="${player.tier || 'common'}"
+      data-stars="${player.stars || 1}"
+    >
         <button class="close-btn">✕</button>
 
         <div class="card-header">
