@@ -434,6 +434,16 @@ function renderStat(label, value){
 // =========================
 // 🪟 PLAYER MODAL
 // =========================
+function renderStars(count = 1){
+  const safe = Math.max(1, Math.min(count, 5)); // clamp 1–5
+
+  return `
+    <div class="stars">
+      <img src="/gfx/modal/star${safe}.webp" alt="${safe} stars" />
+    </div>
+  `;
+}
+
 function openPlayerModal(player){
 
   const existing = document.getElementById("playerModal");
@@ -444,21 +454,24 @@ function openPlayerModal(player){
 
   div.innerHTML = `
     <div class="modal-overlay">
-    <div 
-      class="player-modal" 
-      data-tier="${player.tier || 'common'}"
-      data-stars="${player.stars || 1}"
-    >
+      <div 
+        class="player-modal" 
+        data-tier="${player.tier || 'common'}"
+        data-stars="${player.stars || 1}"
+      >
+
         <button class="close-btn">✕</button>
 
         <div class="card-header">
           <h1>${player.name}</h1>
-          <span class="overall">${player.overall}</span>
+          <span class="overall">${player.overall ?? 0}</span>
         </div>
 
         <div class="card-body">
-          <div class="position">${player.position}</div>
-          <div class="tier">${player.tier}</div>
+          <div class="position">${player.position || "-"}</div>
+          <div class="tier">${player.tier || "common"}</div>
+
+          ${renderStars(player.stars)}
 
           <div class="stats">
             ${renderStat("SHO", player.shooting)}
@@ -474,10 +487,9 @@ function openPlayerModal(player){
   document.body.appendChild(div);
 
   const overlay = div.querySelector(".modal-overlay");
-  const modal = div.querySelector(".player-modal");
   const closeBtn = div.querySelector(".close-btn");
 
-  // ❌ Button
+  // ❌ Close Button
   closeBtn.onclick = () => div.remove();
 
   // ❌ Klick außerhalb
