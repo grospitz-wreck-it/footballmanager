@@ -174,6 +174,37 @@ function updateEvents(){
   
 }
 
+const overlayEl = document.getElementById("matchOverlay");
+const overlayImg = document.getElementById("overlayImage");
+const overlayText = document.getElementById("overlayText");
+
+let overlayTimeout = null;
+
+export function showOverlay(imageUrl, text, duration = 2500){
+
+  if(!overlayEl) return;
+
+  // reset vorheriges Overlay
+  clearTimeout(overlayTimeout);
+
+  // content setzen
+  overlayImg.src = imageUrl || "";
+  overlayText.innerText = text || "";
+
+  // anzeigen
+  overlayEl.classList.remove("hidden");
+  requestAnimationFrame(() => {
+    overlayEl.classList.add("show");
+  });
+
+  // auto hide
+  overlayTimeout = setTimeout(() => {
+    overlayEl.classList.remove("show");
+    overlayEl.classList.add("hidden");
+  }, duration);
+}
+
+
 // =========================
 // 📊 TABS
 // =========================
