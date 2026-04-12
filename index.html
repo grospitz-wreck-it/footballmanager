@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- 🔥 WICHTIG: CSS EINBINDEN -->
+<!-- 🔥 CSS -->
 <link rel="stylesheet" href="./style.css">
 
 </head>
@@ -14,104 +14,114 @@
 <!-- SPLASH -->
 <div id="splash">
   <input id="nameInput" placeholder="Dein Name">
+
   <div id="plzSearch">
-  <input id="plzInput" maxlength="3" placeholder="PLZ (z.B. 320)" />
-  <div id="leagueResults"></div>
-</div>
+    <input id="plzInput" maxlength="3" placeholder="PLZ (z.B. 320)" />
+    <div id="leagueResults"></div>
+  </div>
+
   <select id="leagueSelect"></select>
   <select id="teamSelect"></select>
+
   <button id="startBtn">Spiel starten</button>
 </div>
 
 <!-- APP -->
 <div id="app">
 
-<!-- HEADER -->
-<div id="header">
-  <button id="burgerBtn">☰</button>
-  <div>Kreisliga Manager</div>
-</div>
-
-<!-- SIDEBAR -->
-<div id="sidebarWrapper" class="sidebar-wrapper">
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
-
-  <div id="sidebar">
-    <button id="saveBtn">💾 Speichern</button>
-    <button id="loadBtn">📂 Laden</button>
-    <button id="resetBtn">🗑 Reset</button>
-
-    <hr>
-
-    <select id="leagueSelectMenu"></select>
-    <select id="teamSelectMenu"></select>
-  </div>
-</div>
-
-<!-- MAIN -->
-<div class="container">
-
-  <div id="topBar">
-    <div id="topTeams">- vs -</div>
-    <div id="topScore">0 : 0</div>
-    <div id="topMinute">0'</div>
+  <!-- HEADER -->
+  <div id="header">
+    <button id="burgerBtn">☰</button>
+    <div>Kreisliga Manager</div>
   </div>
 
-  <div id="progressBar">
-    <div id="progressFill"></div>
+  <!-- SIDEBAR -->
+  <div id="sidebarWrapper" class="sidebar-wrapper">
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <div id="sidebar">
+      <button id="saveBtn">💾 Speichern</button>
+      <button id="loadBtn">📂 Laden</button>
+      <button id="resetBtn">🗑 Reset</button>
+
+      <hr>
+
+      <select id="leagueSelectMenu"></select>
+      <select id="teamSelectMenu"></select>
+    </div>
   </div>
 
-  <canvas id="gameCanvas"></canvas>
+  <!-- MAIN -->
+  <div class="container">
 
-  <div id="eventBar">
-    <div id="eventText">Willkommen im Spiel</div>
-  </div>
-
-  <button id="mainButton">Spiel starten</button>
-
-  <div id="adContainer"></div>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="table">Tabelle</button>
-    <button class="tab" data-tab="schedule">Spieltage</button>
-    <button class="tab" data-tab="team">Team</button>
-  </div>
-
-  <!-- TAB CONTENT -->
-  <div id="tabContent">
-
-    <div id="tableView" class="tab-view">
-      <div id="table">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Team</th>
-              <th>SP</th>
-              <th>S</th>
-              <th>U</th>
-              <th>N</th>
-              <th>Tore</th>
-              <th>Diff</th>
-              <th>Pkt</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
+    <div id="topBar">
+      <div id="topTeams">- vs -</div>
+      <div id="topScore">0 : 0</div>
+      <div id="topMinute">0'</div>
     </div>
 
-    <div id="scheduleView" class="tab-view" style="display:none;"></div>
-    <div id="teamView" class="tab-view" style="display:none;"></div>
-    <div id="teamView" class="tab-view"></div>
+    <div id="progressBar">
+      <div id="progressFill"></div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="eventBar">
+      <div id="eventText">Willkommen im Spiel</div>
+    </div>
+
+    <button id="mainButton">Spiel starten</button>
+
+    <div id="adContainer"></div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" data-tab="table">Tabelle</button>
+      <button class="tab" data-tab="schedule">Spieltage</button>
+      <button class="tab" data-tab="team">Team</button>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <div id="tabContent">
+
+      <div id="tableView" class="tab-view">
+        <div id="table">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Team</th>
+                <th>SP</th>
+                <th>S</th>
+                <th>U</th>
+                <th>N</th>
+                <th>Tore</th>
+                <th>Diff</th>
+                <th>Pkt</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="scheduleView" class="tab-view" style="display:none;"></div>
+      <div id="teamView" class="tab-view" style="display:none;"></div>
+
+    </div>
+
   </div>
 
 </div>
 
-<script type="module" src="js/main.js"></script>
+<!-- 🔥 OVERLAY (vor Script!) -->
 <div id="matchOverlay" class="overlay hidden">
   <img id="overlayImage" />
   <div id="overlayText"></div>
 </div>
+
+<!-- SCRIPT -->
+<script type="module" src="js/main.js"></script>
+
 </body>
 </html>
