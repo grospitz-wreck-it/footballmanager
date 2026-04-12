@@ -565,13 +565,27 @@ if(a==="deleteEvent") deleteEvent(e.target.dataset.id);
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
 
-qs("saveBtn")?.addEventListener("click", createCampaign);
-qs("createEventBtn")?.addEventListener("click", saveEvent);
+document.addEventListener("DOMContentLoaded", () => {
 
-qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
-qs("tabEvents")?.addEventListener("click", () => switchTab("events"));
-qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
+  qs("saveBtn")?.addEventListener("click", createCampaign);
+  qs("createEventBtn")?.addEventListener("click", saveEvent);
 
-switchTab("ads");
-loadCampaigns();
+  // 🔥 NEU
+  qs("saveGameEventBtn")?.addEventListener("click", saveGameEvent);
+
+  qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
+  qs("tabEvents")?.addEventListener("click", () => switchTab("events"));
+  qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
+
+  // 🔥 NEU
+  qs("tabGameEvents")?.addEventListener("click", () => switchTab("game"));
+
+  // 🔥 NEU: Initial Load
+  loadGameEvents();
+  loadEventTypes();
+
+  // bestehend
+  switchTab("ads");
+  loadCampaigns();
 });
+
