@@ -141,6 +141,10 @@ ${events.length
 // =========================
 function initDebugOverlay(){
 
+  if(!isDebugEnabled()){
+    console.log("🐞 Debug Overlay deaktiviert");
+    return;
+  }
   const { content, getFrozen } = createOverlay();
 
   let isHovering = false;
