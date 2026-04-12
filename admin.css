@@ -317,3 +317,16 @@ button.danger {
 button.danger:hover {
   background: #d9363e;
 }
+.debugToggle{
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 99999;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  background: #111;
+  color: #0f0;
+  cursor: pointer;
+  font-family: monospace;
+}
