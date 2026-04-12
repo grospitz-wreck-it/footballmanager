@@ -502,8 +502,16 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
       live.minute++;
 
-      const ctx = { match: game.match.current };
+const ctx = {
+  match: game.match.current,
 
+  requestGoal: (data = {}) => {
+    game.match.flags = game.match.flags || {};
+
+    game.match.flags.goalRequested = true;
+    game.match.flags.goalData = data;
+  }
+};
       rollRandomEvents(ctx);
       simulateLiveEvent(ctx);
       updateEvents();
