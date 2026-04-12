@@ -565,8 +565,6 @@ if(a==="deleteEvent") deleteEvent(e.target.dataset.id);
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
 
-document.addEventListener("DOMContentLoaded", () => {
-
   qs("saveBtn")?.addEventListener("click", createCampaign);
   qs("createEventBtn")?.addEventListener("click", saveEvent);
 
