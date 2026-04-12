@@ -2,7 +2,7 @@
 // ======================================
 // 🎮 DOOM STYLE PLAYER RENDERER (UPGRADED)
 // ======================================
-
+import faceData from "./faceData.js";
 export function drawPlayer(ctx, rand, country, mood = "neutral") {
 
   const scale = 4;
