@@ -9,13 +9,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const state = {
   campaigns: [],
   events: [],
-  gameEvents: [], // 🔥 NEU
+  gameEvents: [],
   editId: null,
   editEventId: null,
   inlineEditId: null,
-  inlineEventEditId: null
-};
+  inlineEventEditId: null,
 
+  // 🔥 NEU
+  inlineGameEventEditId: null
+};
 // =====================
 // HELPERS
 // =====================
