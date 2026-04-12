@@ -117,24 +117,36 @@ function createDNA(rand, country, quality){
 // ======================================
 
 function drawHead(ctx, cx, dna){
+
   const cy = 28;
 
-  for(let y=-dna.headH; y<=dna.headH; y++){
-    let t = y / dna.headH;
-    let w = Math.round(dna.headW * Math.sqrt(1 - t*t));
+  const skin = [
+    dna.skinLight,
+    dna.skinMid,
+    dna.skinDark
+  ];
 
-    if(y > 0 && y < dna.headH/2) w += dna.cheekWidth;
-    if(y > dna.headH/2) w += dna.jawWidth;
+  // 80s STYLE: harte Stufen statt Kurve
+  const shape = [
+    {w:8, c:0},   // top highlight
+    {w:10,c:0},
+    {w:12,c:1},
+    {w:13,c:1},
+    {w:14,c:1},
+    {w:15,c:1},
+    {w:15,c:1},
+    {w:14,c:2},   // shadow start
+    {w:13,c:2},
+    {w:12,c:2},
+    {w:10,c:2},
+  ];
 
-    let color = dna.skinMid;
-    if(y < -dna.headH*0.3) color = dna.skinLight;
-    if(y > dna.headH*0.4) color = dna.skinDark;
-
-    ctx.fillStyle = color;
-    ctx.fillRect(cx - w, cy + y, w*2, 1);
+  for(let i=0;i<shape.length;i++){
+    const row = shape[i];
+    ctx.fillStyle = skin[row.c];
+    ctx.fillRect(cx - row.w, cy - 10 + i, row.w*2, 1);
   }
 }
-
 
 // ======================================
 // 👂 EARS
@@ -158,59 +170,22 @@ function drawEar(ctx, x, y, w, h, dna){
 // 💇 HAIR (ALL STYLES)
 // ======================================
 
-function drawHair(ctx, cx, dna, rand){
+function drawHair(ctx, cx, dna){
 
   if(dna.hairStyle === "none") return;
 
   ctx.fillStyle = dna.hairColor;
 
-  const top = 10;
-  const w = dna.headW + 2;
+  const y = 14;
 
-  if(dna.hairStyle === "crop"){
-    for(let y=0;y<dna.hairHeight;y++){
-      let width = w - Math.floor(y/2);
-      ctx.fillRect(cx - width, top + y, width*2, 1);
-    }
-  }
+  // harte Pixel-Blöcke
+  ctx.fillRect(cx-10, y, 20, 2);
 
-  if(dna.hairStyle === "messy"){
-    for(let y=0;y<dna.hairHeight;y++){
-      let width = w - Math.floor(y/3);
-      let shift = Math.floor(rand()*3)-1;
-      ctx.fillRect(cx - width + shift, top + y, width*2, 1);
-    }
-  }
+  ctx.fillRect(cx-12, y+2, 4, 2);
+  ctx.fillRect(cx+8, y+2, 4, 2);
 
-  if(dna.hairStyle === "flat"){
-    ctx.fillRect(cx - w, top, w*2, dna.hairHeight);
-  }
-
-  if(dna.hairStyle === "sidecut"){
-    ctx.fillRect(cx - w, top, w*2, dna.hairHeight);
-    ctx.clearRect(cx, top, w, dna.hairHeight);
-  }
-
-  if(dna.hairStyle === "buzz"){
-    for(let x=-w;x<w;x+=2){
-      ctx.fillRect(cx+x, top, 1, 2);
-    }
-  }
-
-  if(dna.hairStyle === "afro"){
-    for(let y=0;y<dna.hairHeight+3;y++){
-      let width = w + 2 - Math.floor(y/2);
-      ctx.fillRect(cx - width, top + y, width*2, 1);
-    }
-  }
-
-  if(dna.hairStyle === "receding"){
-    ctx.fillRect(cx - w, top, w*2, dna.hairHeight);
-    ctx.clearRect(cx - w, top, 6, 4);
-    ctx.clearRect(cx + w - 6, top, 6, 4);
-  }
+  ctx.fillRect(cx-6, y+4, 12, 2);
 }
-
 
 // ======================================
 // 👁 EYES
@@ -218,27 +193,19 @@ function drawHair(ctx, cx, dna, rand){
 
 function drawEyes(ctx, cx, dna){
 
-  const y = dna.eyeY;
+  const y = 24;
+  const d = 6;
 
-  const oL = dna.eyeSpacing;
-  const oR = dna.eyeSpacing + dna.eyeOffsetR;
-
-  const yL = y + dna.eyeOffsetYL;
-  const yR = y + dna.eyeOffsetYR;
-
+  // whites
   ctx.fillStyle = "#fff";
-  ctx.fillRect(cx - oL, yL, 4, 3);
-  ctx.fillRect(cx + oR - 4, yR, 4, 3);
+  ctx.fillRect(cx - d, y, 3, 2);
+  ctx.fillRect(cx + d - 3, y, 3, 2);
 
-  ctx.fillStyle = dna.eyeColor;
-  ctx.fillRect(cx - oL + 1, yL, 2, 2);
-  ctx.fillRect(cx + oR - 3, yR, 2, 2);
-
+  // pupils (immer 1px!)
   ctx.fillStyle = "#000";
-  ctx.fillRect(cx - oL + 1, yL, 1, 1);
-  ctx.fillRect(cx + oR - 3, yR, 1, 1);
+  ctx.fillRect(cx - d + 1, y, 1, 1);
+  ctx.fillRect(cx + d - 2, y, 1, 1);
 }
-
 
 // ======================================
 // 👃 NOSE
@@ -246,10 +213,7 @@ function drawEyes(ctx, cx, dna){
 
 function drawNose(ctx, cx, dna){
   ctx.fillStyle = dna.skinDark;
-
-  if(dna.noseType === "small") ctx.fillRect(cx-1,30,2,2);
-  if(dna.noseType === "wide") ctx.fillRect(cx-2,30,4,2);
-  if(dna.noseType === "long") ctx.fillRect(cx-1,30,2,4);
+  ctx.fillRect(cx, 29, 1, 2);
 }
 
 
@@ -258,13 +222,17 @@ function drawNose(ctx, cx, dna){
 // ======================================
 
 function drawMouth(ctx, cx, dna, mood){
-  ctx.fillStyle = "#300";
 
-  if(mood === "happy") ctx.fillRect(cx-5,38,10,2);
-  else if(mood === "angry") ctx.fillRect(cx-4,38,8,1);
-  else ctx.fillRect(cx-3,38,6,1);
+  ctx.fillStyle = "#200";
+
+  if(mood === "happy"){
+    ctx.fillRect(cx-2, 36, 1, 1);
+    ctx.fillRect(cx-1, 37, 2, 1);
+    ctx.fillRect(cx+1, 36, 1, 1);
+  } else {
+    ctx.fillRect(cx-2, 36, 4, 1);
+  }
 }
-
 
 // ======================================
 // 🧔 BEARD
@@ -274,42 +242,11 @@ function drawBeard(ctx, cx, dna){
 
   if(dna.beard === "none") return;
 
-  const y = 36;
-  const w = dna.headW;
-
   ctx.fillStyle = dna.hairColor;
 
-  if(dna.beard === "stubble"){
-    for(let x=-w+4;x<w-4;x+=2){
-      ctx.fillRect(cx+x,y,1,1);
-    }
-  }
-
-  if(dna.beard === "goatee"){
-    ctx.fillRect(cx-2,y,4,4);
-    ctx.fillRect(cx-1,y+4,2,2);
-  }
-
-  if(dna.beard === "chin"){
-    ctx.fillRect(cx - w + 3, y, 2, 6);
-    ctx.fillRect(cx + w - 5, y, 2, 6);
-    ctx.fillRect(cx - w + 3, y+5, w*2 - 6, 1);
-  }
-
-  if(dna.beard === "full"){
-    for(let i=0;i<6;i++){
-      let width = w - 2 - Math.floor(i/2);
-      ctx.fillRect(cx - width, y+i, width*2, 1);
-    }
-  }
-
-  if(dna.beard === "mustache"){
-    ctx.fillRect(cx-6,y-4,4,1);
-    ctx.fillRect(cx+2,y-4,4,1);
-  }
+  // nur Andeutung
+  ctx.fillRect(cx-4, 34, 8, 2);
 }
-
-
 // ======================================
 // 👓 ACCESSORIES
 // ======================================
@@ -361,20 +298,37 @@ function drawBody(ctx, cx, country, rand){
   }
 }
 
+function outline(ctx){
 
+  ctx.fillStyle = "#000";
+
+  for(let y=0;y<64;y++){
+    for(let x=0;x<64;x++){
+
+      const p = ctx.getImageData(x,y,1,1).data;
+
+      if(p[3] === 0) continue;
+
+      // check neighbors
+      const n = ctx.getImageData(x+1,y,1,1).data;
+      if(n[3] === 0){
+        ctx.fillRect(x+1,y,1,1);
+      }
+    }
+  }
+}
+drawBody(...)
+outline(ctx)
 // ======================================
 // 🎨 DATA
 // ======================================
 
 const SKIN_TONES = [
-  ["#f6e0c9","#e9c2a6","#d9a07a"],
-  ["#eac39b","#d29a6a","#b97c4f"],
-  ["#c68642","#a86b33","#7c4a1f"],
-  ["#8d5524","#6f3f1a","#4e2a12"]
+  ["#f2c9a0","#d99a6c","#8a5a3a"] // nur EIN Set nutzen!
 ];
 
 const HAIR_COLORS = [
-  "#1c1c1c","#3b2f2f","#6b4f3a","#d6a77a","#c0c0c0"
+  "#2b1d14","#5a3a2a","#c9a36a"
 ];
 
 const EYE_COLORS = [
