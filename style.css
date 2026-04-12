@@ -942,3 +942,7 @@ to { transform: translateX(100%); }
   transform: scale(1.15);
   box-shadow: 0 6px 18px rgba(0,0,0,0.7);
 }
+#player-avatar {
+  display: block;
+  margin-bottom: 8px;
+}
