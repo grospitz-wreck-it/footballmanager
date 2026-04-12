@@ -1065,20 +1065,48 @@ tr:hover {
 }
 
 /* 👉 EINZELNER BANNER */
+/* =========================
+🏟️ AD SYSTEM (FINAL FIXED)
+========================= */
+
+#adContainer {
+  width: 320px;            /* 🔥 FIX: kein 100% mehr */
+  height: 100px;
+
+  margin: 10px auto;
+
+  position: relative;
+  overflow: hidden;
+
+  background: #020617;
+  border-radius: 10px;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* TRACK */
+#adContainer .adTrack {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  transition: transform 0.4s ease;
+}
+
+/* ITEM */
 #adContainer .adItem {
   min-width: 100%;
   height: 100%;
   flex-shrink: 0;
 }
 
-/* 👉 LINK */
+/* LINK */
 #adContainer .adItem a {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-/* 👉 IMAGE */
+/* IMAGE */
 #adContainer .adItem img {
   width: 100%;
   height: 100%;
