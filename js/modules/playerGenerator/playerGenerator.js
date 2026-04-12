@@ -31,8 +31,8 @@ export function getPlayerTexture(id, country) {
 
   const rand = createRNG(idToSeed(id));
 
-  drawPlayer(ctx, rand, country);
-
+drawPlayer(ctx, rand, country, mood);
+  
   cache.set(key, canvas);
   return canvas;
 }
