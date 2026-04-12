@@ -183,7 +183,7 @@ if(newest.assets?.length){
     showOverlay(img, text);
   }
 }
-
+}
 const overlayEl = document.getElementById("matchOverlay");
 const overlayImg = document.getElementById("overlayImage");
 const overlayText = document.getElementById("overlayText");
