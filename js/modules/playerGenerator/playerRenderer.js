@@ -29,11 +29,16 @@ export function drawPlayer(ctx, rand, country, mood="neutral", quality=0.5){
 // 🧬 DNA SYSTEM (UPGRADED)
 // ======================================
 
+
 function createDNA(rand, country, quality){
 
-  const skinSet = pick(rand, SKIN_BY_REGION[country] || SKIN_TONES);
+  const type = pick(rand, [
+    "winger","playmaker","defender","striker","keeper","youth"
+  ]);
 
-  return {
+  const skinSet = pick(rand, SKIN_TONES);
+
+  let dna = {
     skinLight: skinSet[0],
     skinMid: skinSet[1],
     skinDark: skinSet[2],
@@ -41,27 +46,76 @@ function createDNA(rand, country, quality){
     hairColor: pick(rand, HAIR_COLORS),
     eyeColor: pick(rand, EYE_COLORS),
 
-    headW: 14 + Math.floor(rand()*6),
-    headH: 18 + Math.floor(rand()*6),
+    glasses: false,
+    beard: "none",
 
-    cheekWidth: 2 + Math.floor(rand()*3),
-    jawWidth: 2 + Math.floor(rand()*3),
-
-    eyeSpacing: 6 + Math.floor(rand()*4),
-    eyeY: 24 + Math.floor(rand()*3),
-
-    noseType: pick(rand, ["small","wide","long"]),
-    earSize: 2 + Math.floor(rand()*3),
-
-    hairStyle: pick(rand, ["short","flat","none"]),
-    beard: pick(rand, ["none","short","full"]),
-
-    glasses: rand() < 0.25,
-
-    // ⭐ quality boost (stars look better)
-    detail: rand() < quality
+    // defaults
+    headW: 16,
+    headH: 20,
+    eyeSpacing: 7,
+    eyeY: 25,
+    noseType: "small",
+    jawWidth: 2,
+    cheekWidth: 2
   };
+
+  // =========================
+  // ⚽ ARCHETYPE SHAPING
+  // =========================
+
+  if(type === "winger"){
+    dna.headW = 14;
+    dna.headH = 20;
+    dna.eyeSpacing = 8;
+  }
+
+  if(type === "playmaker"){
+    dna.headH = 22;
+    dna.beard = rand() < 0.6 ? "short" : "none";
+    dna.glasses = rand() < 0.2;
+  }
+
+  if(type === "defender"){
+    dna.headW = 20;
+    dna.jawWidth = 5;
+    dna.eyeSpacing = 6;
+  }
+
+  if(type === "striker"){
+    dna.noseType = pick(rand, ["long","wide"]);
+    dna.eyeSpacing = 7;
+  }
+
+  if(type === "keeper"){
+    dna.headH = 24;
+    dna.eyeSpacing = 9;
+  }
+
+  if(type === "youth"){
+    dna.headW = 15;
+    dna.headH = 18;
+    dna.eyeSpacing = 8;
+    dna.beard = "none";
+  }
+
+  // =========================
+  // ⭐ QUALITY (STARS LOOK BETTER)
+  // =========================
+  if(rand() < quality){
+    dna.eyeSpacing += 1;
+    dna.headW += 1;
+  }
+
+  // =========================
+  // 🎲 ASYMMETRY (CRITICAL!)
+  // =========================
+  dna.eyeOffsetL = Math.floor(rand()*2);
+  dna.eyeOffsetR = Math.floor(rand()*2);
+
+  return dna;
 }
+
+
 
 
 // ======================================
