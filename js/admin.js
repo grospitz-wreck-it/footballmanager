@@ -563,27 +563,26 @@ if(a==="deleteEvent") deleteEvent(e.target.dataset.id);
 // =====================
 // INIT
 // =====================
+// =====================
+// INIT
+// =====================
 document.addEventListener("DOMContentLoaded", () => {
 
   qs("saveBtn")?.addEventListener("click", createCampaign);
   qs("createEventBtn")?.addEventListener("click", saveEvent);
 
-  // 🔥 NEU
+  // 🔥 GAME EVENTS
   qs("saveGameEventBtn")?.addEventListener("click", saveGameEvent);
 
   qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
   qs("tabEvents")?.addEventListener("click", () => switchTab("events"));
   qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
-
-  // 🔥 NEU
   qs("tabGameEvents")?.addEventListener("click", () => switchTab("game"));
 
-  // 🔥 NEU: Initial Load
+  // 🔥 INIT LOADS
   loadGameEvents();
   loadEventTypes();
 
-  // bestehend
   switchTab("ads");
   loadCampaigns();
 });
-
