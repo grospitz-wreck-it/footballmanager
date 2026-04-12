@@ -16,9 +16,10 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // =========================
 let campaignsCache = [];
 let adIndex = 0;
+let lastRenderedAdId = null;
 
 // =========================
-// 📥 LOAD FROM SUPABASE
+// 📥 LOAD FROM SUPABASE (optimized)
 // =========================
 async function loadCampaigns() {
   try {
@@ -27,21 +28,22 @@ async function loadCampaigns() {
       .select("*")
       .eq("active", true);
 
-    console.log("📦 SUPABASE DATA:", data);
-
     if (error) {
       console.error("❌ Supabase Fehler:", error);
-      campaignsCache = [];
       return;
     }
 
-    campaignsCache = data || [];
+    // 👉 Nur updaten wenn sich was geändert hat
+    const newData = JSON.stringify(data || []);
+    const oldData = JSON.stringify(campaignsCache);
 
-    console.log("✅ campaignsCache gesetzt:", campaignsCache);
+    if (newData !== oldData) {
+      campaignsCache = data || [];
+      console.log("✅ campaignsCache updated");
+    }
 
   } catch (e) {
     console.error("❌ Load Fehler:", e);
-    campaignsCache = [];
   }
 }
 
@@ -88,7 +90,7 @@ async function trackEvent(campaignId, type) {
 }
 
 // =========================
-// 🎬 RENDER (FIXED)
+// 🎬 RENDER (optimized + rotation)
 // =========================
 function renderAds() {
 
@@ -96,12 +98,15 @@ function renderAds() {
   if (!el) return;
 
   const ads = getMatchingAds();
+
   if (!ads.length) {
     el.innerHTML = `<div>Keine Werbung</div>`;
+    lastRenderedAdId = null;
     return;
   }
 
-  const ad = ads[0];
+  // 👉 Rotation berücksichtigen
+  const ad = ads[adIndex % ads.length];
   const img = ad.assets?.[0]?.url;
 
   if (!img) {
@@ -109,33 +114,21 @@ function renderAds() {
     return;
   }
 
-  // 🔥 Rendering (JETZT RICHTIG PLATZIERT)
+  // 👉 Nicht neu rendern wenn gleiche Ad
+  if (lastRenderedAdId === ad.id) return;
+  lastRenderedAdId = ad.id;
+
+  // 🔥 Rendering
   el.innerHTML = ad.link
     ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
          <img src="${img}" alt="Ad" loading="lazy">
        </a>`
     : `<img src="${img}" alt="Ad" loading="lazy">`;
 
-  // 👁️ IMPRESSION
+  // 👁️ IMPRESSION (nur einmal pro Anzeige)
   trackEvent(ad.id, "impression");
 
   // 🖱 CLICK TRACKING
-  const linkEl = el.querySelector(".adLink");
-
-  if (linkEl) {
-    linkEl.addEventListener("click", () => {
-      trackEvent(ad.id, "click");
-    }, { once: true });
-  }
-}
-  // =========================
-  // 👁️ IMPRESSION
-  // =========================
-  trackEvent(ad.id, "impression");
-
-  // =========================
-  // 🖱 CLICK TRACKING
-  // =========================
   const linkEl = el.querySelector(".adLink");
 
   if (linkEl) {
@@ -146,7 +139,7 @@ function renderAds() {
 }
 
 // =========================
-// 🔄 ROTATION
+// 🔄 ROTATION (fixed)
 // =========================
 function rotateAds() {
 
@@ -155,6 +148,17 @@ function rotateAds() {
 
   adIndex = (adIndex + 1) % ads.length;
   renderAds();
+}
+
+// =========================
+// 🧠 DEBOUNCE HELPER
+// =========================
+function debounce(fn, delay = 200) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
+  };
 }
 
 // =========================
@@ -167,12 +171,14 @@ async function startAdEngine() {
   await loadCampaigns();
   renderAds();
 
+  // 👉 weniger aggressive polling
   setInterval(async () => {
     await loadCampaigns();
     rotateAds();
   }, 8000);
 
-  window.addEventListener("resize", renderAds);
+  // 👉 optimierte events
+  window.addEventListener("resize", debounce(renderAds, 250));
   window.addEventListener("focus", renderAds);
 }
 
