@@ -92,26 +92,32 @@ async function trackEvent(campaignId, type) {
 // =========================
 function renderAds() {
 
-  // 🔥 FIX: neues Element verwenden
   const el = document.getElementById("adContainer");
-  if (!el) return;
+  console.log("🧱 adContainer:", el);
+
+  console.log("📦 campaignsCache (render):", campaignsCache);
 
   const ads = getMatchingAds();
+  console.log("🎯 MATCHING ADS:", ads);
+
+  if (!el) return;
 
   if (!ads.length) {
     el.innerHTML = `<div>Keine Werbung</div>`;
     return;
   }
 
-  adIndex = adIndex % ads.length;
-  const ad = ads[adIndex];
+  const ad = ads[0];
 
-  // 🔥 Asset holen (aus Admin Struktur)
-const img = ad.assets?.[0]?.url;
+  const img = ad.assets?.[0]?.url;
+  console.log("🖼 asset:", img);
 
-if (!img) {
-  el.innerHTML = `<div>Keine Werbung</div>`;
-  return;
+  if (!img) {
+    el.innerHTML = `<div>Kein Asset</div>`;
+    return;
+  }
+
+  el.innerHTML = `<img src="${img}">`;
 }
 
 // 🔥 Rendering
