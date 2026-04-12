@@ -286,12 +286,15 @@ function createShot(ctx){
       game.match.score.away++;
     }
 
-    emitMatchEvent(EVENT_TYPES.GOAL, {
-      teamId,
-      playerId: shooter?.id,
-      relatedPlayerId: getRandomPlayer(teamId)?.id,
-      outcome: EVENT_OUTCOMES.SUCCESS
-    });
+ emitMatchEvent(EVENT_TYPES.GOAL, {
+  teamId,
+  playerId: shooter?.id,
+  relatedPlayerId: getRandomPlayer(teamId)?.id,
+  outcome: EVENT_OUTCOMES.SUCCESS,
+
+  // 🔥 WICHTIG: DAMIT WEBP KOMMT
+  assets: getGoalAssets?.() || []
+});
 
     return;
   }
