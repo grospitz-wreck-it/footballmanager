@@ -101,3 +101,37 @@ export function drawPlayer(ctx, rand, country){
   // =========================
   fill(ctx,18,48,28,12,getColor(country));
 }
+function px(ctx,x,y,c){
+  ctx.fillStyle=c;
+  ctx.fillRect(x,y,1,1);
+}
+
+function fill(ctx,x,y,w,h,c){
+  ctx.fillStyle=c;
+  ctx.fillRect(x,y,w,h);
+}
+
+function line(ctx,x,y,w,c){
+  ctx.fillStyle=c;
+  ctx.fillRect(x,y,w,2);
+}
+
+function eye(ctx,x,y,rand){
+  px(ctx,x,y,"#fff");
+  px(ctx,x+1,y,"#fff");
+
+  px(ctx,x,y,"#000");
+  if(rand() > 0.5) px(ctx,x+1,y,"#000");
+}
+
+function pick(rand,a){
+  return a[Math.floor(rand()*a.length)];
+}
+
+function getColor(code){
+  return {
+    DE:"#dd0000",
+    FR:"#0055A4",
+    BR:"#009C3B"
+  }[code] || "#888";
+}
