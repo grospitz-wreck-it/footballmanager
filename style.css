@@ -745,25 +745,81 @@ tr:hover {
   pointer-events: none;
 }
 
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}.player-modal {
-width: 320px;
-max-width: 90%;
-border-radius: 22px;
-padding: 20px;
-position: relative;
-overflow: hidden;
+  /* =========================
+🎴 PLAYER CARD (UPGRADED)
+========================= */
 
-background: linear-gradient(160deg, #111A2B, #0B1220);
+.player-modal {
+  width: 280px;
+  max-width: 90%;
 
-color: white;
+  border-radius: 22px;
+  padding: 18px;
 
-box-shadow:
-0 20px 60px rgba(0,0,0,0.9),
-inset 0 0 30px rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
 
-animation: modalIn 0.25s ease forwards;
+  background: linear-gradient(160deg, #111A2B, #0B1220);
+  color: white;
+
+  /* 🔥 mehr Tiefe */
+  box-shadow:
+    0 25px 80px rgba(0,0,0,0.9),
+    0 0 0 1px rgba(255,255,255,0.05),
+    inset 0 0 30px rgba(255,255,255,0.04);
+
+  /* 🎮 Animation (FIFA feel) */
+  transform: scale(0.85) translateY(20px);
+  opacity: 0;
+
+  animation: modalIn 0.25s ease forwards;
+
+  /* DEFAULT */
+  --glow: rgba(34,197,94,0.25);
+  --shine: rgba(255,255,255,0.18);
+}
+
+
+/* ✨ SHINE (beweglich) */
+.player-modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    var(--shine) 45%,
+    transparent 70%
+  );
+
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+
+/* 🔥 GLOW BORDER */
+.player-modal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+
+  box-shadow:
+    0 0 0 2px var(--glow),
+    0 0 50px var(--glow);
+
+  pointer-events: none;
+}
+
+
+/* 🎯 ANIMATION */
+@keyframes modalIn {
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
 
 /* DEFAULT */
 --glow: rgba(34,197,94,0.2);
