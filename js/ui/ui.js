@@ -491,15 +491,19 @@ const ctx = canvas.getContext("2d");
 
 const texture = getPlayerTexture(
   player.id,
-  player.nationality || player.Country
+  player.nationality || player.Country || "DE"
 );
 
-ctx.clearRect(0, 0, 64, 64);
-ctx.drawImage(texture, 0, 0);
-  
-  const overlay = div.querySelector(".modal-overlay");
-  const closeBtn = div.querySelector(".close-btn");
+if(player.overall > 80){
+  ctx.shadowColor = "gold";
+  ctx.shadowBlur = 10;
+}
 
+ctx.drawImage(texture, 0, 0);
+
+// reset (wichtig!)
+ctx.shadowBlur = 0;
+  
   // ❌ Close Button
   closeBtn.onclick = () => div.remove();
 
