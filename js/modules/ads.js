@@ -47,25 +47,20 @@ async function loadCampaigns() {
 function getMatchingAds() {
 
   const now = Date.now();
-  const leagueKey = game.league?.key;
-  const teamKey = game.team?.selected;
+  const leagueId = game.league?.current?.id;
+  const teamId = game.team?.selectedId;
 
   return campaignsCache.filter(c => {
 
     if (c.start_date && now < new Date(c.start_date).getTime()) return false;
     if (c.end_date && now > new Date(c.end_date).getTime()) return false;
 
-    const t = c.targeting || {};
+    if (c.scope === "global") return true;
 
-    if (t.global) return true;
+    if (c.scope === "league" && c.scope_ref == leagueId) return true;
 
-    if (!leagueKey && !teamKey) return true;
-
-    if (t.league && t.league === leagueKey) return true;
-
-    if (t.team) {
-      if (t.team === "all") return true;
-      if (t.team === teamKey) return true;
+    if (c.scope === "team" && Array.isArray(c.scope_ref)) {
+      return c.scope_ref.includes(teamId);
     }
 
     return false;
@@ -107,12 +102,20 @@ function renderAds() {
   adIndex = adIndex % ads.length;
   const ad = ads[adIndex];
 
-  // 🔥 WICHTIG: KEIN wrapper mehr der Layout sprengt
-  el.innerHTML = ad.link
-    ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
-         <img src="${ad.image}" alt="Ad" loading="lazy">
-       </a>`
-    : `<img src="${ad.image}" alt="Ad" loading="lazy">`;
+  // 🔥 Asset holen (aus Admin Struktur)
+const img = ad.assets?.[0]?.url;
+
+if (!img) {
+  el.innerHTML = `<div>Keine Werbung</div>`;
+  return;
+}
+
+// 🔥 Rendering
+el.innerHTML = ad.link
+  ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
+       <img src="${img}" alt="Ad" loading="lazy">
+     </a>`
+  : `<img src="${img}" alt="Ad" loading="lazy">`;
 
   // =========================
   // 👁️ IMPRESSION
