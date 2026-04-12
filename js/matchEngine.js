@@ -516,11 +516,17 @@ if(Array.isArray(gameEvents)){
   });
 }
       
-      if(live.minute === 45 && live.phase === "first_half"){
-        live.phase = "halftime";
-        live.running = false;
-        saveGame();
-      }
+     if(live.minute === 45 && live.phase === "first_half"){
+  live.phase = "halftime";
+  live.running = false;
+
+  setTimeout(() => {
+    live.running = true;
+    live.phase = "second_half";
+  }, 1000); // optional länger
+
+  saveGame();
+}
 
       if(live.minute >= 90){
 
