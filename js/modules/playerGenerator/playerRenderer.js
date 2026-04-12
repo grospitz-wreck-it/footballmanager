@@ -1,7 +1,5 @@
-
 export function drawPlayer(ctx, rand, country, mood="neutral"){
 
-  // 🔥 HIGH RES BUFFER
   const scale = 4;
   const buffer = document.createElement("canvas");
   buffer.width = 64 * scale;
@@ -9,7 +7,7 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   const bctx = buffer.getContext("2d");
 
-  // 🎲 Variation (dein System bleibt!)
+  // 🎲 Variation
   const faceW = 60 + rand()*20;
   const faceH = 80 + rand()*20;
   const eyeY = 110 + rand()*10;
@@ -20,33 +18,62 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
   const hair = pick(rand, ["#2b2b2b","#5a3a2e","#d6a77a"]);
 
   // =========================
-  // 👤 FACE (Spline)
+  // 👤 FACE (verzerrte ellipse = pseudo spline)
   // =========================
   bctx.fillStyle = skin;
   bctx.beginPath();
-  bctx.ellipse(128, 140, faceW, faceH, 0, 0, Math.PI*2);
+
+  const cx = 128;
+  const cy = 140;
+
+  bctx.moveTo(cx, cy - faceH);
+
+  for(let a=0; a<=Math.PI*2; a+=0.3){
+    let x = cx + Math.cos(a) * faceW + (rand()-0.5)*6;
+    let y = cy + Math.sin(a) * faceH + (rand()-0.5)*6;
+    bctx.lineTo(x,y);
+  }
+
+  bctx.closePath();
   bctx.fill();
 
   // =========================
-  // 💇 HAIR
+  // 🌗 SHADING (Doom Style!)
+  // =========================
+  let grad = bctx.createLinearGradient(0, 60, 0, 220);
+  grad.addColorStop(0, "rgba(255,255,255,0.25)");
+  grad.addColorStop(1, "rgba(0,0,0,0.4)");
+
+  bctx.fillStyle = grad;
+  bctx.fill();
+
+  // =========================
+  // 💇 HAIR (rough)
   // =========================
   bctx.fillStyle = hair;
   bctx.beginPath();
-  bctx.ellipse(128, 90, faceW + 20, 70, 0, 0, Math.PI);
+
+  for(let a=0; a<=Math.PI; a+=0.25){
+    let x = cx + Math.cos(a)*(faceW+20) + (rand()-0.5)*8;
+    let y = 90 + Math.sin(a)*70 + (rand()-0.5)*6;
+    if(a===0) bctx.moveTo(x,y);
+    else bctx.lineTo(x,y);
+  }
+
+  bctx.closePath();
   bctx.fill();
 
   // =========================
-  // 👁 EYES (REAL SHAPES)
+  // 👁 EYES
   // =========================
-  drawEye(bctx, 128 - eyeSpacing/2, eyeY, mood);
-  drawEye(bctx, 128 + eyeSpacing/2, eyeY, mood);
+  drawEye(bctx, cx - eyeSpacing/2, eyeY, mood, rand);
+  drawEye(bctx, cx + eyeSpacing/2, eyeY, mood, rand);
 
   // =========================
-  // 👄 MOUTH (curve)
+  // 👄 MOUTH (rough spline)
   // =========================
   bctx.strokeStyle = "#722";
   bctx.lineWidth = 6;
-
   bctx.beginPath();
 
   if(mood === "happy"){
@@ -71,61 +98,16 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
   bctx.fillRect(80, 220, 96, 40);
 
   // =========================
-  // ⬇️ DOWNSCALE
+  // 🎨 PALETTE REDUKTION
   // =========================
+  applyPalette(bctx, buffer.width, buffer.height);
+
+  // =========================
+  // ⬇️ PIXELIZE + DOWNSCALE
+  // =========================
+  pixelize(bctx, buffer.width, buffer.height, 4);
+
   ctx.clearRect(0,0,64,64);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(buffer, 0, 0, 64, 64);
 }
-
-
-// =========================
-// 👁 EYE
-// =========================
-function drawEye(ctx, x, y, mood){
-
-  // white
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.ellipse(x, y, 16, 10, 0, 0, Math.PI*2);
-  ctx.fill();
-
-  // pupil
-  ctx.fillStyle = "#000";
-  ctx.beginPath();
-  ctx.arc(x, y, 5, 0, Math.PI*2);
-  ctx.fill();
-
-  // eyelid
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(x-16, y-6);
-  ctx.lineTo(x+16, y-6);
-  ctx.stroke();
-
-  if(mood === "tired"){
-    ctx.strokeStyle = "#555";
-    ctx.beginPath();
-    ctx.moveTo(x-16, y+6);
-    ctx.lineTo(x+16, y+6);
-    ctx.stroke();
-  }
-}
-
-
-// =========================
-// 🧩 HELPERS
-// =========================
-function pick(rand,a){
-  return a[Math.floor(rand()*a.length)];
-}
-
-function getColor(code){
-  return {
-    DE:"#dd0000",
-    FR:"#0055A4",
-    BR:"#009C3B"
-  }[code] || "#888";
-}
-
