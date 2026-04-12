@@ -523,11 +523,15 @@ if(Array.isArray(gameEvents)){
       }
 
       if(live.minute >= 90){
-        clearInterval(matchInterval);
-        matchInterval = null;
-        endMatch(onEnd);
-        break;
-      }
+
+  live.running = false; // 🔥 DAS FEHLT NOCH
+
+  clearInterval(matchInterval);
+  matchInterval = null;
+
+  endMatch(onEnd);
+  break;
+}
 
       accumulator -= STEP;
       safety++;
