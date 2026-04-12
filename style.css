@@ -1,420 +1,821 @@
 /* =========================
-🎨 DESIGN SYSTEM
-========================= */
-:root {
---bg-main: #0B1220;
---bg-surface: #111A2B;
---bg-elevated: #162238;
---border: #1F2A44;
---divider: #22304A;
-
---primary: #22C55E;
---primary-hover: #16A34A;
---primary-soft: #4ADE80;
---primary-glow: rgba(34,197,94,0.25);
-
---text-main: #E5E7EB;
---text-secondary: #9CA3AF;
-}
-
-/* =========================
 🌍 GLOBAL RESET
 ========================= */
 *,
 *::before,
 *::after {
-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-margin: 0;
-font-family: system-ui, -apple-system, sans-serif;
-background: var(--bg-main);
-color: var(--text-main);
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #0f172a;
+  color: #e5e7eb;
 }
 
 /* =========================
 🟡 SPLASH SCREEN
 ========================= */
 #splash {
-position: fixed;
-inset: 0;
-z-index: 9999;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
 
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
-gap: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
 
-background: var(--bg-main);
-color: white;
-padding: 20px;
-text-align: center;
+  background: #020617;
+  color: white;
+  padding: 20px;
+  text-align: center;
 }
 
 #splash > * {
-width: 100%;
-max-width: 320px;
+  width: 100%;
+  max-width: 320px;
 }
 
 #logo {
-width: 70%;
-max-width: 220px;
-image-rendering: pixelated;
+  width: 70%;
+  max-width: 220px;
+  image-rendering: pixelated;
 }
 
 #splash input,
 #splash select,
 #splash button {
-padding: 12px;
-font-size: 16px;
-border-radius: 10px;
-border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
 }
 
 #splash input {
-background: var(--bg-surface);
-color: white;
+  background: #111827;
+  color: white;
 }
 
 #splash button {
-background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-color: white;
-font-weight: 600;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-weight: 600;
 }
 
 /* =========================
 📱 APP ROOT
 ========================= */
 #app {
-width: 100%;
+  width: 100%;
 }
 
 /* =========================
 📦 LAYOUT (FIXED)
 ========================= */
 .container {
-width: 100%;
-max-width: 420px;
-margin: 0 auto;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
 
-padding: 6px 12px 12px;
+  padding: 6px 12px 12px;
 
-display: flex;
-flex-direction: column;
-gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* =========================
 🧷 HEADER (IMPROVED)
 ========================= */
 #header {
-position: sticky;
-top: 0;
-background: linear-gradient(180deg, var(--bg-main), var(--bg-main));
-padding: 14px 16px;
-display: flex;
-align-items: center;
-gap: 12px;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, #020617, #020617);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-font-weight: 600;
-font-size: 16px;
+  font-weight: 600;
+  font-size: 16px;
 
-border-bottom: 1px solid var(--divider);
-backdrop-filter: blur(6px);
+  border-bottom: 1px solid #1e293b;
+  backdrop-filter: blur(6px);
 }
 
 #burgerBtn {
-background: transparent;
-border: none;
-color: white;
-font-size: 20px;
-cursor: pointer;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 /* =========================
 🍔 SIDEBAR
 ========================= */
 .sidebar-wrapper {
-position: fixed;
-inset: 0;
-z-index: 3000;
-pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  pointer-events: none;
 }
 
 .sidebar-wrapper.open {
-pointer-events: auto;
+  pointer-events: auto;
 }
 
 .sidebar-overlay {
-position: absolute;
-inset: 0;
-background: rgba(0,0,0,0.5);
-opacity: 0;
-transition: opacity 0.25s ease;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .sidebar-wrapper.open .sidebar-overlay {
-opacity: 1;
+  opacity: 1;
 }
 
 #sidebar {
-position: absolute;
-top: 0;
-left: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
 
-width: 260px;
-height: 100%;
+  width: 260px;
+  height: 100%;
 
-background: var(--bg-main);
-color: white;
+  background: #020617;
+  color: white;
 
-padding: 20px;
+  padding: 20px;
 
-display: flex;
-flex-direction: column;
-gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-transform: translateX(-100%);
-transition: transform 0.25s ease;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
 }
 
 .sidebar-wrapper.open #sidebar {
-transform: translateX(0);
+  transform: translateX(0);
 }
 
 /* =========================
 ⚽ TOP BAR (FIXED)
 ========================= */
 #topBar {
-background: linear-gradient(135deg, var(--bg-main), var(--bg-surface));
-padding: 14px;
-border-radius: 14px;
+  background: linear-gradient(135deg, #020617, #111827);
+  padding: 14px;
+  border-radius: 14px;
 
-display: grid;
-grid-template-columns: 1fr auto 1fr;
-align-items: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
 
-box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
 #topTeams {
-text-align: left;
-font-size: 13px;
-opacity: 0.85;
+  text-align: left;
+  font-size: 13px;
+  opacity: 0.85;
 }
 
 #topScore {
-text-align: center;
-font-size: 24px;
-font-weight: 800;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 800;
 }
 
 #topMinute {
-text-align: right;
-font-size: 12px;
-opacity: 0.7;
+  text-align: right;
+  font-size: 12px;
+  opacity: 0.7;
 }
 
 /* =========================
-⏱ PROGRESS BAR
+⏱ PROGRESS BAR (FIXED + COLOR FADE)
 ========================= */
 #progressBar {
-height: 8px;
-background: var(--divider);
-border-radius: 10px;
-overflow: hidden;
-margin-top: 4px;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 4px;
 }
 
 #progressFill {
-height: 100%;
-width: 0%;
-background: linear-gradient(90deg,#facc15,#f97316,#ef4444);
-transition: width 0.3s ease;
-}
+  height: 100%;
+  width: 0%;
 
+  /* 🔥 Gelb → Orange → Rot */
+  background: linear-gradient(
+    90deg,
+    #facc15,   /* gelb */
+    #f97316,   /* orange */
+    #ef4444    /* rot */
+  );
+
+  transition: width 0.3s ease;
+}
 /* =========================
-🎮 GAME SCREEN
+🎮 GAME SCREEN (FIXED)
 ========================= */
 #gameCanvas {
-width: 100%;
-aspect-ratio: 16 / 9;
-background: #166534;
-border-radius: 14px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #166534;
+  border-radius: 14px;
 
-margin-top: -4px;
+  margin-top: -4px;
 
-box-shadow: inset 0 0 20px rgba(0,0,0,0.4),
-0 6px 20px rgba(0,0,0,0.4);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.4),
+              0 6px 20px rgba(0,0,0,0.4);
 }
 
 /* =========================
 📡 LIVE FEED
 ========================= */
 #liveFeed {
-max-height: 120px;
-overflow-y: auto;
-display: flex;
-flex-direction: column-reverse;
-gap: 6px;
+  max-height: 120px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
 }
 
 #liveFeed div {
-background: rgba(0,0,0,0.3);
-padding: 6px 8px;
-border-radius: 6px;
-font-size: 13px;
-border-left: 3px solid var(--primary);
+  background: rgba(0,0,0,0.3);
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  border-left: 3px solid #22c55e;
 }
 
 /* =========================
 ▶️ BUTTONS
 ========================= */
 button {
-font-size: 15px;
-border-radius: 10px;
-padding: 12px;
-border: none;
-cursor: pointer;
+  font-size: 15px;
+  border-radius: 10px;
+  padding: 12px;
+  border: none;
+  cursor: pointer;
 }
 
 .main-btn {
-width: 100%;
-background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-color: white;
-font-weight: 600;
+  width: 100%;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-weight: 600;
 }
 
 /* =========================
 📊 TABS
 ========================= */
 .tabs {
-display: flex;
-gap: 8px;
-background: var(--bg-main);
-padding: 6px;
-border-radius: 12px;
+  display: flex;
+  gap: 8px;
+  background: #020617;
+  padding: 6px;
+  border-radius: 12px;
 }
 
 .tab {
-flex: 1;
-padding: 10px;
-border-radius: 10px;
-background: transparent;
-border: none;
-color: var(--text-secondary);
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
 }
 
 .tab.active {
-background: var(--primary);
-color: #022c22;
-font-weight: 600;
+  background: #22c55e;
+  color: #022c22;
+  font-weight: 600;
 }
 
 .tab-view {
-min-height: 200px;
+  min-height: 200px;
 }
 
 /* =========================
-📊 TABLE
+📊 TABLE (DEIN STYLE + CLEAN)
 ========================= */
 #table {
-width: 100%;
-background: var(--bg-main);
-border-radius: 14px;
-overflow: hidden;
-box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  width: 100%;
+  background: #020617;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 table {
-width: 100%;
-border-collapse: collapse;
-font-size: 13px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
 }
 
 thead {
-background: var(--bg-main);
+  background: #020617;
 }
 
 th {
-padding: 10px 6px;
-font-size: 11px;
-text-transform: uppercase;
-color: var(--text-secondary);
+  padding: 10px 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #94a3b8;
 }
 
 td {
-padding: 10px 6px;
-text-align: center;
-border-bottom: 1px solid var(--divider);
+  padding: 10px 6px;
+  text-align: center;
+  border-bottom: 1px solid #1e293b;
 }
 
 td.team {
-text-align: left;
-font-weight: 500;
+  text-align: left;
+  font-weight: 500;
 }
 
 td.pts {
-font-weight: bold;
-color: var(--primary);
+  font-weight: bold;
+  color: #22c55e;
 }
 
 td.pos {
-font-weight: bold;
-color: var(--text-secondary);
+  font-weight: bold;
+  color: #94a3b8;
 }
 
 tr:hover {
-background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.03);
 }
 
 .table-promoted {
-background: rgba(34,197,94,0.15);
+  background: rgba(34,197,94,0.15);
 }
 
 .table-relegated {
-background: rgba(239,68,68,0.15);
+  background: rgba(239,68,68,0.15);
 }
 
 .table-myteam {
-outline: 2px solid var(--primary);
-background: rgba(34,197,94,0.08);
+  outline: 2px solid #22c55e;
+  background: rgba(34,197,94,0.08);
 }
 
 .table-active {
-font-weight: bold;
+  font-weight: bold;
+}
+/* =========================
+📅 SCHEDULE PRO UI
+========================= */
+
+.schedule-card {
+  background: linear-gradient(180deg, #020617, #0f172a);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: fadeIn 0.3s ease;
 }
 
-/* =========================
-📅 SCHEDULE
-========================= */
-.schedule-card {
-background: linear-gradient(180deg, var(--bg-main), var(--bg-main));
-border-radius: 16px;
-padding: 12px;
-box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-animation: fadeIn 0.3s ease;
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .schedule-header button {
-background: var(--divider);
+  background: #1e293b;
+  color: white;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.schedule-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.match {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px;
+  border-radius: 10px;
+
+  background: rgba(255,255,255,0.03);
+  transition: all 0.2s ease;
+}
+
+.match:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.match.active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #022c22;
+  font-weight: bold;
+  transform: scale(1.02);
+}
+
+.match .vs {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =========================
-👤 PLAYER CARD
+👕 TEAM TAB (MATCH STYLE)
 ========================= */
+
+#teamView {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* SECTION TITLES */
+#teamView h3 {
+  margin: 6px 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+/* GRID wie Table/Schedule Cards */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* BENCH */
+.bench-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+/* PLAYER CARD (MATCHES YOUR DESIGN SYSTEM) */
 .player-card {
-background: linear-gradient(180deg, var(--bg-main), var(--bg-main));
+  background: linear-gradient(180deg, #020617, #0f172a);
+  border-radius: 14px;
+  padding: 10px;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  transition: all 0.2s ease;
+}
+
+/* HOVER wie Schedule */
+.player-card:hover {
+  background: rgba(255,255,255,0.06);
+  transform: scale(1.03);
+}
+
+/* SMALL (BENCH) */
+.player-card.small {
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+/* HEADER */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* POSITION BADGE */
+.card-header span:first-child {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* RATING */
+.card-header span:last-child {
+  font-weight: bold;
+  color: #e5e7eb;
+}
+
+/* NAME */
+.player-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+/* STATS */
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* STAT */
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+/* BAR */
+.stat-bar {
+  flex: 1;
+  height: 4px;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* VALUE BAR (MATCHES PROGRESS COLORS) */
+.stat-bar div {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #22c55e,
+    #16a34a
+  );
+}
+
+
+/* =========================
+🔍 PLZ SEARCH (ADD ONLY)
+========================= */
+#plzSearch {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#leagueResults {
+  max-height: 140px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: #020617;
+  border: 1px solid #1e293b;
+}
+
+.league-option {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #1e293b;
+  font-size: 14px;
+}
+
+.league-option:hover {
+  background: rgba(34,197,94,0.15);
+}
+/* =========================
+🎯 SELECT STYLE MATCH (ADD ONLY)
+========================= */
+#splash select,
+#leagueSelect,
+#teamSelect {
+  background: #020617;
+  color: white;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 14px;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  transition: all 0.2s ease;
+}
+
+#splash select:focus,
+#leagueSelect:focus,
+#teamSelect:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.2);
+}
+
+/* optional: kleiner Pfeil */
+#leagueSelect,
+#teamSelect {
+  background-image: linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+                    linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 3px),
+                       calc(100% - 11px) calc(50% - 3px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+/* =========================
+⚽ TEAM FORMATION FIELD
+========================= */
+
+.team-field {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: url("./gfx/field.svg") center/cover no-repeat;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+/* Linien (optional cool) */
+.team-field::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 50%;
+}
+
+/* Spieler Position */
+.player-pos {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 70px;
+}
+
+/* kleinere Karten */
+.player-card.small {
+  font-size: 11px;
+  padding: 6px;
 }
 
 /* =========================
-🔥 FIX MODAL DUPLICATE
+🟡 Player DOT
 ========================= */
-.player-modal {
-width: 320px;
-height: 500px;
-border-radius: 20px;
-background: linear-gradient(145deg, #1e3a8a, var(--bg-main));
+.player-dot {
+  position: relative;
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+/* Bild */
+.player-dot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+}
+
+/* 🔥 Initialen oben drauf */
+.player-dot .label {
+  position: absolute;
+
+  font-size: 13px;
+  font-weight: 800;
+  color: white;
+
+  letter-spacing: 0.5px;
+
+  /* 🔥 DAS MACHT ES LESBAR */
+  text-shadow:
+    0 0 4px rgba(0,0,0,0.9),
+    0 1px 2px rgba(0,0,0,0.9),
+    0 0 8px rgba(0,0,0,0.6);
+
+  pointer-events: none;
+}
+
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+}
+
+.player-card {
+  width: 320px;
+  height: 500px;
+
+  border-radius: 20px;
+
+  background: linear-gradient(145deg, #1e3a8a, #0f172a);
+  color: white;
+
+  padding: 20px;
+  position: relative;
+
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.7),
+    inset 0 0 20px rgba(255,255,255,0.05);
+}
+
+/* Header */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.overall {
+  font-size: 32px;
+  font-weight: bold;
+  color: #38bdf8;
+}
+
+/* Body */
+.card-body {
+  margin-top: 20px;
+}
+
+.position {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.tier {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #a5f3fc;
+}
+
+/* Close Button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+/* Stats */
+.stat-row {
+  margin-bottom: 12px;
+}
+
+.stat-bar {
+  height: 6px;
+  background: #1f2937;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stat-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+
+.player-dot:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.7);
 }
