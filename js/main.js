@@ -242,8 +242,10 @@ async function init(){
 
   try {
 
-    const { data: players } = await supabase.from("players").select("*");
-    window.playerPool = players;
+    import { loadPlayers } from "./loader.js";
+
+const players = await loadPlayers();
+window.playerPool = players;
 
     const { data: teams } = await supabase.from("teams").select("*");
 
