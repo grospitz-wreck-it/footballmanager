@@ -1,5 +1,5 @@
 // =========================
-// 🎮 EVENT SYSTEM (FINAL + RESOLVER)
+// 🎮 EVENT SYSTEM (CLEAN + NO GOAL OVERRIDE)
 // =========================
 
 import { resolveEvent } from "./eventResolver.js";
@@ -34,14 +34,10 @@ function processMatchEvent(event){
 
     const result = resolveShot({ shooter, keeper });
 
-    // 🧮 SCORE UPDATE
+    // ❗ WICHTIG: GOAL NICHT HIER HANDLEN
     if(result === EVENT_TYPES.GOAL){
-
-      if(event.teamId === game.match.current.homeTeamId){
-        game.match.live.score.home++;
-      } else {
-        game.match.live.score.away++;
-      }
+      // 👉 MatchEngine macht Goal + Assets
+      return false;
     }
 
     emit(EVENTS.MATCH_EVENT, {
@@ -131,7 +127,7 @@ function triggerEvent(eventId, context = {}){
 
   const eventObj = {
     id: eventId,
-    minute: game.match.live.minute,
+    minute: game.match?.live?.minute ?? 0,
     duration: def.duration || 0,
     data: context
   };
@@ -147,9 +143,10 @@ function triggerEvent(eventId, context = {}){
     triggerEvent(next, context);
   }
 
+  // 👉 Nur UI-Log (kein echtes MATCH_EVENT!)
   if(game.match?.live?.events){
     game.match.live.events.unshift(
-      game.match.live.minute + "' - " + (dbEvent?.title || eventId)
+      (game.match.live.minute ?? 0) + "' - " + (dbEvent?.title || eventId)
     );
 
     if(game.match.live.events.length > 25){
@@ -164,9 +161,10 @@ function triggerEvent(eventId, context = {}){
 function updateEvents(){
 
   const live = game.match?.live;
+  if(!live) return;
 
   // 🔥 RESOLVER PIPELINE
-  if(live?.events?.length){
+  if(Array.isArray(live.events) && live.events.length){
 
     const remaining = [];
 
