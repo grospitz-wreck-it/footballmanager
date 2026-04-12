@@ -18,8 +18,9 @@ function idToSeed(id) {
   return Math.abs(hash);
 }
 
-export function getPlayerTexture(id, country) {
-  const key = id + "_" + country;
+export function getPlayerTexture(id, country, mood = "neutral") {
+
+  const key = id + "_" + country + "_" + mood;
 
   if (cache.has(key)) return cache.get(key);
 
@@ -31,7 +32,7 @@ export function getPlayerTexture(id, country) {
 
   const rand = createRNG(idToSeed(id));
 
-drawPlayer(ctx, rand, country, mood);
+  drawPlayer(ctx, rand, country, mood);
   
   cache.set(key, canvas);
   return canvas;
