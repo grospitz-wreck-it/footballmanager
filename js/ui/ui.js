@@ -171,6 +171,8 @@ function updateEvents(){
   `;
 
   container.appendChild(div);
+  const overlay = div.querySelector(".modal-overlay");
+const closeBtn = div.querySelector(".close-btn");
 }
 
 // =========================
