@@ -457,18 +457,23 @@ function runMatchLoop({ onTick, onEnd } = {}){
   const STEP = 400;
 
   matchInterval = setInterval(() => {
-console.log("⏱", {
-  minute: live.minute,
-  running: live.running,
-  phase: live.phase
-});    const now = performance.now();
+
+    // ✅ LIVE ZUERST HOLEN
+    const live = game.match?.live;
+    if(!live) return;
+
+    // ✅ DEBUG (jetzt safe)
+    console.log("⏱", {
+      minute: live.minute,
+      running: live.running,
+      phase: live.phase
+    });
+
+    const now = performance.now();
     const delta = now - lastTime;
     lastTime = now;
 
     accumulator += delta;
-
-    const live = game.match?.live;
-    if(!live) return;
 
     let safety = 0;
 
@@ -485,6 +490,9 @@ console.log("⏱", {
       rollRandomEvents(ctx);
       simulateLiveEvent(ctx);
       updateEvents();
+
+      // =========================
+      // 🎮 GAME EVENTS
 
       // =========================
 // 🎮 GAME EVENTS TRIGGER
