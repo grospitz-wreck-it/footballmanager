@@ -119,17 +119,11 @@ function renderAds() {
   lastRenderedAdId = ad.id;
 
   // 🔥 Rendering
- el.innerHTML = `
-  <div class="adItem">
-    ${
-      ad.link
-        ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
-             <img src="${img}" alt="Ad" loading="lazy">
-           </a>`
-        : `<img src="${img}" alt="Ad" loading="lazy">`
-    }
-  </div>
-`;
+  el.innerHTML = ad.link
+    ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
+         <img src="${img}" alt="Ad" loading="lazy">
+       </a>`
+    : `<img src="${img}" alt="Ad" loading="lazy">`;
 
   // 👁️ IMPRESSION (nur einmal pro Anzeige)
   trackEvent(ad.id, "impression");
