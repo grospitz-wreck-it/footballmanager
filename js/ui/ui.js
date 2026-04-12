@@ -4,7 +4,7 @@
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
 import { renderLiveTable } from "../modules/table.js";
-
+import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -463,9 +463,10 @@ function openPlayerModal(player){
         <button class="close-btn">✕</button>
 
         <div class="card-header">
-          <h1>${player.name}</h1>
-          <span class="overall">${player.overall ?? 0}</span>
-        </div>
+  <canvas id="player-avatar" width="64" height="64"></canvas>
+  <h1>${player.name}</h1>
+  <span class="overall">${player.overall ?? 0}</span>
+</div>
 
         <div class="card-body">
           <div class="position">${player.position || "-"}</div>
@@ -485,7 +486,17 @@ function openPlayerModal(player){
   `;
 
   document.body.appendChild(div);
+const canvas = div.querySelector("#player-avatar");
+const ctx = canvas.getContext("2d");
 
+const texture = getPlayerTexture(
+  player.id,
+  player.nationality || player.Country
+);
+
+ctx.clearRect(0, 0, 64, 64);
+ctx.drawImage(texture, 0, 0);
+  
   const overlay = div.querySelector(".modal-overlay");
   const closeBtn = div.querySelector(".close-btn");
 
