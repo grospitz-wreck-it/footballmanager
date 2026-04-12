@@ -32,6 +32,15 @@ function el(tag, style){
 // =========================
 function createOverlay(){
 
+  // 🔥 DUPLICATE GUARD
+  const existing = document.getElementById("__debugOverlay");
+  if(existing){
+    return {
+      content: document.getElementById("__debugOverlayContent"),
+      getFrozen: () => false // fallback (freeze bleibt nur beim ersten)
+    };
+  }
+
   const container = el("div", {
     position: "fixed",
     bottom: "10px",
@@ -50,6 +59,8 @@ function createOverlay(){
     userSelect: "text"
   });
 
+  container.id = "__debugOverlay";
+
   const header = el("div", {
     fontWeight: "bold",
     marginBottom: "8px",
@@ -57,6 +68,7 @@ function createOverlay(){
   });
 
   const content = el("div");
+  content.id = "__debugOverlayContent";
 
   let frozen = false;
 
