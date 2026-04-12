@@ -3,7 +3,9 @@
 // =========================
 
 import { game } from "../js/core/state.js";
-
+function isDebugEnabled(){
+  return localStorage.getItem("debugOverlay") === "true";
+}
 // =========================
 // 🧠 GLOBAL EVENT BUFFER
 // =========================
