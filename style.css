@@ -1106,11 +1106,10 @@ tr:hover {
   height: 100%;
 }
 
-#adContainer .adItem img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;   /* 🔥 statt cover */
-  background: #000;      /* optional */
+#adContainer img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
 }
 
 /* 👉 OPTIONAL TAP FEEDBACK (MOBILE NICE UX) */
