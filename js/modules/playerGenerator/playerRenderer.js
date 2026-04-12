@@ -1,9 +1,9 @@
 
 // ======================================
-// ⚽ PIXEL MANAGER RENDERER V3 (PURE PIXEL ART)
+// ⚽ PIXEL MANAGER RENDERER V4 (ADVANCED)
 // ======================================
 
-export function drawPlayer(ctx, rand, country, mood="neutral"){
+export function drawPlayer(ctx, rand, country, mood="neutral", quality=0.5){
 
   const size = 64;
   ctx.clearRect(0,0,size,size);
@@ -11,52 +11,27 @@ export function drawPlayer(ctx, rand, country, mood="neutral"){
 
   const cx = 32;
 
-  const dna = createDNA(rand);
+  const dna = createDNA(rand, country, quality);
 
-  // =========================
-  // 👤 HEAD (PIXEL BUILT)
-  // =========================
   drawHead(ctx, cx, dna);
-
-  // =========================
-  // 💇 HAIR
-  // =========================
+  drawEars(ctx, cx, dna);
   drawHair(ctx, cx, dna);
-
-  // =========================
-  // 👁 EYES
-  // =========================
   drawEyes(ctx, cx, dna);
-
-  // =========================
-  // 👄 MOUTH
-  // =========================
+  drawNose(ctx, cx, dna);
   drawMouth(ctx, cx, dna, mood);
-
-  // =========================
-  // 🧔 BEARD
-  // =========================
   drawBeard(ctx, cx, dna);
-
-  // =========================
-  // 👓 ACCESSORIES
-  // =========================
   drawAccessories(ctx, cx, dna);
-
-  // =========================
-  // 👕 BODY
-  // =========================
   drawBody(ctx, cx, country);
 }
 
 
 // ======================================
-// 🧬 DNA
+// 🧬 DNA SYSTEM (UPGRADED)
 // ======================================
 
-function createDNA(rand){
+function createDNA(rand, country, quality){
 
-  const skinSet = pick(rand, SKIN_TONES);
+  const skinSet = pick(rand, SKIN_BY_REGION[country] || SKIN_TONES);
 
   return {
     skinLight: skinSet[0],
@@ -69,19 +44,28 @@ function createDNA(rand){
     headW: 14 + Math.floor(rand()*6),
     headH: 18 + Math.floor(rand()*6),
 
+    cheekWidth: 2 + Math.floor(rand()*3),
+    jawWidth: 2 + Math.floor(rand()*3),
+
     eyeSpacing: 6 + Math.floor(rand()*4),
-    eyeY: 25 + Math.floor(rand()*2),
+    eyeY: 24 + Math.floor(rand()*3),
+
+    noseType: pick(rand, ["small","wide","long"]),
+    earSize: 2 + Math.floor(rand()*3),
 
     hairStyle: pick(rand, ["short","flat","none"]),
     beard: pick(rand, ["none","short","full"]),
 
-    glasses: rand() < 0.25
+    glasses: rand() < 0.25,
+
+    // ⭐ quality boost (stars look better)
+    detail: rand() < quality
   };
 }
 
 
 // ======================================
-// 👤 HEAD (TRUE PIXEL OVAL)
+// 👤 HEAD (MULTI-ZONE)
 // ======================================
 
 function drawHead(ctx, cx, dna){
@@ -93,21 +77,42 @@ function drawHead(ctx, cx, dna){
     let t = y / dna.headH;
     let w = Math.round(dna.headW * Math.sqrt(1 - t*t));
 
-    // shading zones
+    // cheeks widen
+    if(y > 0 && y < dna.headH/2){
+      w += dna.cheekWidth;
+    }
+
+    // jaw
+    if(y > dna.headH/2){
+      w += dna.jawWidth;
+    }
+
     let color = dna.skinMid;
 
     if(y < -dna.headH*0.3) color = dna.skinLight;
     if(y > dna.headH*0.4) color = dna.skinDark;
 
     ctx.fillStyle = color;
-
     ctx.fillRect(cx - w, cy + y, w*2, 1);
   }
 }
 
 
 // ======================================
-// 💇 HAIR (BLOCK STYLE)
+// 👂 EARS
+// ======================================
+
+function drawEars(ctx, cx, dna){
+
+  ctx.fillStyle = dna.skinMid;
+
+  ctx.fillRect(cx - dna.headW - 2, 28, dna.earSize, 6);
+  ctx.fillRect(cx + dna.headW + 2 - dna.earSize, 28, dna.earSize, 6);
+}
+
+
+// ======================================
+// 💇 HAIR
 // ======================================
 
 function drawHair(ctx, cx, dna){
@@ -127,7 +132,7 @@ function drawHair(ctx, cx, dna){
 
 
 // ======================================
-// 👁 EYES (ICONIC)
+// 👁 EYES
 // ======================================
 
 function drawEyes(ctx, cx, dna){
@@ -135,30 +140,45 @@ function drawEyes(ctx, cx, dna){
   const y = dna.eyeY;
   const o = dna.eyeSpacing;
 
-  // whites
   ctx.fillStyle = "#fff";
   ctx.fillRect(cx-o, y, 4, 3);
   ctx.fillRect(cx+o-4, y, 4, 3);
 
-  // iris
   ctx.fillStyle = dna.eyeColor;
   ctx.fillRect(cx-o+1, y, 2, 2);
   ctx.fillRect(cx+o-3, y, 2, 2);
 
-  // pupil
   ctx.fillStyle = "#000";
   ctx.fillRect(cx-o+1, y, 1, 1);
   ctx.fillRect(cx+o-3, y, 1, 1);
 
-  // highlight (critical!)
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(cx-o+2, y, 1, 1);
-  ctx.fillRect(cx+o-2, y, 1, 1);
+  if(dna.detail){
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(cx-o+2, y, 1, 1);
+    ctx.fillRect(cx+o-2, y, 1, 1);
+  }
+}
 
-  // eyebrows
-  ctx.fillStyle = "rgba(0,0,0,0.5)";
-  ctx.fillRect(cx-o, y-3, 4, 1);
-  ctx.fillRect(cx+o-4, y-3, 4, 1);
+
+// ======================================
+// 👃 NOSE (NEW!)
+// ======================================
+
+function drawNose(ctx, cx, dna){
+
+  ctx.fillStyle = dna.skinDark;
+
+  if(dna.noseType === "small"){
+    ctx.fillRect(cx-1, 30, 2, 2);
+  }
+
+  if(dna.noseType === "wide"){
+    ctx.fillRect(cx-2, 30, 4, 2);
+  }
+
+  if(dna.noseType === "long"){
+    ctx.fillRect(cx-1, 30, 2, 4);
+  }
 }
 
 
@@ -213,12 +233,12 @@ function drawAccessories(ctx, cx, dna){
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 1;
 
-  ctx.strokeRect(cx-12, 25, 8, 6);
-  ctx.strokeRect(cx+4, 25, 8, 6);
+  ctx.strokeRect(cx-12, dna.eyeY, 8, 6);
+  ctx.strokeRect(cx+4, dna.eyeY, 8, 6);
 
   ctx.beginPath();
-  ctx.moveTo(cx-4, 28);
-  ctx.lineTo(cx+4, 28);
+  ctx.moveTo(cx-4, dna.eyeY+3);
+  ctx.lineTo(cx+4, dna.eyeY+3);
   ctx.stroke();
 }
 
@@ -232,14 +252,13 @@ function drawBody(ctx, cx, country){
   ctx.fillStyle = getColor(country);
   ctx.fillRect(cx-18, 46, 36, 18);
 
-  // collar
   ctx.fillStyle = "rgba(0,0,0,0.2)";
   ctx.fillRect(cx-18, 46, 36, 3);
 }
 
 
 // ======================================
-// 🎨 PALETTES
+// 🎨 PALETTES + REGION
 // ======================================
 
 const SKIN_TONES = [
@@ -248,6 +267,12 @@ const SKIN_TONES = [
   ["#c68642","#a86b33","#7c4a1f"],
   ["#8d5524","#6f3f1a","#4e2a12"]
 ];
+
+const SKIN_BY_REGION = {
+  BR: SKIN_TONES,
+  FR: SKIN_TONES,
+  DE: SKIN_TONES
+};
 
 const HAIR_COLORS = [
   "#1c1c1c","#3b2f2f","#6b4f3a","#d6a77a","#c0c0c0"
