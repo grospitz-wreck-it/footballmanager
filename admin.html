@@ -164,6 +164,49 @@
 
 </div>
 
+<div id="gameEventsTab" class="tabContent">
+
+<div class="box">
+  <h2>🎮 Neues Game Event</h2>
+
+  <div class="grid">
+
+    <input id="geTitle" placeholder="Titel">
+
+    <!-- EVENT TYPE -->
+    <select id="geType"></select>
+
+    <!-- TRIGGER -->
+    <select id="geTrigger">
+      <option value="random">Random</option>
+      <option value="always">Immer</option>
+      <option value="once">Einmal pro Match</option>
+    </select>
+
+    <input id="geProbability" type="number" step="0.01" placeholder="Chance (0-1)">
+
+    <!-- PARAMS -->
+    <input id="geValue" placeholder="Value">
+    <input id="geDuration" placeholder="Duration">
+
+    <!-- MEDIA -->
+    <input type="file" id="geMedia">
+
+    <button id="saveGameEventBtn">💾 Speichern</button>
+
+  </div>
+</div>
+
+<div class="box">
+  <h2>📋 Game Events</h2>
+
+  <input id="geSearch" placeholder="Suche...">
+
+  <div id="gameEventList"></div>
+</div>
+
+</div>
+  
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script type="module" src="./js/admin.js"></script>
