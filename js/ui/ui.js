@@ -435,11 +435,11 @@ function renderStat(label, value){
 // 🪟 PLAYER MODAL
 // =========================
 function renderStars(count = 1){
-  const safe = Math.max(1, Math.min(count, 5)); // clamp 1–5
+  const safe = Math.max(1, Math.min(count, 5));
 
   return `
     <div class="stars">
-      <img src="../gfx/modal/star${safe}.webp" alt="${safe} stars" />
+      <img src="/gfx/modal/star${safe}.webp" alt="${safe} stars" />
     </div>
   `;
 }
