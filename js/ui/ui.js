@@ -432,6 +432,65 @@ function renderStat(label, value){
   `;
 }
 
+function openPlayerModal(player){
+
+  const existing = document.getElementById("playerModal");
+  if(existing) existing.remove();
+
+  const div = document.createElement("div");
+  div.id = "playerModal";
+
+  div.innerHTML = `
+    <div class="modal-overlay">
+      <div 
+        class="player-modal" 
+        data-tier="${player.tier || 'common'}"
+        data-stars="${player.stars || 1}"
+      >
+
+        <button class="close-btn">✕</button>
+
+        <div class="card-top">
+          <div class="rating">${player.overall ?? 0}</div>
+          <div class="stars-top">
+            <img src="/gfx/modal/star${player.stars || 1}.webp" />
+          </div>
+        </div>
+
+        <div class="card-player">
+          <canvas id="player-avatar" width="64" height="64"></canvas>
+        </div>
+
+        <div class="card-name">${player.name}</div>
+
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(div);
+
+  // 🎨 Avatar rendern
+  const canvas = div.querySelector("#player-avatar");
+  const ctx = canvas.getContext("2d");
+
+  const texture = getPlayerTexture(
+    player.id,
+    player.nationality || player.Country || "DE"
+  );
+
+  ctx.clearRect(0,0,64,64);
+  ctx.drawImage(texture, 0, 0);
+
+  // ❌ Close logic (FIXED)
+  const overlay = div.querySelector(".modal-overlay");
+  const closeBtn = div.querySelector(".close-btn");
+
+  closeBtn.onclick = () => div.remove();
+
+  overlay.onclick = (e) => {
+    if(e.target === overlay) div.remove();
+  };
+}
 
 // =========================
 // 📦 EXPORTS
