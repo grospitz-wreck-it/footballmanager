@@ -170,8 +170,18 @@ function updateEvents(){
     <span>${text}</span>
   `;
 
-  container.appendChild(div);
-  
+container.appendChild(div);
+
+// =========================
+// 🎮 OVERLAY TRIGGER
+// =========================
+if(newest.assets?.length){
+
+  const img = newest.assets[0]?.url;
+
+  if(img){
+    showOverlay(img, text);
+  }
 }
 
 const overlayEl = document.getElementById("matchOverlay");
