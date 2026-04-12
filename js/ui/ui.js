@@ -457,30 +457,35 @@ function openPlayerModal(player){
   div.innerHTML = `
     <div class="modal-overlay">
       <div 
-        class="player-modal" 
+        class="player-modal fifa-card" 
         data-tier="${player.tier || 'common'}"
         data-stars="${player.stars || 1}"
       >
 
+        <!-- ❌ CLOSE -->
         <button class="close-btn">✕</button>
 
-        <div class="card-header">
-  <canvas id="player-avatar" width="64" height="64"></canvas>
-  <h1>${player.name}</h1>
-  <span class="overall">${player.overall ?? 0}</span>
-</div>
-
-        <div class="card-body">
-          <div class="position">${player.position || "-"}</div>
-          <div class="tier">${player.tier || "common"}</div>
-
-          ${renderStars(player.stars)}
-
-          <div class="stats">
-            ${renderStat("SHO", player.shooting)}
-            ${renderStat("PAS", player.passing)}
-            ${renderStat("DEF", player.defending)}
+        <!-- 🔝 TOP -->
+        <div class="card-top">
+          <div class="rating">${player.overall ?? 0}</div>
+          <div class="stars-top">
+            <img src="/gfx/modal/star${player.stars || 1}.webp" />
           </div>
+        </div>
+
+        <!-- 👤 PLAYER -->
+        <div class="card-player">
+          <canvas id="player-avatar" width="96" height="96"></canvas>
+        </div>
+
+        <!-- 📛 NAME -->
+        <div class="card-name">${player.name}</div>
+
+        <!-- 📊 STATS -->
+        <div class="card-stats">
+          ${renderStat("SHO", player.shooting)}
+          ${renderStat("PAS", player.passing)}
+          ${renderStat("DEF", player.defending)}
         </div>
 
       </div>
@@ -488,32 +493,39 @@ function openPlayerModal(player){
   `;
 
   document.body.appendChild(div);
-const canvas = div.querySelector("#player-avatar");
-const ctx = canvas.getContext("2d");
 
-const texture = getPlayerTexture(
-  player.id,
-  player.nationality || player.Country || "DE"
-);
+  // =========================
+  // 🎨 RENDER AVATAR
+  // =========================
+  const canvas = div.querySelector("#player-avatar");
+  const ctx = canvas.getContext("2d");
 
-if(player.overall > 80){
-  ctx.shadowColor = "gold";
-  ctx.shadowBlur = 10;
-}
+  const texture = getPlayerTexture(
+    player.id,
+    player.nationality || player.Country || "DE"
+  );
 
-ctx.drawImage(texture, 0, 0);
+  if(player.overall > 80){
+    ctx.shadowColor = "gold";
+    ctx.shadowBlur = 10;
+  }
 
-// reset (wichtig!)
-ctx.shadowBlur = 0;
-  
-  // ❌ Close Button
+  ctx.drawImage(texture, 0, 0, 96, 96);
+  ctx.shadowBlur = 0;
+
+  // =========================
+  // ❌ CLOSE LOGIC (FIXED)
+  // =========================
+  const overlay = div.querySelector(".modal-overlay");
+  const closeBtn = div.querySelector(".close-btn");
+
   closeBtn.onclick = () => div.remove();
 
   overlay.addEventListener("click", (e) => {
-  if (e.target.classList.contains("modal-overlay")) {
-    div.remove();
-  }
-});
+    if (e.target.classList.contains("modal-overlay")) {
+      div.remove();
+    }
+  });
 }
 
 // =========================
