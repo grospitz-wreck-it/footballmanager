@@ -1066,14 +1066,18 @@ tr:hover {
 
 /* 👉 EINZELNER BANNER */
 /* =========================
-🏟️ AD SYSTEM (FINAL FIXED)
+🏟️ AD SYSTEM (FINAL CLEAN)
 ========================= */
 
+/* SLOT */
 #adContainer {
-  width: 320px;            /* 🔥 FIX: kein 100% mehr */
+  width: 100%;              /* passt sich Container an */
   height: 100px;
 
-  margin: 10px auto;
+  min-height: 100px;
+  max-height: 100px;
+
+  margin: 10px 0;
 
   position: relative;
   overflow: hidden;
@@ -1084,7 +1088,7 @@ tr:hover {
   box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
-/* TRACK */
+/* TRACK (für Rotation) */
 #adContainer .adTrack {
   display: flex;
   height: 100%;
@@ -1092,7 +1096,7 @@ tr:hover {
   transition: transform 0.4s ease;
 }
 
-/* ITEM */
+/* EINZELNE AD */
 #adContainer .adItem {
   min-width: 100%;
   height: 100%;
@@ -1106,13 +1110,14 @@ tr:hover {
   height: 100%;
 }
 
-#adContainer img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
+/* IMAGE (FIXED SCALING) */
+#adContainer .adItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* 🔥 verhindert „riesig“ */
 }
 
-/* 👉 OPTIONAL TAP FEEDBACK (MOBILE NICE UX) */
+/* OPTIONAL: TAP FEEDBACK */
 #adContainer:active img {
   transform: scale(0.98);
   transition: transform 0.15s ease;
@@ -1122,16 +1127,4 @@ tr:hover {
     width: 100%;
     max-width: 320px;
   }
-}
-#adContainer {
-  width: 320px !important;
-  height: 100px !important;
-
-  min-height: 100px !important;
-  max-height: 100px !important;
-
-  overflow: hidden !important;
-}
-#adContainer {
-  outline: 3px solid red;
 }
