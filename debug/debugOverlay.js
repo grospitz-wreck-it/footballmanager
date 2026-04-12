@@ -1,8 +1,16 @@
 // =========================
-// 🐞 DEBUG OVERLAY (FINAL)
+// 🐞 DEBUG OVERLAY (FINAL + EVENTS)
 // =========================
 
 import { game } from "../js/core/state.js";
+
+// =========================
+// 🧠 GLOBAL EVENT BUFFER
+// =========================
+if(!window.__DEBUG_EVENTS){
+  window.__DEBUG_EVENTS = [];
+}
+
 // =========================
 // 🧠 HELPERS
 // =========================
@@ -52,13 +60,13 @@ function createOverlay(){
 
   header.textContent = "🐞 DEBUG";
 
-  // Klick = ein/ausblenden
+  // Toggle sichtbar
   header.onclick = () => {
     content.style.display =
       content.style.display === "none" ? "block" : "none";
   };
 
-  // Doppelklick = freeze
+  // Freeze
   header.ondblclick = () => {
     frozen = !frozen;
     header.textContent = frozen
@@ -81,6 +89,8 @@ function render(content){
   const league = game.league?.current;
   const match = game.match?.current;
   const live = game.match?.live;
+
+  const events = window.__DEBUG_EVENTS || [];
 
   content.innerHTML = `
 <b>📊 LEAGUE</b>
@@ -111,6 +121,16 @@ Score: ${safe(live?.score?.home)} : ${safe(live?.score?.away)}
 
 <b>🧠 STATE</b>
 Phase: ${safe(game.phase)}
+
+<b>📡 EVENTS</b>
+${events.length
+  ? events.map(e => `
+    ${e.minute}' ${e.type}
+    ${e.playerId ? `👤 ${e.playerId.slice(0,6)}` : ""}
+    ${e.assets?.[0]?.url ? "🎥" : ""}
+  `).join("<br>")
+  : "-"
+}
 `;
 }
 
