@@ -192,26 +192,60 @@ function drawHair(ctx, cx, dna){
 function drawEyes(ctx, cx, dna){
 
   const y = dna.eyeY;
-  const o = dna.eyeSpacing;
 
+  // 👁 individuelle Offsets (ASYMMETRIE!)
+  const oL = dna.eyeSpacing;
+  const oR = dna.eyeSpacing + (dna.eyeOffsetR || 0);
+
+  const yL = y + (dna.eyeOffsetYL || 0);
+  const yR = y + (dna.eyeOffsetYR || 0);
+
+  const sizeL = dna.eyeSizeL || 4;
+  const sizeR = dna.eyeSizeR || 4;
+
+  // =========================
+  // 👁 LEFT EYE
+  // =========================
   ctx.fillStyle = "#fff";
-  ctx.fillRect(cx-o, y, 4, 3);
-  ctx.fillRect(cx+o-4, y, 4, 3);
+  ctx.fillRect(cx - oL, yL, sizeL, 3);
 
   ctx.fillStyle = dna.eyeColor;
-  ctx.fillRect(cx-o+1, y, 2, 2);
-  ctx.fillRect(cx+o-3, y, 2, 2);
+  ctx.fillRect(cx - oL + 1, yL, 2, 2);
 
   ctx.fillStyle = "#000";
-  ctx.fillRect(cx-o+1, y, 1, 1);
-  ctx.fillRect(cx+o-3, y, 1, 1);
+  ctx.fillRect(cx - oL + 1, yL, 1, 1);
 
+  // =========================
+  // 👁 RIGHT EYE
+  // =========================
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(cx + oR - sizeR, yR, sizeR, 3);
+
+  ctx.fillStyle = dna.eyeColor;
+  ctx.fillRect(cx + oR - sizeR + 1, yR, 2, 2);
+
+  ctx.fillStyle = "#000";
+  ctx.fillRect(cx + oR - sizeR + 1, yR, 1, 1);
+
+  // =========================
+  // ✨ HIGHLIGHTS (optional)
+  // =========================
   if(dna.detail){
     ctx.fillStyle = "#fff";
-    ctx.fillRect(cx-o+2, y, 1, 1);
-    ctx.fillRect(cx+o-2, y, 1, 1);
+    ctx.fillRect(cx - oL + 2, yL, 1, 1);
+    ctx.fillRect(cx + oR - 2, yR, 1, 1);
   }
+
+  // =========================
+  // 👁 EYEBROWS (CHARACTER!)
+  // =========================
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+
+  // leicht unterschiedlich
+  ctx.fillRect(cx - oL, yL - 3, sizeL, 1);
+  ctx.fillRect(cx + oR - sizeR, yR - 3 + (dna.browOffset || 0), sizeR, 1);
 }
+
 
 
 // ======================================
