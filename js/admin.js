@@ -7,12 +7,13 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // STATE
 // =====================
 const state = {
-campaigns: [],
-events: [],
-editId: null,
-editEventId: null,
-inlineEditId: null,
-inlineEventEditId: null
+  campaigns: [],
+  events: [],
+  gameEvents: [], // 🔥 NEU
+  editId: null,
+  editEventId: null,
+  inlineEditId: null,
+  inlineEventEditId: null
 };
 
 // =====================
