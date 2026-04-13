@@ -836,15 +836,16 @@ function switchTab(tab){
     loadEvents();
   }
 
- if(tab === "insights"){
+if(tab === "insights"){
 
   qs("insightsTab")?.classList.add("active");
   qs("tabInsights")?.classList.add("active");
 
-  destroyChart(); // 🔥 FIX
+  destroyChart();
 
   loadInsights();
   loadChart();
+  loadGeoMap(); // 🔥 DAS HAT GEFEHLT
 }
 }
 
