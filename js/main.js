@@ -413,7 +413,11 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
     initDebugOverlay();
     initMatchEventSlides();
     renderSchedule();
+initPLZSystem(); // 🔥 wichtig!
 
+} catch (e){
+  console.error("❌ INIT ERROR:", e);
+}
 
 // =========================
 // 🌍 PLZ + LEAGUE SYSTEM (FINAL CLEAN)
@@ -580,18 +584,26 @@ game.league.currentRound++;
             updateMainButtonText();
           },
           onEnd: () => {
-            matchLoopRunning = false;
-            updateUI();
-            updateMainButtonText();
-          }
-        });
-      }
+          matchLoopRunning = false;
 
-      renderSchedule();
-      updateUI();
-      updateMainButtonText();
-      return;
+    if(game.match?.live){
+      game.match.live.running = false;
     }
+
+    if(game.events){
+      game.events.history = [];
+    }
+
+    advanceSchedule();
+
+    game.league.currentRound = game.league.currentRound;
+
+    updateUI();
+    renderEvents();
+    renderSchedule();
+  });
+
+} 
 
     if(
       live.phase === "halftime" ||
