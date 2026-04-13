@@ -119,7 +119,9 @@ function applyGameEventEffect(event, ctx){
   if(!event) return;
 
   // 🔥 GOAL EFFECT
-  if(event.effect === "goal"){
+  const type = String(event.type || event.effect || "").toLowerCase();
+
+if(type === "goal"){
 
     const isHome = Math.random() < 0.5;
     const teamId = isHome
@@ -148,7 +150,41 @@ function applyGameEventEffect(event, ctx){
       text: event.title || "⚽ Tor!",
 
       // 👉 WEBP / Images
-      assets: event.assets || [],
+      const type = String(event.type || event.effect || "").toLowerCase();
+
+if(type === "goal"){
+
+  const isHome = Math.random() < 0.5;
+  const teamId = isHome
+    ? ctx.match.homeTeamId
+    : ctx.match.awayTeamId;
+
+  const player = getRandomPlayer(teamId);
+
+  if(isHome){
+    game.match.live.score.home++;
+    game.match.score.home++;
+  } else {
+    game.match.live.score.away++;
+    game.match.score.away++;
+  }
+
+  console.log("🎯 GOAL ASSETS (FINAL):", getGoalAssets());
+
+  emitMatchEvent(EVENT_TYPES.GOAL, {
+    teamId,
+    playerId: player?.id,
+    outcome: EVENT_OUTCOMES.SUCCESS,
+
+    text: event.title || "⚽ Tor!",
+
+    // 🔥 FIX
+    assets: getGoalAssets(),
+
+    eventId: event.id,
+    eventType: event.type
+  });
+}
 
       // 👉 optional für später
       eventId: event.id,
