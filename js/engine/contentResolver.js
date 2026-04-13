@@ -13,9 +13,15 @@ export function resolveEventContent(event){
   const events = game.data?.gameEvents || [];
   const type = normalize(event.type);
 
-  const matches = events.filter(e => 
-    normalize(e.type) === type
-  );
+ const matches = events.filter(e => {
+  const possible = [
+    e.type,
+    e.effect,
+    e.eventType
+  ].map(normalize);
+
+  return possible.includes(type);
+});
 
   if(!matches.length){
     return {
