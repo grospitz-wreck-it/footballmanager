@@ -241,7 +241,7 @@ on(EVENTS.MATCH_EVENT, (event) => {
   // 🆕 CONTENT RESOLVER
   // =========================
   const resolved = resolveEventContent(enrichedInput);
-
+  console.log("🧪 RESOLVED:", resolved);
   // =========================
   // 🧠 TEXT PRIORITY
   // =========================
