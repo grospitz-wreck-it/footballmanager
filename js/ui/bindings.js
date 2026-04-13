@@ -1,10 +1,12 @@
 // =========================
 // 🔗 UI BINDINGS (CLEAN FIX)
 // =========================
+import { getSessionId, track } from "../../tools/analytics.js";
 import {
   selectTeam,
   initLeagueSelect
 } from "../modules/league.js";
+
 
 import { setPlayerName } from "../modules/player.js";
 import { renderApp } from "./layout.js";
