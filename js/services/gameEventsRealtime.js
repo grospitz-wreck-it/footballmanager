@@ -1,9 +1,11 @@
 // =========================
-// 🔴 REALTIME GAME EVENTS
+// 🔴 REALTIME GAME EVENTS (FINAL CLEAN)
 // =========================
 
 import { supabase } from "../client.js";
 import { game } from "../core/state.js";
+import { emit } from "../core/events.js";
+import { EVENTS } from "../core/events.constants.js";
 
 // =========================
 // 📥 INITIAL LOAD
@@ -20,9 +22,16 @@ export async function loadGameEvents(){
   }
 
   game.data = game.data || {};
+
+  // 🔥 RESET (gegen alten Cache)
+  game.data.gameEvents = [];
+
+  // 🔥 ASSIGN
   game.data.gameEvents = data || [];
 
   console.log("🔥 Events geladen:", game.data.gameEvents);
+
+  emit(EVENTS.STATE_CHANGED);
 }
 
 // =========================
@@ -40,16 +49,22 @@ export function subscribeGameEvents(){
     // =========================
     .on(
       "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "game_events"
-      },
+      { event: "INSERT", schema: "public", table: "game_events" },
       payload => {
 
-        console.log("➕ EVENT INSERT", payload.new);
+        const newEvent = payload.new;
 
-        game.data.gameEvents.push(payload.new);
+        console.log("➕ EVENT INSERT", newEvent);
+
+        const exists = game.data.gameEvents.some(
+          e => String(e.id) === String(newEvent.id)
+        );
+
+        if(!exists){
+          game.data.gameEvents.push(newEvent);
+        }
+
+        emit(EVENTS.STATE_CHANGED);
       }
     )
 
@@ -58,22 +73,22 @@ export function subscribeGameEvents(){
     // =========================
     .on(
       "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "game_events"
-      },
+      { event: "UPDATE", schema: "public", table: "game_events" },
       payload => {
 
-        console.log("✏️ EVENT UPDATE", payload.new);
+        const updated = payload.new;
+
+        console.log("✏️ EVENT UPDATE", updated);
 
         const index = game.data.gameEvents.findIndex(
-          e => String(e.id) === String(payload.new.id)
+          e => String(e.id) === String(updated.id)
         );
 
         if(index !== -1){
-          game.data.gameEvents[index] = payload.new;
+          game.data.gameEvents[index] = updated;
         }
+
+        emit(EVENTS.STATE_CHANGED);
       }
     )
 
@@ -82,18 +97,18 @@ export function subscribeGameEvents(){
     // =========================
     .on(
       "postgres_changes",
-      {
-        event: "DELETE",
-        schema: "public",
-        table: "game_events"
-      },
+      { event: "DELETE", schema: "public", table: "game_events" },
       payload => {
 
-        console.log("❌ EVENT DELETE", payload.old);
+        const deleted = payload.old;
+
+        console.log("❌ EVENT DELETE", deleted);
 
         game.data.gameEvents = game.data.gameEvents.filter(
-          e => String(e.id) !== String(payload.old.id)
+          e => String(e.id) !== String(deleted.id)
         );
+
+        emit(EVENTS.STATE_CHANGED);
       }
     )
 
