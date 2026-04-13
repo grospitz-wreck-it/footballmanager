@@ -7,6 +7,7 @@ import { EVENTS } from "./core/events.constants.js";
 import { initLeagueSelect, setLeagueById } from "./modules/league.js";
 import "./core/eventStore.js";
 import { loadPlayers } from "./modules/loader.js";
+
 // =========================
 // 🔌 SUPABASE
 // =========================
@@ -28,7 +29,7 @@ window.buildAllTeams = buildAllTeams;
 // 🎮 ENGINE
 // =========================
 import { runMatchLoop, initMatch } from "./matchEngine.js";
-
+import { initMatchEventSlides } from "./engine/matchEventSlideSystem.js";
 // =========================
 // 💾 STORAGE
 // =========================
