@@ -60,7 +60,6 @@ function getTeamNameById(id){
 // =========================
 // 🆕 EVENT EMITTER
 // =========================
-console.log("🎯 GOAL ASSETS:", getAssetsForEvent("goal"));
 function emitMatchEvent(type, payload = {}) {
 
   const live = game.match?.live;
