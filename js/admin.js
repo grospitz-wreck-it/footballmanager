@@ -1,3 +1,4 @@
+let insightChart = null;
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
 import { SUPABASE_URL, SUPABASE_KEY } from "./config.js";
 
