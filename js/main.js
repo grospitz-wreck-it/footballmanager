@@ -653,5 +653,3 @@ document.addEventListener("visibilitychange", () => {
 // ▶️ START
 // =========================
 document.addEventListener("DOMContentLoaded", init);
-
-export { init };
