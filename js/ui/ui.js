@@ -159,7 +159,13 @@ function updateEvents(){
   console.log("🧪 EVENT DEBUG:", newest);
   if(newest.id === lastRenderedEventId) return;
   lastRenderedEventId = newest.id;
-
+  // 🔥 TRACKING
+import("../tools/analytics.js").then(({ track }) => {
+  track("game_event", {
+    minute: newest.minute,
+    text: newest.text || null
+  });
+});
   // =========================
   // 🧠 TEXT (IMMER!)
   // =========================
