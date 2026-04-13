@@ -248,7 +248,7 @@ async function findLeaguesByCode(input){
 // 🚀 INIT
 // =========================
 async function init(){
-
+track("app_start");
   window.game = game;
 
   const splash = document.getElementById("splash");
@@ -489,7 +489,7 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
   }
 
   mainBtn?.addEventListener("click", () => {
-
+  
     let live = game.match?.live;
     const league = game.league?.current;
 
@@ -516,7 +516,7 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
     }
 
     if(live.minute >= 90){
-
+    track("match_start");
       // 🔥 FIX
 game.league.currentRound++;
       const round = league?.schedule?.[game.league.currentRound|| 0];
