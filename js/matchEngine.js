@@ -56,27 +56,24 @@ function getTeamNameById(id){
   return getTeamById(id)?.name || "Unbekannt";
 }
 
-function getGoalAssets(){
+function getAssetsForEvent(type){
 
   const events = game.data?.gameEvents || [];
 
+  const normalizedType = String(type || "").toLowerCase();
+
   const pool = events.filter(e => {
-
-    const type =
-      String(e.type || e.effect || e.eventType || "")
-      .toLowerCase();
-
-    return type === "goal";
+    const t = String(e.type || e.effect || e.eventType || "").toLowerCase();
+    return t === normalizedType;
   });
 
-  console.log("🎯 GOAL POOL:", pool);
+  console.log(`🎯 ASSET POOL [${normalizedType}]:`, pool);
 
   if(!pool.length) return [];
 
-  // 🔥 random event auswählen
   const randomEvent = pool[Math.floor(Math.random() * pool.length)];
 
-  console.log("🎯 SELECTED GOAL EVENT:", randomEvent);
+  console.log("🎯 SELECTED EVENT:", randomEvent);
 
   return Array.isArray(randomEvent.assets)
     ? randomEvent.assets
@@ -118,12 +115,15 @@ function applyGameEventEffect(event, ctx){
 
   if(!event) return;
 
-  // 🔥 GOAL EFFECT
   const type = String(event.type || event.effect || "").toLowerCase();
 
-if(type === "goal"){
+  // =========================
+  // ⚽ GOAL EVENT
+  // =========================
+  if(type === "goal"){
 
     const isHome = Math.random() < 0.5;
+
     const teamId = isHome
       ? ctx.match.homeTeamId
       : ctx.match.awayTeamId;
@@ -138,55 +138,26 @@ if(type === "goal"){
       game.match.live.score.away++;
       game.match.score.away++;
     }
-    
-    console.log("🎯 GOAL ASSETS:", getGoalAssets());
-    // 🔥 TEXT + ASSETS aus Admin übernehmen
+
+    // 🔥 DEBUG
+    console.log("🎯 GOAL ASSETS (RAW EVENT):", event.assets);
+    console.log("🎯 GOAL ASSETS (FALLBACK):", getGoalAssets?.());
+
+    // 🔥 FINAL EMIT
     emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
       playerId: player?.id,
       outcome: EVENT_OUTCOMES.SUCCESS,
 
-      // 👉 Text kommt jetzt aus deinem Admin Event
+      // 👉 Text aus Admin
       text: event.title || "⚽ Tor!",
 
-      // 👉 WEBP / Images
-      const type = String(event.type || event.effect || "").toLowerCase();
+      // 👉 FIX: sichere Asset-Logik
+      assets: Array.isArray(event.assets) && event.assets.length
+        ? event.assets
+        : (getGoalAssets?.() || []),
 
-if(type === "goal"){
-
-  const isHome = Math.random() < 0.5;
-  const teamId = isHome
-    ? ctx.match.homeTeamId
-    : ctx.match.awayTeamId;
-
-  const player = getRandomPlayer(teamId);
-
-  if(isHome){
-    game.match.live.score.home++;
-    game.match.score.home++;
-  } else {
-    game.match.live.score.away++;
-    game.match.score.away++;
-  }
-
-  console.log("🎯 GOAL ASSETS (FINAL):", getGoalAssets());
-
-  emitMatchEvent(EVENT_TYPES.GOAL, {
-    teamId,
-    playerId: player?.id,
-    outcome: EVENT_OUTCOMES.SUCCESS,
-
-    text: event.title || "⚽ Tor!",
-
-    // 🔥 FIX
-    assets: getGoalAssets(),
-
-    eventId: event.id,
-    eventType: event.type
-  });
-}
-
-      // 👉 optional für später
+      // 👉 optional
       eventId: event.id,
       eventType: event.type
     });
