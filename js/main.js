@@ -578,13 +578,13 @@ game.league.currentRound++;
         game.match.live.running = true;
         matchLoopRunning = true;
 
-        runMatchLoop({
-          onTick: () => {
-            updateUI();
-            updateMainButtonText();
-          },
-          onEnd: () => {
-          matchLoopRunning = false;
+       runMatchLoop({
+  onTick: () => {
+    updateUI();
+    updateMainButtonText();
+  },
+  onEnd: () => {
+    matchLoopRunning = false;
 
     if(game.match?.live){
       game.match.live.running = false;
@@ -596,13 +596,11 @@ game.league.currentRound++;
 
     advanceSchedule();
 
-    game.league.currentRound = game.league.currentRound;
-
     updateUI();
     renderEvents();
     renderSchedule();
-   } // ✅ schließt onEnd
-}); // ✅ schließt runMatchLoop
+  }
+});
 
     if(
       live.phase === "halftime" ||
