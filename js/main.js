@@ -10,14 +10,7 @@ import "./core/eventStore.js";
 import { loadPlayers } from "./modules/loader.js";
 import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
 
-async function startGame(){
 
-  await loadGameEvents();     // 🔥 zuerst laden
-  subscribeGameEvents();      // 🔴 dann realtime starten
-
-}
-
-startGame();
 // =========================
 // 🔌 SUPABASE
 // =========================
