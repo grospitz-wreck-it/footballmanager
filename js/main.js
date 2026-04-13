@@ -91,7 +91,6 @@ function startBackgroundSimulation(){
           score: { home: 0, away: 0 }
         };
       }
-      track("app_open");
       if(match._processed) return;
 
       // 🔥 Minute läuft hoch
@@ -249,6 +248,8 @@ async function findLeaguesByCode(input){
 // =========================
 async function init(){
 track("app_start");
+track("app_open");
+
   window.game = game;
 
   const splash = document.getElementById("splash");
@@ -466,9 +467,7 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
 
   } catch (e){
     console.error("❌ INIT ERROR:", e);
-    window.addEventListener("beforeunload", () => {
-  track("session_end");
-});
+    
   }
 
   // =========================
@@ -526,7 +525,7 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
     }
 
     if(live.minute >= 90){
-    track("match_start");
+
       // 🔥 FIX
 game.league.currentRound++;
       const round = league?.schedule?.[game.league.currentRound|| 0];
@@ -631,6 +630,12 @@ game.league.currentRound++;
   document.getElementById("resetBtn")?.addEventListener("click", () => {
     import("./services/storage.js").then(m => m.resetGame());
   });
+  // =========================
+// 🔚 SESSION END TRACKING
+// =========================
+window.addEventListener("beforeunload", () => {
+  track("session_end");
+});
 }
 
 // =========================
