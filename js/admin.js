@@ -595,9 +595,15 @@ async function loadGeoMap(){
     .sort((a,b) => b[1] - a[1])
     .slice(0, 5);
 
+  if(!sorted.length){
+    container.innerHTML = "Keine Daten";
+    return;
+  }
+
   container.innerHTML = sorted.map(([id, val], i) => `
     <div class="regionRow">
-      #${i+1} Region ${id} — ${val} Nutzer
+      <span>#${i+1} Region ${id}</span>
+      <strong>${val}</strong>
     </div>
   `).join("");
 }
