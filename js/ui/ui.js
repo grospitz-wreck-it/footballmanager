@@ -191,10 +191,8 @@ if(!text) return;
   // =========================
   // 🎬 OVERLAY (NUR WENN ASSET)
   // =========================
-if(
-  newest.assets?.length &&
-  (!newest.meta || newest.meta.category === "highlight")
-){
+if(newest.assets?.length)
+{
     const asset = newest.assets[0];
     const url = asset?.url;
 
