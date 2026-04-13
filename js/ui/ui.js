@@ -155,6 +155,9 @@ function updateEvents(){
   if(newest.id === lastRenderedEventId) return;
   lastRenderedEventId = newest.id;
 
+  // =========================
+  // 🧠 TEXT (IMMER!)
+  // =========================
   let text = newest.text;
 
   if(!text){
@@ -165,6 +168,9 @@ function updateEvents(){
 
   if(!text) return;
 
+  // =========================
+  // 📰 FEED UPDATE
+  // =========================
   const div = document.createElement("div");
 
   div.innerHTML = `
@@ -172,7 +178,21 @@ function updateEvents(){
     <span>${text}</span>
   `;
 
-container.appendChild(div);
+  container.appendChild(div);
+
+  // =========================
+  // 🎬 OVERLAY (NUR WENN ASSET)
+  // =========================
+  if(newest.assets && newest.assets.length){
+
+    const asset = newest.assets[0];
+    const url = asset?.url;
+
+    if(url){
+      showOverlay(url, text);
+    }
+  }
+}
 
 // =========================
 // 🎮 OVERLAY TRIGGER
