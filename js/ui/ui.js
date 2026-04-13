@@ -212,7 +212,7 @@ if(newest.assets?.length)
 // 🎮 OVERLAY TRIGGER
 // =========================
 
-export function showOverlay(imageUrl, text, duration = 2500){
+export function showOverlay(imageUrl, text, duration = 5000){
 
   const overlayEl = document.getElementById("matchOverlay");
   const overlayImg = document.getElementById("overlayImage");
