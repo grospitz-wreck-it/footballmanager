@@ -494,8 +494,8 @@ async function getGeoData(){
 
   const map = {};
 
-  data.forEach(e => {
-    if(!e.region_id) return;
+  (data || []).forEach(e => {
+  if(!e.region_id) return;
 
     map[e.region_id] = (map[e.region_id] || 0) + 1;
   });
