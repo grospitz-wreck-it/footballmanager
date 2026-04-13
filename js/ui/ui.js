@@ -217,6 +217,26 @@ export function showOverlay(imageUrl, text, duration = 2500){
 }
 
 // =========================
+// 🎬 MATCH EVENT OVERLAY (DIRECT)
+// =========================
+on(EVENTS.MATCH_EVENT, (event) => {
+
+  // ❌ nur Events mit Assets
+  if(!event.assets || !event.assets.length) return;
+
+  const asset = event.assets[0];
+  const url = asset?.url;
+
+  if(!url) return;
+
+  const text = event.text || event.type;
+
+  console.log("🎬 OVERLAY TRIGGER:", event);
+
+  showOverlay(url, text);
+});
+
+// =========================
 // 📊 TABS
 // =========================
 function updateTabs(){
