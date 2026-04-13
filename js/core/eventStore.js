@@ -203,15 +203,75 @@ on(EVENTS.AD_REWARD, (ad) => {
 // =========================
 // 🧪 DEBUG LOGGING
 // =========================
-
 on(EVENTS.MATCH_EVENT, (event) => {
-  console.log("📥 EventStore received MATCH_EVENT:", event);
-});
 
-on(EVENTS.GAME_EVENT, (event) => {
-  console.log("🎮 Game Event received:", event);
-});
+  if(!event) return;
 
-on(EVENTS.AD_REWARD, (ad) => {
-  console.log("💰 Ad Reward applied:", ad);
+  if(!game.events){
+    game.events = { history: [] };
+  }
+
+  if(!game.events.history){
+    game.events.history = [];
+  }
+
+  const players = game.players || [];
+  const teams = game.data?.teams || [];
+
+  const player = findPlayer(players, event.playerId);
+  const relatedPlayer = findPlayer(players, event.relatedPlayerId);
+  const team = findTeam(teams, event.teamId);
+
+  const playerName = buildPlayerName(player);
+  const relatedPlayerName = relatedPlayer ? buildPlayerName(relatedPlayer) : null;
+
+  const teamName =
+    team?.name ||
+    team?.Name ||
+    "ein Team";
+
+  const enrichedInput = {
+    ...event,
+    playerName,
+    relatedPlayerName,
+    teamName
+  };
+
+  // =========================
+  // 🆕 CONTENT RESOLVER
+  // =========================
+  const resolved = resolveEventContent(enrichedInput);
+
+  // =========================
+  // 🧠 TEXT PRIORITY
+  // =========================
+  let text = null;
+
+  try {
+    text =
+      resolved.text ||
+      generateCommentary(enrichedInput) ||
+      generateText(enrichedInput);
+  } catch(e){
+    console.error("❌ Commentary Crash:", e);
+  }
+
+  const enrichedEvent = {
+    ...enrichedInput,
+
+    id: ensureId(enrichedInput),
+
+    text: text || "...",
+    assets: resolved.assets || [],
+
+    meta: {
+      ...resolved.config,
+      ...enrichMeta(enrichedInput)
+    }
+  };
+
+  game.events.history.push(enrichedEvent);
+  game.events.last = enrichedEvent;
+
+  emit(EVENTS.STATE_CHANGED, enrichedEvent);
 });
