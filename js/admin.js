@@ -368,6 +368,61 @@ function loadEventTypes(){
 }
 
 
+
+async function loadInsights(){
+
+  // 🔹 DAU
+  const { data: dauData } = await supabase
+    .from("analytics_events")
+    .select("session_id", { count: "exact", head: true })
+    .gte("created_at", new Date(Date.now() - 24*60*60*1000).toISOString());
+
+  // 🔹 Sessions
+  const { data: sessionsData } = await supabase
+    .from("analytics_events")
+    .select("session_id", { count: "exact", head: true });
+
+  // 🔹 Matches
+  const { count: matches } = await supabase
+    .from("analytics_events")
+    .select("*", { count: "exact", head: true })
+    .eq("event_name", "match_start");
+
+  // 🔹 Avg Session
+  const { data: sessions } = await supabase
+    .from("analytics_events")
+    .select("session_id, created_at");
+
+  const map = {};
+
+  sessions.forEach(e => {
+    if(!map[e.session_id]){
+      map[e.session_id] = {
+        min: e.created_at,
+        max: e.created_at
+      };
+    } else {
+      if(e.created_at < map[e.session_id].min) map[e.session_id].min = e.created_at;
+      if(e.created_at > map[e.session_id].max) map[e.session_id].max = e.created_at;
+    }
+  });
+
+  const durations = Object.values(map).map(s =>
+    (new Date(s.max) - new Date(s.min)) / 1000
+  );
+
+  const avg = durations.length
+    ? Math.round(durations.reduce((a,b)=>a+b,0)/durations.length)
+    : 0;
+
+  // 🔥 UI UPDATE
+  document.getElementById("insightDAU").textContent = dauData?.length || 0;
+  document.getElementById("insightSessions").textContent = sessionsData?.length || 0;
+  document.getElementById("insightMatches").textContent = matches || 0;
+  document.getElementById("insightAvg").textContent = avg + "s";
+}
+
+
 // =====================
 // 🎮 GAME EVENTS (NEU)
 // =====================
