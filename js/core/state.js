@@ -24,10 +24,11 @@ const game = {
   // 📚 DATA
   // =========================
   data: {
-    leagues: [],
-    events: [],
-    campaigns: []
-  },
+  leagues: [],
+  events: [],
+  campaigns: [],
+  gameEvents: []
+}
 
   // =========================
   // 👕 TEAM
