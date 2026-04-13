@@ -120,8 +120,8 @@ function ensureId(event){
 // 🧠 CORE STORE LOGIC
 // =========================
 
-on(EVENTS.MATCH_EVENT, (event) => {
-console.log("📥 RAW MATCH_EVENT:", event); // 🔥 HIER
+on(EVENTS.GAME_EVENT, (event) => {
+
   if(!event) return;
 
   if(!game.events){
@@ -136,16 +136,11 @@ console.log("📥 RAW MATCH_EVENT:", event); // 🔥 HIER
   const teams = game.data?.teams || [];
 
   const player = findPlayer(players, event.playerId);
-  console.log("🧪 PLAYER OBJECT:", player);
-console.log("🧪 ALL PLAYERS SAMPLE:", players?.[0]);
-console.log("🧪 PLAYER ID:", event.playerId);
   const relatedPlayer = findPlayer(players, event.relatedPlayerId);
-  const keeper = findPlayer(players, event.keeperId);
   const team = findTeam(teams, event.teamId);
 
   const playerName = buildPlayerName(player);
   const relatedPlayerName = relatedPlayer ? buildPlayerName(relatedPlayer) : null;
-  const keeperName = keeper ? buildPlayerName(keeper) : null;
 
   const teamName =
     team?.name ||
@@ -156,7 +151,6 @@ console.log("🧪 PLAYER ID:", event.playerId);
     ...event,
     playerName,
     relatedPlayerName,
-    keeperName,
     teamName
   };
 
@@ -168,34 +162,23 @@ console.log("🧪 PLAYER ID:", event.playerId);
     console.error("❌ Commentary Engine Crash:", e);
   }
 
- const enrichedEvent = {
-  ...enrichedInput,
+  const enrichedEvent = {
+    ...enrichedInput,
 
-  // 🔥 FIX: Assets IMMER mitnehmen
-  assets: Array.isArray(event.assets) ? event.assets : [],
+    // 🔥 FIX: Assets übernehmen
+    assets: Array.isArray(event.assets) ? event.assets : [],
 
-  id: ensureId(event),
-  text: text || generateText(event),
-  meta: enrichMeta(event)
-};
-console.log("📦 FINAL EVENT:", enrichedEvent);
+    id: ensureId(event),
+    text: text || generateText(event),
+    meta: enrichMeta(event)
+  };
+
+  console.log("🎮 FINAL GAME EVENT:", enrichedEvent);
+
   game.events.history.push(enrichedEvent);
-
-  if(game.match){
-    if(!game.match.live){
-      game.match.live = {};
-    }
-
-    if(!game.match.live.events){
-      game.match.live.events = [];
-    }
-
-    game.match.live.events.push(enrichedEvent);
-  }
 
   emit(EVENTS.STATE_CHANGED, game.events.history);
 });
-
 // =========================
 // 🎮 GAME EVENTS
 // =========================
