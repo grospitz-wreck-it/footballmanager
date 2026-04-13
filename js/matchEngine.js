@@ -56,30 +56,6 @@ function getTeamNameById(id){
   return getTeamById(id)?.name || "Unbekannt";
 }
 
-function getAssetsForEvent(type){
-
-  const events = game.data?.gameEvents || [];
-
-  const normalizedType = String(type || "").toLowerCase();
-
-  const pool = events.filter(e => {
-    const t = String(e.type || e.effect || e.eventType || "").toLowerCase();
-    return t === normalizedType;
-  });
-
-  console.log(`🎯 ASSET POOL [${normalizedType}]:`, pool);
-
-  if(!pool.length) return [];
-
-  const randomEvent = pool[Math.floor(Math.random() * pool.length)];
-
-  console.log("🎯 SELECTED EVENT:", randomEvent);
-
-  return Array.isArray(randomEvent.assets)
-    ? randomEvent.assets
-    : [];
-}
-
 
 // =========================
 // 🆕 EVENT EMITTER
@@ -95,14 +71,8 @@ function emitMatchEvent(type, payload = {}) {
     type: type || "UNKNOWN_EVENT",
     minute: live.minute ?? 0,
 
-    // 🔥 PAYLOAD zuerst
-    ...payload,
-
-    // 🔥 SAFETY: TEXT fallback (payload darf NICHT überschrieben werden)
-    text: payload?.text ?? payload?.title ?? null,
-
-    // 🔥 ASSETS sauber absichern (kein undefined / kein Müll)
-    assets: Array.isArray(payload?.assets) ? payload.assets : []
+    // 🔥 NUR ROHDATEN
+    ...payload
   };
 
   emit(EVENTS.MATCH_EVENT, event);
@@ -139,28 +109,14 @@ function applyGameEventEffect(event, ctx){
       game.match.score.away++;
     }
 
-    // 🔥 DEBUG
-    console.log("🎯 GOAL ASSETS (RAW EVENT):", event.assets);
-    console.log("🎯 GOAL ASSETS (FALLBACK):", getGoalAssets?.());
 
     // 🔥 FINAL EMIT
-    emitMatchEvent(EVENT_TYPES.GOAL, {
-      teamId,
-      playerId: player?.id,
-      outcome: EVENT_OUTCOMES.SUCCESS,
-
-      // 👉 Text aus Admin
-      text: event.title || "⚽ Tor!",
-
-      // 👉 FIX: sichere Asset-Logik
-      assets: Array.isArray(event.assets) && event.assets.length
-        ? event.assets
-        : (getGoalAssets?.() || []),
-
-      // 👉 optional
-      eventId: event.id,
-      eventType: event.type
-    });
+   emitMatchEvent(EVENT_TYPES.GOAL, {
+  teamId,
+  playerId: player?.id,
+  relatedPlayerId: getRandomPlayer(teamId)?.id,
+  outcome: EVENT_OUTCOMES.SUCCESS
+});
   }
 }
 // =========================
@@ -327,10 +283,9 @@ function createShot(ctx){
   teamId,
   playerId: shooter?.id,
   relatedPlayerId: getRandomPlayer(teamId)?.id,
-  outcome: EVENT_OUTCOMES.SUCCESS,
+  outcome: EVENT_OUTCOMES.SUCCESS
 
-  // 🔥 WICHTIG: DAMIT WEBP KOMMT
-  assets: getAssetsForEvent("goal")
+
 });
 
     return;
