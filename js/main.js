@@ -3,6 +3,7 @@
 // =========================
 import { game } from "./core/state.js";
 import { on } from "./core/events.js";
+import { track } from "../tools/analytics.js";
 import { EVENTS } from "./core/events.constants.js";
 import { initLeagueSelect, setLeagueById } from "./modules/league.js";
 import "./core/eventStore.js";
