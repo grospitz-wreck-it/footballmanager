@@ -134,18 +134,23 @@ function renderEvents(){
   const headline = document.getElementById("eventText");
 
   if(feed){
-    feed.innerHTML = events.length > 0
-      ? events.slice(-20).reverse()
-    .map(e => {
-      const safeText = String(e.text)
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    
-      return `<div>${e.minute}' - ${safeText}</div>`;
-    })
-      .join("")
-      : "";
-  }
+if(feed){
+  feed.innerHTML = events.length > 0
+    ? (
+        events
+          .slice(-20)
+          .reverse()
+          .map(e => {
+            const safeText = String(e.text)
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;");
+            
+            return `<div>${e.minute}' - ${safeText}</div>`;
+          })
+          .join("")
+      )
+    : "";
+}
 
   const top = events.length
   ? events[events.length - 1]
