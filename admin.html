@@ -8,7 +8,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin.css">
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
 <button id="toggleDebug" class="debugToggle"></button>
@@ -156,7 +156,10 @@
     <h2>📊 Activity</h2>
     <canvas id="insightChart" height="120"></canvas>
   </div>
-
+<div class="box">
+  <h2>🇩🇪 Nutzer Heatmap</h2>
+  <div id="geoMap" style="height: 400px;"></div>
+</div>
 </div>
 <!-- ========================= -->
 <!-- 🎮 GAME EVENTS TAB (FIXED POSITION) -->
