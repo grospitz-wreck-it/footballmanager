@@ -73,6 +73,7 @@ function getGoalAssets(){
 // =========================
 // 🆕 EVENT EMITTER
 // =========================
+console.log("🎯 GOAL ASSETS:", getGoalAssets());
 function emitMatchEvent(type, payload = {}) {
 
   const live = game.match?.live;
