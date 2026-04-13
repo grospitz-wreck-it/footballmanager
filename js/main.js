@@ -91,7 +91,7 @@ function startBackgroundSimulation(){
           score: { home: 0, away: 0 }
         };
       }
-
+      track("app_open");
       if(match._processed) return;
 
       // 🔥 Minute läuft hoch
@@ -466,6 +466,9 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
 
   } catch (e){
     console.error("❌ INIT ERROR:", e);
+    window.addEventListener("beforeunload", () => {
+  track("session_end");
+});
   }
 
   // =========================
