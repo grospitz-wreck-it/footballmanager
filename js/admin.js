@@ -423,6 +423,36 @@ async function loadInsights(){
 }
 
 
+async function loadChart(){
+
+  const { data } = await supabase
+    .from("analytics_events")
+    .select("created_at");
+
+  const days = {};
+
+  data.forEach(e => {
+    const d = new Date(e.created_at).toLocaleDateString();
+    days[d] = (days[d] || 0) + 1;
+  });
+
+  const labels = Object.keys(days);
+  const values = Object.values(days);
+
+  new Chart(document.getElementById("insightChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Events",
+        data: values,
+        tension: 0.3
+      }]
+    }
+  });
+}
+
+
 // =====================
 // 🎮 GAME EVENTS (NEU)
 // =====================
