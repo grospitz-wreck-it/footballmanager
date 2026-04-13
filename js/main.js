@@ -3,12 +3,13 @@
 // =========================
 import { game } from "./core/state.js";
 import { on } from "./core/events.js";
-import { track } from "../tools/analytics.js";
+import { track, trackEnd } from "../tools/analytics.js";
 import { EVENTS } from "./core/events.constants.js";
 import { initLeagueSelect, setLeagueById } from "./modules/league.js";
 import "./core/eventStore.js";
 import { loadPlayers } from "./modules/loader.js";
 import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
+
 async function startGame(){
 
   await loadGameEvents();     // 🔥 zuerst laden
