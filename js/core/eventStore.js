@@ -121,7 +121,7 @@ function ensureId(event){
 // =========================
 
 on(EVENTS.MATCH_EVENT, (event) => {
-
+console.log("📥 RAW MATCH_EVENT:", event); // 🔥 HIER
   if(!event) return;
 
   if(!game.events){
