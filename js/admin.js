@@ -426,28 +426,22 @@ async function loadInsights(){
 
 async function loadChart(){
 
-  const { data } = await supabase
-    .from("analytics_events")
-    .select("created_at");
+  const ctx = document.getElementById("insightChart");
 
-  const days = {};
+  // 🔥 WICHTIG: alten Chart zerstören
+  if(insightChart){
+    insightChart.destroy();
+  }
 
-  data.forEach(e => {
-    const d = new Date(e.created_at).toLocaleDateString();
-    days[d] = (days[d] || 0) + 1;
-  });
+  const data = await getChartData(); // deine bestehende Funktion
 
-  const labels = Object.keys(days);
-  const values = Object.values(days);
-
-  new Chart(document.getElementById("insightChart"), {
+  insightChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels,
+      labels: data.labels,
       datasets: [{
         label: "Events",
-        data: values,
-        tension: 0.3
+        data: data.values
       }]
     }
   });
