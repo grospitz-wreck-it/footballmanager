@@ -1117,31 +1117,37 @@ tr:hover {
   display: block;
 }
 
+#gameCanvas {
+  position: relative; /* 🔥 ANKER */
+}
+
 #matchOverlay {
-  position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%) scale(0.9);
-  z-index: 999999;
+  position: absolute;
+  inset: 0;
 
-  background: rgba(0,0,0,0.9);
-  padding: 16px;
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
-  text-align: center;
-  color: white;
+  background: rgba(0,0,0,0.6);
 
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s ease;
+
+  transition: opacity 0.3s ease;
+}
+
+#matchOverlay img {
+  width: 60%;
+  max-width: 300px;
+  border-radius: 10px;
 }
 
 #matchOverlay.show {
   opacity: 1;
-  transform: translateX(-50%) scale(1);
 }
 
 #matchOverlay.hidden {
-  opacity: 0;
-  pointer-events: none;
+  display: none;
 }
