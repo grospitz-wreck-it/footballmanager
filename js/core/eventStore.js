@@ -179,56 +179,7 @@ on(EVENTS.GAME_EVENT, (event) => {
 
   emit(EVENTS.STATE_CHANGED, game.events.history);
 });
-// =========================
-// 🎮 GAME EVENTS
-// =========================
 
-on(EVENTS.GAME_EVENT, (event) => {
-
-  if(!event) return;
-
-  const players = game.players || [];
-  const teams = game.data?.teams || [];
-
-  const player = findPlayer(players, event.playerId);
-  const relatedPlayer = findPlayer(players, event.relatedPlayerId);
-  const team = findTeam(teams, event.teamId);
-
-  const playerName = buildPlayerName(player);
-  const relatedPlayerName = relatedPlayer ? buildPlayerName(relatedPlayer) : null;
-
-  const teamName =
-    team?.name ||
-    team?.Name ||
-    "ein Team";
-
-  const enrichedInput = {
-    ...enrichedInput,
-    playerName,
-    relatedPlayerName,
-    teamName
-  };
-
-  let text = null;
-
-  try {
-    text = generateCommentary(enrichedInput);
-  } catch(e){
-    console.error("❌ Commentary Engine Crash:", e);
-  }
-
-  const enrichedEvent = {
-  ...event,
-  assets: Array.isArray(event.assets) ? event.assets : [],
-
-  if(!game.events){
-    game.events = { history: [] };
-  }
-
-  game.events.history.push(enrichedEvent);
-
-  emit(EVENTS.STATE_CHANGED, game.events.history);
-});
 
 // =========================
 // 💰 AD EVENTS HOOK
