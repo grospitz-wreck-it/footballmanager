@@ -187,7 +187,7 @@ function initEventBindings(){
   renderEvents();
   renderSchedule();
 });
-
+}
 // =========================
 // 🧠 HELPERS
 // =========================
