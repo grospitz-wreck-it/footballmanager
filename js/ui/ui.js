@@ -44,9 +44,9 @@ function initUI(){
   });
 
   // 🔥 HIER EINFÜGEN
-  on(EVENTS.MATCH_EVENT, () => {
-    updateEvents();
-  });
+  on(EVENTS.STATE_CHANGED, () => {
+  updateEvents();
+});
 }
 
 // =========================
