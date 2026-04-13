@@ -158,8 +158,16 @@ function updateEvents(){
   // =========================
   // 🧠 TEXT (IMMER!)
   // =========================
-  let text = newest.text;
+let text = newest.text;
 
+if(!text){
+  try {
+    text = buildCommentary(newest);
+  } catch(e){}
+}
+
+if(!text) return;
+  
   if(!text){
     try {
       text = buildCommentary(newest);
@@ -183,8 +191,10 @@ function updateEvents(){
   // =========================
   // 🎬 OVERLAY (NUR WENN ASSET)
   // =========================
-  if(newest.assets && newest.assets.length){
-
+if(
+  newest.assets?.length &&
+  (!newest.meta || newest.meta.category === "highlight")
+){
     const asset = newest.assets[0];
     const url = asset?.url;
 
