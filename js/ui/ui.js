@@ -208,7 +208,7 @@ if(
 // 🎮 OVERLAY TRIGGER
 // =========================
 
-}
+
 const overlayEl = document.getElementById("matchOverlay");
 const overlayImg = document.getElementById("overlayImage");
 const overlayText = document.getElementById("overlayText");
