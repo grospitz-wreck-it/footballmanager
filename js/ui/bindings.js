@@ -42,7 +42,6 @@ function bindUI(){
   if(startBtn){
     startBtn.onclick = () => {
       // 🔥 NEUE SESSION erzwingen
-      localStorage.setItem("session_id", crypto.randomUUID());
       track("session_start");
       
       const input = document.getElementById("nameInput");
