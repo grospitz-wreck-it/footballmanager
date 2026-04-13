@@ -38,8 +38,9 @@ export function resolveEventContent(event){
 
   return {
     text: selected.title || null,
-    assets: Array.isArray(selected.assets) ? selected.assets : [],
-    config: {
+  assets: Array.isArray(selected.assets)
+  ? selected.assets.flat()
+  : [],    config: {
       id: selected.id,
       category: selected.category || "default",
       priority: selected.priority || 0
