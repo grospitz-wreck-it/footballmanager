@@ -635,9 +635,8 @@ game.league.currentRound++;
 // 🔚 SESSION END TRACKING
 // =========================
 window.addEventListener("beforeunload", () => {
-  track("session_end");
+  trackEnd("session_end");
 });
-}
 
 // =========================
 // ▶️ START
