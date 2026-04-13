@@ -134,8 +134,14 @@ function renderEvents(){
   if(feed){
     feed.innerHTML = events.length > 0
       ? events.slice(-20).reverse()
-        .map(e => `<div>${e.minute}' - ${e.text}</div>`)
-        .join("")
+    .map(e => {
+      const safeText = String(e.text)
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    
+      return `<div>${e.minute}' - ${safeText}</div>`;
+    })
+      .join("")
       : "";
   }
 
@@ -171,7 +177,8 @@ function initEventBindings(){
       game.events.history = [];
     }
 
-    advanceSchedule(); // bleibt!
+  advanceSchedule(); // bleibt!
+
 // 🔥 Sync back
 game.league.currentRound = game.league.currentRound;
     updateUI();
