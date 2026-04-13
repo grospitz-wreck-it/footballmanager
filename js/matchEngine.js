@@ -60,12 +60,26 @@ function getGoalAssets(){
 
   const events = game.data?.gameEvents || [];
 
-  const goalEvent = events.find(e =>
-    e.type === "goal" || e.effect === "goal" || e.eventType === "goal"
-  );
+  const pool = events.filter(e => {
 
-  return Array.isArray(goalEvent?.assets)
-    ? goalEvent.assets
+    const type =
+      String(e.type || e.effect || e.eventType || "")
+      .toLowerCase();
+
+    return type === "goal";
+  });
+
+  console.log("🎯 GOAL POOL:", pool);
+
+  if(!pool.length) return [];
+
+  // 🔥 random event auswählen
+  const randomEvent = pool[Math.floor(Math.random() * pool.length)];
+
+  console.log("🎯 SELECTED GOAL EVENT:", randomEvent);
+
+  return Array.isArray(randomEvent.assets)
+    ? randomEvent.assets
     : [];
 }
 
