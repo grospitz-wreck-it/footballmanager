@@ -172,29 +172,28 @@ function initEventBindings(){
     renderEvents();
   });
 
-  on(EVENTS.MATCH_FINISHED, () => {
+ on(EVENTS.MATCH_FINISHED, () => {
 
-    stopBackgroundSimulation();
+  stopBackgroundSimulation();
 
-    matchLoopRunning = false;
+  matchLoopRunning = false;
 
-    if(game.match?.live){
-      game.match.live.running = false;
-    }
+  if(game.match?.live){
+    game.match.live.running = false;
+  }
 
-    if(game.events){
-      game.events.history = [];
-    }
+  if(game.events){
+    game.events.history = [];
+  }
 
-  advanceSchedule(); // bleibt!
+  advanceSchedule();
 
-// 🔥 Sync back
-game.league.currentRound = game.league.currentRound;
-    updateUI();
-    renderEvents();
-    renderSchedule();
-  });
-}
+  game.league.currentRound = game.league.currentRound;
+
+  updateUI();
+  renderEvents();
+  renderSchedule();
+});
 
 // =========================
 // 🧠 HELPERS
@@ -415,124 +414,97 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
     initMatchEventSlides();
     renderSchedule();
 
-    const plzInput = document.getElementById("plzInput");
-    const results = document.getElementById("leagueResults");
 
-    if(plzInput && results){
+// =========================
+// 🌍 PLZ + LEAGUE SYSTEM (FINAL CLEAN)
+// =========================
 
-      plzInput.addEventListener("input", async (e) => {
+function initPLZSystem(){
 
-        const value = e.target.value;
+  const plzInput = document.getElementById("plzInput");
+  const results = document.getElementById("leagueResults");
 
-        if(value.length < 2){
-          results.innerHTML = "";
-          return;
-        }
+  if(!plzInput || !results) return;
 
-        const leagues = await findLeaguesByCode(value);
-
-        results.innerHTML = leagues.map(l => `
-          <div class="league-option" data-id="${l.id}">
-            ${l.name}
-          </div>
-        `).join("");
-      });
-
-      results.addEventListener("click", (e) => {
-
-        const el = e.target.closest(".league-option");
-        if(!el) return;
-
-        const leagueId = el.dataset.id;
-
-        const league = game.league.available.find(
-          l => normalizeId(l.id) === normalizeId(leagueId)
-        );
-
-        if(league){
-
-          setLeagueById(league.id);
-
-          if(!league.schedule || !league.schedule.length){
-            generateSchedule();
-          }
-
-          // 🔥 FIX
-          if(game.league.currentRound === undefined){
-            game.league.currentRound = 0;
-          }
-
-          const round = league.schedule?.[game.league.currentRound || 0];
-          const match = getMatchForMyTeam(round);
-
-          if(match){
-           initMatch(round);
-          const plz = document.getElementById("plzInput")?.value;
-
-track("match_start", {
-  round: game.league.currentRound,
-  teamId: game.team?.selectedId,
-  session_id: localStorage.getItem("session_id"),
-  region_id: getRegionFromPLZ(plz)
-});
-            
-            game.match.live.running = false;
-            game.match.live.phase = "first_half";
-          }
-
-          renderSchedule();
-          updateUI();
-        }
-      });
-    }
-
-    if(loaded){
-      splash.style.display = "none";
-      app.style.display = "block";
-      updateUI();
-      renderEvents();
-    } else {
-
-      game.phase = "setup";
-      splash.style.display = "flex";
-      app.style.display = "none";
-
-      document.getElementById("startBtn")?.addEventListener("click", () => {
-
-        game.phase = "idle";
-        splash.style.display = "none";
-        app.style.display = "block";
-
-        const league = game.league?.current;
-
-        // 🔥 FIX
-        const round = league?.schedule?.[game.league.currentRound || 0];
-        const match = getMatchForMyTeam(round);
-
-        if(match){
-          initMatch(round);
-          track("match_start", {
-  round: game.league.currentRound,
-  teamId: game.team?.selectedId,
-  session_id: localStorage.getItem("session_id"),
-  region_id: game.league?.current?.region_id || null
-});
-          const live = game.match.live;
-          live.running = false;
-          live.minute = 0;
-          live.phase = "first_half";
-        }
-
-        updateUI();
-        renderEvents();
-      });
-    }
-
-  } catch (e){
-    console.error("❌ INIT ERROR:", e);
-    
+  // ✅ Restore
+  const saved = localStorage.getItem("user_plz");
+  if(saved){
+    plzInput.value = saved;
   }
 
+  // ✅ Save
+  plzInput.addEventListener("input", (e) => {
+    localStorage.setItem("user_plz", e.target.value);
+  });
+
+  // 🔍 Search
+  plzInput.addEventListener("input", async (e) => {
+
+    const value = e.target.value;
+
+    if(value.length < 2){
+      results.innerHTML = "";
+      return;
+    }
+
+    const leagues = await findLeaguesByCode(value);
+
+    results.innerHTML = leagues.map(l => `
+      <div class="league-option" data-id="${l.id}">
+        ${l.name}
+      </div>
+    `).join("");
+  });
+
+  // 🖱 Select
+  results.addEventListener("click", (e) => {
+
+    const el = e.target.closest(".league-option");
+    if(!el) return;
+
+    const leagueId = el.dataset.id;
+
+    const league = game.league.available.find(
+      l => normalizeId(l.id) === normalizeId(leagueId)
+    );
+
+    if(!league) return;
+
+    setLeagueById(league.id);
+
+    if(!league.schedule || !league.schedule.length){
+      generateSchedule();
+    }
+
+    if(game.league.currentRound === undefined){
+      game.league.currentRound = 0;
+    }
+
+    const round = league.schedule?.[game.league.currentRound || 0];
+    const match = getMatchForMyTeam(round);
+
+    if(match){
+      initMatch(round);
+
+      const plz = localStorage.getItem("user_plz");
+
+      track("match_start", {
+        round: game.league.currentRound,
+        teamId: game.team?.selectedId,
+        session_id: localStorage.getItem("session_id"),
+        region_id: getRegionFromPLZ(plz)
+      });
+
+      game.match.live.running = false;
+      game.match.live.phase = "first_half";
+    }
+
+    renderSchedule();
+    updateUI();
+  });
+}
+
+    
   // =========================
   // ▶️ MAIN BUTTON
   // =========================
