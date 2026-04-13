@@ -3,6 +3,7 @@
 // =========================
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
+import { track } from "../../tools/analytics.js";
 import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
@@ -159,13 +160,12 @@ function updateEvents(){
   console.log("🧪 EVENT DEBUG:", newest);
   if(newest.id === lastRenderedEventId) return;
   lastRenderedEventId = newest.id;
-  // 🔥 TRACKING
-import("../tools/analytics.js").then(({ track }) => {
+
   track("game_event", {
-    minute: newest.minute,
-    text: newest.text || null
-  });
+  minute: newest.minute,
+  text: newest.text || null
 });
+  
   // =========================
   // 🧠 TEXT (IMMER!)
   // =========================
