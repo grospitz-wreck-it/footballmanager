@@ -5,6 +5,8 @@ import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
 import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
+import { on } from "../core/events.js";
+import { EVENTS } from "../core/events.constants.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
