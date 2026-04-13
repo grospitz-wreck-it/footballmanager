@@ -411,7 +411,7 @@ initPLZSystem(); // 🔥 wichtig!
 } catch (e){
   console.error("❌ INIT ERROR:", e);
 }
-
+}
 // =========================
 // 🌍 PLZ + LEAGUE SYSTEM (FINAL CLEAN)
 // =========================
