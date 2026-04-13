@@ -240,8 +240,17 @@ on(EVENTS.MATCH_EVENT, (event) => {
   // =========================
   // 🆕 CONTENT RESOLVER
   // =========================
-  const resolved = resolveEventContent(enrichedInput);
-  console.log("🧪 RESOLVED:", resolved);
+// =========================
+// 🧠 CONTENT RESOLVE
+// =========================
+const resolved = resolveEventContent(event);
+
+console.log("🧪 RESOLVED:", resolved);
+
+// 🔥🔥🔥 DAS FEHLT BEI DIR
+event.text = resolved.text;
+event.assets = resolved.assets;
+event.meta = resolved.config;
   // =========================
   // 🧠 TEXT PRIORITY
   // =========================
