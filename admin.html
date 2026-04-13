@@ -140,12 +140,24 @@
 <!-- ========================= -->
 
 <div id="insightsTab" class="tabContent">
-  <div class="box">
-    <h2>📈 Insights</h2>
-    <p>Tracking coming soon...</p>
-  </div>
-</div>
 
+  <div class="box">
+    <h2>📈 Overview</h2>
+
+    <div class="kpiGrid">
+      <div class="kpiCard"><span>DAU</span><h2 id="insightDAU">0</h2></div>
+      <div class="kpiCard"><span>Sessions</span><h2 id="insightSessions">0</h2></div>
+      <div class="kpiCard"><span>Matches</span><h2 id="insightMatches">0</h2></div>
+      <div class="kpiCard"><span>Avg Session</span><h2 id="insightAvg">0s</h2></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>📊 Activity</h2>
+    <canvas id="insightChart" height="120"></canvas>
+  </div>
+
+</div>
 <!-- ========================= -->
 <!-- 🎮 GAME EVENTS TAB (FIXED POSITION) -->
 <!-- ========================= -->
