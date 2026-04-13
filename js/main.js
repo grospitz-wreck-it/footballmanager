@@ -601,9 +601,8 @@ game.league.currentRound++;
     updateUI();
     renderEvents();
     renderSchedule();
-  });
-
-} 
+   } // ✅ schließt onEnd
+}); // ✅ schließt runMatchLoop
 
     if(
       live.phase === "halftime" ||
