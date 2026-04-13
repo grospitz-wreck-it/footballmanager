@@ -133,10 +133,15 @@ function initMatchEventSlides(){
   // 🔥 WICHTIGSTER TEIL
   on(EVENTS.MATCH_EVENT, (event) => {
 
-    console.log("🎬 EVENT:", event);
+  // ❌ keine Assets → kein Slide
+  if(!event.assets || !event.assets.length){
+    return;
+  }
 
-    createSlide(event);
-  });
+  console.log("🎬 SLIDE EVENT:", event);
+
+  createSlide(event);
+});
 }
 
 // =========================
