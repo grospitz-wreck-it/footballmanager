@@ -27,7 +27,7 @@ const game = {
   leagues: [],
   events: [],
   campaigns: [],
-  gameEvents: []
+  gameEvents: [],
 }
 
   // =========================
