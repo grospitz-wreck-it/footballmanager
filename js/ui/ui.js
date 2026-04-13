@@ -212,7 +212,10 @@ if(newest.assets?.length)
 // 🎮 OVERLAY TRIGGER
 // =========================
 
-export function showOverlay(imageUrl, text, duration = 5000){
+let overlayTimeout = null;
+let overlayHideTimeout = null;
+
+export function showOverlay(imageUrl, text, duration = 2500){
 
   const overlayEl = document.getElementById("matchOverlay");
   const overlayImg = document.getElementById("overlayImage");
@@ -223,23 +226,37 @@ export function showOverlay(imageUrl, text, duration = 5000){
     return;
   }
 
-  clearTimeout(overlayTimeout);
+  // 🔥 ALLE alten Timer killen (wichtig bei Event-Spam)
+  if(overlayTimeout) clearTimeout(overlayTimeout);
+  if(overlayHideTimeout) clearTimeout(overlayHideTimeout);
 
+  // 🔥 Content setzen
   overlayImg.src = imageUrl || "";
   overlayText.innerText = text || "";
 
+  // 🔥 HARD RESET (kein alter State bleibt hängen)
+  overlayEl.classList.remove("show");
   overlayEl.classList.remove("hidden");
 
+  // 🔥 Force Reflow → garantiert saubere Animation
+  overlayEl.getBoundingClientRect();
+
+  // 🔥 SHOW (nächster Frame → smooth)
   requestAnimationFrame(() => {
     overlayEl.classList.add("show");
   });
 
+  // 🔥 AUTO HIDE
   overlayTimeout = setTimeout(() => {
     overlayEl.classList.remove("show");
-    overlayEl.classList.add("hidden");
+
+    // nach Fade → wirklich verstecken
+    overlayHideTimeout = setTimeout(() => {
+      overlayEl.classList.add("hidden");
+    }, 250); // muss zur CSS transition passen
+
   }, duration);
 }
-
 
 // =========================
 // 📊 TABS
