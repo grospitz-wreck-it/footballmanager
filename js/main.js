@@ -253,7 +253,17 @@ track("app_open", {
   region_id: game.league?.current?.region_id || null
 });
 if(!localStorage.getItem("has_started")){
+
+  const sessionId = crypto.randomUUID();
+  localStorage.setItem("session_id", sessionId);
+
+  track("session_start", {
+    session_id: sessionId,
+    region_id: game.league?.current?.region_id || null
+  });
+
   track("app_start");
+
   localStorage.setItem("has_started", "true");
 }
 
