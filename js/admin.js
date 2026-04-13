@@ -510,9 +510,82 @@ async function loadGeoMap(){
   const container = document.getElementById("geoMap");
   if(!container) return;
 
-  // 🔥 reset map (wichtig bei tab switch)
   if(geoMap){
     geoMap.remove();
+  }
+
+  geoMap = L.map("geoMap").setView([51.2, 10.4], 6);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(geoMap);
+
+  const geoData = await getGeoData();
+
+  const res = await fetch("./admin/data/germany.json");
+  const germany = await res.json();
+
+  // 👉 dein style bleibt
+  function getColor(value){
+    if(value > 200) return "#800026";
+    if(value > 100) return "#BD0026";
+    if(value > 50) return "#E31A1C";
+    if(value > 20) return "#FC4E2A";
+    if(value > 10) return "#FD8D3C";
+    if(value > 5) return "#FEB24C";
+    if(value > 0) return "#FED976";
+    return "#EEE";
+  }
+
+  function style(feature){
+    const regionId = feature.properties.id;
+    const value = geoData[regionId] || 0;
+
+    return {
+      fillColor: getColor(value),
+      weight: 1,
+      opacity: 1,
+      color: "#333",
+      fillOpacity: 0.7
+    };
+  }
+
+  // 🔥 HIER kommt dein NEUER BLOCK rein
+  const geoLayer = L.geoJSON(germany, {
+
+    style,
+
+    onEachFeature: (feature, layer) => {
+
+      const regionId = feature.properties.id;
+      const value = geoData[regionId] || 0;
+
+      layer.bindTooltip(`
+        <strong>${feature.properties.name}</strong><br>
+        👥 ${value} Nutzer
+      `);
+
+      layer.on({
+        mouseover: (e) => {
+          const l = e.target;
+          l.setStyle({
+            weight: 2,
+            color: "#000",
+            fillOpacity: 0.9
+          });
+          l.bringToFront();
+        },
+
+        mouseout: (e) => {
+          geoLayer.resetStyle(e.target);
+        }
+      });
+    }
+
+  }).addTo(geoMap);
+
+}
+    
   }
 
   geoMap = L.map("geoMap").setView([51.2, 10.4], 6);
@@ -526,16 +599,17 @@ async function loadGeoMap(){
   const res = await fetch("admin/data/germany.json");
   const germany = await res.json();
 
-  function getColor(value){
-    if(value > 200) return "#800026";
-    if(value > 100) return "#BD0026";
-    if(value > 50) return "#E31A1C";
-    if(value > 20) return "#FC4E2A";
-    if(value > 10) return "#FD8D3C";
-    if(value > 5) return "#FEB24C";
-    if(value > 0) return "#FED976";
-    return "#EEE";
-  }
+ function getColor(value){
+
+  const max = 200; // 🔥 kannst du dynamisch machen
+  const ratio = Math.min(value / max, 1);
+
+  const r = Math.floor(255 * ratio);
+  const g = Math.floor(200 * (1 - ratio));
+  const b = 80;
+
+  return `rgb(${r},${g},${b})`;
+}
 
   function style(feature){
 
@@ -553,21 +627,71 @@ async function loadGeoMap(){
 
   function onEachFeature(feature, layer){
 
+  const regionId = feature.properties.id; // ggf anpassen!
+  const value = geoData[regionId] || 0;
+
+  layer.bindTooltip(`
+    <strong>${feature.properties.name}</strong><br>
+    👥 ${value} Nutzer
+  `);
+
+  layer.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight
+  });
+}
+
+  const geoLayer = L.geoJSON(germany, {
+
+  style,
+
+  onEachFeature: (feature, layer) => {
+
     const regionId = feature.properties.id;
     const value = geoData[regionId] || 0;
 
-    layer.bindPopup(`
+    // Tooltip (Hover)
+    layer.bindTooltip(`
       <strong>${feature.properties.name}</strong><br>
-      Nutzer: ${value}
+      👥 ${value} Nutzer
     `);
+
+    // 🔥 Hover Effekt
+    layer.on({
+      mouseover: (e) => {
+        const l = e.target;
+        l.setStyle({
+          weight: 2,
+          color: "#000",
+          fillOpacity: 0.9
+        });
+        l.bringToFront();
+      },
+
+      mouseout: (e) => {
+        geoLayer.resetStyle(e.target);
+      }
+    });
   }
 
-  L.geoJSON(germany, {
-    style,
-    onEachFeature
-  }).addTo(geoMap);
-}
+}).addTo(geoMap);
 
+
+  function renderTopRegions(geoData){
+
+  const container = document.getElementById("topRegions");
+  if(!container) return;
+
+  const sorted = Object.entries(geoData)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 5);
+
+  container.innerHTML = sorted.map(([id, val], i) => `
+    <div class="regionRow">
+      #${i+1} Region ${id} — ${val} Nutzer
+    </div>
+  `).join("");
+}
 
 // =====================
 // 🎮 GAME EVENTS (NEU)
