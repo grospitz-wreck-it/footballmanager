@@ -472,7 +472,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
   let lastTime = performance.now();
   let accumulator = 0;
-  const STEP = 1500;
+  const STEP = 1000;
 
   matchInterval = setInterval(() => {
 
