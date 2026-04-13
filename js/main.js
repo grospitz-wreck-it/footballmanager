@@ -257,14 +257,21 @@ window.playerPool = players;
     const { data: teams } = await supabase.from("teams").select("*");
 
     const { data: competitions } = await supabase
-      .from("competitions")
-      .select(`
-        *,
-        regions (
-          name,
-          states ( name )
-        )
-      `);
+  .from("competitions")
+  .select(`
+    *,
+    regions (
+      name,
+      states ( name )
+    )
+  `);
+
+// 🔥 GAME EVENTS LADEN (FIX)
+const { data: gameEvents } = await supabase
+  .from("game_events")
+  .select("*");
+
+console.log("🎮 GAME EVENTS LOADED:", gameEvents);
 
     const leagueMap = new Map();
 
@@ -301,11 +308,14 @@ window.playerPool = players;
     }
 
     game.data = {
-      players,
-      teams: teams.map(t => ({ ...t, id: normalizeId(t.id) })),
-      competitions,
-      leagues
-    };
+  players,
+  teams: teams.map(t => ({ ...t, id: normalizeId(t.id) })),
+  competitions,
+  leagues,
+
+  // 🔥 CRITICAL FIX
+  gameEvents: gameEvents || []
+};
 
     game.league = game.league || {};
     game.league.available = leagues;
