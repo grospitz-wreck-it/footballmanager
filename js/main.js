@@ -217,6 +217,42 @@ function getMatchForMyTeam(round){
 }
 
 
+const PLZ_TO_REGION = {
+  "10": "DE-BE","11": "DE-BB","12": "DE-BB","13": "DE-BB",
+  "20": "DE-HH","21": "DE-NI","22": "DE-HH",
+  "30": "DE-NI","31": "DE-NI","32": "DE-NW","33": "DE-NW",
+  "34": "DE-HE","35": "DE-HE","36": "DE-HE","37": "DE-NI",
+  "38": "DE-NI","39": "DE-ST",
+
+  "40": "DE-NW","41": "DE-NW","42": "DE-NW","43": "DE-NW",
+  "44": "DE-NW","45": "DE-NW","46": "DE-NW","47": "DE-NW",
+  "48": "DE-NW","49": "DE-NW",
+
+  "50": "DE-NW","51": "DE-NW","52": "DE-NW","53": "DE-NW",
+
+  "60": "DE-HE","61": "DE-HE","62": "DE-HE","63": "DE-HE",
+
+  "70": "DE-BW","71": "DE-BW","72": "DE-BW","73": "DE-BW",
+  "74": "DE-BW","75": "DE-BW","76": "DE-BW","77": "DE-BW",
+  "78": "DE-BW","79": "DE-BW",
+
+  "80": "DE-BY","81": "DE-BY","82": "DE-BY","83": "DE-BY",
+  "84": "DE-BY","85": "DE-BY","86": "DE-BY","87": "DE-BY",
+  "88": "DE-BW","89": "DE-BY",
+
+  "90": "DE-BY","91": "DE-BY","92": "DE-BY","93": "DE-BY",
+  "94": "DE-BY","95": "DE-BY","96": "DE-BY","97": "DE-BY",
+  "98": "DE-TH","99": "DE-TH"
+};
+function getRegionFromPLZ(plz){
+  if(!plz || plz.length < 2) return null;
+
+  const prefix = plz.slice(0,2);
+  return PLZ_TO_REGION[prefix] || null;
+}
+
+
+
 // =========================
 // 🔥 PLZ FEATURE
 // =========================
@@ -248,19 +284,23 @@ async function findLeaguesByCode(input){
 // 🚀 INIT
 // =========================
 async function init(){
+const plz = document.getElementById("plzInput")?.value;
+
 track("app_open", {
   session_id: localStorage.getItem("session_id"),
-  region_id: game.league?.current?.region_id || null
+  region_id: getRegionFromPLZ(plz)
 });
 if(!localStorage.getItem("has_started")){
 
   const sessionId = crypto.randomUUID();
   localStorage.setItem("session_id", sessionId);
 
-  track("session_start", {
-    session_id: sessionId,
-    region_id: game.league?.current?.region_id || null
-  });
+  const plz = document.getElementById("plzInput")?.value;
+
+track("session_start", {
+  session_id: sessionId,
+  region_id: getRegionFromPLZ(plz)
+});
 
   track("app_start");
 
@@ -427,11 +467,13 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
 
           if(match){
            initMatch(round);
-            track("match_start", {
+          const plz = document.getElementById("plzInput")?.value;
+
+track("match_start", {
   round: game.league.currentRound,
   teamId: game.team?.selectedId,
   session_id: localStorage.getItem("session_id"),
-  region_id: game.league?.current?.region_id || null
+  region_id: getRegionFromPLZ(plz)
 });
             
             game.match.live.running = false;
