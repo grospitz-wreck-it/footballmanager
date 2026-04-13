@@ -486,6 +486,88 @@ async function loadChart(){
   });
 }
 
+async function getGeoData(){
+
+  const { data } = await supabase
+    .from("analytics_events")
+    .select("region_id");
+
+  const map = {};
+
+  data.forEach(e => {
+    if(!e.region_id) return;
+
+    map[e.region_id] = (map[e.region_id] || 0) + 1;
+  });
+
+  return map;
+}
+
+let geoMap = null;
+
+async function loadGeoMap(){
+
+  const container = document.getElementById("geoMap");
+  if(!container) return;
+
+  // 🔥 reset map (wichtig bei tab switch)
+  if(geoMap){
+    geoMap.remove();
+  }
+
+  geoMap = L.map("geoMap").setView([51.2, 10.4], 6);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(geoMap);
+
+  const geoData = await getGeoData();
+
+  const res = await fetch("./data/germany.geo.json");
+  const germany = await res.json();
+
+  function getColor(value){
+    if(value > 200) return "#800026";
+    if(value > 100) return "#BD0026";
+    if(value > 50) return "#E31A1C";
+    if(value > 20) return "#FC4E2A";
+    if(value > 10) return "#FD8D3C";
+    if(value > 5) return "#FEB24C";
+    if(value > 0) return "#FED976";
+    return "#EEE";
+  }
+
+  function style(feature){
+
+    const regionId = feature.properties.id; // ⚠️ muss passen!
+    const value = geoData[regionId] || 0;
+
+    return {
+      fillColor: getColor(value),
+      weight: 1,
+      opacity: 1,
+      color: "#333",
+      fillOpacity: 0.7
+    };
+  }
+
+  function onEachFeature(feature, layer){
+
+    const regionId = feature.properties.id;
+    const value = geoData[regionId] || 0;
+
+    layer.bindPopup(`
+      <strong>${feature.properties.name}</strong><br>
+      Nutzer: ${value}
+    `);
+  }
+
+  L.geoJSON(germany, {
+    style,
+    onEachFeature
+  }).addTo(geoMap);
+}
+
 
 // =====================
 // 🎮 GAME EVENTS (NEU)
