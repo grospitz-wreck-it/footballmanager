@@ -169,12 +169,16 @@ console.log("🧪 PLAYER ID:", event.playerId);
   }
 
  const enrichedEvent = {
-  ...enrichedInput, // 🔥 DAS IST DER FIX
+  ...enrichedInput,
+
+  // 🔥 FIX: Assets IMMER mitnehmen
+  assets: Array.isArray(event.assets) ? event.assets : [],
+
   id: ensureId(event),
   text: text || generateText(event),
   meta: enrichMeta(event)
 };
-
+console.log("📦 FINAL EVENT:", enrichedEvent);
   game.events.history.push(enrichedEvent);
 
   if(game.match){
@@ -231,11 +235,8 @@ on(EVENTS.GAME_EVENT, (event) => {
   }
 
   const enrichedEvent = {
-    ...event,
-    id: ensureId(event),
-    text: text || generateText(event),
-    meta: enrichMeta(event)
-  };
+  ...event,
+  assets: Array.isArray(event.assets) ? event.assets : [],
 
   if(!game.events){
     game.events = { history: [] };
