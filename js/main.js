@@ -409,7 +409,11 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
 
           if(match){
            initMatch(round);
-
+            track("match_start", {
+            round: game.league.currentRound,
+            teamId: game.team?.selectedId
+            });
+            
             game.match.live.running = false;
             game.match.live.phase = "first_half";
           }
@@ -445,7 +449,10 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
 
         if(match){
           initMatch(round);
-
+          track("match_start", {
+          round: game.league.currentRound,
+          teamId: game.team?.selectedId
+          });
           const live = game.match.live;
           live.running = false;
           live.minute = 0;
