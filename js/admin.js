@@ -288,48 +288,62 @@ container.appendChild(div);
 // =====================
 async function saveEvent(){
 
-const assets = await uploadFiles("events", qs("eventMedia").files);
+  const files = qs("eventMedia").files;
 
-const scope = qs("eventScope")?.value || "global";
-let scope_ref = qs("eventScopeRef")?.value || null;
+  // ❌ KEIN FILE → BLOCKIEREN
+  if(!files || !files.length){
+    alert("❌ Bitte mindestens ein Asset hochladen (WEBP)");
+    return;
+  }
 
-if(scope === "team" && scope_ref){
-scope_ref = scope_ref.split(",").map(s => s.trim());
+  const assets = await uploadFiles("events", files);
+
+  // ❌ Upload fehlgeschlagen
+  if(!assets.length){
+    alert("❌ Upload fehlgeschlagen");
+    return;
+  }
+
+  const scope = qs("eventScope")?.value || "global";
+  let scope_ref = qs("eventScopeRef")?.value || null;
+
+  if(scope === "team" && scope_ref){
+    scope_ref = scope_ref.split(",").map(s => s.trim());
+  }
+
+  const payload = {
+    title: qs("eventTitle").value,
+    description: qs("eventDescription").value,
+
+    probability: Number(qs("eventProbability").value || 0),
+    duration: Number(qs("eventDuration").value || 0),
+
+    effect_type: qs("eventEffectType").value,
+    effect_target: qs("eventTarget").value,
+    effect_value: Number(qs("eventValue").value || 0),
+
+    modifier_attack: Number(qs("eventAttack").value || 0),
+    modifier_defense: Number(qs("eventDefense").value || 0),
+
+    // 🔥 WICHTIG
+    assets: assets,
+
+    scope,
+    scope_ref
+  };
+
+  console.log("🚀 SAVE EVENT:", payload);
+
+  if(state.editEventId){
+    await supabase.from("events").update(payload).eq("id", state.editEventId);
+    state.editEventId = null;
+  } else {
+    await supabase.from("events").insert(payload);
+  }
+
+  clearEventForm();
+  loadEvents();
 }
-
-const payload = {
-title: qs("eventTitle").value,
-description: qs("eventDescription").value,
-
-
-probability: Number(qs("eventProbability").value || 0),
-duration: Number(qs("eventDuration").value || 0),
-
-effect_type: qs("eventEffectType").value,
-effect_target: qs("eventTarget").value,
-effect_value: Number(qs("eventValue").value || 0),
-
-modifier_attack: Number(qs("eventAttack").value || 0),
-modifier_defense: Number(qs("eventDefense").value || 0),
-
-assets,
-scope,
-scope_ref
-
-
-};
-
-if(state.editEventId){
-await supabase.from("events").update(payload).eq("id", state.editEventId);
-state.editEventId = null;
-} else {
-await supabase.from("events").insert(payload);
-}
-
-clearEventForm();
-loadEvents();
-}
-
 function clearEventForm(){
 document.querySelectorAll("#eventsTab input, #eventsTab textarea, #eventsTab select")
 .forEach(i => i.value = "");
@@ -360,7 +374,19 @@ function loadEventTypes(){
 
 async function saveGameEvent(){
 
-  const assets = await uploadFiles("game-events", qs("geMedia")?.files || []);
+  const files = qs("geMedia")?.files;
+
+  if(!files || !files.length){
+    alert("❌ Game Event braucht Asset!");
+    return;
+  }
+
+  const assets = await uploadFiles("game-events", files);
+
+  if(!assets.length){
+    alert("❌ Upload failed");
+    return;
+  }
 
   const payload = {
     title: qs("geTitle")?.value,
@@ -369,9 +395,14 @@ async function saveGameEvent(){
     probability: Number(qs("geProbability")?.value || 0),
     value: Number(qs("geValue")?.value || 0),
     duration: Number(qs("geDuration")?.value || 0),
-    assets,
+
+    // 🔥 WICHTIG
+    assets: assets,
+
     active: true
   };
+
+  console.log("🎮 SAVE GAME EVENT:", payload);
 
   await supabase.from("game_events").insert(payload);
 
