@@ -328,6 +328,7 @@ window.playerPool = players;
     initLeagueSelect();
     initTable();
     initDebugOverlay();
+    initMatchEventSlides();
     renderSchedule();
 
     const plzInput = document.getElementById("plzInput");
