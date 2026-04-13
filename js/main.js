@@ -147,7 +147,9 @@ function renderEvents(){
       : "";
   }
 
-  const top = events.at(-1);
+  const top = events.length
+  ? events[events.length - 1]
+  : null;
 
   if(headline){
     headline.textContent = top
