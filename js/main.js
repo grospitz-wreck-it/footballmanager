@@ -687,7 +687,7 @@ document.addEventListener("visibilitychange", () => {
     trackEnd("session_end");
   }
 });
-}
+
 // =========================
 // ▶️ START
 // =========================
