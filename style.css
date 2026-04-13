@@ -1078,13 +1078,30 @@ tr:hover {
 🎬 MATCH OVERLAY (FINAL FIXED)
 ========================= */
 
+/* =========================
+🎬 MATCH OVERLAY (FINAL CLEAN)
+========================= */
+
+/* 🔥 Container ist der Anchor */
 #gameCanvas {
-  position: relative; /* 🔥 ANKER für Overlay */
+  position: relative;
+  overflow: hidden; /* verhindert visuelles "reinfliegen" */
 }
 
+/* 🔥 Canvas liegt unten */
+#gameCanvasInner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* 🔥 Overlay liegt darüber */
 #matchOverlay {
   position: absolute;
   inset: 0;
+  z-index: 100; /* 🔥 KEY FIX */
 
   display: flex;
   flex-direction: column;
@@ -1094,40 +1111,63 @@ tr:hover {
   background: rgba(0,0,0,0.55);
 
   opacity: 0;
-  transform: scale(0.95); /* 🔥 leichter Pop-Effekt */
+  transform: scale(0.96); /* smoother Pop */
   pointer-events: none;
 
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: 
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
-/* Bild */
-#matchOverlay img {
-  width: 60%;
-  max-width: 300px;
-  border-radius: 12px;
-
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-}
-
-/* Text */
-#overlayText {
-  margin-top: 12px;
-  font-size: 20px;
-  font-weight: 700;
-  text-align: center;
-  color: white;
-
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-}
-
-/* SHOW STATE */
+/* 🔥 SHOW */
 #matchOverlay.show {
   opacity: 1;
   transform: scale(1);
 }
 
-/* HIDDEN STATE (KEIN display:none!) */
+/* 🔥 HIDDEN (kein display:none → wichtig für Animation!) */
 #matchOverlay.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+/* =========================
+🖼 IMAGE
+========================= */
+
+#matchOverlay img {
+  width: 60%;
+  max-width: 300px;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.8),
+    0 0 20px rgba(0,0,0,0.6);
+
+  transform: scale(0.9);
+  transition: transform 0.25s ease;
+}
+
+/* Pop-Effekt */
+#matchOverlay.show img {
+  transform: scale(1);
+}
+
+/* =========================
+📝 TEXT
+========================= */
+
+#overlayText {
+  margin-top: 12px;
+
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+
+  color: white;
+
+  text-shadow:
+    0 2px 8px rgba(0,0,0,0.8),
+    0 0 10px rgba(0,0,0,0.6);
 }
