@@ -248,8 +248,12 @@ async function findLeaguesByCode(input){
 // 🚀 INIT
 // =========================
 async function init(){
-track("app_start");
 track("app_open");
+
+if(!localStorage.getItem("has_started")){
+  track("app_start");
+  localStorage.setItem("has_started", "true");
+}
 
   window.game = game;
 
