@@ -8,9 +8,14 @@ import { initLeagueSelect, setLeagueById } from "./modules/league.js";
 import "./core/eventStore.js";
 import { loadPlayers } from "./modules/loader.js";
 import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
+async function startGame(){
 
-await loadGameEvents();     // initial
-subscribeGameEvents();      // realtime
+  await loadGameEvents();     // 🔥 zuerst laden
+  subscribeGameEvents();      // 🔴 dann realtime starten
+
+}
+
+startGame();
 // =========================
 // 🔌 SUPABASE
 // =========================
