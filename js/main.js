@@ -418,9 +418,11 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
           if(match){
            initMatch(round);
             track("match_start", {
-            round: game.league.currentRound,
-            teamId: game.team?.selectedId
-            });
+  round: game.league.currentRound,
+  teamId: game.team?.selectedId,
+  session_id: localStorage.getItem("session_id"),
+  region_id: game.league?.current?.region_id || null
+});
             
             game.match.live.running = false;
             game.match.live.phase = "first_half";
@@ -458,9 +460,11 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
         if(match){
           initMatch(round);
           track("match_start", {
-          round: game.league.currentRound,
-          teamId: game.team?.selectedId
-          });
+  round: game.league.currentRound,
+  teamId: game.team?.selectedId,
+  session_id: localStorage.getItem("session_id"),
+  region_id: game.league?.current?.region_id || null
+});
           const live = game.match.live;
           live.running = false;
           live.minute = 0;
