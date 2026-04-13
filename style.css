@@ -1097,11 +1097,11 @@ tr:hover {
   z-index: 1;
 }
 
-/* 🔥 Overlay liegt darüber */
 #matchOverlay {
-  position: absolute;
-  inset: 0;
-  z-index: 100; /* 🔥 KEY FIX */
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+}
 
   display: flex;
   flex-direction: column;
