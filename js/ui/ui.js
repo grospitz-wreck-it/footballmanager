@@ -151,7 +151,7 @@ function updateEvents(){
   if(!events || events.length === 0) return;
 
   const newest = events[events.length - 1];
-
+  console.log("🧪 EVENT DEBUG:", newest);
   if(newest.id === lastRenderedEventId) return;
   lastRenderedEventId = newest.id;
 
