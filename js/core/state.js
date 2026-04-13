@@ -35,7 +35,7 @@ const game = {
   // =========================
   team: {
   selected: null,      // bleibt (für UI)
-  selectedId: null     // NEU
+  selectedId: null,     // NEU
 },
 
   // =========================
