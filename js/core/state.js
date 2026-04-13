@@ -17,7 +17,7 @@ const game = {
     current: null,
     schedule: [],
     currentRound: 0,
-    currentMatchIndex: 0
+    currentMatchIndex: 0,
   },
 
   // =========================
@@ -28,7 +28,7 @@ const game = {
   events: [],
   campaigns: [],
   gameEvents: [],
-}
+},
 
   // =========================
   // 👕 TEAM
