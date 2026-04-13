@@ -1075,20 +1075,14 @@ tr:hover {
 }
 
 /* =========================
-🎬 MATCH OVERLAY (FINAL FIXED)
+🎬 MATCH OVERLAY (FIXED)
 ========================= */
 
-/* =========================
-🎬 MATCH OVERLAY (FINAL CLEAN)
-========================= */
-
-/* 🔥 Container ist der Anchor */
 #gameCanvas {
   position: relative;
-  overflow: hidden; /* verhindert visuelles "reinfliegen" */
+  overflow: hidden;
 }
 
-/* 🔥 Canvas liegt unten */
 #gameCanvasInner {
   position: absolute;
   inset: 0;
@@ -1098,10 +1092,9 @@ tr:hover {
 }
 
 #matchOverlay {
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 9999 !important;
-}
+  position: absolute;
+  inset: 0;
+  z-index: 9999;
 
   display: flex;
   flex-direction: column;
@@ -1111,34 +1104,25 @@ tr:hover {
   background: rgba(0,0,0,0.55);
 
   opacity: 0;
-  transform: scale(0.96); /* smoother Pop */
+  transform: scale(0.96);
   pointer-events: none;
 
-  transition: 
-    opacity 0.25s ease,
-    transform 0.25s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-/* 🔥 SHOW */
 #matchOverlay.show {
   opacity: 1;
   transform: scale(1);
 }
 
-/* 🔥 HIDDEN (kein display:none → wichtig für Animation!) */
 #matchOverlay.hidden {
   opacity: 0;
-  pointer-events: none;
 }
 
-/* =========================
-🖼 IMAGE
-========================= */
-
+/* IMAGE */
 #matchOverlay img {
   width: 60%;
   max-width: 300px;
-
   border-radius: 12px;
 
   box-shadow:
@@ -1149,22 +1133,16 @@ tr:hover {
   transition: transform 0.25s ease;
 }
 
-/* Pop-Effekt */
 #matchOverlay.show img {
   transform: scale(1);
 }
 
-/* =========================
-📝 TEXT
-========================= */
-
+/* TEXT */
 #overlayText {
   margin-top: 12px;
-
   font-size: 20px;
   font-weight: 700;
   text-align: center;
-
   color: white;
 
   text-shadow:
