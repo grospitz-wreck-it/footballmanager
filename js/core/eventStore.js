@@ -4,8 +4,7 @@
 import { game } from "./state.js";
 import { on, emit } from "./events.js";
 import { EVENTS } from "./events.constants.js";
-
-// 🆕 👉 NEUE ENGINE IMPORT
+import { resolveEventContent } from "../engine/contentResolver.js";
 import { generateText as generateCommentary } from "../engine/commentaryEngine.js";
 
 // =========================
