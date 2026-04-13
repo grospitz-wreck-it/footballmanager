@@ -635,11 +635,18 @@ game.league.currentRound++;
   document.getElementById("resetBtn")?.addEventListener("click", () => {
     import("./services/storage.js").then(m => m.resetGame());
   });
-  // =========================
+// =========================
 // 🔚 SESSION END TRACKING
 // =========================
 window.addEventListener("beforeunload", () => {
   trackEnd("session_end");
+});
+
+// 📱 MOBILE FIX (sehr wichtig!)
+document.addEventListener("visibilitychange", () => {
+  if(document.visibilityState === "hidden"){
+    trackEnd("session_end");
+  }
 });
 
 // =========================
