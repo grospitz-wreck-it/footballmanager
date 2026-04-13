@@ -720,10 +720,10 @@ function switchTab(tab){
     loadEvents();
   }
 
-  if(tab === "insights"){
-    qs("insightsTab")?.classList.add("active");
-    qs("tabInsights")?.classList.add("active");
-  }
+ if(tab === "insights"){
+  loadInsights();
+  loadChart();
+}
 }
 
 // =====================
