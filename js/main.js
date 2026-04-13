@@ -648,9 +648,9 @@ document.addEventListener("visibilitychange", () => {
     trackEnd("session_end");
   }
 });
-
+ }
 // =========================
 // ▶️ START
 // =========================
 document.addEventListener("DOMContentLoaded", init);
-  }
+ 
