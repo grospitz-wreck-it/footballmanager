@@ -432,6 +432,33 @@ async function loadInsights(){
 }
 
 
+async function getChartData(){
+
+  const { data } = await supabase
+    .from("analytics_events")
+    .select("created_at, session_id")
+    .order("created_at", { ascending: true });
+
+  const map = {};
+
+  data?.forEach(e => {
+
+    const date = new Date(e.created_at).toLocaleDateString();
+
+    if(!map[date]){
+      map[date] = new Set();
+    }
+
+    map[date].add(e.session_id);
+  });
+
+  // 🔥 Sets → Zahlen
+  const labels = Object.keys(map);
+  const values = labels.map(d => map[d].size);
+
+  return { labels, values };
+}
+
 async function loadChart(){
 
   const ctx = document.getElementById("insightChart");
