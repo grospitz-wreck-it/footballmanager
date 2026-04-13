@@ -1,7 +1,7 @@
 // =========================
 // 🔗 UI BINDINGS (CLEAN FIX)
 // =========================
-import { getSessionId, track } from "../../tools/analytics.js";
+import { track } from "../../tools/analytics.js";
 import {
   selectTeam,
   initLeagueSelect
