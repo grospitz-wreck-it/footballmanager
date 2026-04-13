@@ -84,7 +84,7 @@ function getAssetsForEvent(type){
 // =========================
 // 🆕 EVENT EMITTER
 // =========================
-console.log("🎯 GOAL ASSETS:", getGoalAssets());
+console.log("🎯 GOAL ASSETS:", getAssetsForEvent("goal"));
 function emitMatchEvent(type, payload = {}) {
 
   const live = game.match?.live;
@@ -330,7 +330,7 @@ function createShot(ctx){
   outcome: EVENT_OUTCOMES.SUCCESS,
 
   // 🔥 WICHTIG: DAMIT WEBP KOMMT
-  assets: getGoalAssets()
+  assets: getAssetsForEvent("goal")
 });
 
     return;
