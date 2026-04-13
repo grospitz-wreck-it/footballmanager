@@ -330,3 +330,20 @@ button.danger:hover {
   cursor: pointer;
   font-family: monospace;
 }
+#regionTop, #topRegions {
+  margin-top: 12px;
+}
+
+.regionRow {
+  background: #1e1e1e;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.regionRow strong {
+  color: #fff;
+}
