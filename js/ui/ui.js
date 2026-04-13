@@ -197,6 +197,7 @@ if(newest.assets?.length)
     const url = asset?.url;
 
     if(url){
+      console.log("🎬 CALL OVERLAY:", url);
       showOverlay(url, text);
     }
   }
