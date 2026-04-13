@@ -74,6 +74,14 @@ document.getElementById("toggleDebug")?.addEventListener("click", () => {
   }));
 });
 
+function destroyChart(){
+  if(insightChart){
+    insightChart.destroy();
+    insightChart = null;
+  }
+}
+
+
 // INIT
 updateDebugButton();
 // =====================
@@ -428,12 +436,16 @@ async function loadChart(){
 
   const ctx = document.getElementById("insightChart");
 
-  // 🔥 WICHTIG: alten Chart zerstören
+  // 🔥 FIX 1: Canvas existiert?
+  if(!ctx) return;
+
+  // 🔥 FIX 2: alten Chart sauber zerstören
   if(insightChart){
     insightChart.destroy();
+    insightChart = null;
   }
 
-  const data = await getChartData(); // deine bestehende Funktion
+  const data = await getChartData();
 
   insightChart = new Chart(ctx, {
     type: "line",
@@ -716,6 +728,12 @@ function switchTab(tab){
   }
 
  if(tab === "insights"){
+
+  qs("insightsTab")?.classList.add("active");
+  qs("tabInsights")?.classList.add("active");
+
+  destroyChart(); // 🔥 FIX
+
   loadInsights();
   loadChart();
 }
