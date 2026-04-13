@@ -42,6 +42,11 @@ function initUI(){
     game.ui.sidebarOpen = false;
     applySidebar();
   });
+
+  // 🔥 HIER EINFÜGEN
+  on(EVENTS.MATCH_EVENT, () => {
+    updateEvents();
+  });
 }
 
 // =========================
