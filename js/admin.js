@@ -523,7 +523,7 @@ async function loadGeoMap(){
 
   const geoData = await getGeoData();
 
-  const res = await fetch("./data/germany.geo.json");
+  const res = await fetch("../admin/data/germany.json");
   const germany = await res.json();
 
   function getColor(value){
