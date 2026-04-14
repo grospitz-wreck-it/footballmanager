@@ -287,13 +287,65 @@ function renderCampaigns(list){
 
   state.campaigns = list;
 
-  const container = qs("campaignList"); // 🔥 geändert
+  const container = qs("campaignList");
   container.innerHTML = "";
 
   list.forEach(c => {
 
     const adSets = c.ad_sets || [];
 
+    // =========================
+    // 🔥 KPI CALC
+    // =========================
+    let totalRevenue = 0;
+
+    adSets.forEach(s => {
+      totalRevenue += s.metrics?.revenue || 0;
+    });
+
+    // =========================
+    // 🎯 BREAKDOWN UI
+    // =========================
+    const breakdownHTML = adSets.map(set => {
+
+      const revenue = set.metrics?.revenue || 0;
+      const impressions = set.metrics?.impressions || 0;
+
+      const share = totalRevenue
+        ? Math.round((revenue / totalRevenue) * 100)
+        : 0;
+
+      return `
+        <div style="margin-top:6px;">
+          <div style="display:flex; justify-content:space-between; font-size:12px;">
+            <span>${set.type.toUpperCase()}</span>
+            <span>€${revenue} • ${share}%</span>
+          </div>
+
+          <div style="
+            height:6px;
+            background:#0f172a;
+            border-radius:4px;
+            overflow:hidden;
+            margin-top:3px;
+          ">
+            <div style="
+              width:${share}%;
+              height:100%;
+              background:linear-gradient(90deg,#22c55e,#3b82f6);
+            "></div>
+          </div>
+
+          <div style="font-size:11px; color:#94a3b8;">
+            IMP ${impressions}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    // =========================
+    // 🎮 ASSETS
+    // =========================
     const adSetHTML = adSets.map(set => {
 
       const assets = set.assets || [];
@@ -318,32 +370,48 @@ function renderCampaigns(list){
       `;
     }).join("");
 
+    // =========================
+    // 🎯 TARGETING
+    // =========================
+    const targeting = c.targeting?.states?.length
+      ? c.targeting.states.join(", ")
+      : "Alle";
+
+    // =========================
+    // 🎯 CARD
+    // =========================
     const div = document.createElement("div");
     div.className = "adRow";
 
     div.innerHTML = `
-      <div class="adLeft">
-        <div>
-          <strong>${c.customer}</strong><br>
-          ${c.name}<br>
-          💰 ${c.budget}€
-        </div>
-
-        <div class="scopeTag">
-          🎯 ${
-  c.targeting?.states?.length
-    ? c.targeting.states.join(", ")
-    : "Alle"
-}
-        </div>
-      </div>
-
-      <div>
-        <button data-action="delete" data-id="${c.id}">🗑️</button>
-      </div>
-
       <div style="width:100%">
-        ${adSetHTML}
+
+        <div class="adLeft">
+          <div>
+            <strong>${c.customer}</strong><br>
+            ${c.name}<br>
+            💰 ${c.budget}€
+          </div>
+
+          <div class="scopeTag">
+            🎯 ${targeting}
+          </div>
+        </div>
+
+        <!-- 🔥 KPI BREAKDOWN -->
+        <div style="margin-top:10px;">
+          ${breakdownHTML}
+        </div>
+
+        <!-- 🔽 AD TYPES -->
+        <div style="margin-top:10px;">
+          ${adSetHTML}
+        </div>
+
+        <div style="margin-top:10px;">
+          <button data-action="delete" data-id="${c.id}">🗑️</button>
+        </div>
+
       </div>
     `;
 
