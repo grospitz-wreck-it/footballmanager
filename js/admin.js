@@ -498,7 +498,7 @@ async function loadInsights(){
   qs("insightDAU").textContent = dau;
   qs("insightSessions").textContent = sessionList.length;
   qs("insightMatches").textContent = matches;
-  qs("insightAvg").textContent = formatDuration(avgSession);
+  qs("insightAvg").textContent = formatDurationVerbose(avgSession);
   qs("insightMPS") && (qs("insightMPS").textContent = matchesPerSession);
   qs("insightEngagement") && (qs("insightEngagement").textContent = engagementScore);
 
