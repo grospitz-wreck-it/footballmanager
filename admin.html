@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -11,13 +10,14 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
+
 <button id="toggleDebug" class="debugToggle"></button>
-  <div class="container">
+
+<div class="container">
 
 <h1>📊 Ad Dashboard</h1>
 
 <!-- TABS -->
-
 <div class="tabs">
   <button id="tabAds" data-tab="ads" class="active">📢 Ads</button>
   <button id="tabEvents" data-tab="events">🎮 Events</button>
@@ -26,50 +26,10 @@
 </div>
 
 <!-- ========================= -->
-<!-- ADS TAB -->
+<!-- ADS TAB (CLEAN) -->
 <!-- ========================= -->
-
 <div id="adsTab" class="tabContent active">
 
-<div class="kpiGrid">
-
-  <div class="kpiCard">
-    <span>DAU</span>
-    <h2 id="insightDAU">0</h2>
-  </div>
-
-  <div class="kpiCard">
-    <span>Sessions</span>
-    <h2 id="insightSessions">0</h2>
-  </div>
-
-  <div class="kpiCard">
-    <span>Matches</span>
-    <h2 id="insightMatches">0</h2>
-  </div>
-
-  <div class="kpiCard">
-    <span>Avg Session</span>
-    <h2 id="insightAvg">0s</h2>
-  </div>
-
-  <!-- 🔥 NEU -->
-  <div class="kpiCard">
-    <span>Matches / Session</span>
-    <h2 id="insightMPS">0</h2>
-  </div>
-
-  <div class="kpiCard">
-    <span>Engagement</span>
-    <h2 id="insightEngagement">-</h2>
-  </div>
-
-</div>
-  <div class="box">
-  <h2>🎯 User Segments</h2>
-  <div id="insightSegments"></div>
-</div>
-  
 <div class="box">
   <h2>Neue Kampagne</h2>
 
@@ -100,6 +60,7 @@
 
     <input id="link" placeholder="https://...">
     <input id="image" type="file" multiple>
+
     <button id="saveBtn">💾 Speichern</button>
   </div>
 </div>
@@ -114,14 +75,12 @@
 <!-- ========================= -->
 <!-- EVENTS TAB -->
 <!-- ========================= -->
-
 <div id="eventsTab" class="tabContent">
 
 <div class="box">
   <h2>🎮 Neues Event</h2>
 
   <div class="grid">
-
     <input id="eventTitle" placeholder="Titel">
     <textarea id="eventDescription" placeholder="Beschreibung"></textarea>
 
@@ -150,14 +109,13 @@
       <option value="both">Beide</option>
     </select>
 
-    <input id="eventValue" type="number" placeholder="Wert (z.B. Tore +1)">
-    <input id="eventAttack" type="number" placeholder="Attack Modifier">
-    <input id="eventDefense" type="number" placeholder="Defense Modifier">
+    <input id="eventValue" type="number">
+    <input id="eventAttack" type="number">
+    <input id="eventDefense" type="number">
 
     <input type="file" id="eventMedia" multiple>
 
     <button id="createEventBtn">🎬 Event speichern</button>
-
   </div>
 </div>
 
@@ -169,99 +127,120 @@
 </div>
 
 <!-- ========================= -->
-<!-- INSIGHTS -->
+<!-- INSIGHTS TAB (FIXED) -->
 <!-- ========================= -->
-
 <div id="insightsTab" class="tabContent">
 
-  <div class="box">
-    <h2>📈 Overview</h2>
+<div class="box">
+  <h2>📈 Overview</h2>
 
-    <div class="kpiGrid">
-      <div class="kpiCard"><span>DAU</span><h2 id="insightDAU">0</h2></div>
-      <div class="kpiCard"><span>Sessions</span><h2 id="insightSessions">0</h2></div>
-      <div class="kpiCard"><span>Matches</span><h2 id="insightMatches">0</h2></div>
-      <div class="kpiCard"><span>Avg Session</span><h2 id="insightAvg">0s</h2></div>
+  <div class="kpiGrid">
+
+    <div class="kpiCard">
+      <span>DAU</span>
+      <h2 id="insightDAU">0</h2>
     </div>
-  </div>
 
-  <div class="box">
-    <h2>📊 Activity</h2>
-    <canvas id="insightChart" height="120"></canvas>
+    <div class="kpiCard">
+      <span>Sessions</span>
+      <h2 id="insightSessions">0</h2>
+    </div>
+
+    <div class="kpiCard">
+      <span>Matches</span>
+      <h2 id="insightMatches">0</h2>
+    </div>
+
+    <div class="kpiCard">
+      <span>Avg Session</span>
+      <h2 id="insightAvg">0s</h2>
+    </div>
+
+    <!-- 🔥 NEU -->
+    <div class="kpiCard">
+      <span>Matches / Session</span>
+      <h2 id="insightMPS">0</h2>
+    </div>
+
+    <div class="kpiCard">
+      <span>Engagement</span>
+      <h2 id="insightEngagement">-</h2>
+    </div>
+
   </div>
+</div>
+
+<!-- 🔥 SEGMENTS -->
+<div class="box">
+  <h2>🎯 User Segments</h2>
+  <div id="insightSegments"></div>
+</div>
+
+<div class="box">
+  <h2>📊 Activity</h2>
+  <canvas id="insightChart" height="120"></canvas>
+</div>
+
 <div class="box">
   <h2>🇩🇪 Nutzer Heatmap</h2>
   <div id="geoMap" style="height: 400px;"></div>
   <div id="topRegions"></div>
 </div>
-</div>
-<!-- ========================= -->
-<!-- 🎮 GAME EVENTS TAB (FIXED POSITION) -->
-<!-- ========================= -->
 
+</div>
+
+<!-- ========================= -->
+<!-- GAME EVENTS TAB -->
+<!-- ========================= -->
 <div id="gameEventsTab" class="tabContent">
 
-  <div class="box">
-    <h2>🎮 Neues Game Event</h2>
+<div class="box">
+  <h2>🎮 Neues Game Event</h2>
 
-    <div class="grid">
+  <div class="grid">
 
-      <input id="geTitle" placeholder="Titel">
+    <input id="geTitle" placeholder="Titel">
 
-      <select id="geType"></select>
+    <select id="geType"></select>
 
-      <select id="geTrigger">
-        <option value="random">🎲 Random</option>
-        <option value="always">⚡ Immer</option>
-        <option value="once">🔁 Einmal pro Match</option>
-      </select>
+    <select id="geTrigger">
+      <option value="random">🎲 Random</option>
+      <option value="always">⚡ Immer</option>
+      <option value="once">🔁 Einmal pro Match</option>
+    </select>
 
-      <input 
-        id="geProbability" 
-        type="number" 
-        step="0.01" 
-        min="0" 
-        max="1"
-        value="0.1"
-        placeholder="Chance (0-1)"
-      >
+    <input id="geProbability" type="number" step="0.01" min="0" max="1" value="0.1">
 
-      <input id="geValue" type="number" placeholder="Wert (z.B. +1 Tor)">
-      <input id="geDuration" type="number" value="0" placeholder="Dauer (Minuten)">
+    <input id="geValue" type="number">
+    <input id="geDuration" type="number" value="0">
 
-      <select id="geCategory">
-        <option value="gameplay">🎮 Gameplay</option>
-        <option value="fun">😂 Fun</option>
-        <option value="rare">💎 Rare</option>
-        <option value="monetization">💰 Monetization</option>
-      </select>
+    <select id="geCategory">
+      <option value="gameplay">🎮 Gameplay</option>
+      <option value="fun">😂 Fun</option>
+      <option value="rare">💎 Rare</option>
+      <option value="monetization">💰 Monetization</option>
+    </select>
 
-      <input 
-        type="file" 
-        id="geMedia" 
-        multiple
-        accept="image/webp,image/png,image/jpeg,video/mp4"
-      >
+    <input type="file" id="geMedia" multiple>
 
-      <button id="saveGameEventBtn">💾 Event speichern</button>
+    <button id="saveGameEventBtn">💾 Event speichern</button>
 
-    </div>
   </div>
+</div>
 
-  <div class="box">
-    <h2>📋 Game Events</h2>
-
-    <input id="geSearch" placeholder="🔍 Suche nach Titel oder Typ...">
-
-    <div id="gameEventList"></div>
-  </div>
+<div class="box">
+  <h2>📋 Game Events</h2>
+  <input id="geSearch" placeholder="🔍 Suche...">
+  <div id="gameEventList"></div>
+</div>
 
 </div>
 
-</div> <!-- ✅ container sauber geschlossen -->
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script> <!-- 🔥 HIER -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script type="module" src="./js/admin.js"></script>
+
 </body>
 </html>
