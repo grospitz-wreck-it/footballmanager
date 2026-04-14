@@ -26,12 +26,16 @@ function getPriority(type) {
     case "INJURY": return 80;
     case "HALFTIME": return 60;
     case "FULLTIME": return 70;
+
+    // 🔥 TAKTIK
+    case "TACTIC_CHANGE": return 50;
+
     default: return 10;
   }
 }
 
 // =========================
-// 🧠 🔥 LOOKUP FIX
+// 🧠 LOOKUP
 // =========================
 
 function findPlayer(players, id){
@@ -55,10 +59,6 @@ function findTeam(teams, id){
   );
 }
 
-// =========================
-// 🧠 🔥 NAME FIX (DER WICHTIGE TEIL)
-// =========================
-
 function buildPlayerName(player){
 
   if(!player) return "ein Spieler";
@@ -71,7 +71,7 @@ function buildPlayerName(player){
 }
 
 // =========================
-// 🔥 OLD Commentary Generator
+// 🧠 FALLBACK TEXT
 // =========================
 function generateText(event) {
 
@@ -82,7 +82,6 @@ function generateText(event) {
   const team = findTeam(teams, event?.teamId);
 
   const playerName = buildPlayerName(player);
-
   const teamName = team?.name || "Ein Team";
 
   switch(event?.type){
@@ -105,21 +104,26 @@ function generateText(event) {
     case "DUEL":
       return `⚔️ Zweikampf im Mittelfeld`;
 
+    // 🔥 TAKTIK
+    case "TACTIC_CHANGE":
+      return `🔧 Taktik angepasst`;
+
     default:
       return `${teamName} im Angriff...`;
   }
 }
 
-// 🔥 ID Generator
+// =========================
+// 🔥 ID
+// =========================
 function ensureId(event){
   return event?.id || `evt_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
 }
 
 // =========================
-// 🧠 CORE STORE LOGIC
+// 🧠 CORE PIPELINE (NEU)
 // =========================
-
-on(EVENTS.GAME_EVENT, (event) => {
+function processEvent(event){
 
   if(!event) return;
 
@@ -138,52 +142,71 @@ on(EVENTS.GAME_EVENT, (event) => {
   const relatedPlayer = findPlayer(players, event.relatedPlayerId);
   const team = findTeam(teams, event.teamId);
 
-  const playerName = buildPlayerName(player);
-  const relatedPlayerName = relatedPlayer ? buildPlayerName(relatedPlayer) : null;
-
-  const teamName =
-    team?.name ||
-    team?.Name ||
-    "ein Team";
-
   const enrichedInput = {
     ...event,
-    playerName,
-    relatedPlayerName,
-    teamName
+    playerName: buildPlayerName(player),
+    relatedPlayerName: relatedPlayer ? buildPlayerName(relatedPlayer) : null,
+    teamName: team?.name || team?.Name || "ein Team"
   };
 
+  // =========================
+  // 🧠 CONTENT RESOLVE
+  // =========================
+  let resolved = {};
+  try {
+    resolved = resolveEventContent(event) || {};
+  } catch(e){
+    console.warn("⚠️ resolveEventContent failed", e);
+  }
+
+  // =========================
+  // 🧠 TEXT GENERATION
+  // =========================
   let text = null;
 
   try {
-    text = generateCommentary(enrichedInput);
+    text =
+      resolved.text ||
+      generateCommentary(enrichedInput) ||
+      generateText(enrichedInput);
   } catch(e){
-    console.error("❌ Commentary Engine Crash:", e);
+    console.error("❌ Commentary Crash:", e);
   }
 
-  const enrichedEvent = {
+  const finalEvent = {
     ...enrichedInput,
 
-    // 🔥 FIX: Assets übernehmen
-    assets: Array.isArray(event.assets) ? event.assets : [],
+    id: ensureId(enrichedInput),
 
-    id: ensureId(event),
-    text: text || generateText(event),
-    meta: enrichMeta(event)
+    text: text || "...",
+
+    assets: resolved.assets || event.assets || [],
+
+    meta: {
+      ...resolved.config,
+      ...enrichMeta(enrichedInput)
+    }
   };
 
-  console.log("🎮 FINAL GAME EVENT:", enrichedEvent);
+  game.events.history.push(finalEvent);
+  game.events.last = finalEvent;
 
-  game.events.history.push(enrichedEvent);
-
-  emit(EVENTS.STATE_CHANGED, game.events.history);
-});
-
+  emit(EVENTS.STATE_CHANGED, finalEvent);
+}
 
 // =========================
-// 💰 AD EVENTS HOOK
+// 🎮 GAME EVENTS
 // =========================
+on(EVENTS.GAME_EVENT, processEvent);
 
+// =========================
+// 🎮 MATCH EVENTS
+// =========================
+on(EVENTS.MATCH_EVENT, processEvent);
+
+// =========================
+// 💰 AD EVENTS
+// =========================
 on(EVENTS.AD_REWARD, (ad) => {
 
   if(!ad) return;
@@ -198,89 +221,4 @@ on(EVENTS.AD_REWARD, (ad) => {
   }
 
   emit(EVENTS.STATE_CHANGED, game);
-});
-
-// =========================
-// 🧪 DEBUG LOGGING
-// =========================
-on(EVENTS.MATCH_EVENT, (event) => {
-
-  if(!event) return;
-
-  if(!game.events){
-    game.events = { history: [] };
-  }
-
-  if(!game.events.history){
-    game.events.history = [];
-  }
-
-  const players = game.players || [];
-  const teams = game.data?.teams || [];
-
-  const player = findPlayer(players, event.playerId);
-  const relatedPlayer = findPlayer(players, event.relatedPlayerId);
-  const team = findTeam(teams, event.teamId);
-
-  const playerName = buildPlayerName(player);
-  const relatedPlayerName = relatedPlayer ? buildPlayerName(relatedPlayer) : null;
-
-  const teamName =
-    team?.name ||
-    team?.Name ||
-    "ein Team";
-
-  const enrichedInput = {
-    ...event,
-    playerName,
-    relatedPlayerName,
-    teamName
-  };
-
-  // =========================
-  // 🆕 CONTENT RESOLVER
-  // =========================
-// =========================
-// 🧠 CONTENT RESOLVE
-// =========================
-const resolved = resolveEventContent(event);
-
-console.log("🧪 RESOLVED:", resolved);
-
-// 🔥🔥🔥 DAS FEHLT BEI DIR
-event.text = resolved.text;
-event.assets = resolved.assets;
-event.meta = resolved.config;
-  // =========================
-  // 🧠 TEXT PRIORITY
-  // =========================
-  let text = null;
-
-  try {
-    text =
-      resolved.text ||
-      generateCommentary(enrichedInput) ||
-      generateText(enrichedInput);
-  } catch(e){
-    console.error("❌ Commentary Crash:", e);
-  }
-
-  const enrichedEvent = {
-    ...enrichedInput,
-
-    id: ensureId(enrichedInput),
-
-    text: text || "...",
-    assets: resolved.assets || [],
-
-    meta: {
-      ...resolved.config,
-      ...enrichMeta(enrichedInput)
-    }
-  };
-
-  game.events.history.push(enrichedEvent);
-  game.events.last = enrichedEvent;
-
-  emit(EVENTS.STATE_CHANGED, enrichedEvent);
 });
