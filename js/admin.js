@@ -330,7 +330,11 @@ function renderCampaigns(list){
         </div>
 
         <div class="scopeTag">
-          🎯 ${(c.targeting?.states || []).join(", ") || "Alle"}
+          🎯 ${
+  c.targeting?.states?.length
+    ? c.targeting.states.join(", ")
+    : "Alle"
+}
         </div>
       </div>
 
