@@ -14,8 +14,8 @@ function initTable(){
   if(!league || !teams) return;
 
   league.table = teams.map(team => ({
-    id: String(team.id),   // 🔥 ONLY SOURCE OF TRUTH
-    name: team.name,       // UI only
+    id: String(team.id),
+    name: team.name,
     played: 0,
     wins: 0,
     draws: 0,
@@ -55,7 +55,7 @@ function sortTable(table){
 }
 
 // =========================
-// 📈 LIVE TABLE (ID SAFE)
+// 📈 LIVE TABLE (FIXED)
 // =========================
 function getLiveTable(){
 
@@ -81,7 +81,7 @@ function getLiveTable(){
       let h = 0;
       let a = 0;
 
-      // 🔥 PRIORITY: LIVE MATCH
+      // 🔥 LIVE MATCH PRIORITY
       if(
         game.match?.current &&
         match.id === game.match.current.id
@@ -89,7 +89,7 @@ function getLiveTable(){
         h = game.match.live?.score?.home ?? 0;
         a = game.match.live?.score?.away ?? 0;
       }
-      // 🔥 ansonsten nur wenn processed
+      // 🔥 PROCESSED MATCH
       else if(match._processed && match.result){
         h = match.result.home;
         a = match.result.away;
@@ -130,45 +130,8 @@ function getLiveTable(){
   return table;
 }
 
-  // =========================
-  // 🔴 LIVE MATCH (PLAYER)
-  // =========================
-  const match = game.match?.current;
-
-  if(match){
-
-    const home = table.find(t => t.id === String(match.homeTeamId));
-    const away = table.find(t => t.id === String(match.awayTeamId));
-
-    if(home && away){
-
-      const h = game.match?.live?.score?.home ?? 0;
-      const a = game.match?.live?.score?.away ?? 0;
-
-      home.goalsFor += h;
-      home.goalsAgainst += a;
-
-      away.goalsFor += a;
-      away.goalsAgainst += h;
-
-      if(h > a){
-        home.points += 3;
-      }
-      else if(a > h){
-        away.points += 3;
-      }
-      else{
-        home.points++;
-        away.points++;
-      }
-    }
-  }
-
-  return table;
-}
-
 // =========================
-// 🧾 RENDER TABLE (ID SAFE)
+// 🧾 RENDER TABLE
 // =========================
 function renderTable(customTable){
 
@@ -195,18 +158,15 @@ function renderTable(customTable){
     const tr = document.createElement("tr");
     const diff = team.goalsFor - team.goalsAgainst;
 
-    // 🟢 Tabellenführer
     if(index === 0) tr.classList.add("table-promoted");
-
-    // 🔴 Abstiegszone
     if(index >= 14) tr.classList.add("table-relegated");
 
-    // ⭐ DEIN TEAM (FIX)
+    // ⭐ MY TEAM
     if(String(team.id) === myTeamId){
       tr.classList.add("table-myteam");
     }
 
-    // 🎯 AKTIVES MATCH (FIX)
+    // 🎯 ACTIVE MATCH
     if(match){
       if(
         String(team.id) === String(match.homeTeamId) ||
@@ -240,7 +200,7 @@ function renderLiveTable(){
 }
 
 // =========================
-// 🧠 APPLY MATCH (FINAL)
+// 🧠 APPLY MATCH
 // =========================
 function applyMatchToTable(){
 
@@ -283,7 +243,7 @@ function applyMatchToTable(){
     away.draws++;
   }
 
-  console.log("✅ Match applied to table (ID mode)");
+  console.log("✅ Match applied to table");
 }
 
 // =========================
