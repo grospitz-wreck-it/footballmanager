@@ -8,18 +8,18 @@
 <link rel="stylesheet" href="./style.css">
 
 </head>
-<img 
-  id="tacticsBtn" 
-  src="./gfx/tacticsettings.webp" 
-  class="tactics-btn"
-/>
+
+<body>
+
+<!-- 🔥 TACTICS BUTTON -->
 <img 
   id="tacticsBtn" 
   src="./gfx/tacticsettings.webp" 
   class="tactics-btn"
 />
 
-<div id="tacticsOverlay" class="tactics-overlay hidden">
+<!-- 🔥 TACTICS OVERLAY -->
+<div id="tacticsOverlay" class="tactics-overlay">
   <div class="tactics-sheet">
 
     <h3>Taktik</h3>
@@ -38,8 +38,6 @@
 
   </div>
 </div>
-  
-<body>
 
 <!-- SPLASH -->
 <div id="splash">
@@ -94,16 +92,17 @@
       <div id="progressFill"></div>
     </div>
 
-<div id="gameCanvas">
+    <div id="gameCanvas">
 
-  <canvas id="gameCanvasInner"></canvas>
+      <canvas id="gameCanvasInner"></canvas>
 
-  <div id="matchOverlay" class="hidden">
-    <img id="overlayImage" />
-    <div id="overlayText"></div>
-  </div>
+      <div id="matchOverlay" class="hidden">
+        <img id="overlayImage" />
+        <div id="overlayText"></div>
+      </div>
 
-</div>
+    </div>
+
     <div id="eventBar">
       <div id="eventText">Willkommen im Spiel</div>
     </div>
