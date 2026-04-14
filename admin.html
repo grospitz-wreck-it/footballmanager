@@ -30,46 +30,81 @@
 <!-- ========================= -->
 <div id="adsTab" class="tabContent active">
 
+<!-- ========================= -->
+<!-- CAMPAIGN CREATION -->
+<!-- ========================= -->
+
 <div class="box">
-  <h2>Neue Kampagne</h2>
+  <h2>➕ Neue Kampagne</h2>
 
   <div class="grid">
-    <input id="name" placeholder="Name">
-    <input id="customer" placeholder="Kunde">
-    <input id="budget" type="number" placeholder="Budget €">
+    <input id="campaignName" placeholder="Kampagnen Name">
+    <input id="campaignCustomer" placeholder="Kunde">
+    <input id="campaignBudget" type="number" placeholder="Budget €">
 
-    <select id="scope">
-      <option value="global">Global</option>
-      <option value="league">Liga</option>
-      <option value="team">Team</option>
-    </select>
+    <input type="date" id="campaignStart">
+    <input type="date" id="campaignEnd">
 
-    <input id="scopeRef" placeholder="Liga oder Team IDs (comma)">
+    <input id="campaignLink" placeholder="https://...">
 
-    <select id="adFormat">
-      <option value="banner">Banner</option>
-      <option value="video">Video</option>
-      <option value="sponsored">Sponsored</option>
-    </select>
+    <!-- 🔥 TARGETING (simple version jetzt, später Multi-Select) -->
+    <input id="targetStates" placeholder="Bundesländer (z.B. Bayern, NRW)">
+    <input id="targetCities" placeholder="Städte (z.B. München, Berlin)">
+    <input id="targetTeams" placeholder="Teams (z.B. Hertha, Bayern)">
 
-    <input id="cpm" placeholder="CPM €">
-    <input id="cpc" placeholder="CPC €">
-
-    <input type="date" id="startDate">
-    <input type="date" id="endDate">
-
-    <input id="link" placeholder="https://...">
-    <input id="image" type="file" multiple>
-
-    <button id="saveBtn">💾 Speichern</button>
+    <button id="createCampaignBtn">🚀 Kampagne erstellen</button>
   </div>
 </div>
 
+
+<!-- ========================= -->
+<!-- AD SET CREATION -->
+<!-- ========================= -->
+
 <div class="box">
-  <h2>Kampagnen</h2>
-  <div id="list"></div>
+  <h2>🎯 Ad Type hinzufügen</h2>
+
+  <div class="grid">
+    <select id="adType">
+      <option value="interstitial">Interstitial</option>
+      <option value="banner">Banner</option>
+      <option value="video">Rewarded Video</option>
+      <option value="branded">Branded (Event)</option>
+    </select>
+
+    <input id="adPlacement" placeholder="Placement (z.B. reward_screen)">
+    
+    <input id="freqUser" type="number" placeholder="Max pro User">
+    <input id="freqDay" type="number" placeholder="Max pro Tag">
+
+    <input id="dailyLimit" type="number" placeholder="Daily Impressions Limit">
+
+    <button id="addAdSetBtn">➕ Ad Type hinzufügen</button>
+  </div>
 </div>
 
+
+<!-- ========================= -->
+<!-- ASSET UPLOAD -->
+<!-- ========================= -->
+
+<div class="box">
+  <h2>🖼 Assets hochladen</h2>
+
+  <div class="grid">
+    <input id="assetUpload" type="file" multiple>
+    <button id="addAssetBtn">📤 Assets hinzufügen</button>
+  </div>
+</div>
+
+
+<!-- ========================= -->
+<!-- CAMPAIGN LIST -->
+<!-- ========================= -->
+
+<div class="box">
+  <h2>📊 Kampagnen Übersicht</h2>
+  <div id="campaignList"></div>
 </div>
 
 <!-- ========================= -->
