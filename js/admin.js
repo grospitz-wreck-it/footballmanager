@@ -22,47 +22,110 @@ const state = {
 // =====================
 // HELPERS
 // =====================
+function clearForm(){
 
-async function calculateCampaignKPIs(campaign){
+  [
+    "campaignName",
+    "campaignCustomer",
+    "campaignBudget",
+    "campaignLink",
+    "campaignStart",
+    "campaignEnd",
+    "targetStates",
+    "targetCities",
+    "targetTeams"
+  ].forEach(id => {
+    const el = qs(id);
+    if(el) el.value = "";
+  });
 
-  const { data } = await supabase
-    .from("analytics_events")
-    .select("*");
+}
+function calculateCampaignKPIs(campaign, data){
 
-  if(!data) return campaign;
+  if(!data || !data.length) return campaign;
 
   const adSets = campaign.ad_sets || [];
+  const targeting = campaign.targeting || {};
 
   const updatedSets = adSets.map(set => {
 
-    // 🔥 FILTER (basic – später erweitern)
     const relevant = data.filter(e => {
 
-      // Beispiel: match über placement oder type
-      return e.ad_type === set.type;
-    });
+      // =========================
+      // 🎯 TYPE
+      // =========================
+      if(e.ad_type !== set.type) return false;
 
-    const impressions = relevant.length;
-
-    // 👉 simple revenue modell
-    const ecpm = 8; // später dynamisch!
-    const revenue = (impressions / 1000) * ecpm;
-
-    return {
-      ...set,
-      metrics: {
-        impressions,
-        revenue: Number(revenue.toFixed(2))
+      // =========================
+      // 🎯 PLACEMENT
+      // =========================
+      if(set.placement && e.placement && e.placement !== set.placement){
+        return false;
       }
-    };
-  });
 
-  return {
-    ...campaign,
-    ad_sets: updatedSets
-  };
+    // =========================
+// 🌍 STATES (robust)
+// =========================
+if (targeting.states?.length) {
+
+  const normalize = (v) =>
+    (v || "").toString().trim().toLowerCase();
+
+  const states = targeting.states.map(normalize);
+  const eventRegion = normalize(e.region);
+
+  if (!eventRegion || !states.includes(eventRegion)) {
+    return false;
+  }
 }
 
+      // =========================
+      // 🏙 CITIES
+      // =========================
+      if(targeting.cities?.length){
+        if(!e.city || !targeting.cities.includes(e.city)){
+          return false;
+        }
+      }
+
+      // =========================
+      // ⚽ TEAMS
+      // =========================
+      if(targeting.teams?.length){
+        if(!e.team || !targeting.teams.includes(e.team)){
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+
+  const impressions = relevant.length;
+
+  // =========================
+  // 💰 REVENUE (CPM MODEL)
+  // =========================
+  const ecpm = 8;
+
+  const revenue = impressions
+    ? (impressions / 1000) * ecpm
+    : 0;
+
+  return {
+    ...set,
+    metrics: {
+      impressions,
+      revenue: Number(revenue.toFixed(2))
+    }
+  };
+});
+
+return {
+  ...campaign,
+  ad_sets: updatedSets
+};
+}
 const qs = (id) => document.getElementById(id);
 
 function uuid(){
@@ -195,25 +258,7 @@ async function createCampaign(){
   };
 
   await supabase.from("campaigns").insert(payload);
-
-function clearForm(){
-
-  [
-    "campaignName",
-    "campaignCustomer",
-    "campaignBudget",
-    "campaignLink",
-    "campaignStart",
-    "campaignEnd",
-    "targetStates",
-    "targetCities",
-    "targetTeams"
-  ].forEach(id => {
-    const el = qs(id);
-    if(el) el.value = "";
-  });
-
-}
+  clearForm();
   loadCampaigns();
 }
 async function addAdSet(){
@@ -256,7 +301,7 @@ async function addAssets(){
 
   const assets = await uploadFiles("ads", files);
 
-  const campaign = state.campaigns[0];
+  const campaign = state.campaigns.find(c => c.active);
   if(!campaign) return;
 
   if(!campaign.ad_sets?.length){
@@ -276,7 +321,7 @@ const updatedSets = campaign.ad_sets.map((set, i) => {
 });
   await supabase
     .from("campaigns")
-    .update({ ad_sets: campaign.ad_sets })
+    .update({ ad_sets: updatedSets })
     .eq("id", campaign.id);
 
   loadCampaigns();
@@ -313,20 +358,39 @@ loadCampaigns();
 // =====================
 async function loadCampaigns(){
 
-  const { data } = await supabase
+  // =========================
+  // 🔥 LOAD CAMPAIGNS
+  // =========================
+  const { data: campaigns, error: cError } = await supabase
     .from("campaigns")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if(!data) return;
-
-  // 🔥 KPI CALC HIER
-  const enriched = [];
-
-  for(const c of data){
-    const withKPIs = await calculateCampaignKPIs(c);
-    enriched.push(withKPIs);
+  if(cError){
+    console.error("❌ Campaign Load Error", cError);
+    return;
   }
+
+  if(!campaigns) return;
+
+  // =========================
+  // 🔥 LOAD EVENTS (EINMAL!)
+  // =========================
+  const { data: events, error: eError } = await supabase
+    .from("analytics_events")
+    .select("*");
+
+  if(eError){
+    console.error("❌ Events Load Error", eError);
+    return;
+  }
+
+  // =========================
+  // 🔥 KPI CALC
+  // =========================
+  const enriched = campaigns.map(c => 
+    calculateCampaignKPIs(c, events || [])
+  );
 
   renderCampaigns(enriched);
 }
