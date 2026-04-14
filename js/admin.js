@@ -261,85 +261,67 @@ renderCampaigns(data || []);
 // =====================
 function renderCampaigns(list){
 
-state.campaigns = list;
+  state.campaigns = list;
 
-const container = qs("list");
-container.innerHTML = "";
+  const container = qs("campaignList"); // 🔥 geändert
+  container.innerHTML = "";
 
-list.forEach(c => {
+  list.forEach(c => {
 
+    const adSets = c.ad_sets || [];
 
-const isEdit = state.inlineEditId === c.id;
-const assets = c.assets || [];
+    const adSetHTML = adSets.map(set => {
 
-const assetHTML = assets.map(a=>`
-  <div class="asset">
-    ${a.type==="video"
-      ? `<video src="${a?.url || ''}" data-action="fullscreen" muted></video>`
-      : `<img src="${a?.url || ''}" data-action="fullscreen">`
-    }
-    <button 
-      class="assetIdBtn" 
-      data-action="copy" 
-      data-id="${a.id}"
-    >
-      📋 ${a.id.slice(0,6)}
-    </button>
-  </div>
-`).join("");
+      const assets = set.assets || [];
 
-const div = document.createElement("div");
-div.className = "adRow";
-div.dataset.row = c.id;
+      const assetHTML = assets.map(a=>`
+        <div class="asset small">
+          ${
+            a.type==="video"
+            ? `<video src="${a.url}" muted></video>`
+            : `<img src="${a.url}">`
+          }
+        </div>
+      `).join("");
 
-div.innerHTML = `
-  <div class="adLeft">
-    <div class="assetRow">${assetHTML}</div>
+      return `
+        <div class="box" style="margin-top:10px;">
+          <strong>${set.type.toUpperCase()}</strong><br>
+          🎯 ${set.placement || "-"} • 🔁 ${set.freq_user || 0}/user
 
-    ${
-      isEdit
-      ? `
-        <input data-field="customer" value="${c.customer}">
-        <input data-field="name" value="${c.name}">
-        <input data-field="budget" value="${c.budget}">
-      `
-      : `
-        <strong>${c.customer}</strong><br>
-        ${c.name}<br>
-        💰 ${c.budget}€
-      `
-    }
+          <div class="assetRow">${assetHTML}</div>
+        </div>
+      `;
+    }).join("");
 
-    <div class="scopeTag">🌍 ${c.scope || "global"}</div>
+    const div = document.createElement("div");
+    div.className = "adRow";
 
-    <div class="idRow">
-      <button data-action="copy" data-id="${c.id}">
-        ${c.id.slice(0,6)}
-      </button>
-    </div>
-  </div>
+    div.innerHTML = `
+      <div class="adLeft">
+        <div>
+          <strong>${c.customer}</strong><br>
+          ${c.name}<br>
+          💰 ${c.budget}€
+        </div>
 
-  <div>
-    ${
-      isEdit
-      ? `
-        <button data-action="saveInline" data-id="${c.id}">💾</button>
-        <button data-action="cancelInline">❌</button>
-      `
-      : `
-        <button data-action="editInline" data-id="${c.id}">✏️</button>
-        <button class="danger" data-action="delete" data-id="${c.id}">🗑️</button>
-      `
-    }
-  </div>
-`;
+        <div class="scopeTag">
+          🎯 ${(c.targeting?.states || []).join(", ") || "Alle"}
+        </div>
+      </div>
 
-container.appendChild(div);
+      <div>
+        <button data-action="delete" data-id="${c.id}">🗑️</button>
+      </div>
 
+      <div style="width:100%">
+        ${adSetHTML}
+      </div>
+    `;
 
-});
+    container.appendChild(div);
+  });
 }
-
 // =====================
 // EVENTS
 // =====================
