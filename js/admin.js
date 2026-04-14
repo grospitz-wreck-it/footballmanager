@@ -155,7 +155,24 @@ async function createCampaign(){
 
   await supabase.from("campaigns").insert(payload);
 
-  clearForm();
+function clearForm(){
+
+  [
+    "campaignName",
+    "campaignCustomer",
+    "campaignBudget",
+    "campaignLink",
+    "campaignStart",
+    "campaignEnd",
+    "targetStates",
+    "targetCities",
+    "targetTeams"
+  ].forEach(id => {
+    const el = qs(id);
+    if(el) el.value = "";
+  });
+
+}
   loadCampaigns();
 }
 async function addAdSet(){
