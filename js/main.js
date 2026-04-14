@@ -66,47 +66,36 @@ let simInterval = null;
 // =========================
 // 🤖 BACKGROUND SIMULATION (NEW)
 // =========================
+
+// =========================
+// 🤖 BACKGROUND SIMULATION (FINAL)
+// =========================
 function startBackgroundSimulation(){
 
   if(simInterval) return;
 
   simInterval = setInterval(() => {
 
-    const league = game.league.current;
+    const league = game.league?.current;
     const round = league?.schedule?.[game.league.currentRound || 0];
     if(!round) return;
 
-    round.forEach(match => {
-
-      if(
-        match.homeTeamId === game.team?.selectedId ||
-        match.awayTeamId === game.team?.selectedId
-      ) return;
-
-      // 🔥 LIVE INIT (NEU)
-      if(!match.live){
-        match.live = {
-          minute: 0,
-          score: { home: 0, away: 0 }
-        };
-      }
-      function startBackgroundSimulation(){
-
-  if(simInterval) return;
-
-  simInterval = setInterval(() => {
-
-    const league = game.league.current;
-    const round = league?.schedule?.[game.league.currentRound || 0];
-    if(!round) return;
+    const myTeamId = normalizeId(game.team?.selectedId);
 
     round.forEach(match => {
 
-      // 👉 eigenes Spiel überspringen
+      // =========================
+      // ⛔ eigenes Spiel skippen
+      // =========================
       if(
-        match.homeTeamId === game.team?.selectedId ||
-        match.awayTeamId === game.team?.selectedId
+        normalizeId(match.homeTeamId) === myTeamId ||
+        normalizeId(match.awayTeamId) === myTeamId
       ) return;
+
+      // =========================
+      // ⛔ bereits fertig
+      // =========================
+      if(match._processed) return;
 
       // =========================
       // 🟡 LIVE INIT
@@ -115,21 +104,22 @@ function startBackgroundSimulation(){
         match.live = {
           minute: 0,
           score: { home: 0, away: 0 },
-          running: true   // 🔥 NEU
+          running: true
         };
       }
 
-      if(match._processed) return;
-
       // =========================
-      // ⏱ ZEIT
+      // ⏱ ZEITFORTSCHRITT
       // =========================
-      match.live.minute += Math.floor(Math.random() * 5);
+      const timeStep = Math.floor(Math.random() * 5) + 1; // 1–5 Minuten
+      match.live.minute += timeStep;
 
       // =========================
       // ⚽ TORE
       // =========================
-      if(Math.random() < 0.2){
+      const goalChance = 0.18; // feinjustiert
+
+      if(Math.random() < goalChance){
 
         if(Math.random() < 0.5){
           match.live.score.home++;
@@ -143,7 +133,8 @@ function startBackgroundSimulation(){
       // =========================
       if(match.live.minute >= 90){
 
-        match.live.running = false; // 🔥 NEU
+        match.live.minute = 90;
+        match.live.running = false;
 
         match.result = {
           home: match.live.score.home,
@@ -155,11 +146,32 @@ function startBackgroundSimulation(){
 
     });
 
-    // 🔥 WICHTIG → UI + TABLE UPDATE
-    updateUI();
+    // =========================
+    // 🏁 SAISON ENDE CHECK
+    // =========================
+    const schedule = league?.schedule;
+
+    if(schedule){
+      const allDone = schedule.every(round =>
+        round.every(m => m._processed)
+      );
+
+      if(allDone){
+        stopBackgroundSimulation();
+        console.log("🏁 Saison beendet (Simulation gestoppt)");
+      }
+    }
+
+    // =========================
+    // 🔄 UI UPDATE (smart)
+    // =========================
+    if(game.ui?.tab === "table" || game.ui?.tab === "match"){
+      updateUI();
+    }
 
   }, 2000);
 }
+
 
 // =========================
 // 🔥 EVENT RENDER
