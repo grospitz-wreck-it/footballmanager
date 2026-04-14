@@ -389,7 +389,6 @@ function loadEventTypes(){
 }
 
 
-
 async function loadInsights(){
 
   const { data: events } = await supabase
@@ -541,132 +540,7 @@ async function loadInsights(){
     `;
   }
 }
-  // =========================
-  // 🧠 SESSION BUILD
-  // =========================
-  const sessions = {};
 
-  events.forEach(e => {
-    if(!sessions[e.session_id]){
-      sessions[e.session_id] = {
-        start: e.created_at,
-        end: e.created_at,
-        events: []
-      };
-    }
-
-    sessions[e.session_id].events.push(e.event_name);
-
-    if(e.created_at < sessions[e.session_id].start){
-      sessions[e.session_id].start = e.created_at;
-    }
-    if(e.created_at > sessions[e.session_id].end){
-      sessions[e.session_id].end = e.created_at;
-    }
-  });
-
-  const sessionList = Object.values(sessions);
-
-  // =========================
-  // 🔥 CORE KPIs
-  // =========================
-  const dau = new Set(events.map(e => e.session_id)).size;
-
-  const matches = events.filter(e => e.event_name === "match_start").length;
-
-  const durations = sessionList.map(s =>
-    (new Date(s.end) - new Date(s.start)) / 1000
-  );
-
-  const avgSession = durations.length
-    ? Math.round(durations.reduce((a,b)=>a+b,0)/durations.length)
-    : 0;
-
-  const matchesPerSession = sessionList.length
-    ? (matches / sessionList.length).toFixed(2)
-    : 0;
-
-  // =========================
-  // 🎯 SEGMENTATION
-  // =========================
-  let casual = 0;
-  let core = 0;
-  let hardcore = 0;
-
-  sessionList.forEach(s => {
-
-    const matchCount = s.events.filter(e => e === "match_start").length;
-
-    if(matchCount <= 1) casual++;
-    else if(matchCount <= 4) core++;
-    else hardcore++;
-  });
-
-  // =========================
-  // 💰 AD INVENTORY (🔥 NEW)
-  // =========================
-  const estimatedAdsPerMatch = 3; // 🔧 tweakbar
-  const totalImpressions = matches * estimatedAdsPerMatch;
-
-  // =========================
-  // 💸 REVENUE ESTIMATE (🔥 NEW)
-  // =========================
-  const avgCPM = 8; // € (kannst du dynamisch machen)
-
-  const revenue = ((totalImpressions / 1000) * avgCPM).toFixed(2);
-
-  // =========================
-  // 🔁 RETENTION PROXY (🔥 NEW)
-  // =========================
-  const returningUsers = Object.values(sessions).filter(s => {
-    return s.events.length > 5;
-  }).length;
-
-  const retention = sessionList.length
-    ? ((returningUsers / sessionList.length) * 100).toFixed(1)
-    : 0;
-
-  // =========================
-  // 🧠 ENGAGEMENT SCORE
-  // =========================
-  const engagementScore = avgSession > 600
-    ? "🔥 HIGH"
-    : avgSession > 300
-    ? "⚡ MEDIUM"
-    : "🧊 LOW";
-
-  // =========================
-  // 🔥 UI UPDATE
-  // =========================
-  qs("insightDAU").textContent = dau;
-  qs("insightSessions").textContent = sessionList.length;
-  qs("insightMatches").textContent = matches;
-  qs("insightAvg").textContent = formatDurationVerbose(avgSession);
-  qs("insightMPS") && (qs("insightMPS").textContent = matchesPerSession);
-  qs("insightEngagement") && (qs("insightEngagement").textContent = engagementScore);
-
-  // 🔥 SEGMENTS
-  const seg = qs("insightSegments");
-  if(seg){
-    seg.innerHTML = `
-      Casual: ${casual}<br>
-      Core: ${core}<br>
-      Hardcore: ${hardcore}
-    `;
-  }
-
-  // =========================
-  // 💰 NEW UI BLOCK
-  // =========================
-  const monet = qs("insightMonetization");
-  if(monet){
-    monet.innerHTML = `
-      👁 Impressions: ${totalImpressions}<br>
-      💰 Est. Revenue: €${revenue}<br>
-      🔁 Retention: ${retention}%
-    `;
-  }
-}
 
 
 async function getChartData(){
