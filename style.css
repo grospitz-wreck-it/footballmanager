@@ -1183,3 +1183,20 @@ tr:hover {
   opacity: 1;
   transform: scale(1.1);
 }
+.tactics-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 50;
+}
+
+.tactics-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background: #111;
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+}
