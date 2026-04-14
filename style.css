@@ -87,32 +87,77 @@ body {
   gap: 10px;
 }
 
+
 /* =========================
-🧷 HEADER (IMPROVED)
+🧷 HEADER SYSTEM (FINAL CLEAN)
 ========================= */
-#header {
+
+#headerWrap {
   position: sticky;
   top: 0;
-  background: linear-gradient(180deg, #020617, #020617);
-  padding: 14px 16px;
+  z-index: 1000;
+
+  background: #020617;
+
+  display: flex;
+  flex-direction: column;
+
+  /* 🔥 verhindert "durchscrollen" */
+  backdrop-filter: blur(6px);
+}
+
+/* =========================
+🔝 TOP HEADER (BURGER)
+========================= */
+#header {
   display: flex;
   align-items: center;
   gap: 12px;
+
+  padding: 12px 16px;
 
   font-weight: 600;
   font-size: 16px;
 
   border-bottom: 1px solid #1e293b;
-  backdrop-filter: blur(6px);
 }
 
-#burgerBtn {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
+/* =========================
+⚽ MATCH TOP BAR
+========================= */
+#topBar {
+  padding: 12px 14px;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+
+  background: linear-gradient(135deg, #020617, #111827);
+
+  border-bottom: 1px solid #1e293b;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
+
+/* Inhalte bleiben gleich */
+#topTeams {
+  text-align: left;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+#topScore {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+#topMinute {
+  text-align: right;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
 
 /* =========================
 🍔 SIDEBAR
@@ -166,19 +211,8 @@ body {
 }
 
 /* =========================
-⚽ TOP BAR (FIXED)
+⚽ INFO BAR (FIXED)
 ========================= */
-#topBar {
-  background: linear-gradient(135deg, #020617, #111827);
-  padding: 14px;
-  border-radius: 14px;
-
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-}
 
 #topTeams {
   text-align: left;
