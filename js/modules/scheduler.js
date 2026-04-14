@@ -93,16 +93,18 @@ console.log("✅ Validierte Teams:", teams.length);
   // =========================
   // 🔁 BYE
   // =========================
-  if(teams.length % 2 !== 0){
-    teams.push({ id: "BYE", name: "BYE" });
-  }
+ if(teams.length % 2 !== 0){
+  teams.push({ id: "BYE", name: "BYE" });
+}
 
-  const totalRounds = teams.length - 1;
-  const half = teams.length / 2;
+// 🔥 HIER setzen (direkt nach Team-Finalisierung)
+const effectiveTeamCount = teams.filter(t => t.id !== "BYE").length;
 
-  const rounds = [];
-  let rotation = [...teams];
+const totalRounds = teams.length - 1;
+const half = teams.length / 2;
 
+const rounds = [];
+let rotation = [...teams];
   // =========================
   // 🔥 HINRUNDE
   // =========================
@@ -195,7 +197,7 @@ console.log("✅ Validierte Teams:", teams.length);
 
   console.log("✅ Spielplan erstellt:", league.schedule.length);
 
-  validateSchedule(originalCount);
+  validateSchedule(effectiveTeamCount);
 }
 
 // =========================
