@@ -1040,16 +1040,13 @@ function renderGameEvents(list){
     ? `
       <div style="display:flex; gap:6px; flex-wrap:wrap;">
 
-        <!-- 💾 SAVE / CANCEL -->
         <button data-action="saveGameEventInline" data-id="${e.id}">💾</button>
         <button data-action="cancelGameEventInline">❌</button>
 
-        <!-- 📤 ASSET UPLOAD -->
         <input 
           type="file" 
           data-upload="${e.id}" 
-          multiple 
-          style="font-size:10px;"
+          multiple
         >
 
         <button 
