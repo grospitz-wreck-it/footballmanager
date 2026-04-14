@@ -170,15 +170,39 @@ const away = isSwap ? teamA : teamB;
   // 🔥 FIXED: Rückrunde + Shuffle
   const returnRounds = rounds.map(round => {
 
-    const newRound = round.map(match => ({
+    const returnRounds = rounds.map(round => {
+
+  const newRound = round.map(match => {
+
+    const homeId = normalizeId(match.awayTeamId);
+    const awayId = normalizeId(match.homeTeamId);
+
+    return {
       id: crypto.randomUUID(),
-      homeTeamId: normalizeId(match.awayTeamId),
-      awayTeamId: normalizeId(match.homeTeamId),
-      home: match.away,
-      away: match.home,
+
+      // 🔥 ID bleibt PRIMARY
+      homeTeamId: homeId,
+      awayTeamId: awayId,
+
+      // 🔥 UI OBJEKTE (IMMER NEU BAUEN!)
+      home: {
+        id: homeId,
+        name: match.away?.name || "Unbekannt"
+      },
+      away: {
+        id: awayId,
+        name: match.home?.name || "Unbekannt"
+      },
+
       result: null,
       _processed: false
-    }));
+    };
+  });
+
+  shuffleArray(newRound);
+
+  return newRound;
+});
 
     shuffleArray(newRound); // 🔥 NEW
 
