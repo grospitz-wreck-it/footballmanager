@@ -45,7 +45,7 @@ export function trackEnd(event){
   });
 
   navigator.sendBeacon(
-    "https://kckwxggzoenybssryaqr.supabase.co/rest/v1/analytics_events?apikey=YOUR_ANON_KEY",
+    "https://kckwxggzoenybssryaqr.supabase.co/rest/v1/analytics_events?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtja3d4Z2d6b2VueWJzc3J5YXFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyODA1NTksImV4cCI6MjA4OTg1NjU1OX0.J6zOyaBcrXphox1zwLn-bUOYP6SrWxs3_1x4z8B6ZDE",
     new Blob([data], { type: "application/json" })
   );
 }
