@@ -56,15 +56,12 @@ function calculateCampaignKPIs(campaign, data){
 
    const relevant = data.filter(e => {
 
-  // TYPE
   if (e.ad_type !== set.type) return false;
 
-  // PLACEMENT
   if (set.placement && e.placement && e.placement !== set.placement) {
     return false;
   }
 
-  // STATES
   if (targeting.states?.length) {
     const states = targeting.states.map(normalize);
     const eventRegion = normalize(e.region);
@@ -74,7 +71,6 @@ function calculateCampaignKPIs(campaign, data){
     }
   }
 
-  // CITIES
   if (targeting.cities?.length) {
     const cities = targeting.cities.map(normalize);
     const eventCity = normalize(e.city);
@@ -84,7 +80,6 @@ function calculateCampaignKPIs(campaign, data){
     }
   }
 
-  // TEAMS
   if (targeting.teams?.length) {
     const teams = targeting.teams.map(normalize);
     const eventTeam = normalize(e.team);
@@ -96,6 +91,15 @@ function calculateCampaignKPIs(campaign, data){
 
   return true;
 });
+
+// 🔥 DAS HAT GEFEHLT
+const impressions = relevant.length;
+
+const ecpm = 8;
+
+const revenue = impressions
+  ? (impressions / 1000) * ecpm
+  : 0;
 
   // =========================
   // 💰 REVENUE (CPM MODEL)
