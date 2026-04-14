@@ -1165,48 +1165,34 @@ tr:hover {
   cursor: pointer;
 }
 /* =========================
-   🎮 TACTICS BUTTONS (MOBILE OPTIMIZED)
-========================= */
-
-[data-preset],
-[data-tempo],
-[data-pressing],
-[data-line] {
-  transition: transform 0.15s ease, filter 0.15s ease;
-
-  /* leicht „inactive look“ */
-  filter: brightness(0.7) saturate(0.8);
-}
-
-/* ACTIVE STATE */
-[data-preset].active,
-[data-tempo].active,
-[data-pressing].active,
-[data-line].active {
-  filter: brightness(1.1) saturate(1.2);
-  transform: scale(1.1);
-}
-
-/* TOUCH FEEDBACK */
-[data-preset]:active,
-[data-tempo]:active,
-[data-pressing]:active,
-[data-line]:active {
-  transform: scale(0.95);
-}
-/* =========================
-   ⚙️ TACTICS BUTTON
+   ⚙️ TACTICS BUTTON (FINAL)
 ========================= */
 
 #tacticsBtn {
-  position: absolute;
+  position: fixed;          /* stabil für mobile */
   top: 16px;
-  right: 60px; /* Abstand zum Burger */
+  right: 60px;              /* Abstand zum Burger */
 
   width: 44px;
   height: 44px;
 
   object-fit: contain;
 
-  z-index: 25;
+  z-index: 100;
+
+  /* 🔥 wichtige UX Fixes */
+  cursor: pointer;
+  touch-action: manipulation;
+
+  /* 🔥 größere Touch-Fläche */
+  padding: 6px;
+  box-sizing: content-box;
+
+  /* 🔥 smooth interaction */
+  transition: transform 0.1s ease;
+}
+
+/* 👉 Klick-Feedback */
+#tacticsBtn:active {
+  transform: scale(0.9);
 }
