@@ -67,22 +67,36 @@ function getLiveTable(){
   }
 
   const table = league.table.map(t => ({ ...t }));
-
   const round = league.schedule?.[league.currentRound || 0];
 
   if(round){
 
     round.forEach(match => {
 
-      if(!match._processed) return;
-
       const home = table.find(t => t.id === String(match.homeTeamId));
       const away = table.find(t => t.id === String(match.awayTeamId));
 
-      if(!home || !away || !match.result) return;
+      if(!home || !away) return;
 
-      const h = match.result.home;
-      const a = match.result.away;
+      let h = 0;
+      let a = 0;
+
+      // 🔥 PRIORITY: LIVE MATCH
+      if(
+        game.match?.current &&
+        match.id === game.match.current.id
+      ){
+        h = game.match.live?.score?.home ?? 0;
+        a = game.match.live?.score?.away ?? 0;
+      }
+      // 🔥 ansonsten nur wenn processed
+      else if(match._processed && match.result){
+        h = match.result.home;
+        a = match.result.away;
+      }
+      else{
+        return;
+      }
 
       home.goalsFor += h;
       home.goalsAgainst += a;
@@ -111,8 +125,10 @@ function getLiveTable(){
       }
 
     });
-
   }
+
+  return table;
+}
 
   // =========================
   // 🔴 LIVE MATCH (PLAYER)
