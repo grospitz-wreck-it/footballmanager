@@ -158,6 +158,64 @@ async function createCampaign(){
   clearForm();
   loadCampaigns();
 }
+async function addAdSet(){
+
+  const campaign = state.campaigns[0]; // 🔥 MVP: erste Kampagne
+
+  if(!campaign){
+    alert("❌ Erst Kampagne erstellen");
+    return;
+  }
+
+  const adSet = {
+    id: uuid(),
+    type: qs("adType").value,
+    placement: qs("adPlacement").value,
+    freq_user: Number(qs("freqUser").value || 0),
+    freq_day: Number(qs("freqDay").value || 0),
+    daily_limit: Number(qs("dailyLimit").value || 0),
+    assets: [],
+    metrics: {}
+  };
+
+  const updated = [...(campaign.ad_sets || []), adSet];
+
+  await supabase
+    .from("campaigns")
+    .update({ ad_sets: updated })
+    .eq("id", campaign.id);
+
+  loadCampaigns();
+}
+async function addAssets(){
+
+  const files = qs("assetUpload").files;
+
+  if(!files.length){
+    alert("❌ Keine Assets ausgewählt");
+    return;
+  }
+
+  const assets = await uploadFiles("ads", files);
+
+  const campaign = state.campaigns[0];
+  if(!campaign) return;
+
+  if(!campaign.ad_sets?.length){
+    alert("❌ Erst Ad Type erstellen");
+    return;
+  }
+
+  // 🔥 Assets in erstes Ad Set (MVP)
+  campaign.ad_sets[0].assets.push(...assets);
+
+  await supabase
+    .from("campaigns")
+    .update({ ad_sets: campaign.ad_sets })
+    .eq("id", campaign.id);
+
+  loadCampaigns();
+}
 // =====================
 // INLINE UPDATE CAMPAIGN
 // =====================
