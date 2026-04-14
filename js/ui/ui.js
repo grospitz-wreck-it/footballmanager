@@ -16,9 +16,63 @@ let initialized = false;
 let lastRenderedEventId = null;
 let liveTableInterval = null;
 
+
 // =========================
-// 🚀 INIT (EINMAL!)
+// 📂 SIDEBAR APPLY
 // =========================
+let lastSidebarState = null;
+
+function applySidebar(){
+
+  if(game.ui.sidebarOpen === lastSidebarState) return;
+
+  lastSidebarState = game.ui.sidebarOpen;
+
+  const wrapper = document.getElementById("sidebarWrapper");
+  if(!wrapper) return;
+
+  wrapper.classList.toggle("open", game.ui.sidebarOpen);
+}
+
+// =========================
+// 🔄 GLOBAL UI UPDATE (FIX)
+// =========================
+
+function updateUI(){
+
+  initUI();
+
+  applySidebar();
+
+  updateScore();
+  updateProgress();
+  updateEvents();
+  updateTabs();
+
+  if(game.ui.tab === "table"){
+    renderLiveTable();
+
+    if(game.match?.live?.running){
+      renderLiveTable();
+    }
+
+    ensureLiveTableLoop();
+  }
+
+  if(game.ui.tab === "team"){
+    renderTeam();
+  }
+
+  // 🔥 FIX: OVERLAY TOGGLE (MUSS HIER REIN)
+  const tacticsOverlay = document.getElementById("tacticsOverlay");
+
+  if(tacticsOverlay){
+    tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
+  }
+}
+
+ 
+
 function initUI(){
 
   if(initialized) return;
@@ -49,66 +103,37 @@ function initUI(){
   on(EVENTS.STATE_CHANGED, () => {
     updateEvents();
   });
-}
 
-const tacticsBtn = document.getElementById("tacticsBtn");
+  // =========================
+  // ⚙️ TACTICS BUTTON (FIX)
+  // =========================
+  const tacticsBtn = document.getElementById("tacticsBtn");
 
-if(tacticsBtn){
-  tacticsBtn.onclick = () => {
-    game.ui.tacticsOpen = !game.ui.tacticsOpen;
+  if(tacticsBtn){
+    tacticsBtn.onclick = () => {
+      game.ui.tacticsOpen = !game.ui.tacticsOpen;
 
-    console.log("⚙️ tactics toggled:", game.ui.tacticsOpen);
+      console.log("⚙️ tactics toggled:", game.ui.tacticsOpen);
 
-    updateUI();
-  };
-}
-
-// =========================
-// 📂 SIDEBAR APPLY
-// =========================
-let lastSidebarState = null;
-
-function applySidebar(){
-
-  if(game.ui.sidebarOpen === lastSidebarState) return;
-
-  lastSidebarState = game.ui.sidebarOpen;
-
-  const wrapper = document.getElementById("sidebarWrapper");
-  if(!wrapper) return;
-
-  wrapper.classList.toggle("open", game.ui.sidebarOpen);
-}
-
-// =========================
-// 🔄 GLOBAL UI UPDATE
-// =========================
-function updateUI(){
-
-  initUI();
-
-  applySidebar();
-
-  updateScore();
-  updateProgress();
-  updateEvents();
-  updateTabs();
-
-  if(game.ui.tab === "table"){
-
-    renderLiveTable();
-
-    if(game.match?.live?.running){
-      renderLiveTable();
-    }
-
-    ensureLiveTableLoop();
+      updateUI();
+    };
   }
 
-  if(game.ui.tab === "team"){
-    renderTeam();
+  // =========================
+  // 🎮 TACTICS OVERLAY CLOSE
+  // =========================
+  const tacticsOverlay = document.getElementById("tacticsOverlay");
+
+  if(tacticsOverlay){
+    tacticsOverlay.onclick = (e) => {
+      if(e.target === tacticsOverlay){
+        game.ui.tacticsOpen = false;
+        updateUI();
+      }
+    };
   }
 }
+
 
 // =========================
 // ⚽ SCORE
