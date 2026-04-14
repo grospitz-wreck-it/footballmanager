@@ -95,8 +95,7 @@ function startBackgroundSimulation(){
       // =========================
       // ⛔ bereits fertig
       // =========================
-      if(match._processed) return;
-
+        if(match._processed || match.live?.running === false) return;
       // =========================
       // 🟡 LIVE INIT
       // =========================
@@ -146,6 +145,16 @@ function startBackgroundSimulation(){
 
     });
 
+// =========================
+// 🛑 STOP BACKGROUND SIM
+// =========================
+function stopBackgroundSimulation(){
+  if(simInterval){
+    clearInterval(simInterval);
+    simInterval = null;
+  }
+}
+    
     // =========================
     // 🏁 SAISON ENDE CHECK
     // =========================
