@@ -87,11 +87,41 @@ if (targeting.states?.length) {
       // =========================
       // 🏙 CITIES
       // =========================
-      if(targeting.cities?.length){
-        if(!e.city || !targeting.cities.includes(e.city)){
-          return false;
-        }
-      }
+   // =========================
+// 🌍 STATES
+// =========================
+if (targeting.states?.length) {
+  const states = targeting.states.map(normalize);
+  const eventRegion = normalize(e.region);
+
+  if (!eventRegion || !states.includes(eventRegion)) {
+    return false;
+  }
+}
+
+// =========================
+// 🏙 CITIES
+// =========================
+if (targeting.cities?.length) {
+  const cities = targeting.cities.map(normalize);
+  const eventCity = normalize(e.city);
+
+  if (!eventCity || !cities.includes(eventCity)) {
+    return false;
+  }
+}
+
+// =========================
+// ⚽ TEAMS
+// =========================
+if (targeting.teams?.length) {
+  const teams = targeting.teams.map(normalize);
+  const eventTeam = normalize(e.team);
+
+  if (!eventTeam || !teams.includes(eventTeam)) {
+    return false;
+  }
+}
 
       // =========================
       // ⚽ TEAMS
