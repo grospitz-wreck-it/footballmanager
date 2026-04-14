@@ -383,7 +383,7 @@ if(leagueTeams.length < 2){
         teams: leagueTeams.map(t => ({
   id: normalizeId(t.id),
   name: t.name || "Unbekannt"
-}))
+})),
         region_id: c.region_id,
         level: c.level
       });
