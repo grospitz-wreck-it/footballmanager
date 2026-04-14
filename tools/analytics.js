@@ -1,4 +1,3 @@
-import { supabase } from "../js/client.js";
 
 export function getUserId(){
   let id = localStorage.getItem("user_id");
