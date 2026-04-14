@@ -17,6 +17,33 @@ import { getPositionWeights } from "./engine/positionEngine.js";
 import { getPlayerRating } from "./engine/playerEngine.js";
 
 // =========================
+// 🎯 TACTICS SYSTEM (NEW)
+// =========================
+function getTacticModifiers(){
+
+  const t = game.tactics || {};
+
+  const tempo =
+    t.tempo === "fast" ? 1.4 :
+    t.tempo === "slow" ? 0.7 : 1;
+
+  const pressing =
+    t.pressing === "high" ? 1.3 :
+    t.pressing === "low" ? 0.8 : 1;
+
+  const line =
+    t.line === "high" ? 1.2 :
+    t.line === "low" ? 0.85 : 1;
+
+  return {
+    tempo,
+    pressing,
+    line
+  };
+}
+
+
+// =========================
 // 🧠 INTERNAL
 // =========================
 let matchInterval = null;
@@ -32,6 +59,8 @@ function normalizeId(id){
 // =========================
 // 🧠 HELPERS
 // =========================
+
+
 function getTeamById(id){
 
   const nid = normalizeId(id);
@@ -367,6 +396,7 @@ function getTeamStrength(teamId){
   return avg;
 }
 
+
 function simulateLiveEvent(ctx){
 
   updateMomentum();
@@ -384,17 +414,29 @@ function simulateLiveEvent(ctx){
   const homeBias = homeStrength / total;
   const adjustedHomeChance = homeBias + momentum * 0.2;
 
-  const r = Math.random();
+  const tactics = getTacticModifiers();
 
   let attackingTeam =
     Math.random() < adjustedHomeChance
       ? homeId
       : awayId;
 
-  const shotChance = 0.06 * intensity;
-  const foulChance = 0.12;
-  const cornerChance = 0.08;
-  const duelChance = 0.15;
+  // =========================
+  // 🔥 HIGH LINE RISIKO
+  // =========================
+  if(tactics.line > 1 && Math.random() < 0.15){
+    attackingTeam = (attackingTeam === homeId) ? awayId : homeId;
+  }
+
+  // =========================
+  // ⚙️ TAKTIK EINFLUSS
+  // =========================
+  const shotChance   = 0.06 * intensity * tactics.tempo;
+  const foulChance   = 0.12 * tactics.pressing;
+  const cornerChance = 0.08 * tactics.tempo;
+  const duelChance   = 0.15 * tactics.pressing;
+
+  const r = Math.random();
 
   if(r < shotChance){
     createShot({ match: ctx.match, teamId: attackingTeam });
@@ -409,6 +451,8 @@ function simulateLiveEvent(ctx){
     createDuel(ctx);
   }
 }
+
+
 
 // =========================
 // ▶️ CONTROL
