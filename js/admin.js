@@ -453,30 +453,32 @@ function renderCampaigns(list){
     // =========================
     // 🎮 ASSETS
     // =========================
-    const adSetHTML = adSets.map(set => {
 
-      const assets = set.assets || [];
+  const adSetHTML = adSets.map(set => {
 
-      const assetHTML = assets.map(a=>`
-  <div class="asset small">
-    ${
-      a.type==="video"
-      ? `<video src="${a?.url || ''}" muted></video>`
-      : `<img src="${a?.url || ''}">`
-    }
+  const assets = set.assets || [];
 
-    ${
-      isEdit
-      ? `<button 
-            data-action="deleteAsset"
-            data-event-id="${e.id}"
-            data-asset-id="${a.id}"
-            data-table="events"
-        >❌</button>`
-      : ""
-    }
-  </div>
-`).join("");
+  const assetHTML = assets.map(a=>`
+    <div class="asset small">
+      ${
+        a.type==="video"
+        ? `<video src="${a?.url || ''}" muted></video>`
+        : `<img src="${a?.url || ''}">`
+      }
+    </div>
+  `).join("");
+
+  return `
+    <div class="box" style="margin-top:10px;">
+      <strong>${set.type.toUpperCase()}</strong><br>
+      🎯 ${set.placement || "-"} • 🔁 ${set.freq_user || 0}/user
+
+      <div class="assetRow">${assetHTML}</div>
+    </div>
+  `;
+
+}).join("");
+    
 
     // =========================
     // 🎯 TARGETING
