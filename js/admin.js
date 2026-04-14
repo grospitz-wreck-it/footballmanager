@@ -130,56 +130,34 @@ assets.push({
 return assets;
 }
 
-// =====================
-// CREATE / UPDATE CAMPAIGN
-// =====================
 async function createCampaign(){
 
-const assets = await uploadFiles("ads", qs("image").files);
+  const payload = {
+    name: qs("campaignName").value,
+    customer: qs("campaignCustomer").value,
+    budget: Number(qs("campaignBudget").value || 0),
+    link: qs("campaignLink").value,
 
-const scope = qs("scope")?.value || "global";
-let scope_ref = qs("scopeRef")?.value || null;
+    start_date: qs("campaignStart").value || null,
+    end_date: qs("campaignEnd").value || null,
 
-if(scope === "team" && scope_ref){
-scope_ref = scope_ref.split(",").map(s => s.trim());
+    targeting: {
+      states: (qs("targetStates").value || "").split(",").map(s=>s.trim()).filter(Boolean),
+      cities: (qs("targetCities").value || "").split(",").map(s=>s.trim()).filter(Boolean),
+      teams: (qs("targetTeams").value || "").split(",").map(s=>s.trim()).filter(Boolean)
+    },
+
+    ad_sets: [], // 🔥 NEU
+    metrics_total: {},
+
+    active: true
+  };
+
+  await supabase.from("campaigns").insert(payload);
+
+  clearForm();
+  loadCampaigns();
 }
-
-const payload = {
-name: qs("name").value,
-customer: qs("customer").value,
-budget: Number(qs("budget").value || 0),
-link: qs("link").value,
-cpm: Number(qs("cpm").value || 0),
-cpc: Number(qs("cpc").value || 0),
-ad_format: qs("adFormat").value,
-start_date: qs("startDate").value || null,
-end_date: qs("endDate").value || null,
-
-
-scope,
-scope_ref
-
-
-};
-
-if(state.editId){
-if(assets.length) payload.assets = assets;
-await supabase.from("campaigns").update(payload).eq("id", state.editId);
-state.editId = null;
-} else {
-payload.assets = assets;
-payload.active = true;
-await supabase.from("campaigns").insert(payload);
-}
-
-clearForm();
-loadCampaigns();
-}
-
-function clearForm(){
-document.querySelectorAll("#adsTab input").forEach(i => i.value = "");
-}
-
 // =====================
 // INLINE UPDATE CAMPAIGN
 // =====================
