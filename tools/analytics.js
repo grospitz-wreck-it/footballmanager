@@ -35,17 +35,15 @@ export async function track(event, payload = {}){
     console.warn("Tracking failed", e);
   }
 }
-export function trackEnd(event){
-
-  const data = JSON.stringify({
-    event_name: event,
-    session_id: getSessionId(),
-    user_id: getUserId(),
-    created_at: new Date().toISOString()
-  });
-
-  navigator.sendBeacon(
-    "https://kckwxggzoenybssryaqr.supabase.co/rest/v1/analytics_events",
-    new Blob([data], { type: "application/json" })
-  );
+export async function trackEnd(event){
+  try {
+    await supabase.from("analytics_events").insert({
+      event_name: event,
+      session_id: getSessionId(),
+      user_id: getUserId(),
+      created_at: new Date().toISOString()
+    });
+  } catch(e){
+    console.warn("Tracking end failed", e);
+  }
 }
