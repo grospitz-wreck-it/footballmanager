@@ -380,55 +380,110 @@ function loadEventTypes(){
 
 async function loadInsights(){
 
-  // 🔹 DAU
-  const { data: dauData } = await supabase
+  // =========================
+  // 🔹 RAW EVENTS
+  // =========================
+  const { data: events } = await supabase
     .from("analytics_events")
-    .select("session_id", { count: "exact", head: true })
-    .gte("created_at", new Date(Date.now() - 24*60*60*1000).toISOString());
+    .select("event_name, session_id, created_at");
 
-  // 🔹 Sessions
-  const { data: sessionsData } = await supabase
-    .from("analytics_events")
-    .select("session_id", { count: "exact", head: true });
+  if(!events || !events.length) return;
 
-  // 🔹 Matches
-  const { count: matches } = await supabase
-    .from("analytics_events")
-    .select("*", { count: "exact", head: true })
-    .eq("event_name", "match_start");
+  // =========================
+  // 🧠 SESSION BUILD
+  // =========================
+  const sessions = {};
 
-  // 🔹 Avg Session
-  const { data: sessions } = await supabase
-    .from("analytics_events")
-    .select("session_id, created_at");
-
-  const map = {};
-
-  sessions.forEach(e => {
-    if(!map[e.session_id]){
-      map[e.session_id] = {
-        min: e.created_at,
-        max: e.created_at
+  events.forEach(e => {
+    if(!sessions[e.session_id]){
+      sessions[e.session_id] = {
+        start: e.created_at,
+        end: e.created_at,
+        events: []
       };
-    } else {
-      if(e.created_at < map[e.session_id].min) map[e.session_id].min = e.created_at;
-      if(e.created_at > map[e.session_id].max) map[e.session_id].max = e.created_at;
+    }
+
+    sessions[e.session_id].events.push(e.event_name);
+
+    if(e.created_at < sessions[e.session_id].start){
+      sessions[e.session_id].start = e.created_at;
+    }
+    if(e.created_at > sessions[e.session_id].end){
+      sessions[e.session_id].end = e.created_at;
     }
   });
 
-  const durations = Object.values(map).map(s =>
-    (new Date(s.max) - new Date(s.min)) / 1000
+  const sessionList = Object.values(sessions);
+
+  // =========================
+  // 🔥 KPI CALC
+  // =========================
+
+  const dau = new Set(events.map(e => e.session_id)).size;
+
+  const matches = events.filter(e => e.event_name === "match_start").length;
+
+  const durations = sessionList.map(s =>
+    (new Date(s.end) - new Date(s.start)) / 1000
   );
 
-  const avg = durations.length
+  const avgSession = durations.length
     ? Math.round(durations.reduce((a,b)=>a+b,0)/durations.length)
     : 0;
 
-  // 🔥 UI UPDATE
-  document.getElementById("insightDAU").textContent = dauData?.length || 0;
-  document.getElementById("insightSessions").textContent = sessionsData?.length || 0;
-  document.getElementById("insightMatches").textContent = matches || 0;
-  document.getElementById("insightAvg").textContent = avg + "s";
+  const matchesPerSession = sessionList.length
+    ? (matches / sessionList.length).toFixed(2)
+    : 0;
+
+  // =========================
+  // 🎯 SEGMENTATION (🔥 NEU)
+  // =========================
+  let casual = 0;
+  let core = 0;
+  let hardcore = 0;
+
+  sessionList.forEach(s => {
+
+    const matchCount = s.events.filter(e => e === "match_start").length;
+
+    if(matchCount <= 1) casual++;
+    else if(matchCount <= 4) core++;
+    else hardcore++;
+  });
+
+  // =========================
+  // 🧠 ENGAGEMENT SCORE
+  // =========================
+  const engagementScore = avgSession > 600
+    ? "🔥 HIGH"
+    : avgSession > 300
+    ? "⚡ MEDIUM"
+    : "🧊 LOW";
+
+  // =========================
+  // 🔥 UI UPDATE (UPGRADE)
+  // =========================
+
+  document.getElementById("insightDAU").textContent = dau;
+  document.getElementById("insightSessions").textContent = sessionList.length;
+  document.getElementById("insightMatches").textContent = matches;
+  document.getElementById("insightAvg").textContent = avgSession + "s";
+
+  // 🔥 NEUE KPIs (falls vorhanden)
+  const mps = document.getElementById("insightMPS");
+  if(mps) mps.textContent = matchesPerSession;
+
+  const seg = document.getElementById("insightSegments");
+  if(seg){
+    seg.innerHTML = `
+      Casual: ${casual} <br>
+      Core: ${core} <br>
+      Hardcore: ${hardcore}
+    `;
+  }
+
+  const eng = document.getElementById("insightEngagement");
+  if(eng) eng.textContent = engagementScore;
 }
 
 
