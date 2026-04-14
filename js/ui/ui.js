@@ -46,15 +46,19 @@ function updateUI(){
 
   updateScore();
   updateProgress();
-  updateEvents();
+  on(EVENTS.STATE_CHANGED, () => {
+  if(game.events?.history?.length){
+    updateEvents();
+  }
+});
   updateTabs();
 
   if(game.ui.tab === "table"){
     renderLiveTable();
 
-    if(game.match?.live?.running){
-      renderLiveTable();
-    }
+if(game.match?.live?.running){
+  ensureLiveTableLoop();
+}
 
     ensureLiveTableLoop();
   }
@@ -101,11 +105,13 @@ function initUI(){
 
   // 🔥 STATE LISTENER
   on(EVENTS.STATE_CHANGED, () => {
+  if(game.events?.history?.length){
     updateEvents();
-  });
+  }
+});
 
   // =========================
-  // ⚙️ TACTICS BUTTON (FIX)
+  // ⚙️ TACTICS BUTTON (OPEN)
   // =========================
   const tacticsBtn = document.getElementById("tacticsBtn");
 
@@ -132,7 +138,70 @@ function initUI(){
       }
     };
   }
+
+  // =========================
+  // 🎮 TACTICS SYSTEM (PRESETS)
+  // =========================
+
+  // safety init
+  game.tactics = game.tactics || {
+    preset: "balanced",
+    tempo: "normal",
+    pressing: "medium",
+    line: "medium"
+  };
+
+  const PRESETS = {
+    offensive: {
+      tempo: "fast",
+      pressing: "high",
+      line: "high"
+    },
+    balanced: {
+      tempo: "normal",
+      pressing: "medium",
+      line: "medium"
+    },
+    defensive: {
+      tempo: "slow",
+      pressing: "low",
+      line: "low"
+    }
+  };
+
+  // =========================
+  // 🎯 PRESET BUTTONS
+  // =========================
+  document.querySelectorAll("[data-preset]").forEach(btn => {
+
+    btn.onclick = () => {
+
+      const preset = btn.dataset.preset;
+      if(!preset) return;
+
+      const config = PRESETS[preset];
+      if(!config) return;
+
+      game.tactics.preset = preset;
+      game.tactics.tempo = config.tempo;
+      game.tactics.pressing = config.pressing;
+      game.tactics.line = config.line;
+
+      console.log("⚙️ preset applied:", preset, config);
+
+      // UI highlight
+      document.querySelectorAll("[data-preset]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      updateTacticsUI();
+    };
+
+  });
+
+  // initial sync
+  updateTacticsUI();
 }
+
 
 
 // =========================
@@ -355,6 +424,26 @@ if(name === "team"){
 
       updateUI();
     };
+  });
+}
+
+// =========================
+// ⚙️ TACTICS UI SYNC
+// =========================
+function updateTacticsUI(){
+
+  if(!game.tactics) return;
+
+  document.querySelectorAll("[data-tempo]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.tempo === game.tactics.tempo);
+  });
+
+  document.querySelectorAll("[data-pressing]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.pressing === game.tactics.pressing);
+  });
+
+  document.querySelectorAll("[data-line]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.line === game.tactics.line);
   });
 }
 
