@@ -46,6 +46,16 @@ function isDebugEnabled(){
   return localStorage.getItem("debugOverlay") === "true";
 }
 
+function formatDuration(seconds){
+
+  if(!seconds || seconds <= 0) return "0:00";
+
+  const min = Math.floor(seconds / 60);
+  const sec = Math.floor(seconds % 60);
+
+  return `${min}:${sec.toString().padStart(2, "0")}`;
+}
+
 function updateDebugButton(){
 
   const btn = document.getElementById("toggleDebug");
