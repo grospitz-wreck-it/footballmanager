@@ -380,9 +380,6 @@ function loadEventTypes(){
 
 async function loadInsights(){
 
-  // =========================
-  // 🔹 RAW EVENTS
-  // =========================
   const { data: events } = await supabase
     .from("analytics_events")
     .select("event_name, session_id, created_at");
@@ -416,9 +413,8 @@ async function loadInsights(){
   const sessionList = Object.values(sessions);
 
   // =========================
-  // 🔥 KPI CALC
+  // 🔥 CORE KPIs
   // =========================
-
   const dau = new Set(events.map(e => e.session_id)).size;
 
   const matches = events.filter(e => e.event_name === "match_start").length;
@@ -436,7 +432,7 @@ async function loadInsights(){
     : 0;
 
   // =========================
-  // 🎯 SEGMENTATION (🔥 NEU)
+  // 🎯 SEGMENTATION
   // =========================
   let casual = 0;
   let core = 0;
@@ -452,6 +448,30 @@ async function loadInsights(){
   });
 
   // =========================
+  // 💰 AD INVENTORY (🔥 NEW)
+  // =========================
+  const estimatedAdsPerMatch = 3; // 🔧 tweakbar
+  const totalImpressions = matches * estimatedAdsPerMatch;
+
+  // =========================
+  // 💸 REVENUE ESTIMATE (🔥 NEW)
+  // =========================
+  const avgCPM = 8; // € (kannst du dynamisch machen)
+
+  const revenue = ((totalImpressions / 1000) * avgCPM).toFixed(2);
+
+  // =========================
+  // 🔁 RETENTION PROXY (🔥 NEW)
+  // =========================
+  const returningUsers = Object.values(sessions).filter(s => {
+    return s.events.length > 5;
+  }).length;
+
+  const retention = sessionList.length
+    ? ((returningUsers / sessionList.length) * 100).toFixed(1)
+    : 0;
+
+  // =========================
   // 🧠 ENGAGEMENT SCORE
   // =========================
   const engagementScore = avgSession > 600
@@ -461,29 +481,37 @@ async function loadInsights(){
     : "🧊 LOW";
 
   // =========================
-  // 🔥 UI UPDATE (UPGRADE)
+  // 🔥 UI UPDATE
   // =========================
+  qs("insightDAU").textContent = dau;
+  qs("insightSessions").textContent = sessionList.length;
+  qs("insightMatches").textContent = matches;
+  qs("insightAvg").textContent = avgSession + "s";
 
-  document.getElementById("insightDAU").textContent = dau;
-  document.getElementById("insightSessions").textContent = sessionList.length;
-  document.getElementById("insightMatches").textContent = matches;
-  document.getElementById("insightAvg").textContent = avgSession + "s";
+  qs("insightMPS") && (qs("insightMPS").textContent = matchesPerSession);
+  qs("insightEngagement") && (qs("insightEngagement").textContent = engagementScore);
 
-  // 🔥 NEUE KPIs (falls vorhanden)
-  const mps = document.getElementById("insightMPS");
-  if(mps) mps.textContent = matchesPerSession;
-
-  const seg = document.getElementById("insightSegments");
+  // 🔥 SEGMENTS
+  const seg = qs("insightSegments");
   if(seg){
     seg.innerHTML = `
-      Casual: ${casual} <br>
-      Core: ${core} <br>
+      Casual: ${casual}<br>
+      Core: ${core}<br>
       Hardcore: ${hardcore}
     `;
   }
 
-  const eng = document.getElementById("insightEngagement");
-  if(eng) eng.textContent = engagementScore;
+  // =========================
+  // 💰 NEW UI BLOCK
+  // =========================
+  const monet = qs("insightMonetization");
+  if(monet){
+    monet.innerHTML = `
+      👁 Impressions: ${totalImpressions}<br>
+      💰 Est. Revenue: €${revenue}<br>
+      🔁 Retention: ${retention}%
+    `;
+  }
 }
 
 
