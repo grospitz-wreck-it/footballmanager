@@ -499,6 +499,8 @@ function initPLZSystem(){
 // =========================
 // ▶️ MAIN BUTTON (FIXED)
 // =========================
+const mainBtn = document.getElementById("mainButton");
+
 mainBtn?.addEventListener("click", () => {
 
   let live = game.match?.live;
