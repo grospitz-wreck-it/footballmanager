@@ -829,10 +829,19 @@ async function getGeoData(){
 
   const map = {};
 
-  (data || []).forEach(e => {
-  if(!e.region_id) return;
+  const REGION_MAP = {
+    "bayern": "DE-BY",
+    "nrw": "DE-NW",
+    "berlin": "DE-BE",
+    "hamburg": "DE-HH"
+  };
 
-    map[e.region_id] = (map[e.region_id] || 0) + 1;
+  (data || []).forEach(e => {
+    if(!e.region_id) return;
+
+    const key = REGION_MAP[e.region_id.toLowerCase()] || e.region_id;
+
+    map[key] = (map[key] || 0) + 1;
   });
 
   return map;
