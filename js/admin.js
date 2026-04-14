@@ -22,6 +22,47 @@ const state = {
 // =====================
 // HELPERS
 // =====================
+
+async function calculateCampaignKPIs(campaign){
+
+  const { data } = await supabase
+    .from("analytics_events")
+    .select("*");
+
+  if(!data) return campaign;
+
+  const adSets = campaign.ad_sets || [];
+
+  const updatedSets = adSets.map(set => {
+
+    // 🔥 FILTER (basic – später erweitern)
+    const relevant = data.filter(e => {
+
+      // Beispiel: match über placement oder type
+      return e.ad_type === set.type;
+    });
+
+    const impressions = relevant.length;
+
+    // 👉 simple revenue modell
+    const ecpm = 8; // später dynamisch!
+    const revenue = (impressions / 1000) * ecpm;
+
+    return {
+      ...set,
+      metrics: {
+        impressions,
+        revenue: Number(revenue.toFixed(2))
+      }
+    };
+  });
+
+  return {
+    ...campaign,
+    ad_sets: updatedSets
+  };
+}
+
 const qs = (id) => document.getElementById(id);
 
 function uuid(){
