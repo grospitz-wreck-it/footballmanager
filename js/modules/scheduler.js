@@ -66,18 +66,27 @@ function generateSchedule(){
 
   league.teams.forEach(t => {
 
-    const id = resolveTeamId(t);
+  const id = resolveTeamId(t);
 
-    if(!id) return;
-    if(seen.has(id)) return;
+  if(!id){
+    console.error("❌ Team ohne ID:", t);
+    return;
+  }
 
-    seen.add(id);
+  if(seen.has(id)){
+    console.warn("⚠️ Duplicate Team ID:", id);
+    return;
+  }
 
-    teams.push({
-      id: id,
-      name: t.name || "Unbekannt"
-    });
+  seen.add(id);
+
+  teams.push({
+    id: String(id),
+    name: t.name || "Unbekannt"
   });
+});
+
+console.log("✅ Validierte Teams:", teams.length);
 
   const originalCount = teams.length;
 
@@ -228,12 +237,21 @@ function nextMatch(){
 
   const myTeamId = normalizeId(game.team?.selectedId);
 
+  let fallback = null;
+
   for(let r = 0; r < schedule.length; r++){
     for(let m = 0; m < schedule[r].length; m++){
 
       const match = schedule[r][m];
+
       if(match._processed) continue;
 
+      // 👉 fallback merken (erstes offenes Match)
+      if(!fallback){
+        fallback = match;
+      }
+
+      // 👉 dein Team hat Prio
       if(
         normalizeId(match.homeTeamId) === myTeamId ||
         normalizeId(match.awayTeamId) === myTeamId
@@ -245,7 +263,8 @@ function nextMatch(){
     }
   }
 
-  return null;
+  // 👉 wenn kein eigenes Match → erstes offenes zurück
+  return fallback;
 }
 
 // =========================
