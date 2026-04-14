@@ -313,12 +313,22 @@ loadCampaigns();
 // =====================
 async function loadCampaigns(){
 
-const { data } = await supabase
-.from("campaigns")
-.select("*")
-.order("created_at", { ascending: false });
+  const { data } = await supabase
+    .from("campaigns")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-renderCampaigns(data || []);
+  if(!data) return;
+
+  // 🔥 KPI CALC HIER
+  const enriched = [];
+
+  for(const c of data){
+    const withKPIs = await calculateCampaignKPIs(c);
+    enriched.push(withKPIs);
+  }
+
+  renderCampaigns(enriched);
 }
 
 // =====================
