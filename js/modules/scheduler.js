@@ -66,6 +66,7 @@ function shuffleArray(arr){
 // =========================
 // 📅 GENERATE (ID ONLY)
 // =========================
+
 function generateSchedule(){
 
   const league = game.league?.current;
@@ -80,31 +81,39 @@ function generateSchedule(){
     return;
   }
 
-  let teamsRaw = league.teams.map(normalizeTeam);
-
+  // =========================
+  // 🧠 TEAMS NORMALIZEN
+  // =========================
   const seen = new Set();
   let teams = [];
 
-  teamsRaw.forEach(t => {
+  league.teams.forEach(t => {
 
     const id = resolveTeamId(t);
 
     if(!id){
-      console.error("❌ Team ohne ID (wird ignoriert):", t);
+      console.error("❌ Team ohne ID:", t);
       return;
     }
 
     if(seen.has(id)){
-      console.warn("⚠️ Duplicate Team erkannt:", id);
+      console.warn("⚠️ Duplicate Team:", id);
       return;
     }
 
     seen.add(id);
-    teams.push(t);
+
+    teams.push({
+      id: id,
+      name: t.name || "Unbekannt"
+    });
   });
 
   const originalCount = teams.length;
 
+  // =========================
+  // 🔁 BYE (ungerade Teams)
+  // =========================
   if(teams.length % 2 !== 0){
     teams.push({ id: "BYE", name: "BYE" });
   }
@@ -115,51 +124,43 @@ function generateSchedule(){
   const rounds = [];
   let rotation = [...teams];
 
+  // =========================
+  // 🔥 HINRUNDE
+  // =========================
   for(let r = 0; r < totalRounds; r++){
 
     const round = [];
 
     for(let i = 0; i < half; i++){
 
+      const teamA = rotation[i];
+      const teamB = rotation[rotation.length - 1 - i];
+
       const isSwap = r % 2 === 1;
 
-const teamA = rotation[i];
-const teamB = rotation[rotation.length - 1 - i];
+      const home = isSwap ? teamB : teamA;
+      const away = isSwap ? teamA : teamB;
 
-const home = isSwap ? teamB : teamA;
-const away = isSwap ? teamA : teamB;
+      if(home.id === "BYE" || away.id === "BYE") continue;
 
-      const homeId = resolveTeamId(home);
-      const awayId = resolveTeamId(away);
+      round.push({
+        id: crypto.randomUUID(),
 
-      if(!homeId || !awayId || homeId === awayId){
-        continue;
-      }
+        homeTeamId: String(home.id),
+        awayTeamId: String(away.id),
 
-      if(home.name !== "BYE" && away.name !== "BYE"){
+        home: { id: String(home.id), name: home.name },
+        away: { id: String(away.id), name: away.name },
 
-        round.push({
-  id: crypto.randomUUID(),
-
-  // 🔥 PRIMARY
-  homeTeamId: homeId,
-  awayTeamId: awayId,
-
-  // 🔥 UI ONLY (clone → keine Mutation später)
-  home: { id: homeId, name: home.name },
-  away: { id: awayId, name: away.name },
-
-  result: null,
-  _processed: false
-});
-      }
+        result: null,
+        _processed: false
+      });
     }
 
-    // 🔥 NEW: Shuffle pro Spieltag
     shuffleArray(round);
-
     rounds.push(round);
 
+    // Rotation
     const fixed = rotation[0];
     const rest = rotation.slice(1);
 
@@ -168,42 +169,58 @@ const away = isSwap ? teamA : teamB;
   }
 
   // =========================
-// 🔥 RÜCKRUNDE (FINAL FIX)
-// =========================
-const returnRounds = rounds.map(round => {
+  // 🔥 RÜCKRUNDE (SPIEGELN)
+  // =========================
+  const returnRounds = rounds.map(round => {
 
-  const newRound = round.map(match => {
+    const newRound = round.map(match => {
 
-    const homeId = normalizeId(match.awayTeamId);
-    const awayId = normalizeId(match.homeTeamId);
+      const homeId = String(match.awayTeamId);
+      const awayId = String(match.homeTeamId);
 
-    return {
-      id: crypto.randomUUID(),
+      return {
+        id: crypto.randomUUID(),
 
-      // 🔥 IDs bleiben die Wahrheit
-      homeTeamId: homeId,
-      awayTeamId: awayId,
+        homeTeamId: homeId,
+        awayTeamId: awayId,
 
-      // 🔥 UI OBJEKTE sauber neu bauen
-      home: {
-        id: homeId,
-        name: match.away?.name || "Unbekannt"
-      },
-      away: {
-        id: awayId,
-        name: match.home?.name || "Unbekannt"
-      },
+        home: {
+          id: homeId,
+          name: match.away.name
+        },
+        away: {
+          id: awayId,
+          name: match.home.name
+        },
 
-      result: null,
-      _processed: false
-    };
+        result: null,
+        _processed: false
+      };
+    });
+
+    shuffleArray(newRound);
+
+    return newRound;
   });
 
-  // 🔥 Shuffle pro Rückrunden-Spieltag
-  shuffleArray(newRound);
+  // =========================
+  // 📊 FINAL SCHEDULE
+  // =========================
+  league.schedule = [...rounds, ...returnRounds];
 
-  return newRound; // ✅ WICHTIG
-});
+  league.schedule.forEach(round => {
+    round._simulated = false;
+  });
+
+  league.currentRound = 0;
+  league.currentMatchIndex = 0;
+
+  console.log("✅ Spielplan erstellt:", league.schedule.length);
+
+  validateSchedule(originalCount);
+}
+
+
 
 // =========================
 // 🧪 VALIDIERUNG
