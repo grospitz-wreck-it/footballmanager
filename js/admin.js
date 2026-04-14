@@ -177,7 +177,7 @@ function clearForm(){
 }
 async function addAdSet(){
 
-  const campaign = state.campaigns[0]; // 🔥 MVP: erste Kampagne
+ const campaign = state.campaigns.find(c => c.active);
 
   if(!campaign){
     alert("❌ Erst Kampagne erstellen");
