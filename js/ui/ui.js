@@ -8,6 +8,7 @@ import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
+
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -44,10 +45,10 @@ function initUI(){
     applySidebar();
   });
 
-  // 🔥 HIER EINFÜGEN
+  // 🔥 STATE LISTENER
   on(EVENTS.STATE_CHANGED, () => {
-  updateEvents();
-});
+    updateEvents();
+  });
 }
 
 // =========================
@@ -82,15 +83,15 @@ function updateUI(){
   updateTabs();
 
   if(game.ui.tab === "table"){
-  renderLiveTable();
 
-  // 🔥 sofort refresh bei Match-Update
-  if(game.match?.live?.running){
     renderLiveTable();
-  }
 
-  ensureLiveTableLoop();
-}
+    if(game.match?.live?.running){
+      renderLiveTable();
+    }
+
+    ensureLiveTableLoop();
+  }
 
   if(game.ui.tab === "team"){
     renderTeam();
@@ -131,7 +132,7 @@ function updateScore(){
     }
   }
 
-  if(!scoreEl || !teamsEl || !minuteEl) return;
+  if(!scoreEl || !minuteEl) return;
 
   scoreEl.textContent = `${match.score?.home ?? 0} : ${match.score?.away ?? 0}`;
   minuteEl.textContent = `${match.minute ?? 0}'`;
@@ -160,35 +161,34 @@ function updateEvents(){
   if(!container) return;
 
   const events = game.events?.history;
-  if(!events || events.length === 0) return;
+  if(!events?.length) return;
 
   const newest = events[events.length - 1];
+
+  if(!newest) return;
+
   console.log("🧪 EVENT DEBUG:", newest);
+
+  // 🔥 doppelte Render verhindern
   if(newest.id === lastRenderedEventId) return;
   lastRenderedEventId = newest.id;
 
   track("game_event", {
-  minute: newest.minute,
-  text: newest.text || null
-});
-  
-  // =========================
-  // 🧠 TEXT (IMMER!)
-  // =========================
-let text = newest.text;
+    minute: newest.minute,
+    text: newest.text || null
+  });
 
-if(!text){
-  try {
-    text = buildCommentary(newest);
-  } catch(e){}
-}
+  // =========================
+  // 🧠 TEXT
+  // =========================
+  let text = newest.text;
 
-if(!text) return;
-  
   if(!text){
     try {
       text = buildCommentary(newest);
-    } catch(e){}
+    } catch(e){
+      console.warn("⚠️ Commentary failed", e);
+    }
   }
 
   if(!text) return;
@@ -206,10 +206,10 @@ if(!text) return;
   container.appendChild(div);
 
   // =========================
-  // 🎬 OVERLAY (NUR WENN ASSET)
+  // 🎬 OVERLAY (optional)
   // =========================
-if(newest.assets?.length)
-{
+  if(newest.assets?.length){
+
     const asset = newest.assets[0];
     const url = asset?.url;
 
@@ -238,36 +238,43 @@ export function showOverlay(imageUrl, text, duration = 2500){
     return;
   }
 
-  // 🔥 ALLE alten Timer killen (wichtig bei Event-Spam)
-  if(overlayTimeout) clearTimeout(overlayTimeout);
-  if(overlayHideTimeout) clearTimeout(overlayHideTimeout);
+  // 🔥 Timer cleanup (stabilisiert bei Spam)
+  if(overlayTimeout){
+    clearTimeout(overlayTimeout);
+    overlayTimeout = null;
+  }
+
+  if(overlayHideTimeout){
+    clearTimeout(overlayHideTimeout);
+    overlayHideTimeout = null;
+  }
 
   // 🔥 Content setzen
   overlayImg.src = imageUrl || "";
   overlayText.innerText = text || "";
 
-  // 🔥 HARD RESET (kein alter State bleibt hängen)
+  // 🔥 HARD RESET
   overlayEl.classList.remove("show");
   overlayEl.classList.remove("hidden");
 
-  // 🔥 Force Reflow → garantiert saubere Animation
+  // 🔥 Reflow (safe)
   overlayEl.getBoundingClientRect();
 
-  // 🔥 SHOW (nächster Frame → smooth)
+  // 🔥 SHOW
   requestAnimationFrame(() => {
     overlayEl.classList.add("show");
   });
 
-  // 🔥 AUTO HIDE
+  // 🔥 AUTO HIDE (guarded)
   overlayTimeout = setTimeout(() => {
+
     overlayEl.classList.remove("show");
 
-    // nach Fade → wirklich verstecken
     overlayHideTimeout = setTimeout(() => {
       overlayEl.classList.add("hidden");
-    }, 250); // muss zur CSS transition passen
+    }, 250);
 
-  }, duration);
+  }, Math.max(0, duration || 0));
 }
 
 // =========================
@@ -276,10 +283,12 @@ export function showOverlay(imageUrl, text, duration = 2500){
 function updateTabs(){
 
   const tabs = document.querySelectorAll(".tab");
+  if(!tabs.length) return;
 
   tabs.forEach(tab => {
 
     const name = tab.dataset.tab;
+    if(!name) return;
 
     tab.classList.toggle("active", name === game.ui.tab);
 
@@ -291,16 +300,17 @@ function updateTabs(){
         v.style.display = "none";
       });
 
+      // 🔥 safe DOM access
       if(name === "table"){
-        document.getElementById("tableView").style.display = "block";
+        document.getElementById("tableView")?.style.display = "block";
       }
 
       if(name === "schedule"){
-        document.getElementById("scheduleView").style.display = "block";
+        document.getElementById("scheduleView")?.style.display = "block";
       }
 
       if(name === "team"){
-        document.getElementById("teamView").style.display = "block";
+        document.getElementById("teamView")?.style.display = "block";
       }
 
       updateUI();
@@ -317,7 +327,8 @@ function ensureLiveTableLoop(){
 
   liveTableInterval = setInterval(() => {
 
-    if(game.ui.tab !== "table") return;
+    // 🔥 extra guard
+    if(game.ui?.tab !== "table") return;
 
     renderLiveTable();
 
@@ -362,18 +373,20 @@ const FORMATIONS = {
 // =========================
 function pickPlayer(role, byType){
 
+  if(!byType) return null;
+
   if(byType[role]?.length){
     return byType[role].shift();
   }
 
   return (
-    byType.GK.shift() ||
-    byType.DEF.shift() ||
-    byType.MID.shift() ||
-    byType.ST.shift()
+    byType.GK?.shift() ||
+    byType.DEF?.shift() ||
+    byType.MID?.shift() ||
+    byType.ST?.shift() ||
+    null
   );
 }
-
 // =========================
 // ⚽ TEAM
 // =========================
@@ -400,8 +413,9 @@ function renderTeam(){
     (byType[type] || byType.MID).push(p);
   });
 
-  // Sortieren
+  // Sortieren (safe)
   Object.values(byType).forEach(arr => {
+    if(!Array.isArray(arr)) return;
     arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
   });
 
@@ -431,6 +445,8 @@ function renderTeam(){
 
   layout.forEach(slot => {
 
+    if(!slot) return;
+
     const player = pickPlayer(slot.role, pool);
     if(!player) return;
 
@@ -454,6 +470,7 @@ function renderTeam(){
   });
 
   Object.values(benchByType).forEach(arr => {
+    if(!Array.isArray(arr)) return;
     arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
   });
 
@@ -461,7 +478,7 @@ function renderTeam(){
 
   Object.entries(benchByType).forEach(([role, players]) => {
 
-    if(players.length === 0) return;
+    if(!players || players.length === 0) return;
 
     html += `
       <div class="bench-group">
@@ -483,11 +500,13 @@ function renderTeam(){
 
   container.innerHTML = html;
 
-  // Clicks
+  // Clicks (safe)
   document.querySelectorAll(".player-dot").forEach(el => {
     el.onclick = () => {
       const id = el.dataset.id;
-      const player = game.players.find(p => String(p.id) === String(id));
+      if(!id) return;
+
+      const player = (game.players || []).find(p => String(p.id) === String(id));
       if(player) openPlayerModal(player);
     };
   });
@@ -497,6 +516,8 @@ function renderTeam(){
 // 🔵 PLAYER DOT
 // =========================
 function renderPlayerDot(player){
+
+  if(!player) return "";
 
   const initials =
     (player.first_name?.[0] || "") +
@@ -530,13 +551,14 @@ function renderStat(label, value){
 
 function openPlayerModal(player){
 
+  if(!player) return;
+
   const existing = document.getElementById("playerModal");
   if(existing) existing.remove();
 
   const div = document.createElement("div");
   div.id = "playerModal";
 
-  // ⭐ FIX: saubere Stars (kein undefined / falsche Werte)
   const stars = Math.min(Math.max(player.stars || 1, 1), 5);
 
   div.innerHTML = `
@@ -560,7 +582,7 @@ function openPlayerModal(player){
           <canvas id="player-avatar" width="64" height="64"></canvas>
         </div>
 
-        <div class="card-name">${player.name}</div>
+        <div class="card-name">${player.name || "Spieler"}</div>
 
       </div>
     </div>
@@ -568,27 +590,29 @@ function openPlayerModal(player){
 
   document.body.appendChild(div);
 
-  // 🎯 MOOD SYSTEM (unverändert)
+  // 🎯 MOOD SYSTEM
   const mood =
     (player.morale ?? 50) > 80 ? "happy" :
     (player.morale ?? 50) < 40 ? "angry" :
     (player.fitness ?? 100) < 50 ? "tired" :
     "neutral";
 
-  // 🎨 Avatar rendern (unverändert)
+  // 🎨 Avatar
   const canvas = div.querySelector("#player-avatar");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas?.getContext("2d");
 
-  const texture = getPlayerTexture(
-    player.id,
-    player.nationality || player.Country || "DE",
-    mood
-  );
+  if(ctx){
+    const texture = getPlayerTexture(
+      player.id,
+      player.nationality || player.Country || "DE",
+      mood
+    );
 
-  ctx.clearRect(0,0,64,64);
-  ctx.drawImage(texture, 0, 0);
+    ctx.clearRect(0,0,64,64);
+    ctx.drawImage(texture, 0, 0);
+  }
 
-  // ❌ Close logic (unverändert)
+  // ❌ Close logic
   const overlay = div.querySelector(".modal-overlay");
   const closeBtn = div.querySelector(".close-btn");
 
