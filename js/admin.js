@@ -54,89 +54,48 @@ function calculateCampaignKPIs(campaign, data){
 
   const updatedSets = adSets.map(set => {
 
-    const relevant = data.filter(e => {
+   const relevant = data.filter(e => {
 
-      // =========================
-      // 🎯 TYPE
-      // =========================
-      if(e.ad_type !== set.type) return false;
+  // TYPE
+  if (e.ad_type !== set.type) return false;
 
-      // =========================
-      // 🎯 PLACEMENT
-      // =========================
-      if(set.placement && e.placement && e.placement !== set.placement){
-        return false;
-      }
-
-    // =========================
-// 🌍 STATES (robust)
-// =========================
-if (targeting.states?.length) {
-
-  const normalize = (v) =>
-    (v || "").toString().trim().toLowerCase();
-
-  const states = targeting.states.map(normalize);
-  const eventRegion = normalize(e.region);
-
-  if (!eventRegion || !states.includes(eventRegion)) {
+  // PLACEMENT
+  if (set.placement && e.placement && e.placement !== set.placement) {
     return false;
   }
-}
 
-      // =========================
-      // 🏙 CITIES
-      // =========================
-   // =========================
-// 🌍 STATES
-// =========================
-if (targeting.states?.length) {
-  const states = targeting.states.map(normalize);
-  const eventRegion = normalize(e.region);
+  // STATES
+  if (targeting.states?.length) {
+    const states = targeting.states.map(normalize);
+    const eventRegion = normalize(e.region);
 
-  if (!eventRegion || !states.includes(eventRegion)) {
-    return false;
+    if (!eventRegion || !states.includes(eventRegion)) {
+      return false;
+    }
   }
-}
 
-// =========================
-// 🏙 CITIES
-// =========================
-if (targeting.cities?.length) {
-  const cities = targeting.cities.map(normalize);
-  const eventCity = normalize(e.city);
+  // CITIES
+  if (targeting.cities?.length) {
+    const cities = targeting.cities.map(normalize);
+    const eventCity = normalize(e.city);
 
-  if (!eventCity || !cities.includes(eventCity)) {
-    return false;
+    if (!eventCity || !cities.includes(eventCity)) {
+      return false;
+    }
   }
-}
 
-// =========================
-// ⚽ TEAMS
-// =========================
-if (targeting.teams?.length) {
-  const teams = targeting.teams.map(normalize);
-  const eventTeam = normalize(e.team);
+  // TEAMS
+  if (targeting.teams?.length) {
+    const teams = targeting.teams.map(normalize);
+    const eventTeam = normalize(e.team);
 
-  if (!eventTeam || !teams.includes(eventTeam)) {
-    return false;
+    if (!eventTeam || !teams.includes(eventTeam)) {
+      return false;
+    }
   }
-}
 
-      // =========================
-      // ⚽ TEAMS
-      // =========================
-      if(targeting.teams?.length){
-        if(!e.team || !targeting.teams.includes(e.team)){
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-
-  const impressions = relevant.length;
+  return true;
+});
 
   // =========================
   // 💰 REVENUE (CPM MODEL)
