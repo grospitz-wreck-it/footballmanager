@@ -99,13 +99,30 @@ function startBackgroundSimulation(){
       // =========================
       // 🟡 LIVE INIT
       // =========================
-      if(!match.live){
-        match.live = {
-          minute: 0,
-          score: { home: 0, away: 0 },
-          running: true
-        };
-      }
+
+if(!match.live){
+  match.live = {
+    minute: 0,
+    score: { home: 0, away: 0 },
+    running: true,
+    started: false,              // 🔥 NEU
+    startDelay: Math.random() * 6 // 🔥 0–6 Sekunden Delay
+  };
+}
+
+      // =========================
+// ⏳ START DELAY
+// =========================
+if(!match.live.started){
+
+  match.live.startDelay -= 2; // weil dein Interval 2000ms ist
+
+  if(match.live.startDelay > 0){
+    return; // ⛔ noch nicht starten
+  }
+
+  match.live.started = true;
+}
 
       // =========================
       // ⏱ ZEITFORTSCHRITT
