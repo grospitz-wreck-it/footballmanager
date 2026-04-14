@@ -139,14 +139,19 @@ const away = isSwap ? teamA : teamB;
       if(home.name !== "BYE" && away.name !== "BYE"){
 
         round.push({
-          id: crypto.randomUUID(),
-          homeTeamId: homeId,
-          awayTeamId: awayId,
-          home,
-          away,
-          result: null,
-          _processed: false
-        });
+  id: crypto.randomUUID(),
+
+  // 🔥 PRIMARY
+  homeTeamId: homeId,
+  awayTeamId: awayId,
+
+  // 🔥 UI ONLY (clone → keine Mutation später)
+  home: { id: homeId, name: home.name },
+  away: { id: awayId, name: away.name },
+
+  result: null,
+  _processed: false
+});
       }
     }
 
