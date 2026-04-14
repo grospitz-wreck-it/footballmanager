@@ -224,8 +224,15 @@ async function addAssets(){
   }
 
   // 🔥 Assets in erstes Ad Set (MVP)
-  campaign.ad_sets[0].assets.push(...assets);
-
+const updatedSets = campaign.ad_sets.map((set, i) => {
+  if(i === 0){
+    return {
+      ...set,
+      assets: [...(set.assets || []), ...assets]
+    };
+  }
+  return set;
+});
   await supabase
     .from("campaigns")
     .update({ ad_sets: campaign.ad_sets })
