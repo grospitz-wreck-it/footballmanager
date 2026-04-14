@@ -404,6 +404,149 @@ async function loadInsights(){
   const sessions = {};
 
   events.forEach(e => {
+
+    if(!sessions[e.session_id]){
+      sessions[e.session_id] = {
+        start: e.created_at,
+        end: e.created_at,
+        events: []
+      };
+    }
+
+    sessions[e.session_id].events.push(e.event_name);
+
+    if(e.created_at < sessions[e.session_id].start){
+      sessions[e.session_id].start = e.created_at;
+    }
+
+    if(e.created_at > sessions[e.session_id].end){
+      sessions[e.session_id].end = e.created_at;
+    }
+  });
+
+  const sessionList = Object.values(sessions);
+
+  // =========================
+  // 🔥 KPI CALC
+  // =========================
+  const dau = new Set(events.map(e => e.session_id)).size;
+
+  const matches = events.filter(e => e.event_name === "match_start").length;
+
+  const durations = sessionList.map(s =>
+    (new Date(s.end) - new Date(s.start)) / 1000
+  );
+
+  const avgSession = durations.length
+    ? Math.round(durations.reduce((a,b)=>a+b,0)/durations.length)
+    : 0;
+
+  const matchesPerSession = sessionList.length
+    ? (matches / sessionList.length).toFixed(2)
+    : 0;
+
+  // =========================
+  // 🎯 SEGMENTATION
+  // =========================
+  let casual = 0;
+  let core = 0;
+  let hardcore = 0;
+
+  sessionList.forEach(s => {
+
+    const matchCount = s.events.filter(e => e === "match_start").length;
+
+    if(matchCount <= 1) casual++;
+    else if(matchCount <= 4) core++;
+    else hardcore++;
+  });
+
+  // =========================
+  // 💰 MONETIZATION (🔥 NEU)
+  // =========================
+  const adInterval = 120; // Sekunden pro Ad
+
+  const adsPerSession = Math.floor(avgSession / adInterval);
+
+  const totalImpressions = adsPerSession * sessionList.length;
+
+  const avgCPM = 8; // € – später dynamisch möglich
+  const revenue = ((totalImpressions / 1000) * avgCPM).toFixed(2);
+
+  // =========================
+  // 🔁 RETENTION PROXY
+  // =========================
+  const returningUsers = sessionList.filter(s => s.events.length > 5).length;
+
+  const retention = sessionList.length
+    ? ((returningUsers / sessionList.length) * 100).toFixed(1)
+    : 0;
+
+  // =========================
+  // 🧠 ENGAGEMENT SCORE
+  // =========================
+  const engagementScore = avgSession > 600
+    ? "🔥 HIGH"
+    : avgSession > 300
+    ? "⚡ MEDIUM"
+    : "🧊 LOW";
+
+  // =========================
+  // ⏱ FORMAT DURATION
+  // =========================
+  function formatDuration(seconds){
+
+    if(!seconds || seconds <= 0) return "0:00";
+
+    const min = Math.floor(seconds / 60);
+    const sec = Math.floor(seconds % 60);
+
+    return `${min}:${sec.toString().padStart(2, "0")}`;
+  }
+
+  // =========================
+  // 🔥 UI UPDATE
+  // =========================
+  qs("insightDAU").textContent = dau;
+  qs("insightSessions").textContent = sessionList.length;
+  qs("insightMatches").textContent = matches;
+  qs("insightAvg").textContent = formatDuration(avgSession);
+
+  const mps = qs("insightMPS");
+  if(mps) mps.textContent = matchesPerSession;
+
+  const eng = qs("insightEngagement");
+  if(eng) eng.textContent = engagementScore;
+
+  const seg = qs("insightSegments");
+  if(seg){
+    seg.innerHTML = `
+      Casual: ${casual}<br>
+      Core: ${core}<br>
+      Hardcore: ${hardcore}
+    `;
+  }
+
+  // =========================
+  // 💰 MONETIZATION UI
+  // =========================
+  const monet = qs("insightMonetization");
+
+  if(monet){
+    monet.innerHTML = `
+      📺 Ads / Session: ${adsPerSession}<br>
+      👁 Impressions: ${totalImpressions}<br>
+      💰 Revenue: €${revenue}<br>
+      🔁 Retention: ${retention}%
+    `;
+  }
+}
+  // =========================
+  // 🧠 SESSION BUILD
+  // =========================
+  const sessions = {};
+
+  events.forEach(e => {
     if(!sessions[e.session_id]){
       sessions[e.session_id] = {
         start: e.created_at,
