@@ -90,14 +90,47 @@ function startBackgroundSimulation(){
           score: { home: 0, away: 0 }
         };
       }
+      function startBackgroundSimulation(){
+
+  if(simInterval) return;
+
+  simInterval = setInterval(() => {
+
+    const league = game.league.current;
+    const round = league?.schedule?.[game.league.currentRound || 0];
+    if(!round) return;
+
+    round.forEach(match => {
+
+      // 👉 eigenes Spiel überspringen
+      if(
+        match.homeTeamId === game.team?.selectedId ||
+        match.awayTeamId === game.team?.selectedId
+      ) return;
+
+      // =========================
+      // 🟡 LIVE INIT
+      // =========================
+      if(!match.live){
+        match.live = {
+          minute: 0,
+          score: { home: 0, away: 0 },
+          running: true   // 🔥 NEU
+        };
+      }
 
       if(match._processed) return;
 
-      // 🔥 Minute läuft hoch
+      // =========================
+      // ⏱ ZEIT
+      // =========================
       match.live.minute += Math.floor(Math.random() * 5);
 
-      // 🔥 Tore fallen zufällig
+      // =========================
+      // ⚽ TORE
+      // =========================
       if(Math.random() < 0.2){
+
         if(Math.random() < 0.5){
           match.live.score.home++;
         } else {
@@ -105,8 +138,12 @@ function startBackgroundSimulation(){
         }
       }
 
-      // 🔥 Spiel wird beendet
+      // =========================
+      // 🏁 ABPFIFF
+      // =========================
       if(match.live.minute >= 90){
+
+        match.live.running = false; // 🔥 NEU
 
         match.result = {
           home: match.live.score.home,
@@ -115,18 +152,13 @@ function startBackgroundSimulation(){
 
         match._processed = true;
       }
+
     });
 
+    // 🔥 WICHTIG → UI + TABLE UPDATE
     updateUI();
 
   }, 2000);
-}
-
-function stopBackgroundSimulation(){
-  if(simInterval){
-    clearInterval(simInterval);
-    simInterval = null;
-  }
 }
 
 // =========================
