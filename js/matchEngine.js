@@ -202,13 +202,18 @@ if(!playerMatch){
   game.match._scheduleRef = playerMatch;
 
   game.match.current = {
-    id: playerMatch.id || crypto.randomUUID(),
-    homeTeamId: homeId,
-    awayTeamId: awayId,
-    homeName: getTeamNameById(homeId),
-    awayName: getTeamNameById(awayId),
-    result: null
-  };
+  id: playerMatch.id,
+
+  // 🔥 IDs bleiben
+  homeTeamId: homeId,
+  awayTeamId: awayId,
+
+  // 🔥 ORIGINAL OBJEKTE AUS SCHEDULE
+  home: playerMatch.home,
+  away: playerMatch.away,
+
+  result: null
+};
 
   try {
     game.match.current.homePlayers = getPlayersOfTeam(homeId);
