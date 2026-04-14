@@ -82,9 +82,15 @@ function updateUI(){
   updateTabs();
 
   if(game.ui.tab === "table"){
+  renderLiveTable();
+
+  // 🔥 sofort refresh bei Match-Update
+  if(game.match?.live?.running){
     renderLiveTable();
-    ensureLiveTableLoop();
   }
+
+  ensureLiveTableLoop();
+}
 
   if(game.ui.tab === "team"){
     renderTeam();
