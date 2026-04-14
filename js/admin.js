@@ -95,12 +95,6 @@ function calculateCampaignKPIs(campaign, data){
 // 🔥 DAS HAT GEFEHLT
 const impressions = relevant.length;
 
-const ecpm = 8;
-
-const revenue = impressions
-  ? (impressions / 1000) * ecpm
-  : 0;
-
   // =========================
   // 💰 REVENUE (CPM MODEL)
   // =========================
