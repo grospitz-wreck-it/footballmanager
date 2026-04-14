@@ -1164,3 +1164,22 @@ tr:hover {
 
   cursor: pointer;
 }
+/* =========================
+   🎮 TACTICS BUTTONS
+========================= */
+
+[data-preset],
+[data-tempo],
+[data-pressing],
+[data-line] {
+  opacity: 0.5;
+  transition: 0.2s;
+}
+
+[data-preset].active,
+[data-tempo].active,
+[data-pressing].active,
+[data-line].active {
+  opacity: 1;
+  transform: scale(1.1);
+}
