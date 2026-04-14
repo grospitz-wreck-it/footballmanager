@@ -1165,38 +1165,32 @@ tr:hover {
   cursor: pointer;
 }
 /* =========================
-   🎮 TACTICS BUTTONS
+   🎮 TACTICS BUTTONS (MOBILE OPTIMIZED)
 ========================= */
 
 [data-preset],
 [data-tempo],
 [data-pressing],
 [data-line] {
-  opacity: 0.5;
-  transition: 0.2s;
+  transition: transform 0.15s ease, filter 0.15s ease;
+
+  /* leicht „inactive look“ */
+  filter: brightness(0.7) saturate(0.8);
 }
 
+/* ACTIVE STATE */
 [data-preset].active,
 [data-tempo].active,
 [data-pressing].active,
 [data-line].active {
-  opacity: 1;
+  filter: brightness(1.1) saturate(1.2);
   transform: scale(1.1);
 }
-.tactics-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 50;
-}
 
-.tactics-sheet {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  background: #111;
-  border-radius: 16px 16px 0 0;
-  padding: 16px;
+/* TOUCH FEEDBACK */
+[data-preset]:active,
+[data-tempo]:active,
+[data-pressing]:active,
+[data-line]:active {
+  transform: scale(0.95);
 }
