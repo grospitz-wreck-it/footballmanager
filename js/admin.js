@@ -22,6 +22,8 @@ const state = {
 // =====================
 // HELPERS
 // =====================
+const normalize = (v) =>
+  (v || "").toString().trim().toLowerCase();
 function clearForm(){
 
   [
@@ -40,6 +42,9 @@ function clearForm(){
   });
 
 }
+
+
+
 function calculateCampaignKPIs(campaign, data){
 
   if(!data || !data.length) return campaign;
