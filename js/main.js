@@ -381,9 +381,9 @@ if(leagueTeams.length < 2){
         id: leagueId,
         name: `${c.name}${c.regions?.name ? " " + c.regions.name : ""}`,
         teams: leagueTeams.map(t => ({
-          ...t,
-          id: normalizeId(t.id)
-        })),
+  id: normalizeId(t.id),
+  name: t.name || "Unbekannt"
+}))
         region_id: c.region_id,
         level: c.level
       });
