@@ -1088,7 +1088,9 @@ document.addEventListener("click", (e)=>{
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
 
-  qs("saveBtn")?.addEventListener("click", createCampaign);
+  qs("createCampaignBtn")?.addEventListener("click", createCampaign);
+  qs("addAdSetBtn")?.addEventListener("click", addAdSet);
+  qs("addAssetBtn")?.addEventListener("click", addAssets);
   qs("createEventBtn")?.addEventListener("click", saveEvent);
 
   // 🔥 GAME EVENTS
