@@ -1150,3 +1150,17 @@ tr:hover {
     0 2px 8px rgba(0,0,0,0.8),
     0 0 10px rgba(0,0,0,0.6);
 }
+.tactics-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 44px;
+  height: 44px;
+
+  object-fit: contain;
+
+  z-index: 20;
+
+  cursor: pointer;
+}
