@@ -1063,17 +1063,25 @@ async function deleteGameEvent(id){
 // =====================
 async function saveInlineEvent(id){
 
-const row = document.querySelector(`[data-event-row="${id}"]`);
+  const row = document.querySelector(`[data-event-row="${id}"]`);
+  if(!row) return;
 
-const payload = {
-title: row.querySelector("[data-field='title']").value,
-description: row.querySelector("[data-field='description']").value
-};
+  const payload = {
+    title: row.querySelector("[data-field='title']").value,
+    description: row.querySelector("[data-field='description']").value,
 
-await supabase.from("events").update(payload).eq("id", id);
+    effect_type: row.querySelector("[data-field='effect_type']").value,
+    effect_target: row.querySelector("[data-field='effect_target']").value,
 
-state.inlineEventEditId = null;
-loadEvents();
+    effect_value: Number(row.querySelector("[data-field='effect_value']").value || 0),
+    probability: Number(row.querySelector("[data-field='probability']").value || 0),
+    duration: Number(row.querySelector("[data-field='duration']").value || 0)
+  };
+
+  await supabase.from("events").update(payload).eq("id", id);
+
+  state.inlineEventEditId = null;
+  loadEvents();
 }
 
 async function saveInlineGameEvent(id){
@@ -1082,7 +1090,13 @@ async function saveInlineGameEvent(id){
   if(!row) return;
 
   const payload = {
-    title: row.querySelector("[data-field='title']").value
+    title: row.querySelector("[data-field='title']").value,
+    type: row.querySelector("[data-field='type']").value,
+    trigger: row.querySelector("[data-field='trigger']").value,
+
+    probability: Number(row.querySelector("[data-field='probability']").value || 0),
+    value: Number(row.querySelector("[data-field='value']").value || 0),
+    duration: Number(row.querySelector("[data-field='duration']").value || 0)
   };
 
   await supabase.from("game_events").update(payload).eq("id", id);
@@ -1106,71 +1120,158 @@ renderEvents(data || []);
 // =====================
 function renderEvents(list){
 
-state.events = list;
+  state.events = list;
 
-const container = qs("eventList");
-container.innerHTML = "";
+  const container = qs("eventList");
+  container.innerHTML = "";
 
-list.forEach(e => {
+  list.forEach(e => {
 
+    const isEdit = state.inlineEventEditId === e.id;
+    const assets = e.assets || [];
 
-const isEdit = state.inlineEventEditId === e.id;
-const assets = e.assets || [];
+    const assetHTML = assets.map(a=>`
+      <div class="asset small">
+        ${
+          a.type==="video"
+          ? `<video src="${a?.url || ''}" muted></video>`
+          : `<img src="${a?.url || ''}">`
+        }
+      </div>
+    `).join("");
 
-const assetHTML = assets.map(a=>`
-  <div class="asset small">
-    ${
-      a.type==="video"
-      ? `<video src="${a?.url || ''}" muted></video>`
-      : `<img src="${a?.url || ''}">`
-    }
-  </div>
-`).join("");
+    const div = document.createElement("div");
+    div.className = "eventRow";
+    div.dataset.eventRow = e.id;
 
-const div = document.createElement("div");
-div.className = "eventRow";
-div.dataset.eventRow = e.id;
+    div.innerHTML = `
+      ${
+        isEdit
+        ? `
+          <input data-field="title" value="${e.title}">
+          <textarea data-field="description">${e.description || ""}</textarea>
 
-div.innerHTML = `
-  ${
-    isEdit
-    ? `
-      <input data-field="title" value="${e.title}">
-      <textarea data-field="description">${e.description}</textarea>
-    `
-    : `
-      <strong>${e.title}</strong><br>
-      ${e.description || ""}
-    `
-  }
+          <select data-field="effect_type">
+            <option value="goal" ${e.effect_type==="goal"?"selected":""}>⚽ Tor</option>
+            <option value="modifier" ${e.effect_type==="modifier"?"selected":""}>📊 Modifier</option>
+            <option value="pause" ${e.effect_type==="pause"?"selected":""}>⏸ Pause</option>
+            <option value="resume" ${e.effect_type==="resume"?"selected":""}>▶️ Resume</option>
+            <option value="end" ${e.effect_type==="end"?"selected":""}>🏁 Ende</option>
+          </select>
 
-  <div class="metaRow">
-    🎯 ${e.effect_type} | ${e.effect_target} | ${e.effect_value}<br>
-    ⚡ ${e.probability} | ⏳ ${e.duration}
-  </div>
+          <select data-field="effect_target">
+            <option value="home" ${e.effect_target==="home"?"selected":""}>Home</option>
+            <option value="away" ${e.effect_target==="away"?"selected":""}>Away</option>
+            <option value="both" ${e.effect_target==="both"?"selected":""}>Beide</option>
+          </select>
 
-  <div class="assetRow">${assetHTML}</div>
+          <input data-field="effect_value" type="number" value="${e.effect_value || 0}">
+          <input data-field="probability" type="number" step="0.01" value="${e.probability || 0}">
+          <input data-field="duration" type="number" value="${e.duration || 0}">
+        `
+        : `
+          <strong>${e.title}</strong><br>
+          ${e.description || ""}
+        `
+      }
 
-  <div>
-    ${
-      isEdit
-      ? `
-        <button data-action="saveInlineEvent" data-id="${e.id}">💾</button>
-        <button data-action="cancelInlineEvent">❌</button>
-      `
-      : `
-        <button data-action="editInlineEvent" data-id="${e.id}">✏️</button>
-        <button class="danger" data-action="deleteEvent" data-id="${e.id}">🗑️</button>
-      `
-    }
-  </div>
-`;
+      <div class="metaRow">
+        🎯 ${e.effect_type} | ${e.effect_target} | ${e.effect_value}<br>
+        ⚡ ${e.probability} | ⏳ ${e.duration}
+      </div>
 
-container.appendChild(div);
+      <div class="assetRow">${assetHTML}</div>
 
+      <div>
+        ${
+          isEdit
+          ? `
+            <button data-action="saveInlineEvent" data-id="${e.id}">💾</button>
+            <button data-action="cancelInlineEvent">❌</button>
+          `
+          : `
+            <button data-action="editInlineEvent" data-id="${e.id}">✏️</button>
+            <button class="danger" data-action="deleteEvent" data-id="${e.id}">🗑️</button>
+          `
+        }
+      </div>
+    `;
 
-});
+    container.appendChild(div);
+  });
 }
+
+function renderGameEvents(list){
+
+  state.gameEvents = list;
+
+  const container = qs("gameEventList");
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  list.forEach(e => {
+
+    const isEdit = state.inlineGameEventEditId === e.id;
+    const assets = e.assets || [];
+
+    const assetHTML = assets.map(a=>`
+      <div class="asset small">
+        ${
+          a.type==="video"
+          ? `<video src="${a?.url || ''}" muted></video>`
+          : `<img src="${a?.url || ''}">`
+        }
+      </div>
+    `).join("");
+
+    const div = document.createElement("div");
+    div.className = "eventRow";
+    div.dataset.id = e.id;
+
+    div.innerHTML = `
+      <div>
+        ${
+          isEdit
+          ? `
+            <input data-field="title" value="${e.title}">
+
+            <input data-field="type" value="${e.type}">
+            <input data-field="trigger" value="${e.trigger}">
+
+            <input data-field="probability" type="number" step="0.01" value="${e.probability || 0}">
+            <input data-field="value" type="number" value="${e.value || 0}">
+            <input data-field="duration" type="number" value="${e.duration || 0}">
+          `
+          : `
+            <strong>${e.title}</strong><br>
+            🧠 ${e.type} | 🎯 ${e.trigger}<br>
+            ⚡ ${e.probability} | ⏳ ${e.duration}
+          `
+        }
+      </div>
+
+      <div class="assetRow">${assetHTML}</div>
+
+      <div>
+        ${
+          isEdit
+          ? `
+            <button data-action="saveGameEventInline" data-id="${e.id}">💾</button>
+            <button data-action="cancelGameEventInline">❌</button>
+          `
+          : `
+            <button data-action="editGameEventInline" data-id="${e.id}">✏️</button>
+            <button class="danger" data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
+          `
+        }
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
 
 // =====================
 // DELETE EVENT
@@ -1179,6 +1280,58 @@ async function deleteEvent(id){
 await supabase.from("events").delete().eq("id", id);
 loadEvents();
 }
+
+// =====================
+// Edit Assets
+// =====================
+async function removeAssetFromEvent(eventId, assetId, table){
+
+  const { data } = await supabase
+    .from(table)
+    .select("assets")
+    .eq("id", eventId)
+    .single();
+
+  if(!data) return;
+
+  const updated = (data.assets || []).filter(a => a.id !== assetId);
+
+  await supabase
+    .from(table)
+    .update({ assets: updated })
+    .eq("id", eventId);
+
+  if(table === "events") loadEvents();
+  if(table === "game_events") loadGameEvents();
+}
+async function uploadInlineAssets(eventId, files, table){
+
+  const bucket = table === "events" ? "events" : "game-events";
+
+  const newAssets = await uploadFiles(bucket, files);
+
+  if(!newAssets.length) return;
+
+  const { data } = await supabase
+    .from(table)
+    .select("assets")
+    .eq("id", eventId)
+    .single();
+
+  const updated = [
+    ...(data.assets || []),
+    ...newAssets
+  ];
+
+  await supabase
+    .from(table)
+    .update({ assets: updated })
+    .eq("id", eventId);
+
+  if(table === "events") loadEvents();
+  if(table === "game_events") loadGameEvents();
+}
+
 
 // =====================
 // TABS
