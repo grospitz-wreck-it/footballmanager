@@ -865,7 +865,7 @@ async function loadGeoMap(){
   }).addTo(geoMap);
 
   const geoData = await getGeoData();
-
+  console.log("GEO DATA:", geoData);
   const res = await fetch("./admin/data/germany.json");
   const germany = await res.json();
 
