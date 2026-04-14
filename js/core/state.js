@@ -24,19 +24,19 @@ const game = {
   // 📚 DATA
   // =========================
   data: {
-  leagues: [],
-  events: [],
-  campaigns: [],
-  gameEvents: [],
-},
+    leagues: [],
+    events: [],
+    campaigns: [],
+    gameEvents: [],
+  },
 
   // =========================
   // 👕 TEAM
   // =========================
   team: {
-  selected: null,      // bleibt (für UI)
-  selectedId: null,     // NEU
-},
+    selected: null,
+    selectedId: null,
+  },
 
   // =========================
   // ⚽ MATCH
@@ -45,6 +45,11 @@ const game = {
     current: null,
     live: createLiveMatchState()
   },
+
+  // =========================
+  // 🎯 TACTICS (🔥 NEU)
+  // =========================
+  tactics: createTacticsState(),
 
   // =========================
   // 🎲 EVENTS SYSTEM
@@ -79,7 +84,7 @@ const game = {
   },
 
   // =========================
-  // 🖥 UI STATE (🔥 FINAL FIX)
+  // 🖥 UI STATE
   // =========================
   ui: createUIState(),
 
@@ -94,13 +99,31 @@ const game = {
 };
 
 // =========================
-// 🧩 FACTORIES (🔥 WICHTIG)
+// 🧩 FACTORIES
 // =========================
 
 function createUIState(){
   return {
     sidebarOpen: false,
-    tab: "table"
+    tab: "table",
+
+    // 🔥 optional direkt vorbereitet
+    tacticsOpen: false
+  };
+}
+
+// =========================
+// 🔥 TACTICS FACTORY (NEU)
+// =========================
+function createTacticsState(){
+  return {
+    preset: "balanced",
+
+    tempo: "normal",     // slow | normal | fast
+    pressing: "medium",  // low | medium | high
+    line: "medium",      // low | medium | high
+
+    lastChangeMinute: 0
   };
 }
 
@@ -143,7 +166,7 @@ function createAnalyticsState(){
 }
 
 // =========================
-// 🧹 RESET GAME (FINAL FIX)
+// 🧹 RESET GAME
 // =========================
 function resetGame(){
 
@@ -159,16 +182,19 @@ function resetGame(){
   };
 
   game.team.selected = null;
-  game.team.selectedId = null; // 👈 hinzufügen
+  game.team.selectedId = null;
 
   game.match.current = null;
   game.match.live = createLiveMatchState();
+
+  // 🔥 TACTICS RESET (WICHTIG!)
+  game.tactics = createTacticsState();
 
   game.events = createEventsState();
   game.ads = createAdsState();
   game.analytics = createAnalyticsState();
 
-  // 🔥 CRITICAL: immer frische Referenz
+  // 🔥 UI RESET
   game.ui = createUIState();
 
   game.phase = "setup";
@@ -178,7 +204,7 @@ function resetGame(){
 }
 
 // =========================
-// 🌐 DEBUG (🔥 EXTREM WICHTIG)
+// 🌐 DEBUG
 // =========================
 if (typeof window !== "undefined") {
   window.game = game;
