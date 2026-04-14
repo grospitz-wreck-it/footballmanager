@@ -361,9 +361,19 @@ console.log("🎮 GAME EVENTS LOADED:", gameEvents);
       if(c.level !== 7) return;
       if(!c.name?.toLowerCase().includes("kreisliga a")) return;
 
-      const leagueTeams = teams.filter(
-        t => normalizeId(t.competition_id) === leagueId
-      );
+      const leagueTeams = teams.filter(t => {
+
+  const teamLeagueId = normalizeId(t.competition_id);
+  const currentLeagueId = normalizeId(c.id);
+
+  return teamLeagueId === currentLeagueId;
+});
+
+// 🔥 DEBUG (WICHTIG!)
+if(leagueTeams.length < 2){
+  console.warn("⚠️ Zu wenig Teams für Liga:", c.name, leagueTeams.length);
+  return;
+}
 
       if(!leagueTeams.length) return;
 
