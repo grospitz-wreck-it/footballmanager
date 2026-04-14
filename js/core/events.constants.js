@@ -61,11 +61,16 @@ export const EVENT_TYPES = {
   // =========================
   KICKOFF: "KICKOFF",
   HALFTIME: "HALFTIME",
-  FULLTIME: "FULLTIME"
+  FULLTIME: "FULLTIME",
+
+  // =========================
+  // 🔧 TACTICS (NEU)
+  // =========================
+  TACTIC_CHANGE: "TACTIC_CHANGE"
 };
 
 // =========================
-// 🎯 EVENT OUTCOMES (NEU)
+// 🎯 EVENT OUTCOMES
 // =========================
 export const EVENT_OUTCOMES = {
   SUCCESS: "success",
