@@ -302,16 +302,19 @@ function updateTabs(){
 
       // 🔥 safe DOM access
       if(name === "table"){
-        document.getElementById("tableView")?.style.display = "block";
-      }
+  const el = document.getElementById("tableView");
+  if(el) el.style.display = "block";
+}
 
-      if(name === "schedule"){
-        document.getElementById("scheduleView")?.style.display = "block";
-      }
+if(name === "schedule"){
+  const el = document.getElementById("scheduleView");
+  if(el) el.style.display = "block";
+}
 
-      if(name === "team"){
-        document.getElementById("teamView")?.style.display = "block";
-      }
+if(name === "team"){
+  const el = document.getElementById("teamView");
+  if(el) el.style.display = "block";
+}
 
       updateUI();
     };
