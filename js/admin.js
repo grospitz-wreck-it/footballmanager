@@ -458,24 +458,25 @@ function renderCampaigns(list){
       const assets = set.assets || [];
 
       const assetHTML = assets.map(a=>`
-        <div class="asset small">
-          ${
-            a.type==="video"
-            ? `<video src="${a.url}" muted></video>`
-            : `<img src="${a.url}">`
-          }
-        </div>
-      `).join("");
+  <div class="asset small">
+    ${
+      a.type==="video"
+      ? `<video src="${a?.url || ''}" muted></video>`
+      : `<img src="${a?.url || ''}">`
+    }
 
-      return `
-        <div class="box" style="margin-top:10px;">
-          <strong>${set.type.toUpperCase()}</strong><br>
-          🎯 ${set.placement || "-"} • 🔁 ${set.freq_user || 0}/user
-
-          <div class="assetRow">${assetHTML}</div>
-        </div>
-      `;
-    }).join("");
+    ${
+      isEdit
+      ? `<button 
+            data-action="deleteAsset"
+            data-event-id="${e.id}"
+            data-asset-id="${a.id}"
+            data-table="events"
+        >❌</button>`
+      : ""
+    }
+  </div>
+`).join("");
 
     // =========================
     // 🎯 TARGETING
@@ -1034,18 +1035,39 @@ function renderGameEvents(list){
       <div class="assetRow">${assetHTML}</div>
 
       <div>
-        ${
-          isEdit
-          ? `
-            <button data-action="saveGameEventInline" data-id="${e.id}">💾</button>
-            <button data-action="cancelGameEventInline">❌</button>
-          `
-          : `
-            <button data-action="editGameEventInline" data-id="${e.id}">✏️</button>
-            <button class="danger" data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
-          `
-        }
+  ${
+    isEdit
+    ? `
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+
+        <!-- 💾 SAVE / CANCEL -->
+        <button data-action="saveGameEventInline" data-id="${e.id}">💾</button>
+        <button data-action="cancelGameEventInline">❌</button>
+
+        <!-- 📤 ASSET UPLOAD -->
+        <input 
+          type="file" 
+          data-upload="${e.id}" 
+          multiple 
+          style="font-size:10px;"
+        >
+
+        <button 
+          data-action="uploadAssetInline"
+          data-id="${e.id}"
+          data-table="game_events"
+        >
+          📤 Upload
+        </button>
+
       </div>
+    `
+    : `
+      <button data-action="editGameEventInline" data-id="${e.id}">✏️</button>
+      <button class="danger" data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
+    `
+  }
+</div>
     `;
 
     container.appendChild(div);
@@ -1382,27 +1404,37 @@ document.addEventListener("click", (e)=>{
   if(!a) return;
 
   // =====================
-  // GENERIC
+  // 🖼 ASSET ACTIONS (NEU)
   // =====================
-  if(a==="copy") copy(e.target.dataset.id);
+  if(a==="deleteAsset"){
+    removeAssetFromEvent(
+      e.target.dataset.eventId,
+      e.target.dataset.assetId,
+      e.target.dataset.table
+    );
+  }
 
-  if(a==="fullscreen"){
-    e.target.closest(".asset")?.classList.toggle("fullscreen");
+  if(a==="uploadAssetInline"){
+    const input = document.querySelector(
+      `input[data-upload="${e.target.dataset.id}"]`
+    );
+
+    if(!input || !input.files.length){
+      alert("Kein File");
+      return;
+    }
+
+    uploadInlineAssets(
+      e.target.dataset.id,
+      input.files,
+      e.target.dataset.table
+    );
   }
 
   // =====================
   // CAMPAIGNS
   // =====================
   if(a==="delete") deleteCampaign(e.target.dataset.id);
-  if(a==="editInline"){
-    state.inlineEditId = e.target.dataset.id;
-    loadCampaigns();
-  }
-  if(a==="saveInline") saveInlineCampaign(e.target.dataset.id);
-  if(a==="cancelInline"){
-    state.inlineEditId = null;
-    loadCampaigns();
-  }
 
   // =====================
   // EVENTS
@@ -1411,29 +1443,14 @@ document.addEventListener("click", (e)=>{
     state.inlineEventEditId = e.target.dataset.id;
     loadEvents();
   }
+
   if(a==="saveInlineEvent") saveInlineEvent(e.target.dataset.id);
-  if(a==="cancelInlineEvent"){
-    state.inlineEventEditId = null;
-    loadEvents();
-  }
-  if(a==="deleteEvent") deleteEvent(e.target.dataset.id);
 
   // =====================
-  // 🎮 GAME EVENTS (FIX)
+  // GAME EVENTS
   // =====================
-  if(a==="deleteGameEvent") deleteGameEvent(e.target.dataset.id);
-
   if(a==="editGameEventInline"){
     state.inlineGameEventEditId = e.target.dataset.id;
-    loadGameEvents();
-  }
-
-  if(a==="saveGameEventInline"){
-    saveInlineGameEvent(e.target.dataset.id);
-  }
-
-  if(a==="cancelGameEventInline"){
-    state.inlineGameEventEditId = null;
     loadGameEvents();
   }
 
