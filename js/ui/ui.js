@@ -51,6 +51,18 @@ function initUI(){
   });
 }
 
+const tacticsBtn = document.getElementById("tacticsBtn");
+
+if(tacticsBtn){
+  tacticsBtn.onclick = () => {
+    game.ui.tacticsOpen = !game.ui.tacticsOpen;
+
+    console.log("⚙️ tactics toggled:", game.ui.tacticsOpen);
+
+    updateUI();
+  };
+}
+
 // =========================
 // 📂 SIDEBAR APPLY
 // =========================
