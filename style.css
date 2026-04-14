@@ -1194,3 +1194,19 @@ tr:hover {
 [data-line]:active {
   transform: scale(0.95);
 }
+/* =========================
+   ⚙️ TACTICS BUTTON
+========================= */
+
+#tacticsBtn {
+  position: absolute;
+  top: 16px;
+  right: 60px; /* Abstand zum Burger */
+
+  width: 44px;
+  height: 44px;
+
+  object-fit: contain;
+
+  z-index: 25;
+}
