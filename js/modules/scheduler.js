@@ -167,10 +167,10 @@ const away = isSwap ? teamA : teamB;
     rotation = [fixed, ...rest];
   }
 
-  // 🔥 FIXED: Rückrunde + Shuffle
-  const returnRounds = rounds.map(round => {
-
-    const returnRounds = rounds.map(round => {
+  // =========================
+// 🔥 RÜCKRUNDE (FINAL FIX)
+// =========================
+const returnRounds = rounds.map(round => {
 
   const newRound = round.map(match => {
 
@@ -180,11 +180,11 @@ const away = isSwap ? teamA : teamB;
     return {
       id: crypto.randomUUID(),
 
-      // 🔥 ID bleibt PRIMARY
+      // 🔥 IDs bleiben die Wahrheit
       homeTeamId: homeId,
       awayTeamId: awayId,
 
-      // 🔥 UI OBJEKTE (IMMER NEU BAUEN!)
+      // 🔥 UI OBJEKTE sauber neu bauen
       home: {
         id: homeId,
         name: match.away?.name || "Unbekannt"
@@ -199,29 +199,11 @@ const away = isSwap ? teamA : teamB;
     };
   });
 
+  // 🔥 Shuffle pro Rückrunden-Spieltag
   shuffleArray(newRound);
 
-  return newRound;
+  return newRound; // ✅ WICHTIG
 });
-
-    shuffleArray(newRound); // 🔥 NEW
-
-    return newRound;
-  });
-
-  league.schedule = [...rounds, ...returnRounds];
-
-  league.schedule.forEach(round => {
-    round._simulated = false;
-  });
-
-  league.currentRound = 0;
-  league.currentMatchIndex = 0;
-
-  console.log("✅ Spielplan erstellt:", league.schedule.length);
-
-  validateSchedule(originalCount);
-}
 
 // =========================
 // 🧪 VALIDIERUNG
