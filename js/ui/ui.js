@@ -548,17 +548,49 @@ function renderTeam(){
     arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
   });
 
-  const starters = [
-    ...byType.GK.slice(0,1),
-    ...byType.DEF.slice(0,4),
-    ...byType.MID.slice(0,4),
-    ...byType.ST.slice(0,2)
-  ];
+  // =========================
+  // 🔥 LINEUP INTEGRATION
+  // =========================
+
+  const lineup = game.team?.lineup;
+
+  let starters = [];
+
+  if(lineup?.slots){
+
+    const pool = window.playerPool || players;
+
+    const ids = Object.values(lineup.slots).filter(Boolean);
+
+    if(ids.length){
+      starters = pool.filter(p =>
+        ids.includes(String(p.id))
+      );
+    }
+  }
+
+  // 👉 FALLBACK (dein bestehendes System bleibt!)
+  if(!starters.length){
+    starters = [
+      ...byType.GK.slice(0,1),
+      ...byType.DEF.slice(0,4),
+      ...byType.MID.slice(0,4),
+      ...byType.ST.slice(0,2)
+    ];
+  }
 
   const bench = players.filter(p => !starters.includes(p));
 
-  const formation = game.team?.formation || "4-4-2";
+  const formation = lineup?.formation || game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+
+  // 🔥 Mapping Slot → Player (wichtig!)
+  const slotOrder = [
+    "GK",
+    "DEF_1","DEF_2","DEF_3","DEF_4",
+    "MID_1","MID_2","MID_3","MID_4",
+    "ST_1","ST_2"
+  ];
 
   const pool = {
     GK: [...byType.GK],
@@ -572,11 +604,27 @@ function renderTeam(){
     <div class="team-field">
   `;
 
-  layout.forEach(slot => {
+  layout.forEach((slot, i) => {
 
     if(!slot) return;
 
-    const player = pickPlayer(slot.role, pool);
+    let player = null;
+
+    // 🔥 1. Versuche Lineup
+    if(lineup?.slots){
+      const slotKey = slotOrder[i];
+      const playerId = lineup.slots[slotKey];
+
+      if(playerId){
+        player = players.find(p => String(p.id) === String(playerId));
+      }
+    }
+
+    // 🔥 2. Fallback (dein altes System)
+    if(!player){
+      player = pickPlayer(slot.role, pool);
+    }
+
     if(!player) return;
 
     html += `
@@ -588,7 +636,10 @@ function renderTeam(){
 
   html += `</div>`;
 
-  // Bench
+  // =========================
+  // 🪑 BENCH (UNVERÄNDERT)
+  // =========================
+
   html += `<h3>Bench</h3>`;
 
   const benchByType = { GK: [], DEF: [], MID: [], ST: [] };
@@ -629,7 +680,10 @@ function renderTeam(){
 
   container.innerHTML = html;
 
-  // Clicks (safe)
+  // =========================
+  // 🖱️ CLICKS (UNVERÄNDERT)
+  // =========================
+
   document.querySelectorAll(".player-dot").forEach(el => {
     el.onclick = () => {
       const id = el.dataset.id;
