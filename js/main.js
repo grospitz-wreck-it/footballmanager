@@ -248,10 +248,7 @@ function getMatchForMyTeam(round){
 
 
 // =========================
-// 🔥 PLZ FEATURE
-// =========================
-// =========================
-// 📍 PLZ → REGION → LIGA (FINAL)
+// 📍 PLZ → REGION → LIGA (FINAL UI READY)
 // =========================
 
 // 🔹 Regionen aus PLZ holen
@@ -274,7 +271,7 @@ async function getRegionsByCode(code){
 // 🔹 passende Ligen finden
 async function findLeaguesByCode(input){
 
-  if(!input || input.length < 2) return [];
+  if(!input || input.length < 3) return [];
 
   const code = input.slice(0,3);
 
@@ -300,7 +297,7 @@ async function findLeaguesByCode(input){
 }
 
 
-// 🔥 HAUPTFUNKTION → AUTO SELECT
+// 🔥 HAUPTFUNKTION → AUTO SELECT (optional)
 async function autoSelectLeagueByPLZ(input){
 
   const leagues = await findLeaguesByCode(input);
@@ -309,14 +306,79 @@ async function autoSelectLeagueByPLZ(input){
 
   console.log("🎯 PLZ MATCH:", leagues);
 
-  // 👉 optional: sortiere nach Level (wenn vorhanden)
   leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
   const best = leagues[0];
 
-  // 🔥 SETZE LIGA
   setLeagueById(best.id);
 }
+
+
+// =========================
+// 🔎 PLZ SEARCH UI (DEIN DIV)
+// =========================
+const plzInput = document.getElementById("plzInput");
+const resultsEl = document.getElementById("leagueResults");
+
+plzInput?.addEventListener("input", async (e) => {
+
+  const value = e.target.value;
+
+  // 👉 reset wenn zu kurz
+  if(!value || value.length < 3){
+    resultsEl.innerHTML = "";
+    return;
+  }
+
+  const leagues = await findLeaguesByCode(value);
+
+  if(!leagues.length){
+    resultsEl.innerHTML = `<div style="padding:8px;opacity:0.6">Keine Ligen gefunden</div>`;
+    return;
+  }
+
+  // 🔥 sort nach Level (falls vorhanden)
+  leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
+
+  // =========================
+  // 🎯 RENDER RESULTS
+  // =========================
+  resultsEl.innerHTML = leagues.map(l => `
+    <div class="league-result" data-id="${l.id}">
+      ${l.name}
+    </div>
+  `).join("");
+
+  // =========================
+  // 🖱 CLICK HANDLER
+  // =========================
+  resultsEl.querySelectorAll(".league-result").forEach(el => {
+
+    el.addEventListener("click", () => {
+
+      const id = el.dataset.id;
+      if(!id) return;
+
+      console.log("🎯 PLZ SELECT:", id);
+
+      setLeagueById(id);
+
+      // 👉 UI reset
+      resultsEl.innerHTML = "";
+    });
+
+  });
+
+  // =========================
+  // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
+  // =========================
+  if(leagues.length === 1){
+    setLeagueById(leagues[0].id);
+    resultsEl.innerHTML = "";
+  }
+
+});
+
 
 // =========================
 // 🚀 INIT
