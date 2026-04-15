@@ -402,9 +402,16 @@ console.log("🧪 DEBUG READY → window.debugData");
       // 🔁 duplicate guard
       if(leagueMap.has(leagueId)) return;
 
-      // 🎯 nur Kreisliga A
       if(c.level !== 7) return;
-      if(!c.name?.toLowerCase().includes("kreisliga a")) return;
+
+const name = c.name?.toLowerCase() || "";
+
+// 🎯 nur echte Hauptligen behalten
+if(!name.includes("kreisliga a")) return;
+
+// ❌ Müll rausfiltern
+if(name.includes("(region)")) return;
+if(/\sa\s\d+$/.test(name)) return; // A 1, A 2, A 3, A 4
 
       // =========================
       // 🔥 TEAM MATCH (ROBUST)
