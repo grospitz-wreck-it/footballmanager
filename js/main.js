@@ -487,13 +487,25 @@ game.league.available = leagues;
 
 console.log("🏁 Leagues built:", leagues.length);
 
-    // =========================
-    // 🚀 UI START
-    // =========================
-    splash?.classList.add("hidden");
-    app?.classList.remove("hidden");
+   // =========================
+// 🎯 LEAGUE DROPDOWN INIT (FIX)
+// =========================
+console.log("🎯 Init League Select:", game.league.available);
 
-    updateUI();
+initLeagueSelect(game.league.available);
+
+// 👉 AUTO SELECT FIRST LEAGUE
+if(game.league.available?.length){
+  setLeagueById(game.league.available[0].id);
+}
+
+// =========================
+// 🚀 UI START
+// =========================
+splash?.classList.add("hidden");
+app?.classList.remove("hidden");
+
+updateUI();
 
   } catch(e){
     console.error("💥 INIT CRASH:", e);
