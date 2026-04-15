@@ -158,6 +158,54 @@ function getPlayersOfTeam(teamId){
   return pool.filter(p => normalizeId(p.team_id) === nid);
 }
 
+function autoFillLineup(teamId){
+
+  const nid = normalizeId(teamId);
+  const myTeamId =
+    normalizeId(game.team?.selectedId) ||
+    normalizeId(game.team?.id);
+
+  if(nid !== myTeamId) return;
+
+  const pool = getPlayersOfTeam(teamId);
+  if(!pool.length) return;
+
+  const lineup = game.team.lineup;
+
+  const byPos = {
+    GK: [],
+    DEF: [],
+    MID: [],
+    ST: []
+  };
+
+  pool.forEach(p => {
+    const pos = (p.position_type || "").toUpperCase();
+
+    if(pos.includes("GK")) byPos.GK.push(p);
+    else if(pos.includes("DEF")) byPos.DEF.push(p);
+    else if(pos.includes("MID")) byPos.MID.push(p);
+    else if(pos.includes("ST")) byPos.ST.push(p);
+  });
+
+  function pick(arr){
+    return arr.shift()?.id || null;
+  }
+
+  Object.keys(lineup.slots).forEach(slot => {
+
+    if(lineup.slots[slot]) return; // schon gesetzt
+
+    if(slot === "GK") lineup.slots[slot] = pick(byPos.GK);
+
+    else if(slot.startsWith("DEF")) lineup.slots[slot] = pick(byPos.DEF);
+
+    else if(slot.startsWith("MID")) lineup.slots[slot] = pick(byPos.MID);
+
+    else if(slot.startsWith("ST")) lineup.slots[slot] = pick(byPos.ST);
+  });
+}
+
 function getRandomPlayer(teamId){
 
   const nid = normalizeId(teamId);
