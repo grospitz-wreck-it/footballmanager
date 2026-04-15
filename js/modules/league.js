@@ -60,11 +60,17 @@ function initLeague(league){
     return;
   }
 
+  // =========================
+  // 🆔 NORMALIZE IDS
+  // =========================
   league.teams = league.teams.map(t => ({
     ...t,
     id: normalizeId(t.id)
   }));
 
+  // =========================
+  // 📊 TABLE INIT
+  // =========================
   league.table = league.teams.map(team => ({
     id: normalizeId(team.id),
     name: team.name,
@@ -77,14 +83,61 @@ function initLeague(league){
 
   console.log("📊 Tabelle erstellt");
 
+  // =========================
+  // 📅 SCHEDULE FIX (CRITICAL)
+  // =========================
   if(!league.schedule || league.schedule.length === 0){
-    console.warn("⚠️ Kein Schedule vorhanden → muss aus scheduler.js kommen");
-    return;
+
+    console.log("📅 Generiere Schedule für:", league.name);
+
+    const schedule = generateSchedule(league);
+
+    if(!schedule || !schedule.length){
+      console.error("❌ Schedule konnte nicht erstellt werden");
+      return;
+    }
+
+    league.schedule = schedule;
   }
 
-  league.currentRound = 0;
-  league.playerRound = 0; // 🔥 NEW (Player Progress)
-  console.log("✅ Liga initialisiert:", league.name);
+  // =========================
+  // 🔄 ROUND INIT
+  // =========================
+  if(typeof league.currentRound !== "number"){
+    league.currentRound = 0;
+  }
+
+  league.playerRound = 0;
+
+  // =========================
+  // 👥 PLAYERS INIT (CRITICAL FIX)
+  // =========================
+  league.teams.forEach(team => {
+
+    if(!team.players || team.players.length === 0){
+
+      try {
+        const players = ensureTeamPlayers(team);
+
+        if(players && players.length){
+          team.players = players;
+        } else {
+          console.warn("⚠️ Keine Spieler generiert für:", team.name);
+        }
+
+      } catch(e){
+        console.error("❌ Player generation crashed:", team.name, e);
+      }
+    }
+
+  });
+
+  console.log("👥 Spieler generiert für Liga:", league.name);
+
+  // =========================
+  // ✅ DONE
+  // =========================
+  console.log("✅ Liga ready:", league.name);
 }
 
 // =========================
