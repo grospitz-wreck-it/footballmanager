@@ -371,7 +371,16 @@ async function init(){
     const competitions = competitionsRaw || [];
 
     console.log("🏟 Competitions loaded:", competitions.length);
+    // =========================
+// 🧪 DEBUG KIT
+// =========================
+window.debugData = {
+  teams,
+  competitions,
+  players: window.playerPool
+};
 
+console.log("🧪 DEBUG READY → window.debugData");
     // =========================
     // 🎮 GAME EVENTS
     // =========================
