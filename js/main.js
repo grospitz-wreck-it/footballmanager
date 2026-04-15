@@ -620,7 +620,7 @@ updateUI();
 // ▶️ MAIN BUTTON
 // =========================
 const mainBtn = document.getElementById("mainButton");
-
+console.log("BTN CHECK:", mainBtn);
 function updateMainButtonText(){
 
   const live = game.match?.live;
