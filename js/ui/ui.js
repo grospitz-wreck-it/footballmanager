@@ -849,11 +849,40 @@ function calculateTeamStats(){
   const teamId = game.team?.selectedId;
   if(!teamId) return null;
 
-  const players = (game.players || []).filter(p =>
+  const allPlayers = (game.players || []).filter(p =>
     String(p.team_id) === String(teamId)
   );
 
-  if(!players.length) return null;
+  if(!allPlayers.length) return null;
+
+  const lineup = game.team?.lineup;
+
+  let players = [];
+
+  // =========================
+  // 🔥 1. LINEUP VERWENDEN
+  // =========================
+  if(lineup?.slots){
+
+    const ids = Object.values(lineup.slots).filter(Boolean);
+
+    if(ids.length){
+      players = allPlayers.filter(p =>
+        ids.includes(String(p.id))
+      );
+    }
+  }
+
+  // =========================
+  // 🔄 FALLBACK (dein altes System)
+  // =========================
+  if(!players.length){
+    players = allPlayers;
+  }
+
+  // =========================
+  // 🧠 STATS BERECHNUNG
+  // =========================
 
   let attack = 0;
   let defense = 0;
@@ -880,7 +909,6 @@ function calculateTeamStats(){
 
   });
 
-  // Normalisieren (damit Werte ~100 sind)
   const count = players.length || 1;
 
   return {
