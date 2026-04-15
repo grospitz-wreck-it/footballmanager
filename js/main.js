@@ -616,11 +616,15 @@ updateUI();
 }
 
 
+
 // =========================
-// ▶️ MAIN BUTTON (FIXED)
+// ▶️ MAIN BUTTON (FINAL FIX)
 // =========================
 let mainBtn = null;
 
+// =========================
+// 🔤 TEXT UPDATE
+// =========================
 function updateMainButtonText(){
 
   const live = game.match?.live;
@@ -644,181 +648,104 @@ function updateMainButtonText(){
 }
 
 // =========================
-// 🔥 BUTTON INIT (WICHTIG)
+// 🔥 CLICK LOGIC (GETRENNT)
 // =========================
-function initMainButton(){
+function handleMainButtonClick(){
 
-  mainBtn = document.getElementById("mainButton");
+  console.log("🔥 BUTTON CLICKED");
 
-  if(!mainBtn){
-    console.error("❌ mainButton NICHT gefunden");
+  let live = game.match?.live;
+  const league = game.league?.current;
+
+  console.log("🧪 MAIN BTN CLICK", {
+    league,
+    round: league?.schedule?.[game.league?.currentRound || 0],
+    teamId: game.team?.selectedId,
+    hasLive: !!live
+  });
+
+  if(!league){
+    console.warn("❌ Keine Liga geladen");
     return;
   }
 
-  console.log("✅ mainButton gefunden");
+  if(!league.schedule || !league.schedule.length){
+    console.warn("❌ Kein Schedule vorhanden");
+    return;
+  }
 
-  mainBtn.addEventListener("click", () => {
+  if(game.phase === "setup"){
+    game.phase = "idle";
+  }
 
-    console.log("🔥 BUTTON CLICKED");
+  // =========================
+  // 🆕 MATCH INIT
+  // =========================
+  if(!live){
 
-    let live = game.match?.live;
-    const league = game.league?.current;
+    const round = league.schedule[game.league?.currentRound || 0];
 
-    console.log("🧪 MAIN BTN CLICK", {
-      league,
-      round: league?.schedule?.[game.league?.currentRound || 0],
-      teamId: game.team?.selectedId,
-      hasLive: !!live
-    });
-
-    if(!league){
-      console.warn("❌ Keine Liga geladen");
+    if(!round || !round.length){
+      console.warn("❌ Kein Spieltag vorhanden");
       return;
     }
 
-    if(!league.schedule || !league.schedule.length){
-      console.warn("❌ Kein Schedule vorhanden");
-      return;
+    let match = getMatchForMyTeam(round);
+
+    if(!match){
+      console.warn("⚠️ Fallback auf erstes Match");
+      match = round[0];
     }
 
-    if(game.phase === "setup"){
-      game.phase = "idle";
-    }
+    if(match){
+      const ok = initMatch([match]);
 
-    // =========================
-    // 🆕 MATCH INIT
-    // =========================
-    if(!live){
-
-      const round = league.schedule[game.league?.currentRound || 0];
-
-      if(!round || !round.length){
-        console.warn("❌ Kein Spieltag vorhanden");
+      if(!ok){
+        console.error("❌ initMatch fehlgeschlagen");
         return;
       }
 
-      let match = getMatchForMyTeam(round);
+      live = game.match.live;
 
-      if(!match){
-        console.warn("⚠️ Fallback auf erstes Match");
-        match = round[0];
-      }
-
-      if(match){
-        const ok = initMatch([match]); // 🔥 FIX
-
-        if(!ok){
-          console.error("❌ initMatch fehlgeschlagen");
-          return;
-        }
-
-        live = game.match.live;
-
-        if(live){
-          live.running = false;
-          live.phase = "first_half";
-        }
-      }
-    }
-
-    if(!live){
-      console.warn("❌ Kein Match (nach Init)");
-      return;
-    }
-
-    // =========================
-    // 🏁 NEXT MATCH
-    // =========================
-    if(live.minute >= 90){
-
-      game.league.currentRound++;
-
-      const round = league.schedule[game.league?.currentRound || 0];
-
-      if(!round || !round.length){
-        console.warn("❌ Kein nächster Spieltag");
-        return;
-      }
-
-      let match = getMatchForMyTeam(round);
-
-      if(!match){
-        match = round[0];
-      }
-
-      if(match){
-        const ok = initMatch([match]); // 🔥 FIX
-        if(!ok) return;
-
-        startBackgroundSimulation();
-
-        game.match.live.running = true;
-        matchLoopRunning = true;
-
-        runMatchLoop({
-          onTick: () => {
-            updateUI();
-            updateMainButtonText();
-          },
-          onEnd: () => {
-            matchLoopRunning = false;
-            updateUI();
-            updateMainButtonText();
-          }
-        });
-      }
-
-      renderSchedule();
-      updateUI();
-      updateMainButtonText();
-      return;
-    }
-
-    // =========================
-    // ⏸ HALFTIME
-    // =========================
-    if(
-      live.phase === "halftime" ||
-      (live.minute === 45 && !live.running)
-    ){
-
-      if(matchLoopRunning && live.running) return;
-
-      startBackgroundSimulation();
-
-      live.phase = "second_half";
-      live.running = true;
-      matchLoopRunning = true;
-
-      runMatchLoop({
-        onTick: () => {
-          updateUI();
-          updateMainButtonText();
-        },
-        onEnd: () => {
-          matchLoopRunning = false;
-          updateUI();
-          updateMainButtonText();
-        }
-      });
-
-      return;
-    }
-
-    // =========================
-    // ▶️ START / RESUME
-    // =========================
-    if(live.running === false){
-
-      if(matchLoopRunning) return;
-
-      if(live.minute === 0){
+      if(live){
+        live.running = false;
         live.phase = "first_half";
       }
+    }
+  }
+
+  if(!live){
+    console.warn("❌ Kein Match (nach Init)");
+    return;
+  }
+
+  // =========================
+  // 🏁 NEXT MATCH
+  // =========================
+  if(live.minute >= 90){
+
+    game.league.currentRound++;
+
+    const round = league.schedule[game.league?.currentRound || 0];
+
+    if(!round || !round.length){
+      console.warn("❌ Kein nächster Spieltag");
+      return;
+    }
+
+    let match = getMatchForMyTeam(round);
+
+    if(!match){
+      match = round[0];
+    }
+
+    if(match){
+      const ok = initMatch([match]);
+      if(!ok) return;
 
       startBackgroundSimulation();
 
-      live.running = true;
+      game.match.live.running = true;
       matchLoopRunning = true;
 
       runMatchLoop({
@@ -832,23 +759,133 @@ function initMainButton(){
           updateMainButtonText();
         }
       });
-
-      updateMainButtonText();
-      return;
     }
 
-    // =========================
-    // ⏸ PAUSE
-    // =========================
-    if(live.running === true){
-      live.running = false;
-      matchLoopRunning = false;
-      updateMainButtonText();
-      return;
+    renderSchedule();
+    updateUI();
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ⏸ HALFTIME
+  // =========================
+  if(
+    live.phase === "halftime" ||
+    (live.minute === 45 && !live.running)
+  ){
+
+    if(matchLoopRunning && live.running) return;
+
+    startBackgroundSimulation();
+
+    live.phase = "second_half";
+    live.running = true;
+    matchLoopRunning = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    return;
+  }
+
+  // =========================
+  // ▶️ START / RESUME
+  // =========================
+  if(live.running === false){
+
+    if(matchLoopRunning) return;
+
+    if(live.minute === 0){
+      live.phase = "first_half";
     }
 
+    startBackgroundSimulation();
+
+    live.running = true;
+    matchLoopRunning = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ⏸ PAUSE
+  // =========================
+  if(live.running === true){
+    live.running = false;
+    matchLoopRunning = false;
+    updateMainButtonText();
+    return;
+  }
+}
+
+// =========================
+// 🔥 INIT (ULTRA ROBUST)
+// =========================
+function initMainButton(){
+
+  // 👉 1. initial Versuch
+  mainBtn = document.getElementById("mainButton");
+
+  if(mainBtn){
+    console.log("✅ mainButton gefunden (init)");
+    mainBtn.onclick = handleMainButtonClick;
+    return;
+  }
+
+  console.warn("⚠️ Button noch nicht da → starte Observer");
+
+  // 👉 2. fallback: beobachte DOM
+  const observer = new MutationObserver(() => {
+
+    const btn = document.getElementById("mainButton");
+    if(!btn) return;
+
+    console.log("✅ mainButton später gefunden");
+
+    mainBtn = btn;
+    mainBtn.onclick = handleMainButtonClick;
+
+    observer.disconnect();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  // 👉 3. safety: delegated fallback
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#mainButton");
+    if(!btn) return;
+
+    mainBtn = btn;
+    handleMainButtonClick();
   });
 }
+
 // =========================
 // 🔄 RESET
 // =========================
