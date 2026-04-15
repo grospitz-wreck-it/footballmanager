@@ -930,7 +930,11 @@ function renderTacticStats(){
   if(!el) return;
 
   const base = calculateTeamStats();
-  if(!base) return;
+
+if(!base){
+  el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
+  return;
+}
 
   const t = game.tactics || {};
 
