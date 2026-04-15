@@ -653,7 +653,7 @@ document.getElementById("resetBtn")?.addEventListener("click", () => {
   import("./services/storage.js").then(m => m.resetGame());
 });
 
-}
+
 
 // =========================
 // ▶️ START
