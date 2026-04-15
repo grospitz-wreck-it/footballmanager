@@ -139,7 +139,7 @@ function nextMatch(){
 // =========================
 // 🏆 INIT LEAGUE SELECT
 // =========================
-function initLeagueSelect(){
+function initLeagueSelect(leaguesInput){
 
   function resetSelect(id){
     const el = document.getElementById(id);
@@ -155,7 +155,8 @@ function initLeagueSelect(){
 
   const selects = [splashSelect, menuSelect].filter(Boolean);
 
-  const source = game.league?.available || game.data?.leagues || [];
+  // 🔥 FIX: NIMM PARAMETER!
+  const source = leaguesInput || game.league?.available || [];
 
   if (!source.length) {
     console.warn("⚠️ Keine Ligen geladen");
@@ -178,14 +179,15 @@ function initLeagueSelect(){
 
   selects.forEach(select => {
 
-    while(select.firstChild){
-      select.removeChild(select.firstChild);
-    }
+    select.innerHTML = "";
 
     leagues.forEach((league, i) => {
       const option = document.createElement("option");
       option.value = i;
-      option.textContent = league.name;
+
+      // 🔥 BONUS: besserer Name
+      option.textContent = `${league.name} (${league.teams.length})`;
+
       select.appendChild(option);
     });
 
@@ -198,13 +200,12 @@ function initLeagueSelect(){
 
       game.league.current = league;
 
- if(!game.league.current.schedule || !game.league.current.schedule.length){
-  generateSchedule();
-}
+      if(!league.schedule || !league.schedule.length){
+        generateSchedule();
+      }
 
-initLeague(game.league.current);
+      initLeague(league);
 
-      // 🔥 Match fix
       const round = league.schedule?.[0];
       if(round && round.length > 0){
         const ok = initMatch(round);
@@ -221,6 +222,7 @@ initLeague(game.league.current);
     });
   });
 
+  // 🔥 DEFAULT SELECT
   game.league = game.league || {};
   game.league.current = leagues[0];
 
