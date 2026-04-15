@@ -476,109 +476,77 @@ console.log("🧪 DEBUG READY → window.debugData");
   }
 }
 
-  // =========================
-  // ▶️ MAIN BUTTON
-  // =========================
-  const mainBtn = document.getElementById("mainButton");
 
-  function updateMainButtonText(){
+// =========================
+// ▶️ MAIN BUTTON
+// =========================
+const mainBtn = document.getElementById("mainButton");
 
-    const live = game.match?.live;
-    if(!mainBtn || !live) return;
+function updateMainButtonText(){
 
-    if(live.minute >= 90){
-      mainBtn.textContent = "Next Match";
-    }
-    else if(live.phase === "halftime"){
-      mainBtn.textContent = "Start 2nd Half";
-    }
-    else if(live.running){
-      mainBtn.textContent = "Pause";
-    }
-    else if(live.minute > 0){
-      mainBtn.textContent = "Resume";
-    }
-    else{
-      mainBtn.textContent = "Start Match";
+  const live = game.match?.live;
+  if(!mainBtn || !live) return;
+
+  if(live.minute >= 90){
+    mainBtn.textContent = "Next Match";
+  }
+  else if(live.phase === "halftime"){
+    mainBtn.textContent = "Start 2nd Half";
+  }
+  else if(live.running){
+    mainBtn.textContent = "Pause";
+  }
+  else if(live.minute > 0){
+    mainBtn.textContent = "Resume";
+  }
+  else{
+    mainBtn.textContent = "Start Match";
+  }
+}
+
+mainBtn?.addEventListener("click", () => {
+
+  let live = game.match?.live;
+  const league = game.league?.current;
+
+  if(game.phase === "setup"){
+    game.phase = "idle";
+  }
+
+  if(!live){
+    const round = league?.schedule?.[game.league?.currentRound || 0];
+    const match = getMatchForMyTeam(round);
+
+    if(match){
+      initMatch(round);
+      live = game.match.live;
+
+      live.running = false;
+      live.phase = "first_half";
     }
   }
 
-  mainBtn?.addEventListener("click", () => {
+  if(!live){
+    console.warn("❌ Kein Match");
+    return;
+  }
 
-    let live = game.match?.live;
-    const league = game.league?.current;
+  // =========================
+  // 🏁 NEXT MATCH
+  // =========================
+  if(live.minute >= 90){
 
-    if(game.phase === "setup"){
-      game.phase = "idle";
-    }
+    game.league.currentRound++;
 
-    if(!live){
-      const round = league?.schedule?.[game.league.currentRound || 0];
-      const match = getMatchForMyTeam(round);
+    const round = league?.schedule?.[game.league?.currentRound || 0];
+    const match = getMatchForMyTeam(round);
 
-      if(match){
-        initMatch(round);
-        live = game.match.live;
-
-        live.running = false;
-        live.phase = "first_half";
-      }
-    }
-
-    if(!live){
-      console.warn("❌ Kein Match");
-      return;
-    }
-
-    if(live.minute >= 90){
-
-      // 🔥 FIX
-game.league.currentRound++;
-      const round = league?.schedule?.[game.league.currentRound|| 0];
-      const match = getMatchForMyTeam(round);
-
-      if(match){
-        initMatch(round);
-
-        startBackgroundSimulation();
-
-        game.match.live.running = true;
-        matchLoopRunning = true;
-
-        runMatchLoop({
-          onTick: () => {
-            updateUI();
-            updateMainButtonText();
-          },
-          onEnd: () => {
-            matchLoopRunning = false;
-            updateUI();
-            updateMainButtonText();
-          }
-        });
-      }
-
-      renderSchedule();
-      updateUI();
-      updateMainButtonText();
-      return;
-    }
-
-    if(
-      live.phase === "halftime" ||
-      (live.minute === 45 && !live.running)
-    ){
-
-      if(!live.running){
-        matchLoopRunning = false;
-      }
-
-      if(matchLoopRunning && live.running) return;
+    if(match){
+      initMatch(round);
 
       startBackgroundSimulation();
 
-      live.phase = "second_half";
-      live.running = true;
+      game.match.live.running = true;
       matchLoopRunning = true;
 
       runMatchLoop({
@@ -592,50 +560,99 @@ game.league.currentRound++;
           updateMainButtonText();
         }
       });
-
-      return;
     }
 
-    if(live.running === false){
+    renderSchedule();
+    updateUI();
+    updateMainButtonText();
+    return;
+  }
 
-      if(matchLoopRunning) return;
+  // =========================
+  // ⏸ HALFTIME
+  // =========================
+  if(
+    live.phase === "halftime" ||
+    (live.minute === 45 && !live.running)
+  ){
 
-      if(live.minute === 0){
-        live.phase = "first_half";
-      }
-
-      startBackgroundSimulation();
-
-      live.running = true;
-      matchLoopRunning = true;
-
-      runMatchLoop({
-        onTick: () => {
-          updateUI();
-          updateMainButtonText();
-        },
-        onEnd: () => {
-          matchLoopRunning = false;
-          updateUI();
-          updateMainButtonText();
-        }
-      });
-
-      updateMainButtonText();
-      return;
-    }
-
-    if(live.running === true){
-      live.running = false;
+    if(!live.running){
       matchLoopRunning = false;
-      updateMainButtonText();
-      return;
     }
-  });
 
-  document.getElementById("resetBtn")?.addEventListener("click", () => {
-    import("./services/storage.js").then(m => m.resetGame());
-  });
+    if(matchLoopRunning && live.running) return;
+
+    startBackgroundSimulation();
+
+    live.phase = "second_half";
+    live.running = true;
+    matchLoopRunning = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    return;
+  }
+
+  // =========================
+  // ▶️ START / RESUME
+  // =========================
+  if(live.running === false){
+
+    if(matchLoopRunning) return;
+
+    if(live.minute === 0){
+      live.phase = "first_half";
+    }
+
+    startBackgroundSimulation();
+
+    live.running = true;
+    matchLoopRunning = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ⏸ PAUSE
+  // =========================
+  if(live.running === true){
+    live.running = false;
+    matchLoopRunning = false;
+    updateMainButtonText();
+    return;
+  }
+});
+
+// =========================
+// 🔄 RESET
+// =========================
+document.getElementById("resetBtn")?.addEventListener("click", () => {
+  import("./services/storage.js").then(m => m.resetGame());
+});
+
 }
 
 // =========================
