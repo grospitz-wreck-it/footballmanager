@@ -284,9 +284,15 @@ async function findLeaguesByCode(input){
 
   const regionIds = regions.map(r => r.region_id);
 
-  const matches = (game.league?.available || []).filter(l =>
-    regionIds.includes(l.region_id)
+  const matches = (game.league?.available || []).filter(l => {
+
+  if(!l.region_id) return false;
+
+  return regionIds.some(r =>
+    String(r).trim() === String(l.region_id).trim()
   );
+
+});
 
   if(!matches.length){
     console.warn("❌ Keine Liga für Region gefunden");
