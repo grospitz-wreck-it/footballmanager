@@ -336,11 +336,14 @@ function populateTeamSelect() {
 
   const firstTeam = league.teams[0];
 
-  game.team = game.team || {};
-  game.team.selected = firstTeam.name;
-  game.team.selectedId = normalizeId(firstTeam.id);
+game.team = game.team || {};
+game.team.selected = firstTeam.name;
+game.team.selectedId = normalizeId(firstTeam.id);
 
-  ensureTeamPlayers(firstTeam);
+// 🔥 FIX: alle Teams vorbereiten (nicht nur eins)
+league.teams.forEach(t => {
+  ensureTeamPlayers(t);
+});
 
   console.log("✅ Teams geladen:", league.teams.length);
 }
