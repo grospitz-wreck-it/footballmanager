@@ -821,61 +821,6 @@ function handleMainButtonClick(){
 }
 
 // =========================
-// 🔥 ULTRA ROBUST INIT
-// =========================
-function initMainButton(){
-
-  console.log("🔧 initMainButton gestartet");
-
-  // 👉 1. Direkt versuchen
-  mainBtn = document.getElementById("startBtn");
-
-  if(mainBtn){
-    console.log("✅ Button direkt gefunden");
-
-    // 🔥 HARD FIX gegen Overlay / Pointer Issues
-    mainBtn.style.position = "relative";
-    mainBtn.style.zIndex = "9999";
-    mainBtn.style.pointerEvents = "auto";
-
-    mainBtn.onclick = handleMainButtonClick;
-  }
-
-  // 👉 2. GLOBAL FALLBACK (IMMER aktiv)
-  document.addEventListener("click", (e) => {
-
-    const btn = e.target.closest("#startBtn");
-    if(!btn) return;
-
-    console.log("🔥 BUTTON CLICKED (delegated)");
-
-    mainBtn = btn;
-
-    // 🔥 FORCE CLICK
-    handleMainButtonClick();
-  });
-
-  // 👉 3. OBSERVER (falls UI später rendert)
-  const observer = new MutationObserver(() => {
-
-    const btn = document.getElementById("startBtn");
-    if(!btn) return;
-
-    console.log("🔁 Button nachträglich gefunden");
-
-    mainBtn = btn;
-    mainBtn.onclick = handleMainButtonClick;
-
-    observer.disconnect();
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-}
-
-// =========================
 // 🔥 INIT (ULTRA ROBUST)
 // =========================
 function initMainButton(){
