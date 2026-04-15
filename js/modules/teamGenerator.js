@@ -181,9 +181,7 @@ export async function buildAllTeams(){
 
   console.log("🏟 Teams:", teams.length);
 
-  for(const team of teams){
-    await generateTeam(team);
-  }
+  await Promise.all(teams.map(team => generateTeam(team)));
 
   console.log("🎉 ALLE TEAMS FERTIG");
 }
