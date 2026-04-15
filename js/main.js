@@ -395,73 +395,84 @@ console.log("🧪 DEBUG READY → window.debugData");
     // =========================
     const leagueMap = new Map();
 
-    competitions.forEach(c => {
+competitions.forEach(c => {
 
-      const leagueId = normalizeId(c.id);
+  // =========================
+  // 🧠 BASIC FILTER
+  // =========================
+  if(!c) return;
 
-      // 🔁 duplicate guard
-      if(leagueMap.has(leagueId)) return;
+  const name = (c.name || "").toLowerCase().trim();
 
-      if(c.level !== 7) return;
+  if(c.level !== 7) return;
 
-const name = c.name?.toLowerCase() || "";
+  // 🎯 nur echte Kreisliga A
+  if(!name.includes("kreisliga a")) return;
 
-// 🎯 nur echte Hauptligen behalten
-if(!name.includes("kreisliga a")) return;
+  // ❌ Müll raus
+  if(name.includes("(region)")) return;
+  if(/\sa\s\d+$/.test(name)) return; // A 1, A 2, A 3, A 4
 
-// ❌ Müll rausfiltern
-if(name.includes("(region)")) return;
-if(/\sa\s\d+$/.test(name)) return; // A 1, A 2, A 3, A 4
+  // =========================
+  // 🆔 STABILE ID (KEIN normalizeId!!)
+  // =========================
+  const leagueId = String(c.id);
 
-      // =========================
-      // 🔥 TEAM MATCH (ROBUST)
-      // =========================
-      let leagueTeams = teams.filter(t => {
+  // 🔁 duplicate guard
+  if(leagueMap.has(leagueId)) return;
 
-        // 🔥 PRIMARY: competition_id match
-        const teamLeagueId = normalizeId(t.competition_id);
-        const currentLeagueId = normalizeId(c.id);
+  // =========================
+  // 🔥 TEAM MATCH (FIXED)
+  // =========================
+  let leagueTeams = teams.filter(t => {
 
-        if(teamLeagueId && currentLeagueId){
-          return teamLeagueId === currentLeagueId;
-        }
+    if(!t) return false;
 
-        // 🔄 FALLBACK: string match (safety)
-        const teamLeagueName =
-          (t.league || t.league_name || "").toLowerCase().trim();
+    // ✅ PRIMARY: UUID compare (FIX)
+    if(t.competition_id && c.id){
+      return String(t.competition_id) === String(c.id);
+    }
 
-        const compName =
-          (c.name || "").toLowerCase().trim();
+    // 🔄 FALLBACK: Name Match (rare)
+    const teamLeagueName =
+      (t.league || t.league_name || "").toLowerCase().trim();
 
-        return teamLeagueName === compName;
-      });
+    return teamLeagueName === name;
+  });
 
-      // =========================
-      // 🧪 DEBUG (nur wenn leer)
-      // =========================
-      if(leagueTeams.length < 2){
+  // =========================
+  // 🧪 DEBUG (SMART)
+  // =========================
+  if(leagueTeams.length < 2){
 
-        console.warn("⚠️ Zu wenig Teams für Liga:", c.name, leagueTeams.length);
+    console.warn("⚠️ Zu wenig Teams für Liga:", c.name, leagueTeams.length);
 
-        // 🔥 DEEP DEBUG (hilft dir sofort)
-        console.log("👉 Beispiel Teams:", teams.slice(0,5));
+    // 👉 zeig passende IDs zur Diagnose
+    const sample = teams.slice(0,5).map(t => ({
+      name: t.name,
+      comp: t.competition_id
+    }));
 
-        return;
-      }
+    console.log("👉 Beispiel Teams:", sample);
 
-      console.log("✅ Liga OK:", c.name, "| Teams:", leagueTeams.length);
+    return;
+  }
 
-      // =========================
-      // 🧱 BUILD LEAGUE OBJECT
-      // =========================
-      leagueMap.set(leagueId, {
-        id: leagueId,
-        name: c.name,
-        teams: leagueTeams,
-        competition: c
-      });
+  // =========================
+  // ✅ SUCCESS DEBUG
+  // =========================
+  console.log("✅ LEAGUE OK:", c.name, "| teams:", leagueTeams.length);
 
-    });
+  // =========================
+  // 🏗 BUILD LEAGUE
+  // =========================
+  leagueMap.set(leagueId, {
+    id: leagueId,
+    name: c.name,
+    teams: leagueTeams
+  });
+
+});
 
     // =========================
     // 📦 SAVE TO GAME
