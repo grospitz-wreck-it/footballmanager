@@ -624,8 +624,9 @@ updateUI();
 
 
 // =========================
-// ▶️ MAIN BUTTON (ABSOLUTE FINAL FIX)
+// ▶️ MAIN BUTTON (REAL FIX)
 // =========================
+
 let mainBtn = null;
 
 // =========================
@@ -633,9 +634,7 @@ let mainBtn = null;
 // =========================
 function updateMainButtonText(){
 
-  if(!mainBtn){
-    mainBtn = document.getElementById("startBtn"); // 🔥 richtige ID
-  }
+  mainBtn = document.getElementById("startBtn");
 
   const live = game.match?.live;
   if(!mainBtn || !live) return;
@@ -662,17 +661,10 @@ function updateMainButtonText(){
 // =========================
 function handleMainButtonClick(){
 
-  console.log("🔥 BUTTON CLICKED");
+  console.log("🔥 BUTTON CLICKED ✅");
 
   let live = game.match?.live;
   const league = game.league?.current;
-
-  console.log("🧪 MAIN BTN CLICK", {
-    league,
-    round: league?.schedule?.[game.league?.currentRound || 0],
-    teamId: game.team?.selectedId,
-    hasLive: !!live
-  });
 
   if(!league){
     console.warn("❌ Keine Liga geladen");
@@ -694,40 +686,22 @@ function handleMainButtonClick(){
   if(!live){
 
     const round = league.schedule[game.league?.currentRound || 0];
+    if(!round?.length) return;
 
-    if(!round || !round.length){
-      console.warn("❌ Kein Spieltag vorhanden");
-      return;
-    }
+    let match = getMatchForMyTeam(round) || round[0];
 
-    let match = getMatchForMyTeam(round);
+    const ok = initMatch([match]);
+    if(!ok) return;
 
-    if(!match){
-      console.warn("⚠️ Fallback auf erstes Match");
-      match = round[0];
-    }
+    live = game.match.live;
 
-    if(match){
-      const ok = initMatch([match]);
-
-      if(!ok){
-        console.error("❌ initMatch fehlgeschlagen");
-        return;
-      }
-
-      live = game.match.live;
-
-      if(live){
-        live.running = false;
-        live.phase = "first_half";
-      }
+    if(live){
+      live.running = false;
+      live.phase = "first_half";
     }
   }
 
-  if(!live){
-    console.warn("❌ Kein Match (nach Init)");
-    return;
-  }
+  if(!live) return;
 
   // =========================
   // 🏁 NEXT MATCH
@@ -737,39 +711,29 @@ function handleMainButtonClick(){
     game.league.currentRound++;
 
     const round = league.schedule[game.league?.currentRound || 0];
+    if(!round?.length) return;
 
-    if(!round || !round.length){
-      console.warn("❌ Kein nächster Spieltag");
-      return;
-    }
+    let match = getMatchForMyTeam(round) || round[0];
 
-    let match = getMatchForMyTeam(round);
+    const ok = initMatch([match]);
+    if(!ok) return;
 
-    if(!match){
-      match = round[0];
-    }
+    startBackgroundSimulation();
 
-    if(match){
-      const ok = initMatch([match]);
-      if(!ok) return;
+    game.match.live.running = true;
+    matchLoopRunning = true;
 
-      startBackgroundSimulation();
-
-      game.match.live.running = true;
-      matchLoopRunning = true;
-
-      runMatchLoop({
-        onTick: () => {
-          updateUI();
-          updateMainButtonText();
-        },
-        onEnd: () => {
-          matchLoopRunning = false;
-          updateUI();
-          updateMainButtonText();
-        }
-      });
-    }
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
 
     renderSchedule();
     updateUI();
@@ -816,51 +780,26 @@ function handleMainButtonClick(){
     live.running = false;
     matchLoopRunning = false;
     updateMainButtonText();
-    return;
   }
 }
 
 // =========================
-// 🔥 INIT (ULTRA ROBUST)
+// 🔥 EIN EINZIGER GLOBAL LISTENER (KEY FIX)
 // =========================
 function initMainButton(){
 
-  // 👉 1. initial Versuch
-mainBtn = document.getElementById("startBtn");
-  
-  if(mainBtn){
-    console.log("✅ mainButton gefunden (init)");
-    mainBtn.onclick = handleMainButtonClick;
-    return;
-  }
+  console.log("🔧 initMainButton ACTIVE");
 
-  console.warn("⚠️ Button noch nicht da → starte Observer");
-
-  // 👉 2. fallback: beobachte DOM
-  const observer = new MutationObserver(() => {
-
-    const btn = document.getElementById("startBtn");
-    if(!btn) return;
-
-    console.log("✅ mainButton später gefunden");
-
-    mainBtn = btn;
-    mainBtn.onclick = handleMainButtonClick;
-
-    observer.disconnect();
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  // 👉 3. safety: delegated fallback
   document.addEventListener("click", (e) => {
+
     const btn = e.target.closest("#startBtn");
+
     if(!btn) return;
 
+    console.log("🎯 MATCHED startBtn");
+
     mainBtn = btn;
+
     handleMainButtonClick();
   });
 }
