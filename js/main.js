@@ -355,25 +355,42 @@ plzInput?.addEventListener("input", async (e) => {
     </div>
   `).join("");
 
+
   // =========================
-  // 🖱 CLICK HANDLER
-  // =========================
-  resultsEl.querySelectorAll(".league-result").forEach(el => {
+// 🖱 CLICK HANDLER (CLEAN)
+// =========================
+resultsEl.querySelectorAll(".league-result").forEach(el => {
 
-    el.addEventListener("click", () => {
+  el.onclick = () => {
 
-      const id = el.dataset.id;
-      if(!id) return;
+    const id = el.dataset.id;
 
-      console.log("🎯 PLZ SELECT:", id);
+    if(!id){
+      console.warn("❌ Kein League ID gefunden");
+      return;
+    }
 
+    console.log("🎯 PLZ SELECT:", id);
+
+    try {
       setLeagueById(id);
+    } catch(e){
+      console.error("❌ setLeagueById crashed:", e);
+      return;
+    }
 
-      // 👉 UI reset
-      resultsEl.innerHTML = "";
+    resultsEl.innerHTML = "";
+
+    updateUI?.();
+    updateMainButtonText?.();
+
+    console.log("✅ League gesetzt:", {
+      league: game.league?.current?.name,
+      teams: game.league?.current?.teams?.length
     });
+  };
 
-  });
+});
 
   // =========================
   // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
