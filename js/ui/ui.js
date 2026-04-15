@@ -639,7 +639,7 @@ const players = pool.filter(p =>
     "ST_1","ST_2"
   ];
 
-  const pool = {
+  const positionPool = {
     GK: [...byType.GK],
     DEF: [...byType.DEF],
     MID: [...byType.MID],
@@ -669,7 +669,7 @@ const players = pool.filter(p =>
 
     // 🔥 2. Fallback (dein altes System)
     if(!player){
-      player = pickPlayer(slot.role, pool);
+      player = pickPlayer(slot.role, positionPool);
     }
 
     if(!player) return;
