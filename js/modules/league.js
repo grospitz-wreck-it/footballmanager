@@ -226,11 +226,13 @@ function initLeagueSelect(leaguesInput){
   game.league = game.league || {};
   game.league.current = leagues[0];
 
-  initLeague(game.league.current);
+  // 🔥 zuerst Schedule
+if(!game.league.current.schedule || !game.league.current.schedule.length){
+  generateSchedule();
+}
 
-  if(!game.league.current.schedule || !game.league.current.schedule.length){
-    generateSchedule();
-  }
+// dann init
+initLeague(game.league.current);
 
   populateTeamSelect();
 
