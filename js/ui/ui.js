@@ -69,12 +69,17 @@ function updateUI(){
   }
 
   // =========================
-  // ⚙️ TACTICS UI SYNC (NEU)
+  // ⚙️ TACTICS
   // =========================
   updateTacticsUI();
-  renderTacticStats();
+
+  // 🔥 FIX: NUR WENN OVERLAY OFFEN
+  if(game.ui.tacticsOpen){
+    renderTacticStats();
+  }
+
   // =========================
-  // 🪟 OVERLAY TOGGLE
+  // 🪟 OVERLAY
   // =========================
   const tacticsOverlay = document.getElementById("tacticsOverlay");
 
