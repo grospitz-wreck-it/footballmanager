@@ -352,40 +352,60 @@ console.log("🧪 DEBUG READY → window.debugData");
     console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
 
     // =========================
-    // 🧠 LEAGUE BUILD
-    // =========================
-    const leagueMap = new Map();
+// 🧠 LEAGUE BUILD (FINAL CLEAN)
+// =========================
+const leagueMap = new Map();
 
 competitions.forEach(c => {
 
-  const name = (c.name || "").toLowerCase();
+  if(!c) return;
 
+  const rawName = (c.name || "").trim();
+  const name = rawName.toLowerCase();
+
+  // =========================
+  // 🎯 FILTER
+  // =========================
   if(!c.level) return;
   if(c.level > 7) return;
 
+  // Müll raus
   if(name.includes("(region)")) return;
-  if(/\sa\s\d+$/.test(name)) return;
+  if(name.includes("kreisliga b")) return;
+  if(name.includes("kreisliga c")) return;
+  if(name.includes("kreisliga d")) return;
+  if(/\sa\s\d+$/.test(name)) return; // A 1, A 2 ...
 
   const leagueId = String(c.id);
+
+  // Duplicate Guard
   if(leagueMap.has(leagueId)) return;
 
+  // =========================
+  // 🔥 TEAM MATCH (ROBUST)
+  // =========================
   let leagueTeams = teams.filter(t => {
 
     if(!t) return false;
 
+    // ✅ PRIMARY (UUID match)
     if(t.competition_id && c.id){
       return String(t.competition_id) === String(c.id);
     }
 
+    // 🔄 FALLBACK (Name match)
     const teamLeagueName =
       (t.league || t.league_name || "").toLowerCase().trim();
 
     return teamLeagueName === name;
   });
 
+  // =========================
+  // 🧪 DEBUG (nur wenn kaputt)
+  // =========================
   if(leagueTeams.length < 2){
 
-    console.warn("⚠️ Zu wenig Teams für Liga:", c.name, leagueTeams.length);
+    console.warn("⚠️ Zu wenig Teams für Liga:", rawName, leagueTeams.length);
 
     const sample = teams.slice(0,5).map(t => ({
       name: t.name,
@@ -397,23 +417,46 @@ competitions.forEach(c => {
     return;
   }
 
-  console.log("✅ LEAGUE OK:", c.name, "| teams:", leagueTeams.length);
-
+  // =========================
+  // 🧠 DISPLAY NAME FIX
+  // =========================
   const regionName =
     c.regions?.name ||
     c.regions?.states?.name ||
     "";
 
-  const displayName =
-    regionName
-      ? `${regionName} - ${c.name}`
-      : c.name;
+  let displayName = rawName;
 
+  // 👉 Region anhängen wenn sinnvoll
+  if(regionName && !rawName.toLowerCase().includes(regionName.toLowerCase())){
+    displayName = `${rawName} (${regionName})`;
+  }
+
+  // 👉 harte Fixes für generische Namen
+  if(rawName === "Kreisliga A"){
+    displayName = `Kreisliga A (${regionName || "Unbekannt"})`;
+  }
+
+  // 👉 Cleanup
+  displayName = displayName
+    .replace("(Region)", "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // =========================
+  // ✅ SUCCESS
+  // =========================
+  console.log("✅ LEAGUE OK:", displayName, "| teams:", leagueTeams.length);
+
+  // =========================
+  // 🏗 BUILD
+  // =========================
   leagueMap.set(leagueId, {
     id: leagueId,
     name: displayName,
-    teams: leagueTeams,
-    region_id: c.region_id
+    raw_name: rawName,      // 🔥 wichtig für später
+    region_id: c.region_id, // 🔥 für PLZ
+    teams: leagueTeams
   });
 
 });
