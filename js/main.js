@@ -400,18 +400,21 @@ competitions.forEach(c => {
   // =========================
   // 🧠 BASIC FILTER
   // =========================
-  if(!c) return;
+  // =========================
+// 🧠 BASIC FILTER (FIXED)
+// =========================
+if(!c) return;
 
-  const name = (c.name || "").toLowerCase().trim();
+const name = (c.name || "").toLowerCase().trim();
 
-  if(c.level !== 7) return;
+// ❌ Müll raus
+if(name.includes("(region)")) return;
+if(name.includes("kreisliga b")) return;
+if(name.includes("kreisliga c")) return;
+if(name.includes("kreisliga d")) return;
 
-  // 🎯 nur echte Kreisliga A
-  if(!name.includes("kreisliga a")) return;
-
-  // ❌ Müll raus
-  if(name.includes("(region)")) return;
-  if(/\sa\s\d+$/.test(name)) return; // A 1, A 2, A 3, A 4
+// ❌ optional: ganz niedrige Ligen skippen
+if(c.level > 7) return;
 
   // =========================
   // 🆔 STABILE ID (KEIN normalizeId!!)
