@@ -250,28 +250,72 @@ function getMatchForMyTeam(round){
 // =========================
 // 🔥 PLZ FEATURE
 // =========================
+// =========================
+// 📍 PLZ → REGION → LIGA (FINAL)
+// =========================
+
+// 🔹 Regionen aus PLZ holen
 async function getRegionsByCode(code){
-  return supabase
+  const { data, error } = await supabase
     .from("region_codes")
     .select("region_id")
     .eq("country", "DE")
     .eq("code", code);
+
+  if(error){
+    console.error("❌ region_codes error:", error);
+    return [];
+  }
+
+  return data || [];
 }
 
+
+// 🔹 passende Ligen finden
 async function findLeaguesByCode(input){
 
   if(!input || input.length < 2) return [];
 
   const code = input.slice(0,3);
 
-  const { data } = await getRegionsByCode(code);
-  if(!data?.length) return [];
+  const regions = await getRegionsByCode(code);
 
-  const regionIds = data.map(r => r.region_id);
+  if(!regions.length){
+    console.warn("❌ Keine Region für PLZ:", code);
+    return [];
+  }
 
-  return game.league.available.filter(
-    l => regionIds.includes(l.region_id)
+  const regionIds = regions.map(r => r.region_id);
+
+  const matches = (game.league?.available || []).filter(l =>
+    regionIds.includes(l.region_id)
   );
+
+  if(!matches.length){
+    console.warn("❌ Keine Liga für Region gefunden");
+    return [];
+  }
+
+  return matches;
+}
+
+
+// 🔥 HAUPTFUNKTION → AUTO SELECT
+async function autoSelectLeagueByPLZ(input){
+
+  const leagues = await findLeaguesByCode(input);
+
+  if(!leagues.length) return;
+
+  console.log("🎯 PLZ MATCH:", leagues);
+
+  // 👉 optional: sortiere nach Level (wenn vorhanden)
+  leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
+
+  const best = leagues[0];
+
+  // 🔥 SETZE LIGA
+  setLeagueById(best.id);
 }
 
 // =========================
