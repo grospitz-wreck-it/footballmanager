@@ -1270,32 +1270,40 @@ tr:hover {
 #tacticsOverlay.open .tactics-sheet {
   transform: translateY(0);
 }
-.tactics-row button.active {
-  background: orange;
-  color: black;
-  font-weight: bold;
-}
-.tactics-stats {
-  margin-top: 15px;
+.tactic-row{
+  margin-bottom: 10px;
 }
 
-.tactic-row {
-  margin-bottom: 8px;
-}
-
-.tactic-label {
+.tactic-label{
   font-size: 12px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  opacity: 0.8;
 }
 
-.tactic-bar {
+.tactic-bar{
   width: 100%;
-  height: 8px;
-  background: #333;
-  position: relative;
+  height: 10px;
+  background: #111;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.tactic-fill {
+.tactic-fill{
   height: 100%;
-  background: orange;
+
+  /* 🔥 Verlauf */
+  background: linear-gradient(90deg, #00ff88, #ffee00, #ff3b3b);
+
+  /* 🔥 schräge Linien */
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0,0,0,0.25) 0px,
+      rgba(0,0,0,0.25) 6px,
+      transparent 6px,
+      transparent 12px
+    ),
+    linear-gradient(90deg, #00ff88, #ffee00, #ff3b3b);
+
+  transition: width 0.3s ease;
 }
