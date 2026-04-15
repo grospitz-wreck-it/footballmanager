@@ -851,14 +851,34 @@ function openPlayerModal(player){
 
 function calculateTeamStats(){
 
-  const teamId = game.team?.selectedId;
-  if(!teamId) return null;
+  // =========================
+  // 🔥 TEAM ID (ROBUST)
+  // =========================
+  const teamId =
+    game.team?.selectedId ||
+    game.team?.id;
 
-  const allPlayers = (game.players || []).filter(p =>
+  if(!teamId){
+    console.warn("❌ Kein teamId");
+    return null;
+  }
+
+  // =========================
+  // 🔥 DATENQUELLE FIX
+  // =========================
+  const pool =
+    (window.playerPool && window.playerPool.length)
+      ? window.playerPool
+      : (game.players || []);
+
+  const allPlayers = pool.filter(p =>
     String(p.team_id) === String(teamId)
   );
 
-  if(!allPlayers.length) return null;
+  if(!allPlayers.length){
+    console.warn("❌ Keine Spieler gefunden für Team:", teamId);
+    return null;
+  }
 
   const lineup = game.team?.lineup;
 
@@ -877,6 +897,50 @@ function calculateTeamStats(){
       );
     }
   }
+
+  // =========================
+  // 🔄 FALLBACK
+  // =========================
+  if(!players.length){
+    players = allPlayers;
+  }
+
+  // =========================
+  // 🧠 STATS
+  // =========================
+  let attack = 0;
+  let defense = 0;
+  let control = 0;
+
+  players.forEach(p => {
+
+    const rating = p.overall ?? 50;
+    const type = (p.position_type || "MID").toUpperCase();
+
+    if(type.includes("ST")){
+      attack += rating * 1.2;
+    }
+    else if(type.includes("MID")){
+      attack += rating * 0.6;
+      control += rating * 1.0;
+    }
+    else if(type.includes("DEF")){
+      defense += rating * 1.2;
+    }
+    else if(type.includes("GK")){
+      defense += rating * 1.5;
+    }
+
+  });
+
+  const count = players.length || 1;
+
+  return {
+    attack: Math.round(attack / count),
+    defense: Math.round(defense / count),
+    control: Math.round(control / count)
+  };
+}
 
   // =========================
   // 🔄 FALLBACK (dein altes System)
