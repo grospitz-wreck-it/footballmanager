@@ -631,25 +631,76 @@ mainBtn?.addEventListener("click", () => {
   let live = game.match?.live;
   const league = game.league?.current;
 
+  // =========================
+  // 🧪 DEBUG (hilft dir später!)
+  // =========================
+  console.log("🧪 MAIN BTN CLICK", {
+    league,
+    round: league?.schedule?.[game.league?.currentRound || 0],
+    teamId: game.team?.selectedId,
+    hasLive: !!live
+  });
+
+  // =========================
+  // 🔒 GUARDS
+  // =========================
+  if(!league){
+    console.warn("❌ Keine Liga geladen");
+    return;
+  }
+
+  if(!league.schedule || !league.schedule.length){
+    console.warn("❌ Kein Schedule vorhanden");
+    return;
+  }
+
   if(game.phase === "setup"){
     game.phase = "idle";
   }
 
+  // =========================
+  // 🆕 MATCH INIT (FIXED)
+  // =========================
   if(!live){
-    const round = league?.schedule?.[game.league?.currentRound || 0];
-    const match = getMatchForMyTeam(round);
+
+    const round = league.schedule[game.league?.currentRound || 0];
+
+    if(!round || !round.length){
+      console.warn("❌ Kein Spieltag vorhanden");
+      return;
+    }
+
+    let match = getMatchForMyTeam(round);
+
+    // 🔥 FIX: FALLBACK
+    if(!match){
+      console.warn("⚠️ Kein eigenes Match → fallback auf erstes Match");
+      match = round[0];
+    }
 
     if(match){
-      initMatch(round);
+      const ok = initMatch(round);
+
+      if(!ok){
+        console.error("❌ initMatch fehlgeschlagen");
+        return;
+      }
+
       live = game.match.live;
 
-      live.running = false;
-      live.phase = "first_half";
+      // safety init
+      if(live){
+        live.running = false;
+        live.phase = "first_half";
+      }
     }
   }
 
+  // =========================
+  // ❌ FINAL GUARD
+  // =========================
   if(!live){
-    console.warn("❌ Kein Match");
+    console.warn("❌ Kein Match (nach Init)");
     return;
   }
 
@@ -660,11 +711,23 @@ mainBtn?.addEventListener("click", () => {
 
     game.league.currentRound++;
 
-    const round = league?.schedule?.[game.league?.currentRound || 0];
-    const match = getMatchForMyTeam(round);
+    const round = league.schedule[game.league?.currentRound || 0];
+
+    if(!round || !round.length){
+      console.warn("❌ Kein nächster Spieltag");
+      return;
+    }
+
+    let match = getMatchForMyTeam(round);
+
+    if(!match){
+      console.warn("⚠️ Fallback nächstes Match");
+      match = round[0];
+    }
 
     if(match){
-      initMatch(round);
+      const ok = initMatch(round);
+      if(!ok) return;
 
       startBackgroundSimulation();
 
