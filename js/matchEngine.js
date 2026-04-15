@@ -292,12 +292,43 @@ if(!playerMatch){
   result: null
 };
 
-  try {
-    game.match.current.homePlayers = getPlayersOfTeam(homeId);
-    game.match.current.awayPlayers = getPlayersOfTeam(awayId);
-  } catch(e){
-    console.warn("⚠️ Player init failed", e);
+try {
+
+  autoFillLineup(homeId);
+  autoFillLineup(awayId);
+
+  function getPlayersFromLineup(teamId){
+
+    const nid = normalizeId(teamId);
+
+    const myTeamId =
+      normalizeId(game.team?.selectedId) ||
+      normalizeId(game.team?.id);
+
+    if(nid !== myTeamId){
+      return getPlayersOfTeam(teamId);
+    }
+
+    const slots = game.team?.lineup?.slots || {};
+    const ids = Object.values(slots).filter(Boolean);
+
+    if(!ids.length){
+      return getPlayersOfTeam(teamId);
+    }
+
+    const pool = window.playerPool || [];
+
+    return pool.filter(p =>
+      ids.includes(normalizeId(p.id))
+    );
   }
+
+  game.match.current.homePlayers = getPlayersFromLineup(homeId);
+  game.match.current.awayPlayers = getPlayersFromLineup(awayId);
+
+} catch(e){
+  console.warn("⚠️ Player init failed", e);
+}
 
   game.match.live = {
     minute: 0,
