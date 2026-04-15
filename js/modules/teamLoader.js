@@ -40,37 +40,31 @@ function sample(arr, n){
 
 export function generateTeam(team){
 
-  // 🔒 ensure normalized team (non-breaking)
-  team = normalizeTeamObject(team);
+  if(!team) return [];
 
-  let squad = [];
+  const positions = [
+    "GK",
+    "DEF","DEF","DEF","DEF",
+    "MID","MID","MID","MID",
+    "ST","ST"
+  ];
 
-  function pick(pos, n){
-    const pool = getAvailablePlayers(pos);
-    return sample(pool, n);
-  }
+  const players = positions.map((pos, i) => {
 
-  squad.push(...pick("Torwart", 2));
-  squad.push(...pick("Verteidiger", 5));
-  squad.push(...pick("Mittelfeld", 6));
-  squad.push(...pick("Stürmer", 3));
+    const rating = Math.floor(Math.random() * 40) + 50;
 
-  // fallback
-  if(squad.length < 16){
-    const rest = getAvailablePlayers("Mittelfeld"); // fallback flexibel
-    squad.push(...sample(rest, 16 - squad.length));
-  }
+    return {
+      id: `${team.id}-${i}`,
+      team_id: team.id,
+      first_name: "Player",
+      last_name: String(i+1),
+      position_type: pos,
+      overall: rating,
+      age: Math.floor(Math.random() * 15) + 18
+    };
+  });
 
-  /**
-   * 🔒 ID-FIX (NON-DESTRUCTIVE)
-   * Vorher: team.name
-   * Jetzt: bevorzugt team.id, fallback bleibt erhalten
-   */
-  const teamRef = resolveTeamId(team) || team.name;
-
-  markAssigned(squad, teamRef);
-
-  return squad;
+  return players;
 }
 
 /**
