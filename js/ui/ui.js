@@ -935,43 +935,7 @@ function calculateTeamStats(){
   };
 }
 
-  // =========================
-  // 🧠 STATS BERECHNUNG
-  // =========================
-
-  let attack = 0;
-  let defense = 0;
-  let control = 0;
-
-  players.forEach(p => {
-
-    const rating = p.overall ?? 50;
-    const type = p.position_type || "MID";
-
-    if(type === "ST"){
-      attack += rating * 1.2;
-    }
-    else if(type === "MID"){
-      attack += rating * 0.6;
-      control += rating * 1.0;
-    }
-    else if(type === "DEF"){
-      defense += rating * 1.2;
-    }
-    else if(type === "GK"){
-      defense += rating * 1.5;
-    }
-
-  });
-
-  const count = players.length || 1;
-
-  return {
-    attack: Math.round(attack / count),
-    defense: Math.round(defense / count),
-    control: Math.round(control / count)
-  };
-}
+  
 
 
 function renderTacticStats(){
