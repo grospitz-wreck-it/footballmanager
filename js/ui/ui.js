@@ -466,6 +466,10 @@ function updateTacticsUI(){
 
   if(!game.tactics) return;
 
+  document.querySelectorAll("[data-preset]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.preset === game.tactics.preset);
+  });
+
   document.querySelectorAll("[data-tempo]").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.tempo === game.tactics.tempo);
   });
