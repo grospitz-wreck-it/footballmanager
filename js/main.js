@@ -328,217 +328,144 @@ async function init(){
 
   try {
 
+    // =========================
+    // 👥 PLAYERS
+    // =========================
+    const players = await loadPlayers();
+    window.playerPool = players || [];
 
-const players = await loadPlayers();
-window.playerPool = players;
+    console.log("👥 Players loaded:", window.playerPool.length);
 
-    const { data: teams } = await supabase.from("teams").select("*");
+    // =========================
+    // 🏆 TEAMS
+    // =========================
+    const { data: teamsRaw, error: teamsError } =
+      await supabase.from("teams").select("*");
 
-    const { data: competitions } = await supabase
-  .from("competitions")
-  .select(`
-    *,
-    regions (
-      name,
-      states ( name )
-    )
-  `);
+    if(teamsError){
+      console.error("❌ Teams load failed:", teamsError);
+    }
 
-// 🔥 GAME EVENTS LADEN (FIX)
-const { data: gameEvents } = await supabase
-  .from("game_events")
-  .select("*");
+    const teams = teamsRaw || [];
+    window.teams = teams;
+    console.log("🏆 Teams loaded:", teams.length);
 
-console.log("🎮 GAME EVENTS LOADED:", gameEvents);
+    // =========================
+    // 🏟 COMPETITIONS
+    // =========================
+    const { data: competitionsRaw, error: compError } =
+      await supabase
+        .from("competitions")
+        .select(`
+          *,
+          regions (
+            name,
+            states ( name )
+          )
+        `);
 
+    if(compError){
+      console.error("❌ Competitions load failed:", compError);
+    }
+
+    const competitions = competitionsRaw || [];
+
+    console.log("🏟 Competitions loaded:", competitions.length);
+
+    // =========================
+    // 🎮 GAME EVENTS
+    // =========================
+    const { data: gameEvents } = await supabase
+      .from("game_events")
+      .select("*");
+
+    console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
+
+    // =========================
+    // 🧠 LEAGUE BUILD
+    // =========================
     const leagueMap = new Map();
 
     competitions.forEach(c => {
 
       const leagueId = normalizeId(c.id);
+
+      // 🔁 duplicate guard
       if(leagueMap.has(leagueId)) return;
 
+      // 🎯 nur Kreisliga A
       if(c.level !== 7) return;
       if(!c.name?.toLowerCase().includes("kreisliga a")) return;
 
-      const leagueTeams = teams.filter(t => {
+      // =========================
+      // 🔥 TEAM MATCH (ROBUST)
+      // =========================
+      let leagueTeams = teams.filter(t => {
 
-  const teamLeagueId = normalizeId(t.competition_id);
-  const currentLeagueId = normalizeId(c.id);
+        // 🔥 PRIMARY: competition_id match
+        const teamLeagueId = normalizeId(t.competition_id);
+        const currentLeagueId = normalizeId(c.id);
 
-  return teamLeagueId === currentLeagueId;
-});
+        if(teamLeagueId && currentLeagueId){
+          return teamLeagueId === currentLeagueId;
+        }
 
-// 🔥 DEBUG (WICHTIG!)
-if(leagueTeams.length < 2){
-  console.warn("⚠️ Zu wenig Teams für Liga:", c.name, leagueTeams.length);
-  return;
-}
+        // 🔄 FALLBACK: string match (safety)
+        const teamLeagueName =
+          (t.league || t.league_name || "").toLowerCase().trim();
 
-      if(!leagueTeams.length) return;
+        const compName =
+          (c.name || "").toLowerCase().trim();
 
+        return teamLeagueName === compName;
+      });
+
+      // =========================
+      // 🧪 DEBUG (nur wenn leer)
+      // =========================
+      if(leagueTeams.length < 2){
+
+        console.warn("⚠️ Zu wenig Teams für Liga:", c.name, leagueTeams.length);
+
+        // 🔥 DEEP DEBUG (hilft dir sofort)
+        console.log("👉 Beispiel Teams:", teams.slice(0,5));
+
+        return;
+      }
+
+      console.log("✅ Liga OK:", c.name, "| Teams:", leagueTeams.length);
+
+      // =========================
+      // 🧱 BUILD LEAGUE OBJECT
+      // =========================
       leagueMap.set(leagueId, {
         id: leagueId,
-        name: `${c.name}${c.regions?.name ? " " + c.regions.name : ""}`,
-        teams: leagueTeams.map(t => ({
-  id: normalizeId(t.id),
-  name: t.name || "Unbekannt"
-})),
-        region_id: c.region_id,
-        level: c.level
+        name: c.name,
+        teams: leagueTeams,
+        competition: c
       });
+
     });
 
-    const leagues = Array.from(leagueMap.values());
+    // =========================
+    // 📦 SAVE TO GAME
+    // =========================
+    game.leagues = Array.from(leagueMap.values());
 
-    if(!leagues.length){
-      throw new Error("❌ Keine Ligen geladen");
-    }
+    console.log("🏁 Leagues built:", game.leagues.length);
 
-    game.data = {
-  players,
-  teams: teams.map(t => ({ ...t, id: normalizeId(t.id) })),
-  competitions,
-  leagues,
+    // =========================
+    // 🚀 UI START
+    // =========================
+    splash?.classList.add("hidden");
+    app?.classList.remove("hidden");
 
-  // 🔥 CRITICAL FIX
-  gameEvents: gameEvents || []
-};
+    updateUI();
 
-    game.league = game.league || {};
-    game.league.available = leagues;
-
-    game.players = players;
-    initPlayerPool(players);
-
-    const loaded = loadGame();
-
-    if(!game.team?.selectedId){
-      game.phase = "setup";
-    }
-
-    if(!game.league.current){
-      game.league.current = leagues[0];
-    }
-
-    if(!game.league.current.schedule || !game.league.current.schedule.length){
-      generateSchedule();
-    }
-
-    // 🔥 FIX
-    if(game.league.currentRound === undefined){
-      game.league.currentRound = 0;
-    }
-
-    initLeagueSelect();
-    initTable();
-    initDebugOverlay();
-    initMatchEventSlides();
-    renderSchedule();
-
-    const plzInput = document.getElementById("plzInput");
-    const results = document.getElementById("leagueResults");
-
-    if(plzInput && results){
-
-      plzInput.addEventListener("input", async (e) => {
-
-        const value = e.target.value;
-
-        if(value.length < 2){
-          results.innerHTML = "";
-          return;
-        }
-
-        const leagues = await findLeaguesByCode(value);
-
-        results.innerHTML = leagues.map(l => `
-          <div class="league-option" data-id="${l.id}">
-            ${l.name}
-          </div>
-        `).join("");
-      });
-
-      results.addEventListener("click", (e) => {
-
-        const el = e.target.closest(".league-option");
-        if(!el) return;
-
-        const leagueId = el.dataset.id;
-
-        const league = game.league.available.find(
-          l => normalizeId(l.id) === normalizeId(leagueId)
-        );
-
-        if(league){
-
-          setLeagueById(league.id);
-
-          if(!league.schedule || !league.schedule.length){
-            generateSchedule();
-          }
-
-          // 🔥 FIX
-          if(game.league.currentRound === undefined){
-            game.league.currentRound = 0;
-          }
-
-          const round = league.schedule?.[game.league.currentRound || 0];
-          const match = getMatchForMyTeam(round);
-
-          if(match){
-           initMatch(round);
-
-            game.match.live.running = false;
-            game.match.live.phase = "first_half";
-          }
-
-          renderSchedule();
-          updateUI();
-        }
-      });
-    }
-
-    if(loaded){
-      splash.style.display = "none";
-      app.style.display = "block";
-      updateUI();
-      renderEvents();
-    } else {
-
-      game.phase = "setup";
-      splash.style.display = "flex";
-      app.style.display = "none";
-
-      document.getElementById("startBtn")?.addEventListener("click", () => {
-
-        game.phase = "idle";
-        splash.style.display = "none";
-        app.style.display = "block";
-
-        const league = game.league?.current;
-
-        // 🔥 FIX
-        const round = league?.schedule?.[game.league.currentRound || 0];
-        const match = getMatchForMyTeam(round);
-
-        if(match){
-          initMatch(round);
-
-          const live = game.match.live;
-          live.running = false;
-          live.minute = 0;
-          live.phase = "first_half";
-        }
-
-        updateUI();
-        renderEvents();
-      });
-    }
-
-  } catch (e){
-    console.error("❌ INIT ERROR:", e);
+  } catch(e){
+    console.error("💥 INIT CRASH:", e);
   }
+}
 
   // =========================
   // ▶️ MAIN BUTTON
