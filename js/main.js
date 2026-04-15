@@ -624,7 +624,7 @@ updateUI();
 
 
 // =========================
-// ▶️ MAIN BUTTON (FINAL FIX)
+// ▶️ MAIN BUTTON (ABSOLUTE FINAL FIX)
 // =========================
 let mainBtn = null;
 
@@ -632,6 +632,10 @@ let mainBtn = null;
 // 🔤 TEXT UPDATE
 // =========================
 function updateMainButtonText(){
+
+  if(!mainBtn){
+    mainBtn = document.getElementById("startBtn"); // 🔥 richtige ID
+  }
 
   const live = game.match?.live;
   if(!mainBtn || !live) return;
@@ -654,7 +658,7 @@ function updateMainButtonText(){
 }
 
 // =========================
-// 🔥 CLICK LOGIC (GETRENNT)
+// 🔥 CLICK LOGIC
 // =========================
 function handleMainButtonClick(){
 
@@ -774,37 +778,6 @@ function handleMainButtonClick(){
   }
 
   // =========================
-  // ⏸ HALFTIME
-  // =========================
-  if(
-    live.phase === "halftime" ||
-    (live.minute === 45 && !live.running)
-  ){
-
-    if(matchLoopRunning && live.running) return;
-
-    startBackgroundSimulation();
-
-    live.phase = "second_half";
-    live.running = true;
-    matchLoopRunning = true;
-
-    runMatchLoop({
-      onTick: () => {
-        updateUI();
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        matchLoopRunning = false;
-        updateUI();
-        updateMainButtonText();
-      }
-    });
-
-    return;
-  }
-
-  // =========================
   // ▶️ START / RESUME
   // =========================
   if(live.running === false){
@@ -845,6 +818,61 @@ function handleMainButtonClick(){
     updateMainButtonText();
     return;
   }
+}
+
+// =========================
+// 🔥 ULTRA ROBUST INIT
+// =========================
+function initMainButton(){
+
+  console.log("🔧 initMainButton gestartet");
+
+  // 👉 1. Direkt versuchen
+  mainBtn = document.getElementById("startBtn");
+
+  if(mainBtn){
+    console.log("✅ Button direkt gefunden");
+
+    // 🔥 HARD FIX gegen Overlay / Pointer Issues
+    mainBtn.style.position = "relative";
+    mainBtn.style.zIndex = "9999";
+    mainBtn.style.pointerEvents = "auto";
+
+    mainBtn.onclick = handleMainButtonClick;
+  }
+
+  // 👉 2. GLOBAL FALLBACK (IMMER aktiv)
+  document.addEventListener("click", (e) => {
+
+    const btn = e.target.closest("#startBtn");
+    if(!btn) return;
+
+    console.log("🔥 BUTTON CLICKED (delegated)");
+
+    mainBtn = btn;
+
+    // 🔥 FORCE CLICK
+    handleMainButtonClick();
+  });
+
+  // 👉 3. OBSERVER (falls UI später rendert)
+  const observer = new MutationObserver(() => {
+
+    const btn = document.getElementById("startBtn");
+    if(!btn) return;
+
+    console.log("🔁 Button nachträglich gefunden");
+
+    mainBtn = btn;
+    mainBtn.onclick = handleMainButtonClick;
+
+    observer.disconnect();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 }
 
 // =========================
