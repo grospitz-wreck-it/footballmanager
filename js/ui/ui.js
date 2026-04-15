@@ -894,53 +894,53 @@ function calculateTeamStats(){
 function renderTacticStats(){
 
   const el = document.getElementById("tacticsStats");
-  if(!el || !game.tactics) return;
+  if(!el) return;
 
-  const t = game.tactics;
+  const base = calculateTeamStats();
+  if(!base) return;
+
+  const t = game.tactics || {};
+
+  let attack = base.attack;
+  let defense = base.defense;
+  let control = base.control;
 
   // =========================
-  // 🎯 BASE VALUES (100 = neutral)
-  // =========================
-  let attack = 100;
-  let defense = 100;
-  let control = 100;
-
-  // =========================
-  // ⚙️ APPLY MODIFIERS
+  // ⚙️ TACTICS APPLY
   // =========================
 
-  // Tempo
   if(t.tempo === "fast"){
-    attack += 20;
-    control -= 10;
+    attack *= 1.2;
+    control *= 0.9;
   }
+
   if(t.tempo === "slow"){
-    defense += 15;
-    attack -= 10;
+    defense *= 1.15;
+    attack *= 0.9;
   }
 
-  // Pressing
   if(t.pressing === "high"){
-    attack += 15;
-    defense -= 10;
-  }
-  if(t.pressing === "low"){
-    defense += 20;
-    attack -= 10;
+    attack *= 1.15;
+    defense *= 0.9;
   }
 
-  // Line
-  if(t.line === "high"){
-    attack += 10;
-    defense -= 15;
+  if(t.pressing === "low"){
+    defense *= 1.2;
+    attack *= 0.9;
   }
+
+  if(t.line === "high"){
+    attack *= 1.1;
+    defense *= 0.85;
+  }
+
   if(t.line === "low"){
-    defense += 20;
-    attack -= 5;
+    defense *= 1.2;
+    attack *= 0.95;
   }
 
   // Clamp
-  const clamp = v => Math.max(0, Math.min(150, v));
+  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
 
   attack = clamp(attack);
   defense = clamp(defense);
