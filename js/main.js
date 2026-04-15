@@ -615,7 +615,7 @@ splash?.classList.add("hidden");
 app?.classList.remove("hidden");
 
 updateUI();
-
+initMainButton();
   } catch(e){
     console.error("💥 INIT CRASH:", e);
   }
