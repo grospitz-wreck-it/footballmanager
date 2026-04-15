@@ -34,10 +34,13 @@ const game = {
   // 👕 TEAM
   // =========================
   team: {
-    selected: null,
-    selectedId: null,
-  },
-
+  selected: null,
+  selectedId: null,
+  lineup: {
+    formation: "4-4-2",
+    slots: {} // z.B. { GK: playerId, DEF_1: playerId }
+  }
+},
   // =========================
   // ⚽ MATCH
   // =========================
