@@ -866,7 +866,7 @@ mainBtn = document.getElementById("startBtn");
   // 👉 2. fallback: beobachte DOM
   const observer = new MutationObserver(() => {
 
-    const btn = document.getElementById("mainButton");
+    const btn = document.getElementById("startBtn");
     if(!btn) return;
 
     console.log("✅ mainButton später gefunden");
