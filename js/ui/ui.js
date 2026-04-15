@@ -851,9 +851,6 @@ function openPlayerModal(player){
 
 function calculateTeamStats(){
 
-  // =========================
-  // 🔥 TEAM ID (ROBUST)
-  // =========================
   const teamId =
     game.team?.selectedId ||
     game.team?.id;
@@ -863,9 +860,6 @@ function calculateTeamStats(){
     return null;
   }
 
-  // =========================
-  // 🔥 DATENQUELLE FIX
-  // =========================
   const pool =
     (window.playerPool && window.playerPool.length)
       ? window.playerPool
@@ -881,11 +875,10 @@ function calculateTeamStats(){
   }
 
   const lineup = game.team?.lineup;
-
   let players = [];
 
   // =========================
-  // 🔥 1. LINEUP VERWENDEN
+  // 🔥 LINEUP FIRST
   // =========================
   if(lineup?.slots){
 
