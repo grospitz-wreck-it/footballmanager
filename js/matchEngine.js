@@ -433,7 +433,35 @@ function updateMomentum(){
 
 function getTeamStrength(teamId){
 
-  const players = getPlayersOfTeam(teamId);
+  const nid = normalizeId(teamId);
+
+  const myTeamId =
+    normalizeId(game.team?.selectedId) ||
+    normalizeId(game.team?.id);
+
+  let players;
+
+  // 🔥 nur dein Team nutzt Lineup
+  if(nid === myTeamId){
+
+    const slots = game.team?.lineup?.slots || {};
+    const ids = Object.values(slots).filter(Boolean);
+
+    if(ids.length){
+
+      const pool = window.playerPool || [];
+
+      players = pool.filter(p =>
+        ids.includes(normalizeId(p.id))
+      );
+
+    } else {
+      players = getPlayersOfTeam(teamId);
+    }
+
+  } else {
+    players = getPlayersOfTeam(teamId);
+  }
 
   if(!players?.length) return 50;
 
