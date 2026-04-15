@@ -936,13 +936,6 @@ function calculateTeamStats(){
 }
 
   // =========================
-  // 🔄 FALLBACK (dein altes System)
-  // =========================
-  if(!players.length){
-    players = allPlayers;
-  }
-
-  // =========================
   // 🧠 STATS BERECHNUNG
   // =========================
 
