@@ -474,12 +474,18 @@ competitions.forEach(c => {
 
 });
 
-    // =========================
-    // 📦 SAVE TO GAME
-    // =========================
-    game.leagues = Array.from(leagueMap.values());
+   // =========================
+// 📦 SAVE TO GAME (FIX)
+// =========================
+const leagues = Array.from(leagueMap.values());
 
-    console.log("🏁 Leagues built:", game.leagues.length);
+game.leagues = leagues;
+
+// 🔥 CRITICAL FIX (für Dropdown!)
+game.league = game.league || {};
+game.league.available = leagues;
+
+console.log("🏁 Leagues built:", leagues.length);
 
     // =========================
     // 🚀 UI START
