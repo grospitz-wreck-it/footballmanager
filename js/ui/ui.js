@@ -72,7 +72,7 @@ function updateUI(){
   // ⚙️ TACTICS UI SYNC (NEU)
   // =========================
   updateTacticsUI();
-
+  renderTacticStats();
   // =========================
   // 🪟 OVERLAY TOGGLE
   // =========================
@@ -201,6 +201,7 @@ function initUI(){
       btn.classList.add("active");
 
       updateTacticsUI();
+      renderTacticStats();
     };
 
   });
@@ -840,6 +841,84 @@ function openPlayerModal(player){
   overlay.onclick = (e) => {
     if(e.target === overlay) div.remove();
   };
+}
+
+
+function renderTacticStats(){
+
+  const el = document.getElementById("tacticsStats");
+  if(!el || !game.tactics) return;
+
+  const t = game.tactics;
+
+  // =========================
+  // 🎯 BASE VALUES (100 = neutral)
+  // =========================
+  let attack = 100;
+  let defense = 100;
+  let control = 100;
+
+  // =========================
+  // ⚙️ APPLY MODIFIERS
+  // =========================
+
+  // Tempo
+  if(t.tempo === "fast"){
+    attack += 20;
+    control -= 10;
+  }
+  if(t.tempo === "slow"){
+    defense += 15;
+    attack -= 10;
+  }
+
+  // Pressing
+  if(t.pressing === "high"){
+    attack += 15;
+    defense -= 10;
+  }
+  if(t.pressing === "low"){
+    defense += 20;
+    attack -= 10;
+  }
+
+  // Line
+  if(t.line === "high"){
+    attack += 10;
+    defense -= 15;
+  }
+  if(t.line === "low"){
+    defense += 20;
+    attack -= 5;
+  }
+
+  // Clamp
+  const clamp = v => Math.max(0, Math.min(150, v));
+
+  attack = clamp(attack);
+  defense = clamp(defense);
+  control = clamp(control);
+
+  // =========================
+  // 🎨 RENDER
+  // =========================
+  el.innerHTML = `
+    ${renderTacticBar("Attack", attack)}
+    ${renderTacticBar("Defense", defense)}
+    ${renderTacticBar("Control", control)}
+  `;
+}
+
+function renderTacticBar(label, value){
+
+  return `
+    <div class="tactic-row">
+      <div class="tactic-label">${label} (${value})</div>
+      <div class="tactic-bar">
+        <div class="tactic-fill" style="width:${value}%"></div>
+      </div>
+    </div>
+  `;
 }
 
 // =========================
