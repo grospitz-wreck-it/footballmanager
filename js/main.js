@@ -397,24 +397,19 @@ console.log("🧪 DEBUG READY → window.debugData");
 
 competitions.forEach(c => {
 
-  // =========================
-  // 🧠 BASIC FILTER
-  // =========================
+
   // =========================
 // 🧠 BASIC FILTER (FIXED)
 // =========================
-if(!c) return;
+if(!c.level) return;
 
-const name = (c.name || "").toLowerCase().trim();
+// Beispiel: alles von 1–7 zulassen
+if(c.level > 7) return;
 
 // ❌ Müll raus
 if(name.includes("(region)")) return;
-if(name.includes("kreisliga b")) return;
-if(name.includes("kreisliga c")) return;
-if(name.includes("kreisliga d")) return;
+if(/\sa\s\d+$/.test(name)) return;
 
-// ❌ optional: ganz niedrige Ligen skippen
-if(c.level > 7) return;
 
   // =========================
   // 🆔 STABILE ID (KEIN normalizeId!!)
@@ -466,15 +461,27 @@ if(c.level > 7) return;
   // =========================
   console.log("✅ LEAGUE OK:", c.name, "| teams:", leagueTeams.length);
 
-  // =========================
-  // 🏗 BUILD LEAGUE
-  // =========================
-  leagueMap.set(leagueId, {
-    id: leagueId,
-    name: c.name,
-    teams: leagueTeams
-  });
+ // =========================
+// 🧠 NAME ENRICHMENT
+// =========================
+const regionName =
+  c.regions?.name ||
+  c.regions?.states?.name ||
+  "";
 
+const displayName =
+  regionName
+    ? `${regionName} - ${c.name}`
+    : c.name;
+
+// =========================
+// 🏗 BUILD LEAGUE
+// =========================
+leagueMap.set(leagueId, {
+  id: leagueId,
+  name: displayName,
+  teams: leagueTeams,
+  region_id: c.region_id // 🔥 wichtig für PLZ
 });
 
    // =========================
