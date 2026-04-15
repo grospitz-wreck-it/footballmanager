@@ -46,35 +46,42 @@ function updateUI(){
 
   updateScore();
   updateProgress();
-  on(EVENTS.STATE_CHANGED, () => {
-  if(game.events?.history?.length){
-    updateEvents();
-  }
-});
+
   updateTabs();
 
+  // =========================
+  // 📊 TABLE
+  // =========================
   if(game.ui.tab === "table"){
+
     renderLiveTable();
 
-if(game.match?.live?.running){
-  ensureLiveTableLoop();
-}
-
-    ensureLiveTableLoop();
+    if(game.match?.live?.running){
+      ensureLiveTableLoop();
+    }
   }
 
+  // =========================
+  // 👥 TEAM
+  // =========================
   if(game.ui.tab === "team"){
     renderTeam();
   }
 
-  // 🔥 FIX: OVERLAY TOGGLE (MUSS HIER REIN)
+  // =========================
+  // ⚙️ TACTICS UI SYNC (NEU)
+  // =========================
+  updateTacticsUI();
+
+  // =========================
+  // 🪟 OVERLAY TOGGLE
+  // =========================
   const tacticsOverlay = document.getElementById("tacticsOverlay");
 
   if(tacticsOverlay){
     tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
   }
 }
-
  
 
 function initUI(){
