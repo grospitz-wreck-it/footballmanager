@@ -568,9 +568,14 @@ function renderTeam(){
 
   const teamId = game.team?.selectedId;
 
-  const players = (game.players || []).filter(p => 
-    String(p.team_id) === String(teamId)
-  );
+  const pool =
+  (window.playerPool && window.playerPool.length)
+    ? window.playerPool
+    : (game.players || []);
+
+const players = pool.filter(p => 
+  String(p.team_id) === String(teamId)
+);
 
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
