@@ -853,8 +853,8 @@ function handleMainButtonClick(){
 function initMainButton(){
 
   // 👉 1. initial Versuch
-  mainBtn = document.getElementById("mainButton");
-
+mainBtn = document.getElementById("startBtn");
+  
   if(mainBtn){
     console.log("✅ mainButton gefunden (init)");
     mainBtn.onclick = handleMainButtonClick;
@@ -884,7 +884,7 @@ function initMainButton(){
 
   // 👉 3. safety: delegated fallback
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("#mainButton");
+    const btn = e.target.closest("#startBtn");
     if(!btn) return;
 
     mainBtn = btn;
