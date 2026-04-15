@@ -41,7 +41,7 @@ const game = {
   lineup: {
     formation: "4-4-2",
 
-    // Slot-System (positionsbasiert)
+    // 🔥 wichtig: klare Slot-Struktur
     slots: {
       GK: null,
 
