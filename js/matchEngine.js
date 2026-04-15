@@ -444,6 +444,9 @@ function getTeamStrength(teamId){
   // 🔥 nur dein Team nutzt Lineup
   if(nid === myTeamId){
 
+    // 🔥 HIER IST DER FIX
+    autoFillLineup(teamId);
+
     const slots = game.team?.lineup?.slots || {};
     const ids = Object.values(slots).filter(Boolean);
 
