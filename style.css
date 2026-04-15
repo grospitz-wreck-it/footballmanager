@@ -1270,3 +1270,8 @@ tr:hover {
 #tacticsOverlay.open .tactics-sheet {
   transform: translateY(0);
 }
+.tactics-row button.active {
+  background: orange;
+  color: black;
+  font-weight: bold;
+}
