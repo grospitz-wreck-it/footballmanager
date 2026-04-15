@@ -743,7 +743,7 @@ mainBtn?.addEventListener("click", () => {
     }
 
     if(match){
-      const ok = initMatch(round);
+  const ok = initMatch([match]); // 🔥 HIER AUCH
       if(!ok) return;
 
       startBackgroundSimulation();
