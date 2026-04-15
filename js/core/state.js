@@ -36,9 +36,28 @@ const game = {
   team: {
   selected: null,
   selectedId: null,
+
+  // 🔥 LINEUP SYSTEM
   lineup: {
     formation: "4-4-2",
-    slots: {} // z.B. { GK: playerId, DEF_1: playerId }
+
+    // Slot-System (positionsbasiert)
+    slots: {
+      GK: null,
+
+      DEF_1: null,
+      DEF_2: null,
+      DEF_3: null,
+      DEF_4: null,
+
+      MID_1: null,
+      MID_2: null,
+      MID_3: null,
+      MID_4: null,
+
+      ST_1: null,
+      ST_2: null
+    }
   }
 },
   // =========================
