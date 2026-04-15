@@ -1,3 +1,9 @@
+console.log("🚀 MAIN LOADED");
+
+document.addEventListener("click", () => {
+  console.log("🖱 ANY CLICK");
+});
+
 // =========================
 // 📦 CORE
 // =========================
