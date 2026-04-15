@@ -109,7 +109,8 @@ async function saveTeamToDB(ids, teamId){
   const { error } = await supabase
     .from("players")
     .update({ team_id: teamId })
-    .in("id", ids);
+.in("id", ids)
+.is("team_id", null);
 
   if(error){
     console.error("❌ Save Fehler:", error.message);
