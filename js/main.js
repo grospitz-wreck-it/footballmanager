@@ -696,7 +696,7 @@ mainBtn?.addEventListener("click", () => {
     }
 
     if(match){
-      const ok = initMatch(round);
+  const ok = initMatch([match]); // 🔥 HIER FIX
 
       if(!ok){
         console.error("❌ initMatch fehlgeschlagen");
