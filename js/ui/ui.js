@@ -215,11 +215,17 @@ function updateScore(){
   const scoreEl = document.getElementById("topScore");
   const teamsEl = document.getElementById("topTeams");
   const minuteEl = document.getElementById("topMinute");
+  const tacticsEl = document.getElementById("topTactics"); // 🔥 NEU (optional)
 
+  // =========================
+  // 🏷 TEAM NAMES
+  // =========================
   if(teamsEl){
+
     const current = game.match?.current;
 
     if(current){
+
       const homeName =
         current.homeName ||
         (typeof current.home === "string"
@@ -238,10 +244,29 @@ function updateScore(){
     }
   }
 
-  if(!scoreEl || !minuteEl) return;
+  // =========================
+  // ⚽ SCORE + MINUTE
+  // =========================
+  if(scoreEl){
+    scoreEl.textContent = `${match.score?.home ?? 0} : ${match.score?.away ?? 0}`;
+  }
 
-  scoreEl.textContent = `${match.score?.home ?? 0} : ${match.score?.away ?? 0}`;
-  minuteEl.textContent = `${match.minute ?? 0}'`;
+  if(minuteEl){
+    minuteEl.textContent = `${match.minute ?? 0}'`;
+  }
+
+  // =========================
+  // ⚙️ TACTICS (NEU, SAFE)
+  // =========================
+  if(tacticsEl && game.tactics){
+
+    const preset = game.tactics.preset || "balanced";
+
+    tacticsEl.textContent =
+      preset === "custom"
+        ? "CUSTOM"
+        : preset.toUpperCase();
+  }
 }
 
 // =========================
