@@ -257,8 +257,8 @@ async function getRegionsByCode(code){
     .from("region_codes")
     .select("region_id")
     .eq("country", "DE")
-    .eq("code", code);
-
+    .like("code", `${code}%`);
+  
   if(error){
     console.error("❌ region_codes error:", error);
     return [];
