@@ -774,83 +774,11 @@ function renderStat(label, value){
   `;
 }
 
-function openPlayerModal(player){
-
-  if(!player) return;
-
-  const existing = document.getElementById("playerModal");
-  if(existing) existing.remove();
-
-  const div = document.createElement("div");
-  div.id = "playerModal";
-
-  const stars = Math.min(Math.max(player.stars || 1, 1), 5);
-
-  div.innerHTML = `
-    <div class="modal-overlay">
-      <div 
-        class="player-modal" 
-        data-tier="${player.tier || 'common'}"
-        data-stars="${stars}"
-      >
-
-        <button class="close-btn">✕</button>
-
-        <div class="card-top">
-          <div class="rating">${player.overall ?? 0}</div>
-          <div class="stars-top">
-            <img src="./gfx/modal/star${stars}.webp" />
-          </div>
-        </div>
-
-        <div class="card-player">
-          <canvas id="player-avatar" width="64" height="64"></canvas>
-        </div>
-
-        <div class="card-name">${player.name || "Spieler"}</div>
-
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(div);
-
-  // 🎯 MOOD SYSTEM
-  const mood =
-    (player.morale ?? 50) > 80 ? "happy" :
-    (player.morale ?? 50) < 40 ? "angry" :
-    (player.fitness ?? 100) < 50 ? "tired" :
-    "neutral";
-
-  // 🎨 Avatar
-  const canvas = div.querySelector("#player-avatar");
-  const ctx = canvas?.getContext("2d");
-
-  if(ctx){
-    const texture = getPlayerTexture(
-      player.id,
-      player.nationality || player.Country || "DE",
-      mood
-    );
-
-    ctx.clearRect(0,0,64,64);
-    ctx.drawImage(texture, 0, 0);
-  }
-
-  // ❌ Close logic
-  const overlay = div.querySelector(".modal-overlay");
-  const closeBtn = div.querySelector(".close-btn");
-
-  closeBtn.onclick = () => div.remove();
-
-  overlay.onclick = (e) => {
-    if(e.target === overlay) div.remove();
-  };
-}
-
-
 function calculateTeamStats(){
 
+  // =========================
+  // 🔥 TEAM ID
+  // =========================
   const teamId =
     game.team?.selectedId ||
     game.team?.id;
@@ -860,6 +788,9 @@ function calculateTeamStats(){
     return null;
   }
 
+  // =========================
+  // 🔥 DATENQUELLE
+  // =========================
   const pool =
     (window.playerPool && window.playerPool.length)
       ? window.playerPool
@@ -874,12 +805,12 @@ function calculateTeamStats(){
     return null;
   }
 
+  // =========================
+  // 🔥 LINEUP → STARTERS
+  // =========================
   const lineup = game.team?.lineup;
   let players = [];
 
-  // =========================
-  // 🔥 LINEUP FIRST
-  // =========================
   if(lineup?.slots){
 
     const ids = Object.values(lineup.slots).filter(Boolean);
@@ -892,14 +823,14 @@ function calculateTeamStats(){
   }
 
   // =========================
-  // 🔄 FALLBACK
+  // 🔄 FALLBACK (alle Spieler)
   // =========================
   if(!players.length){
     players = allPlayers;
   }
 
   // =========================
-  // 🧠 STATS
+  // 🧠 STATS BERECHNUNG
   // =========================
   let attack = 0;
   let defense = 0;
@@ -910,33 +841,61 @@ function calculateTeamStats(){
     const rating = p.overall ?? 50;
     const type = (p.position_type || "MID").toUpperCase();
 
+    // ⚔️ Attack
     if(type.includes("ST")){
       attack += rating * 1.2;
     }
+
+    // 🧠 Midfield
     else if(type.includes("MID")){
       attack += rating * 0.6;
       control += rating * 1.0;
     }
+
+    // 🛡 Defense
     else if(type.includes("DEF")){
       defense += rating * 1.2;
     }
+
+    // 🧤 Goalkeeper
     else if(type.includes("GK")){
       defense += rating * 1.5;
     }
 
+    // 🔄 Unknown fallback
+    else{
+      control += rating * 0.5;
+    }
+
   });
 
+  // =========================
+  // 📊 NORMALIZE
+  // =========================
   const count = players.length || 1;
 
-  return {
+  let result = {
     attack: Math.round(attack / count),
     defense: Math.round(defense / count),
     control: Math.round(control / count)
   };
+
+  // =========================
+  // 🔒 SAFETY CLAMP
+  // =========================
+  const clamp = v => Math.max(0, Math.min(150, v));
+
+  result.attack = clamp(result.attack);
+  result.defense = clamp(result.defense);
+  result.control = clamp(result.control);
+
+  // =========================
+  // 🧪 DEBUG (optional)
+  // =========================
+  console.log("📊 TeamStats:", result);
+
+  return result;
 }
-
-  
-
 
 function renderTacticStats(){
 
