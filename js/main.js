@@ -83,7 +83,7 @@ function startBackgroundSimulation(){
   simInterval = setInterval(() => {
 
     const league = game.league?.current;
-    const round = league?.schedule?.[game.league.currentRound || 0];
+    const round = league?.schedule?.[game.league?.currentRound || 0];
     if(!round) return;
 
     const myTeamId = normalizeId(game.team?.selectedId);
