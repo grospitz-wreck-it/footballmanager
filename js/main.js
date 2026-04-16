@@ -703,6 +703,9 @@ if(game.league.available?.length){
   setLeagueById(game.league.available[0].id);
 }
 
+// 🔥 HIER REIN
+handleAppVisibility();
+
 // =========================
 // 🔥 APP START (FINAL SAFE)
 // =========================
