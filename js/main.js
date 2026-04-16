@@ -787,11 +787,18 @@ mainBtn?.addEventListener("click", () => {
 // =========================
 // 🔄 RESET
 // =========================
-document.getElementById("resetBtn")?.addEventListener("click", () => {
-  import("./services/storage.js").then(m => m.resetGame());
+document.getElementById("resetBtn")?.addEventListener("click", async () => {
+
+  const m = await import("./services/storage.js");
+  m.resetGame();
+
+  // =========================
+  // 🔥 UI NEU BEWERTEN
+  // =========================
+  handleAppVisibility();
+  updateUI();
+
 });
-
-
 
 // =========================
 // ▶️ START
