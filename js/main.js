@@ -372,10 +372,9 @@ if(plzInput){
 
 plzInput?.addEventListener("input", async (e) => {
 
-  // 🧠 stiller Guard (kein Spam, kein UX-Problem)
   if(!game.league?.available?.length){
-    return;
-  }
+  console.warn("⚠️ Leagues not ready yet");
+}
 
   const value = e.target.value;
 
