@@ -362,66 +362,101 @@ async function autoSelectLeagueByPLZ(input){
 // =========================
 // 🔎 PLZ SEARCH UI (DEIN DIV)
 // =========================
+// =========================
+// 🔎 PLZ SEARCH UI (FIXED)
+// =========================
 const plzInput = document.getElementById("plzInput");
 const resultsEl = document.getElementById("leagueResults");
+
+console.log("🧪 PLZ INPUT:", plzInput);
+console.log("🧪 RESULTS EL:", resultsEl);
 
 // 🔒 zuerst deaktivieren
 if(plzInput){
   plzInput.disabled = true;
 }
 
-plzInput?.addEventListener("input", async (e) => {
+// 🔥 GUARD: wenn DOM nicht da → abbrechen
+if(!plzInput || !resultsEl){
+  console.error("❌ PLZ UI Elemente fehlen");
+} else {
 
-  if(!game.league?.available?.length){
-  console.warn("⚠️ Leagues not ready yet");
-}
+  plzInput.addEventListener("input", async (e) => {
 
-  const value = e.target.value;
+    const value = e.target.value;
 
-  // 👉 reset wenn zu kurz
-  if(!value || value.length < 3){
-    resultsEl.innerHTML = "";
-    return;
-  }
+    console.log("🔥 INPUT EVENT:", value);
 
-  const leagues = await findLeaguesByCode(value);
+    if(!game.league?.available?.length){
+      console.warn("⚠️ Leagues not ready yet");
+    }
 
-  if(!leagues.length){
-    resultsEl.innerHTML = `<div style="padding:8px;opacity:0.6">Keine Ligen gefunden</div>`;
-    return;
-  }
-
-  // 🔥 sort nach Level
-  leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
-
-  // =========================
-  // 🎯 RENDER RESULTS
-  // =========================
-  resultsEl.innerHTML = leagues.map(l => `
-    <div class="league-result" data-id="${l.id}">
-${l.name || l.display_name}
-</div>
-  `).join("");
-
-  // =========================
-  // 🖱 CLICK HANDLER
-  // =========================
-  resultsEl.querySelectorAll(".league-result").forEach(el => {
-
-    el.addEventListener("click", () => {
-
-      const id = el.dataset.id;
-      if(!id) return;
-
-      console.log("🎯 PLZ SELECT:", id);
-
-      setLeagueById(id);
-
-      // 👉 UI reset
+    // 👉 reset wenn zu kurz (JETZT ab 2 statt 3)
+    if(!value || value.length < 2){
       resultsEl.innerHTML = "";
+      return;
+    }
+
+    let leagues = [];
+
+    try {
+      leagues = await findLeaguesByCode(value);
+    } catch(err){
+      console.error("❌ findLeaguesByCode crashed:", err);
+      return;
+    }
+
+    console.log("🏆 FOUND LEAGUES:", leagues);
+
+    if(!leagues || !leagues.length){
+      resultsEl.innerHTML = `<div style="padding:8px;opacity:0.6">Keine Ligen gefunden</div>`;
+      return;
+    }
+
+    // 🔥 sort nach Level
+    leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
+
+    // =========================
+    // 🎯 RENDER RESULTS
+    // =========================
+    resultsEl.innerHTML = leagues.map(l => `
+      <div class="league-result" data-id="${l.id}">
+        ${l.name || l.display_name}
+      </div>
+    `).join("");
+
+    // =========================
+    // 🖱 CLICK HANDLER
+    // =========================
+    resultsEl.querySelectorAll(".league-result").forEach(el => {
+
+      el.addEventListener("click", () => {
+
+        const id = el.dataset.id;
+        if(!id) return;
+
+        console.log("🎯 PLZ SELECT:", id);
+
+        setLeagueById(id);
+
+        // 👉 UI reset
+        resultsEl.innerHTML = "";
+      });
+
     });
 
+    // =========================
+    // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
+    // =========================
+    if(leagues.length === 1){
+      setLeagueById(leagues[0].id);
+      resultsEl.innerHTML = "";
+    }
+
   });
+
+}
+  
 
   // =========================
   // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
