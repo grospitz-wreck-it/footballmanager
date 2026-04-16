@@ -592,11 +592,11 @@ game.league = game.league || {};
 game.league.available = leagues;
 
 console.log("🏁 Leagues built:", leagues.length);
-// 🔥 PLZ INPUT JETZT FREIGEBEN
-const plzInput = document.getElementById("plzInput");
 
-if(plzInput){
-  plzInput.disabled = false;
+    const plzInputEl = document.getElementById("plzInput");
+
+if(plzInputEl){
+  plzInputEl.disabled = false;
   console.log("✅ PLZ ready");
 }
 // =========================
