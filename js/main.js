@@ -604,8 +604,8 @@ if(game.league.available?.length){
   setLeagueById(game.league.available[0].id);
 }
 
-splash?.classList.add("hidden");
-app?.classList.remove("hidden");
+
+handleAppVisibility();   // 👈 HIER
 
 updateUI();
 
