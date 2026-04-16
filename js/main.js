@@ -572,6 +572,7 @@ initLeagueSelect(game.league.available);
 function bindPLZInput(){
 console.log("🚀 bindPLZInput CALLED");
   const plzInput = document.getElementById("plzInput");
+  console.log("🔎 plzInput:", plzInput);
   const resultsEl = document.getElementById("leagueResults");
 
   console.log("🧪 PLZ INPUT:", plzInput);
