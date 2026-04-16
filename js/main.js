@@ -326,12 +326,13 @@ async function findLeaguesByCode(input){
 
   const matches = leagues.filter(l => {
 
-if(!l.region_id) return true; // 🔥 fallback: zeig Liga trotzdem
-    
-    const leagueRegion = String(l.region_id).trim();
+  // 🔥 wenn keine region → immer erlauben
+  if(!l.region_id) return true;
 
-    return regionIds.includes(leagueRegion);
-  });
+  const leagueRegion = String(l.region_id).trim();
+
+  return regionIds.includes(leagueRegion);
+});
 
   if(!matches.length){
     console.warn("⚠️ KEINE MATCHES → nehme ALLE Ligen");
