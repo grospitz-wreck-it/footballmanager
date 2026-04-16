@@ -17,6 +17,8 @@ function normalizeId(id){
 
 // 🔥 Map für externes Setzen (PLZ)
 let leagueIndexMap = [];
+// 🔥 FIX: verhindert doppelte Initialisierung
+let leagueSelectInitialized = false;
 
 function ensureTeamPlayers(team){
 
