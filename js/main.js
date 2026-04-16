@@ -503,42 +503,7 @@ competitions.forEach(c => {
   // =========================
   // 🔥 TEAM MATCH (ROBUST)
   // =========================
-  let leagueTeams = teams.filter(t => {
-
-    if(!t) return false;
-
-    // ✅ PRIMARY (UUID match)
-    if(t.competition_id && c.id){
-      return String(t.competition_id) === String(c.id);
-    }
-
-    // 🔄 FALLBACK (Name match)
-    const teamLeagueName =
-      (t.league || t.league_name || "").toLowerCase().trim();
-
-    return teamLeagueName === name;
-  });
-  console.log("🧪 LEAGUE CHECK:", {
-  league: rawName,
-  compId: c.id,
-  teamsFound: leagueTeams.length
-});
-  // =========================
-  // 🧪 DEBUG (nur wenn kaputt)
-  // =========================
-  if(leagueTeams.length < 2){
-
-  console.warn("⚠️ Zu wenig Teams für Liga (trotzdem erlaubt):", rawName, leagueTeams.length);
-
-  const sample = teams.slice(0,5).map(t => ({
-    name: t.name,
-    comp: t.competition_id
-  }));
-
-  console.log("👉 Beispiel Teams:", sample);
-
-  // ❌ KEIN return mehr!
-}
+ let leagueTeams = teams;
 
   // =========================
   // 🧠 DISPLAY NAME FIX
