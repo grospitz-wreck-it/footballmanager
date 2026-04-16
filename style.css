@@ -543,97 +543,6 @@ tr:hover {
   padding-bottom: 4px;
 }
 
-/* PLAYER CARD (MATCHES YOUR DESIGN SYSTEM) */
-.player-card {
-  background: linear-gradient(180deg, #020617, #0f172a);
-  border-radius: 14px;
-  padding: 10px;
-
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  transition: all 0.2s ease;
-}
-
-/* HOVER wie Schedule */
-.player-card:hover {
-  background: rgba(255,255,255,0.06);
-  transform: scale(1.03);
-}
-
-/* SMALL (BENCH) */
-.player-card.small {
-  min-width: 90px;
-  flex-shrink: 0;
-}
-
-/* HEADER */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #94a3b8;
-}
-
-/* POSITION BADGE */
-.card-header span:first-child {
-  background: rgba(34,197,94,0.15);
-  color: #22c55e;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-weight: 600;
-}
-
-/* RATING */
-.card-header span:last-child {
-  font-weight: bold;
-  color: #e5e7eb;
-}
-
-/* NAME */
-.player-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: white;
-}
-
-/* STATS */
-.stats {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-/* STAT */
-.stat {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 9px;
-  color: #94a3b8;
-}
-
-/* BAR */
-.stat-bar {
-  flex: 1;
-  height: 4px;
-  background: #1e293b;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-/* VALUE BAR (MATCHES PROGRESS COLORS) */
-.stat-bar div {
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    #22c55e,
-    #16a34a
-  );
-}
 
 
 /* =========================
@@ -810,7 +719,18 @@ tr:hover {
 #playerModal {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 4000; /* 🔥 unter matchOverlay (9999 war zu viel) */
+
+  opacity: 0;
+  pointer-events: none; /* 🔥 blockiert NICHT mehr alles */
+
+  transition: opacity 0.2s ease;
+}
+
+/* 👉 aktiv */
+#playerModal.show {
+  opacity: 1;
+  pointer-events: auto; /* 🔥 nur dann klickbar */
 }
 
 .modal-overlay {
@@ -849,10 +769,8 @@ tr:hover {
 
   color: white;
 
-  /* BASE */
   background: linear-gradient(160deg, #111A2B, #0B1220);
 
-  /* 🔥 STRUCTURE (wie FUT) */
   background-image:
     linear-gradient(160deg, rgba(255,255,255,0.05), transparent),
     repeating-linear-gradient(
@@ -863,18 +781,15 @@ tr:hover {
       transparent 6px
     );
 
-  /* 🔥 DEPTH */
   box-shadow:
     0 30px 80px rgba(0,0,0,0.9),
     0 0 0 1px rgba(255,255,255,0.05),
     inset 0 0 30px rgba(255,255,255,0.05);
 
-  /* 🎮 ENTRY */
   transform: scale(0.85) translateY(30px);
   opacity: 0;
   animation: modalIn 0.25s ease forwards;
 
-  /* DEFAULT FX */
   --glow: rgba(34,197,94,0.25);
   --shine: rgba(255,255,255,0.2);
 }
@@ -999,7 +914,7 @@ tr:hover {
 
 
 /* =========================
-❌ CLOSE BUTTON (BESSER)
+❌ CLOSE BUTTON
 ========================= */
 
 .close-btn {
@@ -1029,7 +944,7 @@ tr:hover {
 
 
 /* =========================
-🎨 TIERS (JETZT WICHTIG!)
+🎨 TIERS
 ========================= */
 
 .player-modal[data-tier="common"] {
@@ -1084,11 +999,88 @@ tr:hover {
   to { transform: translateX(120%); }
 }
 
+
+/* =========================
+🧾 PLAYER CARD (LIST VIEW)
+========================= */
+
+.player-card {
+  background: linear-gradient(180deg, #020617, #0f172a);
+  border-radius: 14px;
+  padding: 10px;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  transition: all 0.2s ease;
+}
+
+.player-card:hover {
+  background: rgba(255,255,255,0.06);
+  transform: scale(1.03);
+}
+
+.player-card.small {
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.card-header span:first-child {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.card-header span:last-child {
+  font-weight: bold;
+  color: #e5e7eb;
+}
+
+.player-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stat {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  font-size: 9px;
+  color: #94a3b8;
 }
+
+.stat-bar {
+  flex: 1;
+  height: 4px;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
 }
+
+.stat-bar div {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
 
 /* =========================
 🏟️ AD SYSTEM (LOCKED HEIGHT)
