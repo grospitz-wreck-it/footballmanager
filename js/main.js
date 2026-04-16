@@ -515,8 +515,7 @@ competitions.forEach(c => {
   // =========================
   // 🎯 FILTER
   // =========================
-  if(!c.level) return;
-  if(c.level > 7) return;
+  
 
   // Müll raus
   if(name.includes("(region)")) return;
