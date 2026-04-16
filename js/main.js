@@ -621,9 +621,18 @@ function bindPLZInput(){
     });
 
     if(leagues.length === 1){
-      setLeagueById(leagues[0].id);
-      resultsEl.innerHTML = "";
-    }
+
+  const league = leagues[0];
+
+  // 👉 visuelles Feedback
+  resultsEl.innerHTML = `
+    <div style="padding:8px;color:#4caf50">
+      ✅ ${league.name} ausgewählt
+    </div>
+  `;
+
+  setLeagueById(league.id);
+}
 
   });
 
