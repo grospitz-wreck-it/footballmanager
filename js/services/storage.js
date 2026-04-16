@@ -5,12 +5,13 @@ import { game } from "../core/state.js";
 import { generateSchedule } from "../modules/scheduler.js";
 
 const STORAGE_KEY = "kreisliga_save";
-const SAVE_VERSION = 2; // 🔥 erhöht wegen ID System
+const SAVE_VERSION = 2;
 
 // =========================
 // 💾 SAVE
 // =========================
-function saveGame(){
+export function saveGame(){   // ✅ FIX
+
   try {
 
     const { ui, ...gameData } = game;
@@ -35,7 +36,8 @@ function saveGame(){
 // =========================
 // 📂 LOAD
 // =========================
-function loadGame(){
+export function loadGame(){   // ✅ FIX
+
   try {
 
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -52,24 +54,10 @@ function loadGame(){
       return false;
     }
 
-    // =========================
-    // 🧠 STATE MERGE
-    // =========================
     deepMerge(game, data.game);
-
-    // =========================
-    // 🆔 ID REBUILD (NEU!)
-    // =========================
     rebuildIds();
-
-    // =========================
-    // 🔥 UI FIX
-    // =========================
     ensureUI();
 
-    // =========================
-    // 📅 FALLBACK SCHEDULE
-    // =========================
     if(
       (!game.league?.current?.schedule ||
         game.league.current.schedule.length === 0) &&
@@ -92,7 +80,7 @@ function loadGame(){
 // =========================
 // 🗑 DELETE
 // =========================
-function clearSave(){
+export function clearSave(){   // ✅ FIX
   localStorage.removeItem(STORAGE_KEY);
   console.log("🗑 Save gelöscht");
 }
@@ -240,25 +228,47 @@ export function resetGame(){
   // =========================
   localStorage.clear();
 
+
+ // =========================
+// 🧠 MEMORY RESET (FINAL CLEAN)
+// =========================
+if(game){
+
   // =========================
-  // 🧠 MEMORY RESET (WICHTIG!)
+  // 👤 TEAM
   // =========================
-  if(window.game){
+  game.team = {
+    selectedId: null
+  };
 
-    window.game.team = {
-      selectedId: null
-    };
+  // =========================
+  // 🏆 LEAGUE
+  // =========================
+  game.league = {
+    current: null,
+    available: []
+  };
 
-    window.game.league = {
-      current: null,
-      available: []
-    };
+  // =========================
+  // 🎮 MATCH
+  // =========================
+  game.match = null;
 
-    window.game.match = null;
-    window.game.events = { history: [] };
-    window.game.ui = {};
+  // =========================
+  // 📢 EVENTS
+  // =========================
+  game.events = {
+    history: []
+  };
 
-  }
+  // =========================
+  // 🖥 UI
+  // =========================
+  game.ui = {
+    sidebarOpen: false,
+    tab: "table"
+  };
 
-  console.log("✅ Game state cleared");
 }
+
+console.log("✅ Game state cleared");
