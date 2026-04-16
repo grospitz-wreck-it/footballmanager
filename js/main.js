@@ -401,7 +401,7 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
       teams: game.league?.current?.teams?.length
     });
 
-  // =========================
+// =========================
 // 🔥 APP START (FINAL FIXED & ROBUST)
 // =========================
 
@@ -416,6 +416,9 @@ function handleAppVisibility(){
 
     console.log("🎮 GAME START (team selected)");
 
+    // =========================
+    // 🧼 UI SWITCH
+    // =========================
     if(splash){
       splash.style.display = "none";
     }
@@ -423,6 +426,18 @@ function handleAppVisibility(){
     if(app){
       app.classList.remove("hidden");
     }
+
+    // =========================
+    // 🚀 SYSTEM START (WICHTIG)
+    // =========================
+    initOverlayManager();
+    initMainButton();
+
+    // =========================
+    // 🎨 UI RENDER
+    // =========================
+    updateUI();
+    updateMainButtonText();
 
   } else {
 
@@ -437,7 +452,6 @@ function handleAppVisibility(){
     }
   }
 }
-
   // =========================
   // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
   // =========================
