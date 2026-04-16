@@ -482,7 +482,8 @@ console.log("🧪 START LEAGUE BUILD");
 console.log("🧪 competitions:", competitions);
 console.log("🧪 teams:", teams);
 competitions.forEach(c => {
-
+console.log("🔁 COMP:", c?.name, c?.id);
+  console.log("👉 region_id:", c?.region_id);
   if(!c) return;
 
   const rawName = (c.name || "").trim();
@@ -856,7 +857,7 @@ mainBtn?.addEventListener("click", () => {
     return;
   }
 });
-
+console.log("🧪 leagueMap size:", leagueMap.size);
 // =========================
 // 🔄 RESET
 // =========================
