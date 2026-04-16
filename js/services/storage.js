@@ -272,3 +272,4 @@ if(game){
 }
 
 console.log("✅ Game state cleared");
+}
