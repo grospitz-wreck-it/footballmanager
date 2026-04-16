@@ -29,7 +29,9 @@ startGame();
 // =========================
 import { supabase } from "./client.js";
 console.log("🔥 STEP 8");
-
+console.log("🧪 RAW DATA CHECK");
+console.log("competitions:", competitions);
+console.log("teams:", teams);
 // =========================
 // 🔧 MODULES
 // =========================
