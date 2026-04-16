@@ -445,12 +445,16 @@ async function init(){
       await supabase
         .from("competitions")
         .select(`
-          *,
-          regions (
-            name,
-            states ( name )
-          )
-        `);
+  id,
+  name,
+  level,
+  region_id,
+  regions (
+    id,
+    name,
+    states ( name )
+  )
+`)
 
     if(compError){
       console.error("❌ Competitions load failed:", compError);
