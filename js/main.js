@@ -248,9 +248,6 @@ function getMatchForMyTeam(round){
 
 function handleAppVisibility(){
 
-  const splash = document.getElementById("splash");
-  const app = document.getElementById("app");
-
   if(game.team?.selectedId){
 
     splash && (splash.style.display = "none");
