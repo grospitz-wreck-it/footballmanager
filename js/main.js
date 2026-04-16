@@ -602,7 +602,10 @@ initLeagueSelect(game.league.available);
 // 🔎 PLZ BINDING (FIXED)
 // =========================
 function bindPLZInput(){
-
+const plzInput = document.getElementById("plzInput");
+if(plzInput){
+  plzInput.disabled = true;
+}
   console.log("🚀 bindPLZInput CALLED");
 
   const plzInput = document.getElementById("plzInput");
