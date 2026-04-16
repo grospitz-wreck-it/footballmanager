@@ -686,48 +686,7 @@ if(game.league.available?.length){
 // 🔥 HIER REIN
 handleAppVisibility();
 
-// =========================
-// 🔥 APP START (FINAL SAFE)
-// =========================
 
-if(game.team?.selectedId){
-
-  console.log("🎮 GAME START (team selected)");
-
-  // 🔥 Splash wirklich entfernen (blockiert sonst alles)
-  if(splash){
-    splash.style.display = "none";
-  }
-
-  // 🔥 App sichtbar machen
-  if(app){
-    app.classList.remove("hidden");
-  }
-
-  // 🔥 Systeme initialisieren (Reihenfolge wichtig!)
-  initOverlayManager();
-  initMainButton();
-
-  // 🔥 UI rendern
-  updateUI();
-
-  // 🔥 Button Text korrekt setzen
-  updateMainButtonText();
-
-} else {
-
-  console.log("🟡 WAITING FOR TEAM SELECTION");
-
-  // 👉 Splash bleibt sichtbar
-  if(splash){
-    splash.style.display = "flex";
-  }
-
-  // 👉 App verstecken bis Auswahl
-  if(app){
-    app.classList.add("hidden");
-  }
-}
 
 
 // =========================
