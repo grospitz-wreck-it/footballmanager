@@ -331,7 +331,6 @@ console.log("📦 AVAILABLE LEAGUES:", game.league.available);
   // =========================
   // 🔥 HARTE FALLBACK LOGIK
   // =========================
-console.log("🧠 REGION IDS:", regionIds);
   if(!regions || regions.length === 0){
     console.warn("⚠️ KEINE REGION → nehme ALLE Ligen");
 
@@ -339,6 +338,7 @@ console.log("🧠 REGION IDS:", regionIds);
   }
 
   const regionIds = regions.map(r => String(r.region_id).trim());
+console.log("🧠 REGION IDS:", regionIds);
 
   const matches = leagues.filter(l => {
   console.log("CHECK:", {
@@ -882,4 +882,3 @@ document.getElementById("resetBtn")?.addEventListener("click", async () => {
 // ▶️ START
 // =========================
 init();
-export { init };
