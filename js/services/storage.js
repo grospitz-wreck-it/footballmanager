@@ -231,18 +231,34 @@ function createId(name){
 // =========================
 // 🧨 RESET (FULL SAFE)
 // =========================
-function resetGame(){
+export function resetGame(){
 
-  console.log("🧨 Reset ausgelöst");
+  console.log("🔄 RESET GAME");
 
-  clearSave();
+  // =========================
+  // 💾 STORAGE CLEAR
+  // =========================
+  localStorage.clear();
 
-  // 🔥 verhindert kaputten Rest-State
-  window.location.reload();
+  // =========================
+  // 🧠 MEMORY RESET (WICHTIG!)
+  // =========================
+  if(window.game){
+
+    window.game.team = {
+      selectedId: null
+    };
+
+    window.game.league = {
+      current: null,
+      available: []
+    };
+
+    window.game.match = null;
+    window.game.events = { history: [] };
+    window.game.ui = {};
+
+  }
+
+  console.log("✅ Game state cleared");
 }
-export {
-  saveGame,
-  loadGame,
-  clearSave,
-  resetGame
-};
