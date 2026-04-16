@@ -1151,7 +1151,8 @@ tr:hover {
 #matchOverlay {
   position: absolute;
   inset: 0;
-  z-index: 9999;
+
+  z-index: 5; /* 🔥 FIX: war 9999 → blockierte alles */
 
   display: flex;
   flex-direction: column;
@@ -1163,7 +1164,8 @@ tr:hover {
   opacity: 0;
   transform: scale(0.96);
   transform-origin: center center;
-  pointer-events: none;
+
+  pointer-events: none; /* 🔥 bleibt */
 
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
@@ -1171,10 +1173,14 @@ tr:hover {
 #matchOverlay.show {
   opacity: 1;
   transform: scale(1);
+
+  pointer-events: auto; /* 🔥 FIX: nur wenn sichtbar klickbar */
 }
 
 #matchOverlay.hidden {
   opacity: 0;
+
+  pointer-events: none; /* 🔥 FIX: blockiert NIE mehr UI */
 }
 
 /* IMAGE */
@@ -1207,6 +1213,7 @@ tr:hover {
     0 2px 8px rgba(0,0,0,0.8),
     0 0 10px rgba(0,0,0,0.6);
 }
+
 .tactics-btn {
   position: absolute;
   top: 10px;
