@@ -408,6 +408,35 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
 
 });
 
+function initOverlayManager(){
+
+  console.log("🧠 Overlay Manager active");
+
+  setInterval(() => {
+
+    const matchOverlay = document.getElementById("matchOverlay");
+    const live = game.match?.live;
+
+    // =========================
+    // 🎮 MATCH START → CLOSE TACTICS
+    // =========================
+    if(live?.running && game.ui?.tacticsOpen){
+      game.ui.tacticsOpen = false;
+    }
+
+    // =========================
+    // ⚙️ TACTICS PRIORITY
+    // =========================
+    if(game.ui?.tacticsOpen && matchOverlay){
+      matchOverlay.classList.remove("show");
+      matchOverlay.classList.add("hidden");
+    }
+
+    // ❌ ENTFERNT:
+    // kein permanentes hidden setzen mehr!
+
+  }, 200);
+}
 
 // =========================
 // 🚀 INIT
@@ -611,11 +640,30 @@ if(game.league.available?.length){
   setLeagueById(game.league.available[0].id);
 }
 
-splash?.classList.add("hidden");
-app?.classList.remove("hidden");
+// =========================
+// 🔥 APP START (FINAL FIXED)
+// =========================
 
-updateUI();
+// 🔥 Splash wirklich deaktivieren (NICHT nur hidden)
+if(splash){
+  splash.style.display = "none";   // 🔥 CRITICAL FIX
+}
+
+if(app){
+  app.classList.remove("hidden");
+}
+
+// 🔥 Overlay System ZUERST (wichtig!)
+initOverlayManager();
+
+// 🔥 Button init
 initMainButton();
+
+// 🔥 UI einmal sauber rendern
+updateUI();
+
+// 🔥 Button Text initial setzen
+updateMainButtonText();
   } catch(e){
     console.error("💥 INIT CRASH:", e);
   }
