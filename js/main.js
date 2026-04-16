@@ -533,11 +533,6 @@ competitions.forEach(c => {
   // =========================
   // 🔥 TEAM MATCH (ROBUST)
   // =========================
-  console.log("🧪 LEAGUE CHECK:", {
-  league: rawName,
-  compId: c.id,
-  teamsFound: leagueTeams.length
-});
   let leagueTeams = teams.filter(t => {
 
     if(!t) return false;
@@ -553,7 +548,11 @@ competitions.forEach(c => {
 
     return teamLeagueName === name;
   });
-
+  console.log("🧪 LEAGUE CHECK:", {
+  league: rawName,
+  compId: c.id,
+  teamsFound: leagueTeams.length
+});
   // =========================
   // 🧪 DEBUG (nur wenn kaputt)
   // =========================
