@@ -641,34 +641,47 @@ if(game.league.available?.length){
 }
 
 // =========================
-// 🔥 APP START (FINAL FIXED)
+// 🔥 APP START (FINAL SAFE)
 // =========================
 
-// 🔥 Splash wirklich deaktivieren (NICHT nur hidden)
-if(splash){
-  splash.style.display = "none";   // 🔥 CRITICAL FIX
-}
+if(game.team?.selectedId){
 
-if(app){
-  app.classList.remove("hidden");
-}
+  console.log("🎮 GAME START (team selected)");
 
-// 🔥 Overlay System ZUERST (wichtig!)
-initOverlayManager();
+  // 🔥 Splash wirklich entfernen (blockiert sonst alles)
+  if(splash){
+    splash.style.display = "none";
+  }
 
-// 🔥 Button init
-initMainButton();
+  // 🔥 App sichtbar machen
+  if(app){
+    app.classList.remove("hidden");
+  }
 
-// 🔥 UI einmal sauber rendern
-updateUI();
+  // 🔥 Systeme initialisieren (Reihenfolge wichtig!)
+  initOverlayManager();
+  initMainButton();
 
-// 🔥 Button Text initial setzen
-updateMainButtonText();
-  } catch(e){
-    console.error("💥 INIT CRASH:", e);
+  // 🔥 UI rendern
+  updateUI();
+
+  // 🔥 Button Text korrekt setzen
+  updateMainButtonText();
+
+} else {
+
+  console.log("🟡 WAITING FOR TEAM SELECTION");
+
+  // 👉 Splash bleibt sichtbar
+  if(splash){
+    splash.style.display = "flex";
+  }
+
+  // 👉 App verstecken bis Auswahl
+  if(app){
+    app.classList.add("hidden");
   }
 }
-
 
 
 // =========================
