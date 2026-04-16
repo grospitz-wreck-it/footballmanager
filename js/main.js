@@ -587,12 +587,14 @@ leagueMap.set(leagueId, {
 // ✅ NACH DEM LOOP
 const leagues = Array.from(leagueMap.values());
 
+console.log("🧪 RAW LEAGUE MAP:", leagueMap);
+console.log("🧪 BUILT LEAGUES:", leagues);
+
 game.leagues = leagues;
 game.league = game.league || {};
 game.league.available = leagues;
 
 console.log("🏁 Leagues built:", leagues.length);
-
     const plzInputEl = document.getElementById("plzInput");
 
 if(plzInputEl){
