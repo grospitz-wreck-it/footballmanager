@@ -263,10 +263,26 @@ function handleAppVisibility(){
   }
 }
 
+
+
 // =========================
 // 📍 PLZ → REGION → LIGA (FINAL UI READY)
 // =========================
+async function getRegionsByCode(code){
 
+  const { data, error } = await supabase
+    .from("region_codes")
+    .select("region_id")
+    .eq("country", "DE")
+    .like("code", `${code}%`);
+
+  if(error){
+    console.error("❌ region_codes error:", error);
+    return [];
+  }
+
+  return data || [];
+}
 // 🔹 Regionen aus PLZ holen
 async function findLeaguesByCode(input){
 
