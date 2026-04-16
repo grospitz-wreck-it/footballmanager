@@ -287,10 +287,9 @@ async function getRegionsByCode(code){
 // 🔹 passende Ligen finden
 async function findLeaguesByCode(input){
 
-  if(!input || input.length < 3) return [];
-
-  const code = input.slice(0,3);
-
+if(!input || input.length < 2) return [];
+  
+const code = input.slice(0, 3);
   const regions = await getRegionsByCode(code);
 
   if(!regions.length){
