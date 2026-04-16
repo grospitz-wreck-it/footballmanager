@@ -357,11 +357,10 @@ if(plzInput){
 
 plzInput?.addEventListener("input", async (e) => {
 
-  // 🔥 SAFETY (sehr wichtig!)
   if(!game.league?.available?.length){
-    console.warn("⏳ Ligen noch nicht geladen – input ignoriert");
-    return;
-  }
+  console.warn("⏳ Ligen noch nicht geladen – input ignoriert");
+  return;
+}
 
   const value = e.target.value;
 
