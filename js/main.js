@@ -380,7 +380,6 @@ async function autoSelectLeagueByPLZ(input){
   setLeagueById(best.id);
 }
 
-
 // =========================
 // 🚀 INIT
 // =========================
@@ -673,6 +672,8 @@ function bindPLZInput(){
   console.log("✅ PLZ Input gebunden");
 }
 
+
+    
 // =========================
 // 🔥 WICHTIG: AUFRUF!
 // =========================
@@ -690,7 +691,10 @@ if(game.league.available?.length){
 // =========================
 handleAppVisibility();
 updateUI();
-
+} catch(e){
+    console.error("💥 INIT CRASH:", e);
+  }
+}
 
 
 // =========================
