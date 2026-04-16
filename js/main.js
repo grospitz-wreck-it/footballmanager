@@ -608,32 +608,33 @@ initLeagueSelect(game.league.available);
 // 🔎 PLZ BINDING (FIXED)
 // =========================
 function bindPLZInput(){
-const plzInput = document.getElementById("plzInput");
-if(plzInput){
-  plzInput.disabled = true;
-}
+
   console.log("🚀 bindPLZInput CALLED");
 
   const plzInput = document.getElementById("plzInput");
   const resultsEl = document.getElementById("leagueResults");
-
-  console.log("🔎 plzInput:", plzInput);
-  console.log("🧪 RESULTS EL:", resultsEl);
 
   if(!plzInput || !resultsEl){
     console.error("❌ PLZ UI Elemente fehlen");
     return;
   }
 
-  // 🔥 sicher aktiv
-  plzInput.disabled = false;
+  // 🔥 WICHTIG: NICHT hier aktivieren!
+  // wird später in init gemacht
 
-  plzInput.addEventListener("input", async (e) => {
+  plzInput.oninput = async (e) => {
 
     const value = e.target.value;
 
     console.log("🔥 INPUT EVENT:", value);
 
+    // 👉 warten bis Ligen geladen sind
+    if(!game.league?.available?.length){
+      console.warn("⏳ warten auf Ligen...");
+      return;
+    }
+
+    // 👉 reset
     if(!value || value.length < 2){
       resultsEl.innerHTML = "";
       return;
@@ -650,24 +651,25 @@ if(plzInput){
 
     leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
-    // 👉 mehrere Ergebnisse
+    // 👉 render liste
     resultsEl.innerHTML = leagues.map(l => `
       <div class="league-result" data-id="${l.id}">
         ${l.name || l.display_name}
       </div>
     `).join("");
 
+    // 👉 click handler
     resultsEl.querySelectorAll(".league-result").forEach(el => {
-      el.addEventListener("click", () => {
+      el.onclick = () => {
         const id = el.dataset.id;
         if(!id) return;
 
         setLeagueById(id);
         resultsEl.innerHTML = "";
-      });
+      };
     });
 
-    // 👉 genau 1 Ergebnis
+    // 👉 auto select (1 Ergebnis)
     if(leagues.length === 1){
 
       const league = leagues[0];
@@ -680,17 +682,15 @@ if(plzInput){
 
       setLeagueById(league.id);
 
-      // optional nicer UX
       setTimeout(() => {
         resultsEl.innerHTML = "";
       }, 1200);
     }
 
-  });
+  };
 
   console.log("✅ PLZ Input gebunden");
 }
-
 
     
 // =========================
