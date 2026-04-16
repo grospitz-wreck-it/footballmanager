@@ -623,6 +623,11 @@ console.log("🏁 Leagues built:", leagues.length);
 
 initLeagueSelect(game.league.available);
 
+if(plzInput){
+  plzInput.disabled = false;
+  console.log("✅ PLZ Input aktiviert");
+}
+    
 if(game.league.available?.length){
   setLeagueById(game.league.available[0].id);
 }
