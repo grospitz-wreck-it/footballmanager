@@ -477,7 +477,10 @@ console.log("🧪 DEBUG READY → window.debugData");
 // 🧠 LEAGUE BUILD (FINAL CLEAN)
 // =========================
 const leagueMap = new Map();
-
+// 🔥 HIER REIN
+console.log("🧪 START LEAGUE BUILD");
+console.log("🧪 competitions:", competitions);
+console.log("🧪 teams:", teams);
 competitions.forEach(c => {
 
   if(!c) return;
