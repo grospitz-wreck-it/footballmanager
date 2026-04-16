@@ -3,12 +3,19 @@ console.log("🚀 MAIN.JS LOADED");
 // 📦 CORE
 // =========================
 import { game } from "./core/state.js";
+console.log("🔥 STEP 1");
 import { on } from "./core/events.js";
+console.log("🔥 STEP 2");
 import { EVENTS } from "./core/events.constants.js";
+console.log("🔥 STEP 3");
 import { initLeagueSelect, setLeagueById } from "./modules/league.js";
+console.log("🔥 STEP 4");
 import "./core/eventStore.js";
+console.log("🔥 STEP 5");
 import { loadPlayers } from "./modules/loader.js";
+console.log("🔥 STEP 6");
 import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
+console.log("🔥 STEP 7");
 async function startGame(){
 
   await loadGameEvents();     // 🔥 zuerst laden
@@ -21,39 +28,47 @@ startGame();
 // 🔌 SUPABASE
 // =========================
 import { supabase } from "./client.js";
+console.log("🔥 STEP 8");
 
 // =========================
 // 🔧 MODULES
 // =========================
 import { startAdEngine } from "./modules/ads.js";
+console.log("🔥 STEP 9");
 import { generateSchedule, advanceSchedule, renderSchedule } from "./modules/scheduler.js";
+console.log("🔥 STEP 10");
 import { initTable } from "./modules/table.js";
+console.log("🔥 STEP 11");
 import { initPlayerPool } from "./modules/playerPool.js";
+console.log("🔥 STEP 12");
 import { importPlayers } from "../tools/importer.js";
+console.log("🔥 STEP 13");
 window.importPlayers = importPlayers;
 import { buildAllTeams } from "./modules/teamGenerator.js";
 window.buildAllTeams = buildAllTeams;
-
+console.log("🔥 STEP 14");
 // =========================
 // 🎮 ENGINE
 // =========================
 import { runMatchLoop, initMatch } from "./matchEngine.js";
+console.log("🔥 STEP 15");
 import { initMatchEventSlides } from "./engine/matchEventSlideSystem.js";
+console.log("🔥 STEP 16");
 // =========================
 // 💾 STORAGE
 // =========================
 import { loadGame } from "./services/storage.js";
-
+console.log("🔥 STEP 17");
 // =========================
 // 🖥 UI
 // =========================
 import { updateUI } from "./ui/ui.js";
-
+console.log("🔥 STEP 18");
 // =========================
 // 🐞 DEBUG
 // =========================
 import { initDebugOverlay } from "../debug/debugOverlay.js";
-
+console.log("🔥 STEP 19");
 // =========================
 // 🔥 LOOP GUARD
 // =========================
