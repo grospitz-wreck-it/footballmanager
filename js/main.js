@@ -570,7 +570,7 @@ console.log("🏁 Leagues built:", leagues.length);
 
 initLeagueSelect(game.league.available);
 function bindPLZInput(){
-
+console.log("🚀 bindPLZInput CALLED");
   const plzInput = document.getElementById("plzInput");
   const resultsEl = document.getElementById("leagueResults");
 
