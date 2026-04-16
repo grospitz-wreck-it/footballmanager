@@ -357,10 +357,10 @@ if(plzInput){
 
 plzInput?.addEventListener("input", async (e) => {
 
+  // 🧠 stiller Guard (kein Spam, kein UX-Problem)
   if(!game.league?.available?.length){
-  console.warn("⏳ Ligen noch nicht geladen – input ignoriert");
-  return;
-}
+    return;
+  }
 
   const value = e.target.value;
 
@@ -418,7 +418,6 @@ plzInput?.addEventListener("input", async (e) => {
   }
 
 });
-
 
 // =========================
 // 🚀 INIT
