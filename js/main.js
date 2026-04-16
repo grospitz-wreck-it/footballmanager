@@ -287,6 +287,12 @@ async function getRegionsByCode(code){
 async function findLeaguesByCode(input){
 
   if(!input || input.length < 2) return [];
+
+  // 🔥 WICHTIG: sicherstellen dass Ligen geladen sind
+  if(!game.league?.available?.length){
+    console.warn("⏳ Ligen noch nicht geladen");
+    return [];
+  }
   
   const code = input.slice(0, 3);
   const regions = await getRegionsByCode(code);
@@ -296,28 +302,22 @@ async function findLeaguesByCode(input){
     return [];
   }
 
-  const regionIds = regions.map(r => r.region_id);
+  const regionIds = regions.map(r => String(r.region_id).trim());
 
-  const matches = (game.league?.available || []).filter(l => {
+  const matches = (game.league.available || []).filter(l => {
 
     if(!l.region_id) return false;
 
-    return regionIds.some(r => {
+    const leagueRegion = String(l.region_id).trim();
 
-      // 🔥 ALLES normalisieren (wichtig!)
-      const a = String(r).replace(/\D/g, "");   // nur Zahlen
-      const b = String(l.region_id).replace(/\D/g, "");
-
-      return a && b && a === b;
-    });
-
+    return regionIds.some(r => r === leagueRegion);
   });
 
   if(!matches.length){
     console.warn("❌ Keine Liga für Region gefunden", {
       input,
       regionIds,
-      sampleLeague: game.league?.available?.[0]
+      leaguesSample: game.league.available.slice(0,3)
     });
     return [];
   }
