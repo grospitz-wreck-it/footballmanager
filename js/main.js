@@ -528,17 +528,17 @@ competitions.forEach(c => {
   // =========================
   if(leagueTeams.length < 2){
 
-    console.warn("⚠️ Zu wenig Teams für Liga:", rawName, leagueTeams.length);
+  console.warn("⚠️ Zu wenig Teams für Liga (trotzdem erlaubt):", rawName, leagueTeams.length);
 
-    const sample = teams.slice(0,5).map(t => ({
-      name: t.name,
-      comp: t.competition_id
-    }));
+  const sample = teams.slice(0,5).map(t => ({
+    name: t.name,
+    comp: t.competition_id
+  }));
 
-    console.log("👉 Beispiel Teams:", sample);
+  console.log("👉 Beispiel Teams:", sample);
 
-    return;
-  }
+  // ❌ KEIN return mehr!
+}
 
   // =========================
   // 🧠 DISPLAY NAME FIX
