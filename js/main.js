@@ -401,50 +401,42 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
       teams: game.league?.current?.teams?.length
     });
 
-    // =========================
-    // 🔥 APP START TRIGGER (ROBUST)
-    // =========================
-    setTimeout(() => {
+  // =========================
+// 🔥 APP START (FINAL FIXED & ROBUST)
+// =========================
 
-      const teamReady = game.team?.selectedId;
+function handleAppVisibility(){
 
-      if(teamReady){
+  const splash = document.getElementById("splash");
+  const app = document.getElementById("app");
 
-        console.log("🚀 TEAM READY → START APP");
+  const teamReady = game.team?.selectedId;
 
-        if(typeof startApp === "function"){
-          startApp();
-        } else {
-          console.error("❌ startApp() nicht gefunden!");
-        }
+  if(teamReady){
 
-      } else {
+    console.log("🎮 GAME START (team selected)");
 
-        console.warn("⚠️ Team noch nicht gesetzt → warte auf Auswahl");
+    if(splash){
+      splash.style.display = "none";
+    }
 
-        // 👉 FALLBACK: retry (wichtig bei async state)
-        setTimeout(() => {
+    if(app){
+      app.classList.remove("hidden");
+    }
 
-          if(game.team?.selectedId){
+  } else {
 
-            console.log("🔁 RETRY SUCCESS → START APP");
+    console.log("🟡 WAITING FOR TEAM SELECTION");
 
-            if(typeof startApp === "function"){
-              startApp();
-            }
+    if(splash){
+      splash.style.display = "flex";
+    }
 
-          } else {
-            console.error("❌ Team wurde nie gesetzt → Check teamSelect");
-          }
-
-        }, 300);
-      }
-
-    }, 120); // leicht erhöht für Stabilität
-
-  };
-
-});
+    if(app){
+      app.classList.add("hidden");
+    }
+  }
+}
 
   // =========================
   // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
