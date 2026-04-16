@@ -246,7 +246,10 @@ function getMatchForMyTeam(round){
   return match || null; // ❗ KEIN FALLBACK MEHR
 }
 
-function handleAppVisibility(){
+ffunction handleAppVisibility(){
+
+  const splash = document.getElementById("splash");
+  const app = document.getElementById("app");
 
   if(game.team?.selectedId){
 
