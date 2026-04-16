@@ -288,23 +288,39 @@ async function findLeaguesByCode(input){
 
   if(!input || input.length < 2) return [];
 
-  // 🔥 WICHTIG: sicherstellen dass Ligen geladen sind
-  if(!game.league?.available?.length){
+  // 🔥 Sicherstellen dass Ligen da sind
+  const leagues = game.league?.available || [];
+
+  if(!leagues.length){
     console.warn("⏳ Ligen noch nicht geladen");
     return [];
   }
-  
-  const code = input.slice(0, 3);
-  const regions = await getRegionsByCode(code);
 
-  if(!regions.length){
-    console.warn("❌ Keine Region für PLZ:", code);
-    return [];
+  const code = input.slice(0, 3);
+
+  let regions = [];
+
+  try {
+    regions = await getRegionsByCode(code);
+  } catch(e){
+    console.warn("⚠️ Region lookup failed → fallback", e);
+  }
+
+  // =========================
+  // ✅ FALLBACK: KEINE REGIONEN
+  // =========================
+  if(!regions || regions.length === 0){
+    console.warn("⚠️ Keine Region → fallback auf alle Ligen");
+
+    return leagues;
   }
 
   const regionIds = regions.map(r => String(r.region_id).trim());
 
-  const matches = (game.league.available || []).filter(l => {
+  // =========================
+  // 🔍 FILTER
+  // =========================
+  const matches = leagues.filter(l => {
 
     if(!l.region_id) return false;
 
@@ -313,18 +329,20 @@ async function findLeaguesByCode(input){
     return regionIds.some(r => r === leagueRegion);
   });
 
+  // =========================
+  // ✅ FALLBACK: KEINE MATCHES
+  // =========================
   if(!matches.length){
-    console.warn("❌ Keine Liga für Region gefunden", {
+    console.warn("⚠️ Keine Liga für Region → fallback auf alle Ligen", {
       input,
-      regionIds,
-      leaguesSample: game.league.available.slice(0,3)
+      regionIds
     });
-    return [];
+
+    return leagues;
   }
 
   return matches;
 }
-
 
 
 
