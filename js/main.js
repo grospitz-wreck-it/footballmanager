@@ -394,6 +394,29 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
       league: game.league?.current?.name,
       teams: game.league?.current?.teams?.length
     });
+
+    // =========================
+    // 🔥 NEU: APP START TRIGGER
+    // =========================
+    setTimeout(() => {
+
+      if(game.team?.selectedId){
+
+        console.log("🚀 TEAM READY → START APP");
+
+        // 👉 falls Funktion existiert
+        if(typeof startApp === "function"){
+          startApp();
+        } else {
+          console.warn("❌ startApp nicht gefunden");
+        }
+
+      } else {
+        console.warn("⚠️ Team noch nicht gesetzt nach League Select");
+      }
+
+    }, 100);
+
   };
 
 });
@@ -436,6 +459,29 @@ function initOverlayManager(){
     // kein permanentes hidden setzen mehr!
 
   }, 200);
+}
+
+
+function startApp(){
+
+  const splash = document.getElementById("splash");
+  const app = document.getElementById("app");
+
+  console.log("🚀 START APP TRIGGERED");
+
+  if(splash){
+    splash.style.display = "none";
+  }
+
+  if(app){
+    app.classList.remove("hidden");
+  }
+
+  initOverlayManager();
+  initMainButton();
+
+  updateUI();
+  updateMainButtonText();
 }
 
 // =========================
