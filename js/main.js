@@ -362,8 +362,8 @@ plzInput?.addEventListener("input", async (e) => {
   `).join("");
 
 
-  // =========================
-// 🖱 CLICK HANDLER (CLEAN)
+ // =========================
+// 🖱 CLICK HANDLER (FINAL SAFE)
 // =========================
 resultsEl.querySelectorAll(".league-result").forEach(el => {
 
@@ -378,6 +378,9 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
 
     console.log("🎯 PLZ SELECT:", id);
 
+    // =========================
+    // 🧠 LEAGUE SET
+    // =========================
     try {
       setLeagueById(id);
     } catch(e){
@@ -385,6 +388,9 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
       return;
     }
 
+    // =========================
+    // 🧹 UI CLEANUP
+    // =========================
     resultsEl.innerHTML = "";
 
     updateUI?.();
@@ -396,26 +402,45 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
     });
 
     // =========================
-    // 🔥 NEU: APP START TRIGGER
+    // 🔥 APP START TRIGGER (ROBUST)
     // =========================
     setTimeout(() => {
 
-      if(game.team?.selectedId){
+      const teamReady = game.team?.selectedId;
+
+      if(teamReady){
 
         console.log("🚀 TEAM READY → START APP");
 
-        // 👉 falls Funktion existiert
         if(typeof startApp === "function"){
           startApp();
         } else {
-          console.warn("❌ startApp nicht gefunden");
+          console.error("❌ startApp() nicht gefunden!");
         }
 
       } else {
-        console.warn("⚠️ Team noch nicht gesetzt nach League Select");
+
+        console.warn("⚠️ Team noch nicht gesetzt → warte auf Auswahl");
+
+        // 👉 FALLBACK: retry (wichtig bei async state)
+        setTimeout(() => {
+
+          if(game.team?.selectedId){
+
+            console.log("🔁 RETRY SUCCESS → START APP");
+
+            if(typeof startApp === "function"){
+              startApp();
+            }
+
+          } else {
+            console.error("❌ Team wurde nie gesetzt → Check teamSelect");
+          }
+
+        }, 300);
       }
 
-    }, 100);
+    }, 120); // leicht erhöht für Stabilität
 
   };
 
