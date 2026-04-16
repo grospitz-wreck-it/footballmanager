@@ -29,7 +29,6 @@ startGame();
 // =========================
 import { supabase } from "./client.js";
 console.log("🔥 STEP 8");
-c
 // =========================
 // 🔧 MODULES
 // =========================
