@@ -304,8 +304,8 @@ const code = input.slice(0, 3);
   if(!l.region_id) return false;
 
   return regionIds.some(r =>
-    String(r).trim() === String(l.region_id).trim()
-  );
+  Number(r) === Number(l.region_id)
+);
 
 });
 
