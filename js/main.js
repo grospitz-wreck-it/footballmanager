@@ -350,7 +350,18 @@ async function autoSelectLeagueByPLZ(input){
 const plzInput = document.getElementById("plzInput");
 const resultsEl = document.getElementById("leagueResults");
 
+// 🔒 zuerst deaktivieren
+if(plzInput){
+  plzInput.disabled = true;
+}
+
 plzInput?.addEventListener("input", async (e) => {
+
+  // 🔥 SAFETY (sehr wichtig!)
+  if(!game.league?.available?.length){
+    console.warn("⏳ Ligen noch nicht geladen – input ignoriert");
+    return;
+  }
 
   const value = e.target.value;
 
@@ -367,7 +378,7 @@ plzInput?.addEventListener("input", async (e) => {
     return;
   }
 
-  // 🔥 sort nach Level (falls vorhanden)
+  // 🔥 sort nach Level
   leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
   // =========================
