@@ -246,6 +246,22 @@ function getMatchForMyTeam(round){
   return match || null; // ❗ KEIN FALLBACK MEHR
 }
 
+function handleAppVisibility(){
+
+  const splash = document.getElementById("splash");
+  const app = document.getElementById("app");
+
+  if(game.team?.selectedId){
+
+    splash && (splash.style.display = "none");
+    app && app.classList.remove("hidden");
+
+  } else {
+
+    splash && (splash.style.display = "flex");
+    app && app.classList.add("hidden");
+  }
+}
 
 // =========================
 // 📍 PLZ → REGION → LIGA (FINAL UI READY)
