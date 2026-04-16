@@ -562,20 +562,20 @@ competitions.forEach(c => {
   // =========================
   console.log("✅ LEAGUE OK:", displayName, "| teams:", leagueTeams.length);
 
-  // =========================
-  // 🏗 BUILD
-  // =========================
-  leagueMap.set(leagueId, {
-    id: leagueId,
-    name: displayName,
-    raw_name: rawName,      // 🔥 wichtig für später
-    region_id: c.region_id, // 🔥 für PLZ
-    teams: leagueTeams
-  });
+// =========================
+// 🏗 BUILD
+// =========================
+leagueMap.set(leagueId, {
+  id: leagueId,
+  name: displayName,
+  raw_name: rawName,
+  region_id: c.region_id,
+  teams: leagueTeams
+});
 
 });
 
-// ✅ WICHTIG: NACH DEM LOOP
+// ✅ NACH DEM LOOP
 const leagues = Array.from(leagueMap.values());
 
 game.leagues = leagues;
@@ -584,24 +584,31 @@ game.league.available = leagues;
 
 console.log("🏁 Leagues built:", leagues.length);
 
+// =========================
+// 🏆 LEAGUE SELECT
+// =========================
 initLeagueSelect(game.league.available);
+
+// =========================
+// 🔎 PLZ BINDING (FIXED)
+// =========================
 function bindPLZInput(){
-console.log("🚀 bindPLZInput CALLED");
+
+  console.log("🚀 bindPLZInput CALLED");
+
   const plzInput = document.getElementById("plzInput");
-  console.log("🔎 plzInput:", plzInput);
   const resultsEl = document.getElementById("leagueResults");
 
-  console.log("🧪 PLZ INPUT:", plzInput);
+  console.log("🔎 plzInput:", plzInput);
   console.log("🧪 RESULTS EL:", resultsEl);
-
-  if(plzInput){
-    plzInput.disabled = false; // 🔥 direkt aktivieren
-  }
 
   if(!plzInput || !resultsEl){
     console.error("❌ PLZ UI Elemente fehlen");
     return;
   }
+
+  // 🔥 sicher aktiv
+  plzInput.disabled = false;
 
   plzInput.addEventListener("input", async (e) => {
 
@@ -625,6 +632,7 @@ console.log("🚀 bindPLZInput CALLED");
 
     leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
+    // 👉 mehrere Ergebnisse
     resultsEl.innerHTML = leagues.map(l => `
       <div class="league-result" data-id="${l.id}">
         ${l.name || l.display_name}
@@ -641,42 +649,47 @@ console.log("🚀 bindPLZInput CALLED");
       });
     });
 
+    // 👉 genau 1 Ergebnis
     if(leagues.length === 1){
 
-  const league = leagues[0];
+      const league = leagues[0];
 
-  // 👉 visuelles Feedback
-  resultsEl.innerHTML = `
-    <div style="padding:8px;color:#4caf50">
-      ✅ ${league.name} ausgewählt
-    </div>
-  `;
+      resultsEl.innerHTML = `
+        <div style="padding:8px;color:#4caf50">
+          ✅ ${league.name} ausgewählt
+        </div>
+      `;
 
-  setLeagueById(league.id);
-}
+      setLeagueById(league.id);
+
+      // optional nicer UX
+      setTimeout(() => {
+        resultsEl.innerHTML = "";
+      }, 1200);
+    }
 
   });
 
   console.log("✅ PLZ Input gebunden");
 }
-if(plzInput){
-  plzInput.disabled = false;
-  console.log("✅ PLZ Input aktiviert");
-}
-    
+
+// =========================
+// 🔥 WICHTIG: AUFRUF!
+// =========================
+bindPLZInput();
+
+// =========================
+// 🎯 DEFAULT LEAGUE
+// =========================
 if(game.league.available?.length){
   setLeagueById(game.league.available[0].id);
 }
 
-
-handleAppVisibility();   // 👈 HIER
-
+// =========================
+// UI
+// =========================
+handleAppVisibility();
 updateUI();
-
-  } catch(e){
-    console.error("💥 INIT CRASH:", e);
-  }
-}
 
 
 
