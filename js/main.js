@@ -14,14 +14,13 @@ import { initLeagueSelect, setLeagueById } from "./modules/league.js";
 import "./core/eventStore.js";
 import { loadPlayers } from "./modules/loader.js";
 import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
+
 async function startGame(){
-
-  await loadGameEvents();     // 🔥 zuerst laden
-  subscribeGameEvents();      // 🔴 dann realtime starten
-
+  await loadGameEvents();
+  subscribeGameEvents();
 }
-
 startGame();
+
 // =========================
 // 🔌 SUPABASE
 // =========================
@@ -44,6 +43,7 @@ window.buildAllTeams = buildAllTeams;
 // =========================
 import { runMatchLoop, initMatch } from "./matchEngine.js";
 import { initMatchEventSlides } from "./engine/matchEventSlideSystem.js";
+
 // =========================
 // 💾 STORAGE
 // =========================
@@ -181,8 +181,8 @@ function renderEvents(){
       ? events.slice(-20).reverse()
     .map(e => {
       const safeText = String(e.text)
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     
       return `<div>${e.minute}' - ${safeText}</div>`;
     })
@@ -222,10 +222,11 @@ function initEventBindings(){
       game.events.history = [];
     }
 
-  advanceSchedule(); // bleibt!
+    advanceSchedule();
 
-// 🔥 Sync back
-game.league.currentRound = game.league.currentRound;
+    // 🔥 Sync back
+    game.league.currentRound = game.league.currentRound;
+
     updateUI();
     renderEvents();
     renderSchedule();
@@ -249,15 +250,12 @@ function getMatchForMyTeam(round){
     normalizeId(m.awayTeamId) === myTeamId
   );
 
-  return match || null; // ❗ KEIN FALLBACK MEHR
+  return match || null;
 }
 
-
 // =========================
-// 📍 PLZ → REGION → LIGA (FINAL UI READY)
+// 📍 PLZ → REGION → LIGA
 // =========================
-
-// 🔹 Regionen aus PLZ holen
 async function getRegionsByCode(code){
   const { data, error } = await supabase
     .from("region_codes")
@@ -273,14 +271,11 @@ async function getRegionsByCode(code){
   return data || [];
 }
 
-
-// 🔹 passende Ligen finden
 async function findLeaguesByCode(input){
 
   if(!input || input.length < 3) return [];
 
   const code = input.slice(0,3);
-
   const regions = await getRegionsByCode(code);
 
   if(!regions.length){
@@ -291,14 +286,12 @@ async function findLeaguesByCode(input){
   const regionIds = regions.map(r => r.region_id);
 
   const matches = (game.league?.available || []).filter(l => {
+    if(!l.region_id) return false;
 
-  if(!l.region_id) return false;
-
-  return regionIds.some(r =>
-    String(r).trim() === String(l.region_id).trim()
-  );
-
-});
+    return regionIds.some(r =>
+      String(r).trim() === String(l.region_id).trim()
+    );
+  });
 
   if(!matches.length){
     console.warn("❌ Keine Liga für Region gefunden");
@@ -308,12 +301,9 @@ async function findLeaguesByCode(input){
   return matches;
 }
 
-
-// 🔥 HAUPTFUNKTION → AUTO SELECT (optional)
 async function autoSelectLeagueByPLZ(input){
 
   const leagues = await findLeaguesByCode(input);
-
   if(!leagues.length) return;
 
   console.log("🎯 PLZ MATCH:", leagues);
@@ -321,10 +311,8 @@ async function autoSelectLeagueByPLZ(input){
   leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
   const best = leagues[0];
-
   setLeagueById(best.id);
 }
-
 
 // =========================
 // 🔎 PLZ SEARCH UI (DEIN DIV)
@@ -332,85 +320,8 @@ async function autoSelectLeagueByPLZ(input){
 const plzInput = document.getElementById("plzInput");
 const resultsEl = document.getElementById("leagueResults");
 
-plzInput?.addEventListener("input", async (e) => {
-
-  const value = e.target.value;
-
-  // 👉 reset wenn zu kurz
-  if(!value || value.length < 3){
-    resultsEl.innerHTML = "";
-    return;
-  }
-
-  const leagues = await findLeaguesByCode(value);
-
-  if(!leagues.length){
-    resultsEl.innerHTML = `<div style="padding:8px;opacity:0.6">Keine Ligen gefunden</div>`;
-    return;
-  }
-
-  // 🔥 sort nach Level (falls vorhanden)
-  leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
-
-  // =========================
-  // 🎯 RENDER RESULTS
-  // =========================
-  resultsEl.innerHTML = leagues.map(l => `
-    <div class="league-result" data-id="${l.id}">
-      ${l.name}
-    </div>
-  `).join("");
-
-
 // =========================
-// 🖱 CLICK HANDLER (FINAL CLEAN)
-// =========================
-resultsEl.querySelectorAll(".league-result").forEach(el => {
-
-  el.onclick = () => {
-
-    const id = el.dataset.id;
-
-    if(!id){
-      console.warn("❌ Kein League ID gefunden");
-      return;
-    }
-
-    console.log("🎯 PLZ SELECT:", id);
-
-    try {
-      setLeagueById(id);
-    } catch(e){
-      console.error("❌ setLeagueById crashed:", e);
-      return;
-    }
-
-    resultsEl.innerHTML = "";
-
-    updateUI?.();
-    updateMainButtonText?.();
-
-    console.log("✅ League gesetzt:", {
-      league: game.league?.current?.name,
-      teams: game.league?.current?.teams?.length
-    });
-
-    // 🔥 WICHTIG: WARTEN bis team gesetzt ist
-    setTimeout(() => {
-
-      if(game.team?.selectedId){
-        handleAppVisibility();
-      } else {
-        console.warn("⚠️ Team noch nicht gesetzt (check teamSelect)");
-      }
-
-    }, 120);
-  };
-
-});
-
-// =========================
-// 🔥 APP VISIBILITY CONTROLLER
+// 🔥 APP VISIBILITY CONTROLLER (GLOBAL!)
 // =========================
 function handleAppVisibility(){
 
@@ -426,8 +337,12 @@ function handleAppVisibility(){
     splash && (splash.style.display = "none");
     app && app.classList.remove("hidden");
 
-    initOverlayManager();
-    initMainButton();
+    // ⚠️ wichtig: nur 1x initialisieren!
+    if(!window.__appStarted){
+      initOverlayManager();
+      initMainButton();
+      window.__appStarted = true;
+    }
 
     updateUI();
     updateMainButtonText();
@@ -440,8 +355,98 @@ function handleAppVisibility(){
     app && app.classList.add("hidden");
   }
 }
+
+
+// =========================
+// 🔎 INPUT HANDLER
+// =========================
+plzInput?.addEventListener("input", async (e) => {
+
+  const value = e.target.value;
+
+  if(!value || value.length < 3){
+    resultsEl.innerHTML = "";
+    return;
+  }
+
+  const leagues = await findLeaguesByCode(value);
+
+  if(!leagues.length){
+    resultsEl.innerHTML = `<div style="padding:8px;opacity:0.6">Keine Ligen gefunden</div>`;
+    return;
+  }
+
+  leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
+
   // =========================
-  // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
+  // 🎯 RENDER RESULTS
+  // =========================
+  resultsEl.innerHTML = leagues.map(l => `
+    <div class="league-result" data-id="${l.id}">
+      ${l.name}
+    </div>
+  `).join("");
+
+
+  // =========================
+  // 🖱 CLICK HANDLER (CLEAN)
+  // =========================
+  resultsEl.querySelectorAll(".league-result").forEach(el => {
+
+    el.onclick = () => {
+
+      const id = el.dataset.id;
+
+      if(!id){
+        console.warn("❌ Kein League ID gefunden");
+        return;
+      }
+
+      console.log("🎯 PLZ SELECT:", id);
+
+      try {
+        setLeagueById(id);
+      } catch(e){
+        console.error("❌ setLeagueById crashed:", e);
+        return;
+      }
+
+      resultsEl.innerHTML = "";
+
+      updateUI?.();
+      updateMainButtonText?.();
+
+      console.log("✅ League gesetzt:", {
+        league: game.league?.current?.name,
+        teams: game.league?.current?.teams?.length
+      });
+
+      // 🔥 WICHTIG: WAIT FOR TEAM
+      setTimeout(() => {
+
+        if(game.team?.selectedId){
+          handleAppVisibility();
+        } else {
+
+          console.warn("⚠️ Team noch nicht gesetzt → retry");
+
+          setTimeout(() => {
+            if(game.team?.selectedId){
+              handleAppVisibility();
+            } else {
+              console.error("❌ Team wurde nie gesetzt");
+            }
+          }, 300);
+
+        }
+
+      }, 120);
+    };
+
+  });
+
+  // =========================
+  // ⚡ AUTO SELECT
   // =========================
   if(leagues.length === 1){
     setLeagueById(leagues[0].id);
@@ -450,6 +455,10 @@ function handleAppVisibility(){
 
 });
 
+
+// =========================
+// 🧠 OVERLAY MANAGER
+// =========================
 function initOverlayManager(){
 
   console.log("🧠 Overlay Manager active");
@@ -459,23 +468,14 @@ function initOverlayManager(){
     const matchOverlay = document.getElementById("matchOverlay");
     const live = game.match?.live;
 
-    // =========================
-    // 🎮 MATCH START → CLOSE TACTICS
-    // =========================
     if(live?.running && game.ui?.tacticsOpen){
       game.ui.tacticsOpen = false;
     }
 
-    // =========================
-    // ⚙️ TACTICS PRIORITY
-    // =========================
     if(game.ui?.tacticsOpen && matchOverlay){
       matchOverlay.classList.remove("show");
       matchOverlay.classList.add("hidden");
     }
-
-    // ❌ ENTFERNT:
-    // kein permanentes hidden setzen mehr!
 
   }, 200);
 }
@@ -487,9 +487,6 @@ function initOverlayManager(){
 async function init(){
 
   window.game = game;
-
-  const splash = document.getElementById("splash");
-  const app = document.getElementById("app");
 
   initEventBindings();
   startAdEngine();
@@ -516,6 +513,7 @@ async function init(){
 
     const teams = teamsRaw || [];
     window.teams = teams;
+
     console.log("🏆 Teams loaded:", teams.length);
 
     // =========================
@@ -539,16 +537,18 @@ async function init(){
     const competitions = competitionsRaw || [];
 
     console.log("🏟 Competitions loaded:", competitions.length);
-    // =========================
-// 🧪 DEBUG KIT
-// =========================
-window.debugData = {
-  teams,
-  competitions,
-  players: window.playerPool
-};
 
-console.log("🧪 DEBUG READY → window.debugData");
+    // =========================
+    // 🧪 DEBUG
+    // =========================
+    window.debugData = {
+      teams,
+      competitions,
+      players: window.playerPool
+    };
+
+    console.log("🧪 DEBUG READY → window.debugData");
+
     // =========================
     // 🎮 GAME EVENTS
     // =========================
@@ -559,329 +559,385 @@ console.log("🧪 DEBUG READY → window.debugData");
     console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
 
     // =========================
-// 🧠 LEAGUE BUILD (FINAL CLEAN)
+    // 🧠 LEAGUE BUILD
+    // =========================
+    const leagueMap = new Map();
+
+    competitions.forEach(c => {
+
+      if(!c) return;
+
+      const rawName = (c.name || "").trim();
+      const name = rawName.toLowerCase();
+
+      if(!c.level) return;
+      if(c.level > 7) return;
+
+      if(name.includes("(region)")) return;
+      if(name.includes("kreisliga b")) return;
+      if(name.includes("kreisliga c")) return;
+      if(name.includes("kreisliga d")) return;
+      if(/\sa\s\d+$/.test(name)) return;
+
+      const leagueId = String(c.id);
+      if(leagueMap.has(leagueId)) return;
+
+      let leagueTeams = teams.filter(t => {
+
+        if(!t) return false;
+
+        if(t.competition_id && c.id){
+          return String(t.competition_id) === String(c.id);
+        }
+
+        const teamLeagueName =
+          (t.league || t.league_name || "").toLowerCase().trim();
+
+        return teamLeagueName === name;
+      });
+ console.log("🚀 MAIN LOADED");
+
+document.addEventListener("click", () => {
+  console.log("🖱 ANY CLICK");
+});
+
 // =========================
-const leagueMap = new Map();
+// 📦 CORE
+// =========================
+import { game } from "./core/state.js";
+import { on } from "./core/events.js";
+import { EVENTS } from "./core/events.constants.js";
+import { initLeagueSelect, setLeagueById } from "./modules/league.js";
+import "./core/eventStore.js";
+import { loadPlayers } from "./modules/loader.js";
+import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
 
-competitions.forEach(c => {
+// =========================
+// 🔌 SUPABASE
+// =========================
+import { supabase } from "./client.js";
 
-  if(!c) return;
+// =========================
+// 🔧 MODULES
+// =========================
+import { startAdEngine } from "./modules/ads.js";
+import { advanceSchedule, renderSchedule } from "./modules/scheduler.js";
+import { importPlayers } from "../tools/importer.js";
+import { buildAllTeams } from "./modules/teamGenerator.js";
 
-  const rawName = (c.name || "").trim();
-  const name = rawName.toLowerCase();
+// =========================
+// 🎮 ENGINE
+// =========================
+import { runMatchLoop, initMatch } from "./matchEngine.js";
 
-  // =========================
-  // 🎯 FILTER
-  // =========================
-  if(!c.level) return;
-  if(c.level > 7) return;
+// =========================
+// 🖥 UI
+// =========================
+import { updateUI } from "./ui/ui.js";
 
-  // Müll raus
-  if(name.includes("(region)")) return;
-  if(name.includes("kreisliga b")) return;
-  if(name.includes("kreisliga c")) return;
-  if(name.includes("kreisliga d")) return;
-  if(/\sa\s\d+$/.test(name)) return; // A 1, A 2 ...
+// =========================
+// 🔥 GLOBAL FLAGS
+// =========================
+let matchLoopRunning = false;
+let simInterval = null;
+window.importPlayers = importPlayers;
+window.buildAllTeams = buildAllTeams;
 
-  const leagueId = String(c.id);
+// =========================
+// 🔥 START GAME EVENTS
+// =========================
+async function startGame(){
+  await loadGameEvents();
+  subscribeGameEvents();
+}
+startGame();
 
-  // Duplicate Guard
-  if(leagueMap.has(leagueId)) return;
+// =========================
+// 🧠 HELPERS
+// =========================
+function normalizeId(id){
+  if(id === null || id === undefined) return null;
+  return String(id);
+}
 
-  // =========================
-  // 🔥 TEAM MATCH (ROBUST)
-  // =========================
-  let leagueTeams = teams.filter(t => {
+function getMatchForMyTeam(round){
+  const myTeamId = normalizeId(game.team?.selectedId);
+  return round?.find(m =>
+    normalizeId(m.homeTeamId) === myTeamId ||
+    normalizeId(m.awayTeamId) === myTeamId
+  ) || null;
+}
 
-    if(!t) return false;
+// =========================
+// 🔥 BACKGROUND SIM
+// =========================
+function stopBackgroundSimulation(){
+  if(simInterval){
+    clearInterval(simInterval);
+    simInterval = null;
+  }
+}
 
-    // ✅ PRIMARY (UUID match)
-    if(t.competition_id && c.id){
-      return String(t.competition_id) === String(c.id);
+function startBackgroundSimulation(){
+  if(simInterval) return;
+
+  simInterval = setInterval(() => {
+
+    const league = game.league?.current;
+    const round = league?.schedule?.[game.league?.currentRound || 0];
+    if(!round) return;
+
+    const myTeamId = normalizeId(game.team?.selectedId);
+
+    round.forEach(match => {
+
+      if(
+        normalizeId(match.homeTeamId) === myTeamId ||
+        normalizeId(match.awayTeamId) === myTeamId
+      ) return;
+
+      if(match._processed || match.live?.running === false) return;
+
+      if(!match.live){
+        match.live = {
+          minute: 0,
+          score: { home: 0, away: 0 },
+          running: true,
+          started: false,
+          startDelay: Math.random() * 6
+        };
+      }
+
+      if(!match.live.started){
+        match.live.startDelay -= 2;
+        if(match.live.startDelay > 0) return;
+        match.live.started = true;
+      }
+
+      match.live.minute += Math.floor(Math.random() * 5) + 1;
+
+      if(Math.random() < 0.18){
+        Math.random() < 0.5
+          ? match.live.score.home++
+          : match.live.score.away++;
+      }
+
+      if(match.live.minute >= 90){
+        match.live.minute = 90;
+        match.live.running = false;
+        match.result = match.live.score;
+        match._processed = true;
+      }
+
+    });
+
+    if(game.ui?.tab === "table" || game.ui?.tab === "match"){
+      updateUI();
     }
 
-    // 🔄 FALLBACK (Name match)
-    const teamLeagueName =
-      (t.league || t.league_name || "").toLowerCase().trim();
+  }, 2000);
+}
 
-    return teamLeagueName === name;
+// =========================
+// 🔥 EVENT BINDINGS
+// =========================
+function initEventBindings(){
+
+  on(EVENTS.STATE_CHANGED, renderEvents);
+
+  on(EVENTS.MATCH_FINISHED, () => {
+
+    stopBackgroundSimulation();
+    matchLoopRunning = false;
+
+    if(game.match?.live){
+      game.match.live.running = false;
+    }
+
+    if(game.events){
+      game.events.history = [];
+    }
+
+    advanceSchedule();
+    updateUI();
+    renderEvents();
+    renderSchedule();
   });
+}
 
-  // =========================
-  // 🧪 DEBUG (nur wenn kaputt)
-  // =========================
-  if(leagueTeams.length < 2){
+// =========================
+// 🔥 EVENT RENDER
+// =========================
+function renderEvents(){
 
-    console.warn("⚠️ Zu wenig Teams für Liga:", rawName, leagueTeams.length);
+  const events = game.events?.history || [];
 
-    const sample = teams.slice(0,5).map(t => ({
-      name: t.name,
-      comp: t.competition_id
-    }));
+  const feed = document.getElementById("liveFeed");
+  const headline = document.getElementById("eventText");
 
-    console.log("👉 Beispiel Teams:", sample);
+  if(feed){
+    feed.innerHTML = events.slice(-20).reverse()
+      .map(e => `<div>${e.minute}' - ${e.text}</div>`)
+      .join("");
+  }
 
+  const top = events.at(-1);
+  if(headline){
+    headline.textContent = top ? `${top.minute}' - ${top.text}` : "";
+  }
+}
+
+// =========================
+// 🔥 APP VISIBILITY
+// =========================
+function handleAppVisibility(){
+
+  const splash = document.getElementById("splash");
+  const app = document.getElementById("app");
+
+  if(game.team?.selectedId){
+
+    splash && (splash.style.display = "none");
+    app && app.classList.remove("hidden");
+
+    if(!window.__appStarted){
+      initOverlayManager();
+      initMainButton();
+      window.__appStarted = true;
+    }
+
+    updateUI();
+    updateMainButtonText();
+
+  } else {
+    splash && (splash.style.display = "flex");
+    app && app.classList.add("hidden");
+  }
+}
+
+// =========================
+// 🔎 PLZ SEARCH
+// =========================
+const plzInput = document.getElementById("plzInput");
+const resultsEl = document.getElementById("leagueResults");
+
+plzInput?.addEventListener("input", async (e) => {
+
+  const value = e.target.value;
+  if(!value || value.length < 3){
+    resultsEl.innerHTML = "";
     return;
   }
 
-  // =========================
-  // 🧠 DISPLAY NAME FIX
-  // =========================
-  const regionName =
-    c.regions?.name ||
-    c.regions?.states?.name ||
-    "";
+  const leagues = await findLeaguesByCode(value);
 
-  let displayName = rawName;
+  resultsEl.innerHTML = leagues.map(l => `
+    <div class="league-result" data-id="${l.id}">
+      ${l.name}
+    </div>
+  `).join("");
 
-  // 👉 Region anhängen wenn sinnvoll
-  if(regionName && !rawName.toLowerCase().includes(regionName.toLowerCase())){
-    displayName = `${rawName} (${regionName})`;
-  }
+  resultsEl.querySelectorAll(".league-result").forEach(el => {
+    el.onclick = () => {
 
-  // 👉 harte Fixes für generische Namen
-  if(rawName === "Kreisliga A"){
-    displayName = `Kreisliga A (${regionName || "Unbekannt"})`;
-  }
+      const id = el.dataset.id;
+      if(!id) return;
 
-  // 👉 Cleanup
-  displayName = displayName
-    .replace("(Region)", "")
-    .replace(/\s+/g, " ")
-    .trim();
+      setLeagueById(id);
+      resultsEl.innerHTML = "";
 
-  // =========================
-  // ✅ SUCCESS
-  // =========================
-  console.log("✅ LEAGUE OK:", displayName, "| teams:", leagueTeams.length);
-
-  // =========================
-  // 🏗 BUILD
-  // =========================
-  leagueMap.set(leagueId, {
-    id: leagueId,
-    name: displayName,
-    raw_name: rawName,      // 🔥 wichtig für später
-    region_id: c.region_id, // 🔥 für PLZ
-    teams: leagueTeams
+      setTimeout(handleAppVisibility, 150);
+    };
   });
-
 });
 
-// ✅ WICHTIG: NACH DEM LOOP
-const leagues = Array.from(leagueMap.values());
-
-game.leagues = leagues;
-game.league = game.league || {};
-game.league.available = leagues;
-
-console.log("🏁 Leagues built:", leagues.length);
-
-initLeagueSelect(game.league.available);
-
-if(game.league.available?.length){
-  setLeagueById(game.league.available[0].id);
+// =========================
+// 🧠 OVERLAY
+// =========================
+function initOverlayManager(){
+  setInterval(() => {
+    const matchOverlay = document.getElementById("matchOverlay");
+    if(game.ui?.tacticsOpen && matchOverlay){
+      matchOverlay.classList.add("hidden");
+    }
+  }, 200);
 }
 
-// 🔥 HIER REIN
-handleAppVisibility();
-
-
-
-
 // =========================
-// ▶️ MAIN BUTTON (REAL FIX)
+// ▶️ MAIN BUTTON
 // =========================
-
 let mainBtn = null;
 
-// =========================
-// 🔤 TEXT UPDATE
-// =========================
 function updateMainButtonText(){
 
   mainBtn = document.getElementById("startBtn");
-
   const live = game.match?.live;
   if(!mainBtn || !live) return;
 
-  if(live.minute >= 90){
-    mainBtn.textContent = "Next Match";
-  }
-  else if(live.phase === "halftime"){
-    mainBtn.textContent = "Start 2nd Half";
-  }
-  else if(live.running){
-    mainBtn.textContent = "Pause";
-  }
-  else if(live.minute > 0){
-    mainBtn.textContent = "Resume";
-  }
-  else{
-    mainBtn.textContent = "Start Match";
-  }
+  if(live.minute >= 90) mainBtn.textContent = "Next Match";
+  else if(live.running) mainBtn.textContent = "Pause";
+  else mainBtn.textContent = "Start Match";
 }
 
-// =========================
-// 🔥 CLICK LOGIC
-// =========================
 function handleMainButtonClick(){
-
-  console.log("🔥 BUTTON CLICKED ✅");
 
   let live = game.match?.live;
   const league = game.league?.current;
+  if(!league) return;
 
-  if(!league){
-    console.warn("❌ Keine Liga geladen");
-    return;
-  }
-
-  if(!league.schedule || !league.schedule.length){
-    console.warn("❌ Kein Schedule vorhanden");
-    return;
-  }
-
-  if(game.phase === "setup"){
-    game.phase = "idle";
-  }
-
-  // =========================
-  // 🆕 MATCH INIT
-  // =========================
   if(!live){
-
     const round = league.schedule[game.league?.currentRound || 0];
-    if(!round?.length) return;
-
-    let match = getMatchForMyTeam(round) || round[0];
-
-    const ok = initMatch([match]);
-    if(!ok) return;
-
+    const match = getMatchForMyTeam(round) || round[0];
+    if(!initMatch([match])) return;
     live = game.match.live;
-
-    if(live){
-      live.running = false;
-      live.phase = "first_half";
-    }
   }
 
-  if(!live) return;
-
-  // =========================
-  // 🏁 NEXT MATCH
-  // =========================
-  if(live.minute >= 90){
-
-    game.league.currentRound++;
-
-    const round = league.schedule[game.league?.currentRound || 0];
-    if(!round?.length) return;
-
-    let match = getMatchForMyTeam(round) || round[0];
-
-    const ok = initMatch([match]);
-    if(!ok) return;
-
-    startBackgroundSimulation();
-
-    game.match.live.running = true;
-    matchLoopRunning = true;
-
-    runMatchLoop({
-      onTick: () => {
-        updateUI();
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        matchLoopRunning = false;
-        updateUI();
-        updateMainButtonText();
-      }
-    });
-
-    renderSchedule();
-    updateUI();
-    updateMainButtonText();
-    return;
-  }
-
-  // =========================
-  // ▶️ START / RESUME
-  // =========================
-  if(live.running === false){
-
-    if(matchLoopRunning) return;
-
-    if(live.minute === 0){
-      live.phase = "first_half";
-    }
-
-    startBackgroundSimulation();
-
-    live.running = true;
-    matchLoopRunning = true;
-
-    runMatchLoop({
-      onTick: () => {
-        updateUI();
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        matchLoopRunning = false;
-        updateUI();
-        updateMainButtonText();
-      }
-    });
-
-    updateMainButtonText();
-    return;
-  }
-
-  // =========================
-  // ⏸ PAUSE
-  // =========================
-  if(live.running === true){
+  if(live.running){
     live.running = false;
     matchLoopRunning = false;
-    updateMainButtonText();
+    return;
   }
+
+  startBackgroundSimulation();
+
+  live.running = true;
+  matchLoopRunning = true;
+
+  runMatchLoop({
+    onTick: () => {
+      updateUI();
+      updateMainButtonText();
+    },
+    onEnd: () => {
+      matchLoopRunning = false;
+      updateUI();
+      updateMainButtonText();
+    }
+  });
 }
 
-// =========================
-// 🔥 EIN EINZIGER GLOBAL LISTENER (KEY FIX)
-// =========================
 function initMainButton(){
-
-  console.log("🔧 initMainButton ACTIVE");
-
   document.addEventListener("click", (e) => {
-
-    const btn = e.target.closest("#startBtn");
-
-    if(!btn) return;
-
-    console.log("🎯 MATCHED startBtn");
-
-    mainBtn = btn;
-
-    handleMainButtonClick();
+    if(e.target.closest("#startBtn")){
+      handleMainButtonClick();
+    }
   });
 }
 
 // =========================
-// 🔄 RESET
+// 🚀 INIT
 // =========================
-document.getElementById("resetBtn")?.addEventListener("click", () => {
-  import("./services/storage.js").then(m => m.resetGame());
-});
+async function init(){
 
+  window.game = game;
 
+  initEventBindings();
+  startAdEngine();
 
-// =========================
-// ▶️ START
-// =========================
+  // 🔥 HIER WICHTIG
+  handleAppVisibility();
+}
+
 document.addEventListener("DOMContentLoaded", init);
 
 export { init };
