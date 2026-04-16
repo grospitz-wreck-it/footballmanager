@@ -246,7 +246,7 @@ function getMatchForMyTeam(round){
   return match || null; // ❗ KEIN FALLBACK MEHR
 }
 
-ffunction handleAppVisibility(){
+function handleAppVisibility(){
 
   const splash = document.getElementById("splash");
   const app = document.getElementById("app");
