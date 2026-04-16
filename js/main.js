@@ -326,8 +326,8 @@ async function findLeaguesByCode(input){
 
   const matches = leagues.filter(l => {
 
-    if(!l.region_id) return false;
-
+if(!l.region_id) return true; // 🔥 fallback: zeig Liga trotzdem
+    
     const leagueRegion = String(l.region_id).trim();
 
     return regionIds.includes(leagueRegion);
