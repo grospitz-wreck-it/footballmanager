@@ -312,9 +312,19 @@ console.log("📦 AVAILABLE LEAGUES:", game.league.available);
   console.log("📦 AVAILABLE LEAGUES:", leagues.length);
 
   if(!leagues.length){
-    console.warn("⏳ Ligen noch nicht geladen");
+  console.warn("⏳ Ligen noch nicht geladen → retry");
+
+  // 👉 kurzer Retry
+  await new Promise(r => setTimeout(r, 200));
+
+  const retryLeagues = game.league?.available || [];
+
+  if(!retryLeagues.length){
     return [];
   }
+
+  return retryLeagues;
+}
 
   // 👉 schon ab 2 Ziffern arbeiten
   const code = input.slice(0, 2);
