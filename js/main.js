@@ -400,8 +400,8 @@ plzInput?.addEventListener("input", async (e) => {
   // =========================
   resultsEl.innerHTML = leagues.map(l => `
     <div class="league-result" data-id="${l.id}">
-      ${l.name}
-    </div>
+${l.name || l.display_name}
+</div>
   `).join("");
 
   // =========================
