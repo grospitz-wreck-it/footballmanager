@@ -287,8 +287,8 @@ async function getRegionsByCode(code){
 
 async function findLeaguesByCode(input){
 
-  console.log("🔍 INPUT:", input);
-
+console.log("🔍 INPUT:", input);
+console.log("📦 AVAILABLE LEAGUES:", game.league.available);
   if(!input || input.length < 2) return [];
 
   const leagues = game.league?.available || [];
@@ -307,7 +307,7 @@ async function findLeaguesByCode(input){
 
   try {
     regions = await getRegionsByCode(code);
-    console.log("🌍 REGIONS:", regions);
+  console.log("🌍 REGIONS:", regions);
   } catch(e){
     console.warn("⚠️ Region lookup failed", e);
   }
@@ -315,7 +315,7 @@ async function findLeaguesByCode(input){
   // =========================
   // 🔥 HARTE FALLBACK LOGIK
   // =========================
-
+console.log("🧠 REGION IDS:", regionIds);
   if(!regions || regions.length === 0){
     console.warn("⚠️ KEINE REGION → nehme ALLE Ligen");
 
@@ -325,7 +325,11 @@ async function findLeaguesByCode(input){
   const regionIds = regions.map(r => String(r.region_id).trim());
 
   const matches = leagues.filter(l => {
-
+  console.log("CHECK:", {
+    league: l.name,
+    leagueRegion: l.region_id,
+    regionIds
+  });
   // 🔥 wenn keine region → immer erlauben
   if(!l.region_id) return true;
 
