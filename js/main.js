@@ -309,38 +309,7 @@ async function findLeaguesByCode(input){
   return matches;
 }
 
-// 🔹 passende Ligen finden
-async function findLeaguesByCode(input){
 
-if(!input || input.length < 2) return [];
-  
-const code = input.slice(0, 3);
-  const regions = await getRegionsByCode(code);
-
-  if(!regions.length){
-    console.warn("❌ Keine Region für PLZ:", code);
-    return [];
-  }
-
-  const regionIds = regions.map(r => r.region_id);
-
-  const matches = (game.league?.available || []).filter(l => {
-
-  if(!l.region_id) return false;
-
-  return regionIds.some(r =>
-  Number(r) === Number(l.region_id)
-);
-
-});
-
-  if(!matches.length){
-    console.warn("❌ Keine Liga für Region gefunden");
-    return [];
-  }
-
-  return matches;
-}
 
 
 // 🔥 HAUPTFUNKTION → AUTO SELECT (optional)
@@ -358,7 +327,6 @@ async function autoSelectLeagueByPLZ(input){
 
   setLeagueById(best.id);
 }
-
 
 // =========================
 // 🔎 PLZ SEARCH UI (DEIN DIV)
