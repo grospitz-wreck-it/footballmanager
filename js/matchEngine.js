@@ -253,11 +253,17 @@ function isMyMatch(match){
 // 🎮 INIT MATCH (STRICT ID)
 // =========================
 function initMatch(round){
+
+  // 🔥 FIX: game.match absichern (GANZ WICHTIG)
+  if(!game.match){
+    game.match = {};
+  }
+
   // 🔥 RESET MATCH LOOP
-if(matchInterval){
-  clearInterval(matchInterval);
-  matchInterval = null;
-}
+  if(matchInterval){
+    clearInterval(matchInterval);
+    matchInterval = null;
+  }
   if(!round?.length) return false;
 
 const playerMatch = round.find(m => isMyMatch(m));
