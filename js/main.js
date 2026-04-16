@@ -561,46 +561,76 @@ async function init(){
     // =========================
     // 🧠 LEAGUE BUILD
     // =========================
-    const leagueMap = new Map();
+   const leagueMap = new Map();
 
-    competitions.forEach(c => {
+competitions.forEach(c => {
 
-      if(!c) return;
+  if(!c) return;
 
-      const rawName = (c.name || "").trim();
-      const name = rawName.toLowerCase();
+  const rawName = (c.name || "").trim();
+  const name = rawName.toLowerCase();
 
-      if(!c.level) return;
-      if(c.level > 7) return;
+  if(!c.level) return;
+  if(c.level > 7) return;
 
-      if(name.includes("(region)")) return;
-      if(name.includes("kreisliga b")) return;
-      if(name.includes("kreisliga c")) return;
-      if(name.includes("kreisliga d")) return;
-      if(/\sa\s\d+$/.test(name)) return;
+  if(name.includes("(region)")) return;
+  if(name.includes("kreisliga b")) return;
+  if(name.includes("kreisliga c")) return;
+  if(name.includes("kreisliga d")) return;
+  if(/\sa\s\d+$/.test(name)) return;
 
-      const leagueId = String(c.id);
-      if(leagueMap.has(leagueId)) return;
+  const leagueId = String(c.id);
+  if(leagueMap.has(leagueId)) return;
 
-      let leagueTeams = teams.filter(t => {
+  let leagueTeams = teams.filter(t => {
 
-        if(!t) return false;
+    if(!t) return false;
 
-        if(t.competition_id && c.id){
-          return String(t.competition_id) === String(c.id);
-        }
+    if(t.competition_id && c.id){
+      return String(t.competition_id) === String(c.id);
+    }
 
-        const teamLeagueName =
-          (t.league || t.league_name || "").toLowerCase().trim();
+    const teamLeagueName =
+      (t.league || t.league_name || "").toLowerCase().trim();
 
-        return teamLeagueName === name;
-      });
- console.log("🚀 MAIN LOADED");
+    return teamLeagueName === name;
+  });
 
-document.addEventListener("click", () => {
-  console.log("🖱 ANY CLICK");
+  // 🔥 WICHTIG: NICHT ENTFERNEN
+  if(leagueTeams.length < 2){
+    return;
+  }
+
+  const regionName =
+    c.regions?.name ||
+    c.regions?.states?.name ||
+    "";
+
+  let displayName = rawName;
+
+  if(regionName && !rawName.toLowerCase().includes(regionName.toLowerCase())){
+    displayName = `${rawName} (${regionName})`;
+  }
+
+  if(rawName === "Kreisliga A"){
+    displayName = `Kreisliga A (${regionName || "Unbekannt"})`;
+  }
+
+  displayName = displayName
+    .replace("(Region)", "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // 🔥 DAS IST DER KERN
+  leagueMap.set(leagueId, {
+    id: leagueId,
+    name: displayName,
+    raw_name: rawName,
+    region_id: c.region_id,
+    teams: leagueTeams
+  });
+
 });
-
 // =========================
 // 📦 CORE
 // =========================
