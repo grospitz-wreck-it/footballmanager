@@ -456,17 +456,7 @@ if(!plzInput || !resultsEl){
   });
 
 }
-  
 
-  // =========================
-  // ⚡ AUTO SELECT (wenn nur 1 Ergebnis)
-  // =========================
-  if(leagues.length === 1){
-    setLeagueById(leagues[0].id);
-    resultsEl.innerHTML = "";
-  }
-
-});
 
 // =========================
 // 🚀 INIT
