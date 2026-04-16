@@ -73,10 +73,15 @@ function updateUI(){
   // =========================
   updateTacticsUI();
 
-  // 🔥 FIX: NUR WENN OVERLAY OFFEN
-  if(game.ui.tacticsOpen){
-    renderTacticStats();
-  }
+ // 🔥 AUTO CLOSE OVERLAY BEI MATCH START
+if(game.match?.live?.running && game.ui.tacticsOpen){
+  game.ui.tacticsOpen = false;
+}
+
+// 🔥 FIX: NUR WENN OVERLAY OFFEN
+if(game.ui.tacticsOpen){
+  renderTacticStats();
+}
 
   // =========================
   // 🪟 OVERLAY
