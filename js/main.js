@@ -493,28 +493,6 @@ function initOverlayManager(){
 }
 
 
-function startApp(){
-
-  const splash = document.getElementById("splash");
-  const app = document.getElementById("app");
-
-  console.log("🚀 START APP TRIGGERED");
-
-  if(splash){
-    splash.style.display = "none";
-  }
-
-  if(app){
-    app.classList.remove("hidden");
-  }
-
-  initOverlayManager();
-  initMainButton();
-
-  updateUI();
-  updateMainButtonText();
-}
-
 // =========================
 // 🚀 INIT
 // =========================
