@@ -268,21 +268,46 @@ function handleAppVisibility(){
 // =========================
 
 // 🔹 Regionen aus PLZ holen
-async function getRegionsByCode(code){
-  const { data, error } = await supabase
-    .from("region_codes")
-    .select("region_id")
-    .eq("country", "DE")
-    .like("code", `${code}%`);
+async function findLeaguesByCode(input){
+
+  if(!input || input.length < 2) return [];
   
-  if(error){
-    console.error("❌ region_codes error:", error);
+  const code = input.slice(0, 3);
+  const regions = await getRegionsByCode(code);
+
+  if(!regions.length){
+    console.warn("❌ Keine Region für PLZ:", code);
     return [];
   }
 
-  return data || [];
-}
+  const regionIds = regions.map(r => r.region_id);
 
+  const matches = (game.league?.available || []).filter(l => {
+
+    if(!l.region_id) return false;
+
+    return regionIds.some(r => {
+
+      // 🔥 ALLES normalisieren (wichtig!)
+      const a = String(r).replace(/\D/g, "");   // nur Zahlen
+      const b = String(l.region_id).replace(/\D/g, "");
+
+      return a && b && a === b;
+    });
+
+  });
+
+  if(!matches.length){
+    console.warn("❌ Keine Liga für Region gefunden", {
+      input,
+      regionIds,
+      sampleLeague: game.league?.available?.[0]
+    });
+    return [];
+  }
+
+  return matches;
+}
 
 // 🔹 passende Ligen finden
 async function findLeaguesByCode(input){
