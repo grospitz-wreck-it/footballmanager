@@ -854,7 +854,6 @@ mainBtn?.addEventListener("click", () => {
     return;
   }
 });
-console.log("🧪 leagueMap size:", leagueMap.size);
 // =========================
 // 🔄 RESET
 // =========================
