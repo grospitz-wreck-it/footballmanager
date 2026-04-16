@@ -362,8 +362,8 @@ plzInput?.addEventListener("input", async (e) => {
   `).join("");
 
 
- // =========================
-// 🖱 CLICK HANDLER (FINAL SAFE)
+// =========================
+// 🖱 CLICK HANDLER (FINAL CLEAN)
 // =========================
 resultsEl.querySelectorAll(".league-result").forEach(el => {
 
@@ -378,9 +378,6 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
 
     console.log("🎯 PLZ SELECT:", id);
 
-    // =========================
-    // 🧠 LEAGUE SET
-    // =========================
     try {
       setLeagueById(id);
     } catch(e){
@@ -388,9 +385,6 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
       return;
     }
 
-    // =========================
-    // 🧹 UI CLEANUP
-    // =========================
     resultsEl.innerHTML = "";
 
     updateUI?.();
@@ -401,10 +395,23 @@ resultsEl.querySelectorAll(".league-result").forEach(el => {
       teams: game.league?.current?.teams?.length
     });
 
-// =========================
-// 🔥 APP START (FINAL FIXED & ROBUST)
-// =========================
+    // 🔥 WICHTIG: WARTEN bis team gesetzt ist
+    setTimeout(() => {
 
+      if(game.team?.selectedId){
+        handleAppVisibility();
+      } else {
+        console.warn("⚠️ Team noch nicht gesetzt (check teamSelect)");
+      }
+
+    }, 120);
+  };
+
+});
+
+// =========================
+// 🔥 APP VISIBILITY CONTROLLER
+// =========================
 function handleAppVisibility(){
 
   const splash = document.getElementById("splash");
@@ -416,26 +423,12 @@ function handleAppVisibility(){
 
     console.log("🎮 GAME START (team selected)");
 
-    // =========================
-    // 🧼 UI SWITCH
-    // =========================
-    if(splash){
-      splash.style.display = "none";
-    }
+    splash && (splash.style.display = "none");
+    app && app.classList.remove("hidden");
 
-    if(app){
-      app.classList.remove("hidden");
-    }
-
-    // =========================
-    // 🚀 SYSTEM START (WICHTIG)
-    // =========================
     initOverlayManager();
     initMainButton();
 
-    // =========================
-    // 🎨 UI RENDER
-    // =========================
     updateUI();
     updateMainButtonText();
 
@@ -443,13 +436,8 @@ function handleAppVisibility(){
 
     console.log("🟡 WAITING FOR TEAM SELECTION");
 
-    if(splash){
-      splash.style.display = "flex";
-    }
-
-    if(app){
-      app.classList.add("hidden");
-    }
+    splash && (splash.style.display = "flex");
+    app && app.classList.add("hidden");
   }
 }
   // =========================
