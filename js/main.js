@@ -517,8 +517,8 @@ console.log("🧪 DEBUG READY → window.debugData");
     // 🎮 GAME EVENTS
     // =========================
     const { data: gameEvents } = await supabase
-      .from("game_events")
-      .select("*");
+  .from("event_definitions")
+  .select("*");
 
     console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
 
