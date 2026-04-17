@@ -267,13 +267,30 @@ function initLeagueSelect(leaguesInput){
 
       initLeague(league);
 
-      const round = league.schedule?.[0];
-      if(round && round.length > 0){
-        const ok = initMatch(round);
-        if(ok){
-          game.match.live.running = false;
-        }
-      }
+      const round = league.schedule?.[league.currentRound || 0];
+
+if(!round){
+  console.error("❌ Kein Round nach Teamwahl");
+  return true;
+}
+
+const ok = initMatch(round);
+
+if(!ok){
+  console.error("❌ initMatch fehlgeschlagen nach Teamwahl");
+  return true;
+}
+
+// 🔥 ABSICHERUNG
+if(!game.match?.live){
+  console.error("❌ live fehlt nach initMatch");
+  return true;
+}
+
+game.match.live.running = false;
+game.match.live.phase = game.match.live.phase || "first_half";
+
+console.log("✅ Match ready nach Teamwahl:", game.match);
 
       selects.forEach(s => {
         if(s !== select) s.value = index;
