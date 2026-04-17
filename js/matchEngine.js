@@ -155,7 +155,14 @@ function getPlayersOfTeam(teamId){
   const nid = normalizeId(teamId);
   const pool = window.playerPool || [];
 
-  return pool.filter(p => normalizeId(p.team_id) === nid);
+  console.log("🔍 TEAM ID:", nid);
+
+  const matches = pool.filter(p => String(p.team_id) === String(nid));
+
+  console.log("👥 MATCHING PLAYERS:", matches.length);
+  console.log("🧪 SAMPLE PLAYER:", pool[0]);
+
+  return matches;
 }
 
 function autoFillLineup(teamId){
