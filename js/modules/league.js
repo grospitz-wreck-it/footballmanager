@@ -402,11 +402,15 @@ function populateTeamSelect() {
 
  select.onchange = (e) => {
 
-  // 🔥 GUARD: nichts machen wenn Liga nicht ready
-  if(!game.league?.current || !Array.isArray(game.league.current.teams)){
-    console.warn("⛔ TeamSelect ignoriert – Liga noch nicht bereit");
-    return;
-  }
+if(!game.league?.current){
+  console.warn("⏳ Liga noch nicht ready → retry TeamSelect");
+
+  setTimeout(() => {
+    setLeagueById(id);
+  }, 100);
+
+  return;
+}
 
   const teamId = normalizeId(e.target.value);
 
