@@ -688,8 +688,8 @@ function runMatchLoop({ onTick, onEnd } = {}){
         console.warn("⚠️ Simulation error", e);
       }
 
-      const gameEvents = game.data?.gameEvents;
-
+const gameEvents = game.data?.eventDefinitions;
+      
       if(Array.isArray(gameEvents)){
         gameEvents.forEach(ev => {
 
