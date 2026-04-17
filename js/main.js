@@ -20,18 +20,28 @@ console.log("🔥 STEP 7");
 // =========================
 // START GAME
 // =========================
+// =========================
+// START GAME
+// =========================
 async function startGame(){
 
-  const events = await loadGameEvents();   // 🔥 hol dir die Daten bewusst
+  // 🔥 NEU: direkt aus event_definitions laden
+  const { data, error } = await supabase
+    .from("event_definitions")
+    .select("*");
+
+  if(error){
+    console.error("❌ EventDefinitions Load Error:", error);
+  }
 
   game.data = game.data || {};
-  game.data.gameEvents = events || [];     // 🔥 redundante Absicherung
+  game.data.eventDefinitions = data || [];
 
-  console.log("✅ INIT gameEvents:", game.data.gameEvents.length);
+  console.log("✅ INIT eventDefinitions:", game.data.eventDefinitions.length);
 
+  // 🔥 realtime für echte Match-Events bleibt!
   subscribeGameEvents();
 }
-
 
 startGame();
 // =========================
