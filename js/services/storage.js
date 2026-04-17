@@ -241,13 +241,13 @@ if(game){
     selectedId: null
   };
 
-  // =========================
-  // 🏆 LEAGUE
-  // =========================
-  game.league = {
-    current: null,
-    available: []
-  };
+ // =========================
+// 🏆 LEAGUE
+// =========================
+game.league = game.league || {};
+
+game.league.current = null;
+
 
   // =========================
   // 🎮 MATCH
