@@ -225,5 +225,4 @@ export {
   initTable,
   renderTable,
   renderLiveTable,
-  applyMatchToTable
 };
