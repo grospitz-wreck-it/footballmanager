@@ -645,11 +645,14 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
   matchInterval = setInterval(() => {
 
-    // ✅ LIVE ZUERST HOLEN
     const live = game.match?.live;
-    if(!live) return;
+    const currentMatch = game.match?.current;
 
-    // ✅ DEBUG (jetzt safe)
+    // 🔥 BYE / kein Match → nichts tun
+    if(!live || live.phase === "bye" || !currentMatch){
+      return;
+    }
+
     console.log("⏱", {
       minute: live.minute,
       running: live.running,
@@ -672,19 +675,62 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
       live.minute++;
 
-const ctx = {
-  match: game.match.current,
+      const ctx = {
+        match: currentMatch,
+        requestGoal: (data = {}) => {
+          game.match.flags = game.match.flags || {};
+          game.match.flags.goalRequested = true;
+          game.match.flags.goalData = data;
+        }
+      };
 
-  requestGoal: (data = {}) => {
-    game.match.flags = game.match.flags || {};
+      try {
+        rollRandomEvents(ctx);
+        simulateLiveEvent(ctx);
+        updateEvents();
+      } catch(e){
+        console.warn("⚠️ Simulation error", e);
+      }
 
-    game.match.flags.goalRequested = true;
-    game.match.flags.goalData = data;
-  }
-};
-      rollRandomEvents(ctx);
-      simulateLiveEvent(ctx);
-      updateEvents();
+      // =========================
+      // ⏸️ HALFTIME
+      // =========================
+      if(live.minute === 45 && live.phase === "first_half"){
+        live.phase = "halftime";
+        live.running = false;
+
+        setTimeout(() => {
+          if(game.match?.live){
+            game.match.live.running = true;
+            game.match.live.phase = "second_half";
+          }
+        }, 1000);
+
+        saveGame();
+      }
+
+      // =========================
+      // 🏁 MATCH END
+      // =========================
+      if(live.minute >= 90){
+
+        live.running = false;
+
+        clearInterval(matchInterval);
+        matchInterval = null;
+
+        endMatch(onEnd);
+        break;
+      }
+
+      accumulator -= STEP;
+      safety++;
+    }
+
+    onTick?.();
+
+  }, 50);
+}
 
       // =========================
       // 🎮 GAME EVENTS
