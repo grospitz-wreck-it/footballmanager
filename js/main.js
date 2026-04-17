@@ -316,95 +316,116 @@ function handleAppVisibility(){
 // =========================
 // 📍 PLZ → REGION → LIGA (FINAL UI READY)
 // =========================
-async function getRegionsByCode(code){
+// =========================
+// 📍 DISTRICT AUS PLZ HOLEN (NEU)
+// =========================
+async function getDistrictsByPLZPrefix(code){
+
+  if(!code) return [];
 
   const { data, error } = await supabase
-    .from("region_codes")
-    .select("region_id")
-    .eq("country", "DE")
-    .like("code", `${code}%`);
+    .from("cities")
+    .select("district_id")
+    .eq("plz", code); // 🔥 nutzt dein plz_3 Feld
 
   if(error){
-    console.error("❌ region_codes error:", error);
+    console.error("❌ cities lookup error:", error);
     return [];
   }
 
-  return data || [];
-}
-// 🔹 Regionen aus PLZ holen
+  const districtIds = [...new Set(
+    (data || [])
+      .map(d => d.district_id)
+      .filter(Boolean)
+      .map(id => String(id).trim())
+  )];
 
+  console.log("🌍 DISTRICTS:", districtIds);
+
+  return districtIds;
+}
+
+// =========================
+// 🔎 LIGEN FINDEN (FIXED)
+// =========================
 async function findLeaguesByCode(input){
 
-console.log("🔍 INPUT:", input);
-console.log("📦 AVAILABLE LEAGUES:", game.league.available);
+  console.log("🔍 INPUT:", input);
+  console.log("📦 AVAILABLE LEAGUES:", game.league?.available);
+
   if(!input || input.length < 2) return [];
 
   const leagues = game.league?.available || [];
 
   console.log("📦 AVAILABLE LEAGUES:", leagues.length);
 
+  // =========================
+  // ⏳ RETRY WENN LEER
+  // =========================
   if(!leagues.length){
-  console.warn("⏳ Ligen noch nicht geladen → retry");
+    console.warn("⏳ Ligen noch nicht geladen → retry");
 
-  // 👉 kurzer Retry
-  await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 200));
 
-  const retryLeagues = game.league?.available || [];
+    const retryLeagues = game.league?.available || [];
 
-  if(!retryLeagues.length){
-    return [];
+    if(!retryLeagues.length){
+      return [];
+    }
+
+    return retryLeagues;
   }
 
-  return retryLeagues;
-}
-
-  // 👉 schon ab 2 Ziffern arbeiten
+  // 👉 aktuell 2-stellig (passt zu deinem bisherigen System)
   const code = input.slice(0, 2);
 
-  let regions = [];
+  let districtIds = [];
 
   try {
-    regions = await getRegionsByCode(code);
-  console.log("🌍 REGIONS:", regions);
+    districtIds = await getDistrictsByPLZPrefix(code);
   } catch(e){
-    console.warn("⚠️ Region lookup failed", e);
+    console.warn("⚠️ District lookup failed", e);
   }
 
   // =========================
-  // 🔥 HARTE FALLBACK LOGIK
+  // 🔥 FALLBACK
   // =========================
-  if(!regions || regions.length === 0){
-    console.warn("⚠️ KEINE REGION → nehme ALLE Ligen");
-
+  if(!districtIds || districtIds.length === 0){
+    console.warn("⚠️ KEIN DISTRICT → nehme ALLE Ligen");
     return leagues;
   }
 
-  const regionIds = regions.map(r => String(r.region_id).trim());
-console.log("🧠 REGION IDS:", regionIds);
+  console.log("🧠 DISTRICT IDS:", districtIds);
 
+  // =========================
+  // 🎯 FILTER
+  // =========================
   const matches = leagues.filter(l => {
-  console.log("CHECK:", {
-    league: l.name,
-    leagueRegion: l.region_id,
-    regionIds
+
+    console.log("CHECK:", {
+      league: l.name,
+      leagueDistrict: l.district_id,
+      districtIds
+    });
+
+    // 👉 Ligen ohne district (z.B. Bezirksliga) immer erlauben
+    if(!l.district_id) return true;
+
+    const leagueDistrict = String(l.district_id).trim();
+
+    return districtIds.includes(leagueDistrict);
   });
-  // 🔥 wenn keine region → immer erlauben
-  if(!l.region_id) return true;
 
-  const leagueRegion = String(l.region_id).trim();
-
-  return regionIds.includes(leagueRegion);
-});
-
+  // =========================
+  // 🔥 FALLBACK 2
+  // =========================
   if(!matches.length){
     console.warn("⚠️ KEINE MATCHES → nehme ALLE Ligen");
-
     return leagues;
   }
 
   return matches;
 }
-
 
 // 🔥 HAUPTFUNKTION → AUTO SELECT (optional)
 async function autoSelectLeagueByPLZ(input){
