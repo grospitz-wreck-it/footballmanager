@@ -16,12 +16,22 @@ import { loadPlayers } from "./modules/loader.js";
 console.log("🔥 STEP 6");
 import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
 console.log("🔥 STEP 7");
+
+// =========================
+// START GAME
+// =========================
 async function startGame(){
 
-  await loadGameEvents();     // 🔥 zuerst laden
-  subscribeGameEvents();      // 🔴 dann realtime starten
+  const events = await loadGameEvents();   // 🔥 hol dir die Daten bewusst
 
+  game.data = game.data || {};
+  game.data.gameEvents = events || [];     // 🔥 redundante Absicherung
+
+  console.log("✅ INIT gameEvents:", game.data.gameEvents.length);
+
+  subscribeGameEvents();
 }
+
 
 startGame();
 // =========================
