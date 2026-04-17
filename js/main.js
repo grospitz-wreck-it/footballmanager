@@ -825,31 +825,44 @@ mainBtn?.addEventListener("click", () => {
   // =========================
   if(!live){
 
-    const round = league.schedule?.[game.league?.currentRound || 0];
+  // 🔥 RICHTIG: einzelnes Match holen
+  const match = nextMatch();
 
-    if(!round){
-      console.warn("❌ Kein Spieltag vorhanden");
-      return;
-    }
-
-    const ok = initMatch(round);
-    if(!ok){
-      console.error("❌ initMatch fehlgeschlagen");
-      return;
-    }
-
-    live = game.match?.live;
-
-    if(!live){
-      console.error("❌ Live-State fehlt");
-      return;
-    }
-
-    live.running = false;
-    live.phase = "first_half";
+  if(!match){
+    console.warn("❌ Kein Match verfügbar");
+    return;
   }
 
-  if(!live) return;
+  console.log("🎯 MATCH GEFUNDEN:", {
+    home: match.homeTeamId,
+    away: match.awayTeamId,
+    myTeam: game.team?.selectedId
+  });
+
+  const ok = initMatch(match);
+
+  if(!ok){
+    console.error("❌ initMatch fehlgeschlagen");
+    return;
+  }
+
+  live = game.match?.live;
+
+  if(!live){
+    console.error("❌ Live-State fehlt");
+    return;
+  }
+
+  // 🔥 saubere Initialisierung
+  live.running = false;
+  live.phase = "first_half";
+  live.minute = live.minute || 0;
+}
+
+if(!live){
+  console.warn("❌ Kein Live-State nach Init");
+  return;
+}
 
 
  // =========================
