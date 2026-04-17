@@ -635,122 +635,134 @@ function simulateOtherMatches(round){
 // =========================
 // 🔁 LOOP
 // =========================
-function runMatchLoop({ onTick, onEnd } = {}){
+matchInterval = setInterval(() => {
 
-  if(matchInterval) return;
+  const live = game.match?.live;
+  const currentMatch = game.match?.current;
 
-  let lastTime = performance.now();
-  let accumulator = 0;
-  const STEP = 1000;
+  // =========================
+  // ❌ KEIN MATCH / BYE
+  // =========================
+  if(!live || !currentMatch){
+    return;
+  }
 
-  matchInterval = setInterval(() => {
+  // 👉 bye komplett ignorieren
+  if(live.phase === "bye"){
+    return;
+  }
 
-    const live = game.match?.live;
-    const currentMatch = game.match?.current;
+  // =========================
+  // ⏸ PAUSE HANDLING
+  // =========================
+  if(live.running === false){
+    return;
+  }
 
-    // 🔥 KEIN MATCH / BYE → einfach skippen
-    if(!live || live.phase === "bye" || !currentMatch){
+  // =========================
+  // 🧠 TIME SYSTEM
+  // =========================
+  const now = performance.now();
+  const delta = now - lastTime;
+  lastTime = now;
+
+  accumulator += delta;
+
+  let safety = 0;
+
+  while(accumulator >= STEP && safety < 10){
+
+    live.minute++;
+
+    const ctx = {
+      match: currentMatch,
+      requestGoal: (data = {}) => {
+        game.match.flags = game.match.flags || {};
+        game.match.flags.goalRequested = true;
+        game.match.flags.goalData = data;
+      }
+    };
+
+    try {
+      rollRandomEvents(ctx);
+      simulateLiveEvent(ctx);
+      updateEvents();
+    } catch(e){
+      console.warn("⚠️ Simulation error", e);
+    }
+
+    // =========================
+    // 🎮 GAME EVENTS
+    // =========================
+    const gameEvents = game.data?.gameEvents;
+
+    if(Array.isArray(gameEvents)){
+      gameEvents.forEach(ev => {
+
+        if(!ev.active) return;
+
+        if(ev.trigger === "always"){
+          if(live.minute % 5 === 0){
+            applyGameEventEffect(ev, ctx);
+          }
+        }
+
+        if(ev._lastTrigger === undefined){
+          ev._lastTrigger = -999;
+        }
+
+        if(ev.trigger === "random"){
+          if(
+            live.minute - ev._lastTrigger > 1 &&
+            Math.random() < (ev.probability || 0)
+          ){
+            ev._lastTrigger = live.minute;
+            applyGameEventEffect(ev, ctx);
+          }
+        }
+
+      });
+    }
+
+    // =========================
+    // ⏸ HALFTIME
+    // =========================
+    if(live.minute === 45 && live.phase === "first_half"){
+      live.phase = "halftime";
+      live.running = false;
+
+      setTimeout(() => {
+        if(game.match?.live){
+          game.match.live.running = true;
+          game.match.live.phase = "second_half";
+        }
+      }, 1000);
+
+      saveGame();
+    }
+
+    // =========================
+    // 🏁 MATCH END
+    // =========================
+    if(live.minute >= 90){
+
+      live.running = false;
+
+      clearInterval(matchInterval);
+      matchInterval = null;
+
+      endMatch(onEnd);
+
       return;
     }
 
-    const now = performance.now();
-    const delta = now - lastTime;
-    lastTime = now;
+    accumulator -= STEP;
+    safety++;
+  }
 
-    accumulator += delta;
+  onTick?.();
 
-    let safety = 0;
-
-    while(accumulator >= STEP && safety < 10){
-
-      live.minute++;
-
-      const ctx = {
-        match: currentMatch,
-        requestGoal: (data = {}) => {
-          game.match.flags = game.match.flags || {};
-          game.match.flags.goalRequested = true;
-          game.match.flags.goalData = data;
-        }
-      };
-
-      try {
-        rollRandomEvents(ctx);
-        simulateLiveEvent(ctx);
-        updateEvents();
-      } catch(e){
-        console.warn("⚠️ Simulation error", e);
-      }
-
-      // =========================
-      // 🎮 GAME EVENTS TRIGGER (FIXED POSITION)
-      // =========================
-      const gameEvents = game.data?.gameEvents;
-
-      if(Array.isArray(gameEvents)){
-        gameEvents.forEach(ev => {
-
-          if(!ev.active) return;
-
-          if(ev.trigger === "always"){
-            if(live.minute % 5 === 0){
-              applyGameEventEffect(ev, ctx);
-            }
-          }
-
-          if(ev._lastTrigger === undefined){
-            ev._lastTrigger = -999;
-          }
-
-          if(ev.trigger === "random"){
-            if(
-              live.minute - ev._lastTrigger > 1 &&
-              Math.random() < (ev.probability || 0)
-            ){
-              ev._lastTrigger = live.minute;
-              applyGameEventEffect(ev, ctx);
-            }
-          }
-
-        });
-      }
-
-      // ⏸️ HALFTIME
-      if(live.minute === 45 && live.phase === "first_half"){
-        live.phase = "halftime";
-        live.running = false;
-
-        setTimeout(() => {
-          if(game.match?.live){
-            game.match.live.running = true;
-            game.match.live.phase = "second_half";
-          }
-        }, 1000);
-
-        saveGame();
-      }
-
-      // 🏁 MATCH END
-      if(live.minute >= 90){
-
-        live.running = false;
-
-        clearInterval(matchInterval);
-        matchInterval = null;
-
-        endMatch(onEnd);
-
-        return; // 🔥 wichtig: nicht break
-      }
-
-      accumulator -= STEP;
-      safety++;
-    }
-
-    onTick?.();
-
-  }, 50);
-}
+}, 50);
 
 // =========================
 // 📦 EXPORTS
