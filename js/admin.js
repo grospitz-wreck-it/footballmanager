@@ -1355,16 +1355,19 @@ if(tab === "insights"){
 }
 }
 
+
 // =====================
-// GLOBAL CLICK HANDLER
+// GLOBAL CLICK HANDLER (FIXED)
 // =====================
 document.addEventListener("click", (e)=>{
 
   const a = e.target.dataset.action;
   if(!a) return;
 
+  console.log("🖱 ACTION:", a); // 🔥 DEBUG
+
   // =====================
-  // 🖼 ASSET ACTIONS (NEU)
+  // 🖼 ASSET ACTIONS
   // =====================
   if(a==="deleteAsset"){
     removeAssetFromEvent(
@@ -1394,7 +1397,9 @@ document.addEventListener("click", (e)=>{
   // =====================
   // CAMPAIGNS
   // =====================
-  if(a==="delete") deleteCampaign(e.target.dataset.id);
+  if(a==="delete"){
+    deleteCampaign(e.target.dataset.id);
+  }
 
   // =====================
   // EVENTS
@@ -1404,17 +1409,33 @@ document.addEventListener("click", (e)=>{
     loadEvents();
   }
 
-  if(a==="saveInlineEvent") saveInlineEvent(e.target.dataset.id);
+  if(a==="saveInlineEvent"){
+    saveInlineEvent(e.target.dataset.id);
+  }
+
+  if(a==="deleteEvent"){
+    deleteEvent(e.target.dataset.id);
+  }
 
   // =====================
-  // GAME EVENTS
+  // 🎮 GAME EVENTS (🔥 FIXED)
   // =====================
   if(a==="editGameEventInline"){
     state.inlineGameEventEditId = e.target.dataset.id;
     loadGameEvents();
   }
 
+  if(a==="saveGameEventInline"){
+    saveInlineGameEvent(e.target.dataset.id);
+  }
+
+  if(a==="deleteGameEvent"){
+    deleteGameEvent(e.target.dataset.id);
+  }
+
 });
+
+
 
 // =====================
 // INIT
@@ -1427,8 +1448,12 @@ document.addEventListener("DOMContentLoaded", () => {
   qs("createEventBtn")?.addEventListener("click", saveEvent);
 
   // 🔥 GAME EVENTS
-  qs("saveGameEventBtn")?.addEventListener("click", saveGameEvent);
-
+  document.addEventListener("click", (e) => {
+  if(e.target.id === "saveGameEventBtn"){
+    saveGameEvent();
+  }
+});
+  
   qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
   qs("tabEvents")?.addEventListener("click", () => switchTab("events"));
   qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
