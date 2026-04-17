@@ -833,13 +833,47 @@ mainBtn?.addEventListener("click", () => {
 
   if(!live) return;
 
-  // =========================
-  // 🚫 BYE
-  // =========================
-  if(live.phase === "bye"){
-    console.warn("⚽ Spielfrei → kein Start");
+
+ // =========================
+// 🚫 BYE → AUTO SKIP
+// =========================
+if(live.phase === "bye"){
+  console.warn("⚽ Spielfrei → skip");
+
+  // 👉 UI Feedback
+  const feed = document.getElementById("liveFeed");
+  if(feed){
+    feed.innerHTML = `<div style="padding:8px;color:#999">Spielfrei – nächster Spieltag...</div>`;
+  }
+
+  // 👉 nächsten Spieltag laden
+  game.league.currentRound++;
+
+  const nextRound = league.schedule?.[game.league.currentRound];
+
+  if(!nextRound){
+    console.warn("🏁 Saison Ende erreicht");
     return;
   }
+
+  const ok = initMatch(nextRound);
+
+  if(!ok){
+    console.error("❌ Skip Match init fehlgeschlagen");
+    return;
+  }
+
+  // 👉 optional direkt starten
+  startBackgroundSimulation();
+
+  game.match.live.running = false; // NICHT auto-start
+  matchLoopRunning = false;
+
+  updateUI();
+  updateMainButtonText();
+
+  return;
+}
 
   // =========================
   // 🏁 NEXT MATCH
