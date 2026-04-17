@@ -263,12 +263,35 @@ function getMatchForMyTeam(round){
 
   const myTeamId = normalizeId(game.team?.selectedId);
 
-  const match = round?.find(m =>
-    normalizeId(m.homeTeamId) === myTeamId ||
-    normalizeId(m.awayTeamId) === myTeamId
-  );
+  if(!myTeamId){
+    console.warn("❌ Kein Team gewählt");
+    return null;
+  }
 
-  return match || null; // ❗ KEIN FALLBACK MEHR
+  if(!round || !round.length){
+    console.warn("❌ Kein Round vorhanden");
+    return null;
+  }
+
+  const match = round.find(m => {
+
+    const home = normalizeId(m.homeTeamId);
+    const away = normalizeId(m.awayTeamId);
+
+    return home === myTeamId || away === myTeamId;
+  });
+
+  // 🔥 DEBUG
+  console.log("🔍 MATCH SEARCH:", {
+    myTeamId,
+    found: !!match,
+    round: round.map(m => ({
+      home: m.homeTeamId,
+      away: m.awayTeamId
+    }))
+  });
+
+  return match || null;
 }
 
 function handleAppVisibility(){
