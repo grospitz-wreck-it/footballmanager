@@ -648,6 +648,10 @@ if(plzInputEl){
 // =========================
 initLeagueSelect(game.league.available);
 
+// 🔥 WICHTIG: Default Liga setzen
+if(game.league.available?.length){
+  setLeagueById(game.league.available[0].id);
+}
 // =========================
 // 🔎 PLZ BINDING (FIXED)
 // =========================
