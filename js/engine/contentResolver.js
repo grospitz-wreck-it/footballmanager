@@ -11,6 +11,32 @@ function normalize(val){
   return String(val || "").toLowerCase().trim();
 }
 
+
+function getPlayerNameById(id){
+
+  if(!id) return "ein Spieler";
+
+  const players = window.playerPool || [];
+
+  const p = players.find(p => String(p?.id || "") === String(id));
+
+  if(!p){
+    console.warn("❌ Player not found for id:", id);
+    return "ein Spieler";
+  }
+
+  return p.name || "ein Spieler";
+}
+
+function getTeamNameById(id){
+
+  const teams = game?.data?.teams || [];
+
+  const t = teams.find(t => String(t.id) === String(id));
+
+  return t?.name || "ein Team";
+}
+
 // =========================
 // 🔧 URL FIXER (ROBUST)
 // =========================
@@ -151,5 +177,16 @@ function emptyResult(){
     text: null,
     assets: [],
     config: null
+  };
+}
+export function enrichEvent(event){
+
+  if(!event) return event;
+
+  return {
+    ...event,
+    teamName: getTeamNameById(event.teamId),
+    playerName: getPlayerNameById(event.playerId),
+    relatedPlayerName: getPlayerNameById(event.relatedPlayerId)
   };
 }
