@@ -730,6 +730,8 @@ updateUI();
 // =========================
 // ▶️ MAIN BUTTON
 // =========================
+
+
 const mainBtn = document.getElementById("mainButton");
 
 function updateMainButtonText(){
@@ -759,25 +761,61 @@ mainBtn?.addEventListener("click", () => {
   let live = game.match?.live;
   const league = game.league?.current;
 
+  if(!league){
+    console.warn("❌ Keine Liga aktiv");
+    return;
+  }
+
   if(game.phase === "setup"){
     game.phase = "idle";
   }
 
+  // =========================
+  // 🆕 INIT MATCH
+  // =========================
   if(!live){
-    const round = league?.schedule?.[game.league?.currentRound || 0];
+
+    const round = league.schedule?.[game.league?.currentRound || 0];
+
+    if(!round){
+      console.warn("❌ Kein Spieltag vorhanden");
+      return;
+    }
+
     const match = getMatchForMyTeam(round);
 
-    if(match){
-      initMatch(round);
-      live = game.match.live;
-
-      live.running = false;
-      live.phase = "first_half";
+    if(!match){
+      console.error("❌ Kein Match für dein Team gefunden");
+      console.log("🧪 ROUND:", round);
+      console.log("🧪 TEAM:", game.team?.selectedId);
+      return;
     }
+
+    const ok = initMatch(round);
+
+    if(!ok){
+      console.error("❌ initMatch fehlgeschlagen");
+      return;
+    }
+
+    live = game.match?.live;
+
+    if(!live){
+      console.error("❌ Live-State nicht gesetzt");
+      return;
+    }
+
+    live.running = false;
+    live.phase = "first_half";
+
+    console.log("✅ MATCH READY");
   }
 
+  // =========================
+  // 🛑 FINAL GUARD
+  // =========================
   if(!live){
-    console.warn("❌ Kein Match");
+    console.warn("❌ Kein Match (nach Init)");
     return;
   }
 
@@ -894,7 +932,10 @@ mainBtn?.addEventListener("click", () => {
     updateMainButtonText();
     return;
   }
+
 });
+
+
 // =========================
 // 🔄 RESET
 // =========================
