@@ -1,5 +1,5 @@
 // =========================
-// 🧠 CONTENT RESOLVER (PRO)
+// 🧠 CONTENT RESOLVER (FINAL FIXED)
 // =========================
 
 import { game } from "../core/state.js";
@@ -11,26 +11,37 @@ function normalize(val){
   return String(val || "").toLowerCase().trim();
 }
 
-
+// =========================
+// 👤 PLAYER
+// =========================
 function getPlayerNameById(id){
 
   if(!id) return "ein Spieler";
 
   const players = window.playerPool || [];
 
-  const p = players.find(p => String(p?.id || "") === String(id));
+  const p = players.find(p => String(p?.id) === String(id));
 
   if(!p){
-    console.warn("❌ Player not found for id:", id);
+    console.warn("❌ Player not found:", id);
     return "ein Spieler";
   }
 
   return p.name || "ein Spieler";
 }
 
+// =========================
+// 🏆 TEAM
+// =========================
 function getTeamNameById(id){
 
-  const teams = game?.data?.teams || [];
+  if(!id) return "ein Team";
+
+  const teams =
+    game?.league?.current?.teams ||
+    game?.leagues?.flatMap(l => l.teams) ||
+    window.teams ||
+    [];
 
   const t = teams.find(t => String(t.id) === String(id));
 
@@ -38,17 +49,14 @@ function getTeamNameById(id){
 }
 
 // =========================
-// 🔧 URL FIXER (ROBUST)
+// 🔧 URL FIX
 // =========================
 function fixUrl(url){
   if(!url) return null;
 
   let fixed = url;
 
-  // 🔥 Supabase Transform entfernen
   fixed = fixed.replace("/render/image/public/", "/object/public/");
-
-  // 🔥 Encode (fix für Leerzeichen etc.)
   fixed = encodeURI(fixed);
 
   return fixed;
@@ -62,18 +70,21 @@ function isValidAsset(asset){
 }
 
 // =========================
-// 🧠 GET EVENTS (SAFE + FUTURE READY)
+// 🧠 EVENTS SOURCE (FIX!!!)
 // =========================
-function getGameEvents(){
+function getEventDefinitions(){
 
-  const events = game?.data?.gameEvents;
+  const defs =
+    game?.data?.eventDefinitions ||
+    game?.data?.gameEvents ||
+    [];
 
-  if(!Array.isArray(events)){
-    console.warn("⚠️ No gameEvents in state");
+  if(!Array.isArray(defs)){
+    console.warn("⚠️ No event definitions in state");
     return [];
   }
 
-  return events;
+  return defs;
 }
 
 // =========================
@@ -86,52 +97,53 @@ export function resolveEventContent(event){
     return emptyResult();
   }
 
-  const events = getGameEvents();
+  const definitions = getEventDefinitions();
   const type = normalize(event.type);
 
-  if(!events.length){
+  // 🔥 DEBUG
+  console.log("🧠 RESOLVER INPUT:", {
+    type,
+    definitions: definitions.length
+  });
+
+  if(!definitions.length){
     console.warn("⚠️ No events loaded");
     return emptyResult();
   }
 
   // =========================
-  // 🔍 MATCH EVENTS
+  // 🔍 MATCH
   // =========================
-  const matches = events.filter(e => {
+  const matches = definitions.filter(e => {
 
     const possible = [
       e.type,
       e.effect,
+      e.event_type,
       e.eventType
     ].map(normalize);
 
     return possible.includes(type);
   });
 
-  // =========================
-  // ❌ NO MATCH
-  // =========================
   if(!matches.length){
-    console.warn("⚠️ No match for event:", type);
+    console.warn("⚠️ No definition match for:", type);
     return emptyResult();
   }
 
   // =========================
-  // 🔥 PRIORITY SORT (STABLE)
+  // 🔥 PRIORITY
   // =========================
-  matches.sort((a,b) => {
-    return (b.priority || 0) - (a.priority || 0);
-  });
+  matches.sort((a,b) => (b.priority || 0) - (a.priority || 0));
 
   const selected = matches[0];
 
   // =========================
-  // 🖼 ASSETS PIPELINE
+  // 🖼 ASSETS
   // =========================
   let assets = [];
 
   if(Array.isArray(selected.assets)){
-
     assets = selected.assets
       .flat()
       .filter(isValidAsset)
@@ -139,18 +151,6 @@ export function resolveEventContent(event){
         ...asset,
         url: fixUrl(asset.url)
       }));
-
-  }
-
-  // =========================
-  // 🧾 DEBUG (nur bei Bedarf)
-  // =========================
-  if(game.debug?.events){
-    console.log("🎯 RESOLVED EVENT:", {
-      input: event,
-      selected,
-      assets
-    });
   }
 
   // =========================
@@ -158,9 +158,7 @@ export function resolveEventContent(event){
   // =========================
   return {
     text: selected.title || null,
-
     assets,
-
     config: {
       id: selected.id,
       category: selected.category || "default",
@@ -170,7 +168,7 @@ export function resolveEventContent(event){
 }
 
 // =========================
-// 🧩 EMPTY RESULT
+// 🧩 EMPTY
 // =========================
 function emptyResult(){
   return {
@@ -179,6 +177,10 @@ function emptyResult(){
     config: null
   };
 }
+
+// =========================
+// 🔥 ENRICH (FIXED)
+// =========================
 export function enrichEvent(event){
 
   if(!event) return event;
