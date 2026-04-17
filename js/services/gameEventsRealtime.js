@@ -1,5 +1,5 @@
 // =========================
-// 🔴 REALTIME GAME EVENTS (FINAL CLEAN)
+// 🔴 REALTIME EVENT DEFINITIONS
 // =========================
 
 import { supabase } from "../client.js";
@@ -10,25 +10,23 @@ import { EVENTS } from "../core/events.constants.js";
 // =========================
 // 📥 INITIAL LOAD
 // =========================
-
 export async function loadGameEvents(){
 
   const { data, error } = await supabase
-    .from("game_events")
+    .from("event_definitions")
     .select("*");
 
-  // 🔥 HIER rein
   console.log("RAW RESPONSE:", { data, error });
 
   if(error){
-    console.error("❌ loadGameEvents error:", error);
+    console.error("❌ loadEventDefinitions error:", error);
     return [];
   }
 
   game.data = game.data || {};
-  game.data.gameEvents = data || [];
+  game.data.eventDefinitions = data || [];
 
-  console.log("🔥 Events geladen:", game.data.gameEvents);
+  console.log("🔥 EventDefinitions geladen:", game.data.eventDefinitions.length);
 
   return data || [];
 }
@@ -38,29 +36,33 @@ export async function loadGameEvents(){
 // =========================
 export function subscribeGameEvents(){
 
-  console.log("🔴 Realtime Events aktiv");
+  console.log("🔴 Realtime EventDefinitions aktiv");
 
   const channel = supabase
-    .channel("game-events-channel")
+    .channel("event-definitions-channel")
 
     // =========================
     // ➕ INSERT
     // =========================
     .on(
       "postgres_changes",
-      { event: "INSERT", schema: "public", table: "game_events" },
+      { event: "INSERT", schema: "public", table: "event_definitions" },
       payload => {
 
         const newEvent = payload.new;
 
-        console.log("➕ EVENT INSERT", newEvent);
+        console.log("➕ EVENT DEF INSERT", newEvent);
 
-        const exists = game.data.gameEvents.some(
+        if(!game.data?.eventDefinitions){
+          game.data.eventDefinitions = [];
+        }
+
+        const exists = game.data.eventDefinitions.some(
           e => String(e.id) === String(newEvent.id)
         );
 
         if(!exists){
-          game.data.gameEvents.push(newEvent);
+          game.data.eventDefinitions.push(newEvent);
         }
 
         emit(EVENTS.STATE_CHANGED);
@@ -72,19 +74,19 @@ export function subscribeGameEvents(){
     // =========================
     .on(
       "postgres_changes",
-      { event: "UPDATE", schema: "public", table: "game_events" },
+      { event: "UPDATE", schema: "public", table: "event_definitions" },
       payload => {
 
         const updated = payload.new;
 
-        console.log("✏️ EVENT UPDATE", updated);
+        console.log("✏️ EVENT DEF UPDATE", updated);
 
-        const index = game.data.gameEvents.findIndex(
+        const index = game.data.eventDefinitions.findIndex(
           e => String(e.id) === String(updated.id)
         );
 
         if(index !== -1){
-          game.data.gameEvents[index] = updated;
+          game.data.eventDefinitions[index] = updated;
         }
 
         emit(EVENTS.STATE_CHANGED);
@@ -96,14 +98,14 @@ export function subscribeGameEvents(){
     // =========================
     .on(
       "postgres_changes",
-      { event: "DELETE", schema: "public", table: "game_events" },
+      { event: "DELETE", schema: "public", table: "event_definitions" },
       payload => {
 
         const deleted = payload.old;
 
-        console.log("❌ EVENT DELETE", deleted);
+        console.log("❌ EVENT DEF DELETE", deleted);
 
-        game.data.gameEvents = game.data.gameEvents.filter(
+        game.data.eventDefinitions = (game.data.eventDefinitions || []).filter(
           e => String(e.id) !== String(deleted.id)
         );
 
