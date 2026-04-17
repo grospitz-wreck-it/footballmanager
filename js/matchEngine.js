@@ -663,9 +663,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
     while(accumulator >= STEP && safety < 10){
 
-      if(!live.running){
-        break; // ✅ erlaubt (im while)
-      }
+     
 
       live.minute++;
 
