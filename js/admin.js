@@ -1081,8 +1081,10 @@ async function saveInlineGameEvent(id){
     duration: Number(row.querySelector("[data-field='duration']").value || 0)
   };
 
-  await supabase.from("game_events").update(payload).eq("id", id);
-
+await supabase
+  .from("event_definitions")
+  .update(payload)
+  .eq("id", id);
   state.inlineGameEventEditId = null;
   loadGameEvents();
 }
