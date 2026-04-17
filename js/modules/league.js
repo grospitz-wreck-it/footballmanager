@@ -330,9 +330,8 @@ function setLeagueById(leagueId){
 
   game.league.current = league;
 
-  // 🔥 zuerst Schedule
-if(!league.schedule || !league.schedule.length){
-  generateSchedule(league);
+if(!game.league.current.schedule || !game.league.current.schedule.length){
+  generateSchedule(game.league.current);
 }
 
 // dann init
