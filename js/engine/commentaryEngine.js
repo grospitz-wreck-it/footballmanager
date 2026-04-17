@@ -3,7 +3,7 @@
 // =========================
 
 export function generateText(event){
-
+console.log("🧠 generateText EVENT:", event);
   console.log("🟡 generateText CALLED");
 
   if(!event){
