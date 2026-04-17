@@ -240,7 +240,9 @@ if(game){
   game.team = {
     selectedId: null
   };
-
+ // 👉 LEAGUE SAFE RESET (WICHTIG)
+    game.league = game.league || {};
+    game.league.current = null;
   
   // =========================
   // 🎮 MATCH
