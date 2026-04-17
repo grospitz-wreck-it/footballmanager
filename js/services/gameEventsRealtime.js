@@ -22,7 +22,7 @@ export async function loadGameEvents(){
     return [];
   }
 
-  // 🔥 NORMALIZE (EXTREM WICHTIG)
+  // 🔥 NORMALIZE (wichtig für Resolver!)
   const normalized = (data || []).map(e => ({
     ...e,
     type: String(e.type || "").toLowerCase().trim()
@@ -33,7 +33,7 @@ export async function loadGameEvents(){
 
   console.log("🔥 Events geladen:", normalized.length);
 
-  return normalized; // 🔥 WICHTIG
+  return normalized; // 🔥 DAS HAT GEFehlt
 }
 
 // =========================
