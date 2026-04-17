@@ -513,11 +513,19 @@ console.log("🔁 COMP:", c?.name, c?.id);
   // Duplicate Guard
   if(leagueMap.has(leagueId)) return;
 
-  // =========================
-  // 🔥 TEAM MATCH (ROBUST)
-  // =========================
- let leagueTeams = teams;
+// =========================
+// 🔥 TEAM FILTER (FIX CRITICAL)
+// =========================
+let leagueTeams = teams.filter(t =>
+  String(t.competition_id) === String(c.id)
+);
 
+// 🔥 SAFETY FALLBACK
+if(!leagueTeams.length){
+  console.warn("⚠️ Keine Teams für Liga → fallback:", c.name);
+
+  leagueTeams = teams.slice(0, 10); // temporär fallback
+}
   // =========================
   // 🧠 DISPLAY NAME FIX
   // =========================
