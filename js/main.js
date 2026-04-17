@@ -488,32 +488,37 @@ function getCountryForPlayer(player, team, league){
 }
 
 // =========================
-// 👥 PLAYERS LADEN (NACH TEAMS!)
+// 👥 LOAD PLAYERS (SAFE)
 // =========================
-const players = await loadPlayers();
+const loadedPlayers = await loadPlayers();
 
-if(!players?.length){
-  console.warn("⚠️ Keine Spieler geladen!");
-}
-
-// 🔥 IMPORTANT: league kann hier noch null sein → fallback!
+// ⚠️ league kann hier noch null sein → fallback
 const league = game.league?.current || { level: 7 };
 
-window.playerPool = (players || []).map(p => {
+// 🔥 Safety: falls teams noch nicht da
+if(!window.teams?.length){
+  console.error("❌ KEINE TEAMS beim Player-Build!");
+}
+
+// =========================
+// 🔁 BUILD PLAYER POOL
+// =========================
+window.playerPool = (loadedPlayers || []).map(p => {
 
   let teamId = p.team_id;
 
-  // 🔥 FIX: null / "null" sauber behandeln
+  // 🔥 null / "null" sauber fixen
   if(
     teamId === "null" ||
-    teamId === null ||
     teamId === undefined ||
+    teamId === null ||
     teamId === ""
   ){
     teamId = assignTeamDeterministic(p, window.teams);
   }
 
-  const team = window.teams.find(t =>
+  // 🔥 team lookup (safe)
+  const team = window.teams?.find(t =>
     String(t.id) === String(teamId)
   );
 
@@ -527,7 +532,7 @@ window.playerPool = (players || []).map(p => {
 });
 
 // =========================
-// 🔥 GLOBAL SYNC (WICHTIG)
+// 🔥 GLOBAL SYNC (CRITICAL)
 // =========================
 game.players = window.playerPool;
 
@@ -536,47 +541,17 @@ game.players = window.playerPool;
 // =========================
 console.log("🧠 READY PLAYERS:", window.playerPool.slice(0,5));
 
-// 👉 extra check (EXTREM hilfreich)
-const testTeam = window.teams[0]?.id;
+// 🔥 REAL CHECK → funktioniert team filter?
+const testTeamId = window.teams?.[0]?.id;
 
-if(testTeam){
-  const testPlayers = window.playerPool.filter(p =>
-    String(p.team_id) === String(testTeam)
-  );
+if(testTeamId){
+  const count = window.playerPool.filter(p =>
+    String(p.team_id) === String(testTeamId)
+  ).length;
 
-  console.log("🧪 TEST TEAM:", testTeam);
-  console.log("🧪 PLAYERS IN TEAM:", testPlayers.length);
+  console.log("🧪 TEST TEAM:", testTeamId);
+  console.log("🧪 PLAYERS IN TEAM:", count);
 }
-
-    
-// =========================
-// 🚀 LOAD PLAYERS
-// =========================
-const players = await loadPlayers();
-
-// ⚠️ league kann hier noch null sein → fallback
-const league = game.league?.current || { level: 7 };
-
-window.playerPool = (players || []).map(p => {
-
-  let teamId = p.team_id;
-
-  if(teamId === "null" || teamId === undefined || teamId === null){
-    teamId = assignTeamDeterministic(p, window.teams);
-  }
-
-  const team = window.teams.find(t => String(t.id) === String(teamId));
-
-  const country = getCountryForPlayer(p, team, league);
-
-  return {
-    ...p,
-    team_id: teamId ? String(teamId) : null,
-    country
-  };
-});
-
-console.log("🧠 READY PLAYERS:", window.playerPool.slice(0,5));
 
     // =========================
     // 🏟 COMPETITIONS
