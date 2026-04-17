@@ -249,9 +249,20 @@ async function createCampaign(){
     active: true
   };
 
-  await supabase.from("campaigns").insert(payload);
-  clearForm();
-  loadCampaigns();
+  const { data, error } = await supabase
+  .from("campaigns")
+  .insert(payload);
+
+console.log("INSERT RESULT:", data);
+console.log("INSERT ERROR:", error);
+
+if(error){
+  alert("❌ Fehler beim Speichern");
+  return;
+}
+
+clearForm();
+loadCampaigns();
 }
 async function addAdSet(){
 
