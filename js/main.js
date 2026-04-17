@@ -791,36 +791,30 @@ mainBtn?.addEventListener("click", () => {
   const league = game.league?.current;
 
   // =========================
-  // ❌ NO LEAGUE
+  // ❌ KEINE LIGA
   // =========================
   if(!league){
     console.warn("❌ Keine Liga aktiv");
     return;
   }
 
-  // =========================
-  // 🔧 PHASE FIX
-  // =========================
   if(game.phase === "setup"){
     game.phase = "idle";
   }
 
   // =========================
-  // 🆕 AUTO INIT (KRITISCH)
+  // 🆕 INIT MATCH
   // =========================
   if(!live){
-
-    console.warn("⚠️ Kein live → initMatch wird ausgeführt");
 
     const round = league.schedule?.[game.league?.currentRound || 0];
 
     if(!round){
-      console.error("❌ Kein Spieltag vorhanden");
+      console.warn("❌ Kein Spieltag vorhanden");
       return;
     }
 
     const ok = initMatch(round);
-
     if(!ok){
       console.error("❌ initMatch fehlgeschlagen");
       return;
@@ -829,15 +823,15 @@ mainBtn?.addEventListener("click", () => {
     live = game.match?.live;
 
     if(!live){
-      console.error("❌ live nach init fehlt");
+      console.error("❌ Live-State fehlt");
       return;
     }
 
     live.running = false;
     live.phase = "first_half";
-
-    console.log("✅ MATCH AUTO INIT OK");
   }
+
+  if(!live) return;
 
   // =========================
   // 🚫 BYE
@@ -963,12 +957,10 @@ mainBtn?.addEventListener("click", () => {
     return;
   }
 
-});
+}); // ✅ EINZIGER CLOSING BLOCK
 
 // 🔥 INIT TEXT
 updateMainButtonText();
-
-
   // =========================
   // 🆕 INIT MATCH
   // =========================
