@@ -1,5 +1,5 @@
+import { supabase } from "../client.js"; // 🔥 du brauchst das!
 
-import { SUPABASE_URL, SUPABASE_KEY } from "../config.js";
 export async function loadPlayers(){
 
   const { data, error } = await supabase
@@ -11,19 +11,27 @@ export async function loadPlayers(){
     return [];
   }
 
-  return (data || []).map(p => {
+  const cleaned = (data || []).map(p => {
 
-    // 🔥 STABILE ID (EXTREM WICHTIG)
+    // 🔥 TEAM FIX (KRITISCH)
+    const teamId =
+      (p.team_id === "null" || p.team_id === undefined)
+        ? null
+        : p.team_id;
+
+    // 🔥 STABILE ID
     const id = String(
       p.id ||
-      (p.name + "_" + (p.team_id || ""))
+      (p.name + "_" + (teamId || "no_team"))
     );
 
     return {
       id,
 
       name: p.name,
-      team_id: String(p.team_id),
+
+      // 🔥 WICHTIG: NICHT String()!
+      team_id: teamId,
 
       country: p.country || "DE",
       position: p.position || "CM",
@@ -35,5 +43,8 @@ export async function loadPlayers(){
       goalkeeping: Number(p.goalkeeping) || 50
     };
   });
-}
 
+  console.log("🧼 CLEAN PLAYERS SAMPLE:", cleaned.slice(0,5));
+
+  return cleaned;
+}
