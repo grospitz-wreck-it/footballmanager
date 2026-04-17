@@ -268,30 +268,58 @@ function initMatch(round){
 
 const playerMatch = round.find(m => isMyMatch(m));
 
+// =========================
+// ⚽ BYE HANDLING (FIX)
+// =========================
 if(!playerMatch){
-  console.error("❌ Kein Match für dein Team gefunden!", round);
+  console.warn("⚽ BYE: Team hat spielfrei", round);
+
+  // 🔥 Match-State sauber setzen (wichtig!)
+  game.match._scheduleRef = null;
+
+  game.match.current = null;
+
+  game.match.live = {
+    minute: 0,
+    running: false,
+    score: { home: 0, away: 0 },
+    events: [],
+    phase: "bye"
+  };
+
+  game.match.home = null;
+  game.match.away = null;
+
+  game.match.score = {
+    home: 0,
+    away: 0
+  };
+
+  return {
+    isBye: true
+  };
+}
+
+// =========================
+// ⚽ NORMAL MATCH
+// =========================
+const homeId = normalizeId(playerMatch.homeTeamId);
+const awayId = normalizeId(playerMatch.awayTeamId);
+
+// 🔥 STRICT: KEIN FALLBACK MEHR
+if(!homeId || !awayId){
+  console.error("❌ MATCH INIT FAILED (STRICT ID)", playerMatch);
   return false;
 }
 
-  const homeId = normalizeId(playerMatch.homeTeamId);
-  const awayId = normalizeId(playerMatch.awayTeamId);
+game.match._scheduleRef = playerMatch;
 
-  // 🔥 STRICT: KEIN FALLBACK MEHR
-  if(!homeId || !awayId){
-    console.error("❌ MATCH INIT FAILED (STRICT ID)", playerMatch);
-    return false;
-  }
-
-  game.match._scheduleRef = playerMatch;
-
-  game.match.current = {
+game.match.current = {
   id: playerMatch.id,
 
-  // 🔥 IDs bleiben
   homeTeamId: homeId,
   awayTeamId: awayId,
 
-  // 🔥 ORIGINAL OBJEKTE AUS SCHEDULE
   home: playerMatch.home,
   away: playerMatch.away,
 
