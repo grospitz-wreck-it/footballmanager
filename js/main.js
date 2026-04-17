@@ -425,17 +425,87 @@ async function init(){
     // =========================
     // 👥 PLAYERS
     // =========================
- const players = await loadPlayers();
-    window.playerPool = (players || []).map(p => ({
-  ...p,
-  team_id: (p.team_id === "null" || p.team_id === undefined)
-    ? null
-    : p.team_id
-}));
+// =========================
+// 👥 PLAYERS (FINAL CLEAN)
+// =========================
 
-console.log("🧼 CLEANED PLAYERS:", window.playerPool.slice(0,5));
+// 🔧 helpers direkt hier (kein extra import nötig)
+function assignTeamDeterministic(player, teams){
+  if(!teams?.length) return null;
 
+  const seed = (player.name || "") + (player.id || "");
+  let hash = 0;
 
+  for(let i = 0; i < seed.length; i++){
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+
+  const index = Math.abs(hash) % teams.length;
+  return teams[index]?.id || null;
+}
+
+function getCountryForPlayer(player, team, league){
+
+  const level = league?.level || 7; // fallback Kreisliga
+
+  let foreignChance = 0;
+
+  if(level >= 7) foreignChance = 0.05;
+  else if(level >= 6) foreignChance = 0.15;
+  else if(level >= 5) foreignChance = 0.3;
+  else if(level >= 4) foreignChance = 0.5;
+  else foreignChance = 0.7;
+
+  const seed = (player.id || "") + (team?.id || "");
+  let hash = 0;
+
+  for(let i=0;i<seed.length;i++){
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+
+  const rand = Math.abs(hash % 100) / 100;
+
+  if(rand > foreignChance){
+    return "DE";
+  }
+
+  const countries = ["PL","TR","NL","FR","ES","IT","BR","AR","NG","GH"];
+  const index = Math.abs(hash) % countries.length;
+
+  return countries[index];
+}
+
+// =========================
+// 🚀 LOAD + BUILD
+// =========================
+
+const players = await loadPlayers();
+
+const league = game.league?.current || { level: 7 }; // fallback
+
+window.playerPool = (players || []).map(p => {
+
+  let teamId = p.team_id;
+
+  // 🔥 null / "null" fix
+  if(teamId === "null" || teamId === undefined || teamId === null){
+    teamId = assignTeamDeterministic(p, window.teams);
+  }
+
+  const team = window.teams.find(t => String(t.id) === String(teamId));
+
+  const country = getCountryForPlayer(p, team, league);
+
+  return {
+    ...p,
+    team_id: teamId ? String(teamId) : null,
+    country
+  };
+});
+
+console.log("🧠 READY PLAYERS:", window.playerPool.slice(0,5));
     
     // =========================
     // 🏆 TEAMS
