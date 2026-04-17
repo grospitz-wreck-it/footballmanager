@@ -16,7 +16,8 @@ import { loadPlayers } from "./modules/loader.js";
 console.log("🔥 STEP 6");
 import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
 console.log("🔥 STEP 7");
-
+import { generateSchedule, advanceSchedule, renderSchedule, nextMatch } from "./modules/scheduler.js";
+console.log("🔥 STEP 7einHalb");
 // =========================
 // START GAME
 // =========================
