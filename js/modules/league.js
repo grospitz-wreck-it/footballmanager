@@ -409,7 +409,7 @@ function populateTeamSelect() {
     });
   }
 };
-  });
+
 
   const firstTeam = league.teams[0];
 
