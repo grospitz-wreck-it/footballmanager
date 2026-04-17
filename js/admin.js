@@ -1020,7 +1020,22 @@ async function loadGameEvents(){
 
 
 async function deleteGameEvent(id){
-  await supabase.from("game_events").delete().eq("id", id);
+
+  if(!confirm("Event wirklich löschen?")) return;
+
+  const { error } = await supabase
+    .from("game_events")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    console.error("❌ Delete Error:", error);
+    alert("Löschen fehlgeschlagen");
+    return;
+  }
+
+  console.log("🗑️ GameEvent gelöscht:", id);
+
   loadGameEvents();
 }
 
