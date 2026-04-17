@@ -59,7 +59,7 @@ console.log("🔥 STEP 14");
 // =========================
 // 🎮 ENGINE
 // =========================
-import { runMatchLoop, initMatch } from "./matchEngine.js";
+import { runMatchLoop, initMatch, simulateOtherMatches } from "./matchEngine.js";
 console.log("🔥 STEP 15");
 import { initMatchEventSlides } from "./engine/matchEventSlideSystem.js";
 console.log("🔥 STEP 16");
