@@ -648,16 +648,10 @@ function runMatchLoop({ onTick, onEnd } = {}){
     const live = game.match?.live;
     const currentMatch = game.match?.current;
 
-    // 🔥 BYE / kein Match → nichts tun
+    // 🔥 KEIN MATCH / BYE → einfach skippen
     if(!live || live.phase === "bye" || !currentMatch){
       return;
     }
-
-    console.log("⏱", {
-      minute: live.minute,
-      running: live.running,
-      phase: live.phase
-    });
 
     const now = performance.now();
     const delta = now - lastTime;
@@ -670,7 +664,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
     while(accumulator >= STEP && safety < 10){
 
       if(!live.running){
-        break;
+        break; // ✅ erlaubt (im while)
       }
 
       live.minute++;
@@ -692,9 +686,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
         console.warn("⚠️ Simulation error", e);
       }
 
-      // =========================
       // ⏸️ HALFTIME
-      // =========================
       if(live.minute === 45 && live.phase === "first_half"){
         live.phase = "halftime";
         live.running = false;
@@ -709,9 +701,7 @@ function runMatchLoop({ onTick, onEnd } = {}){
         saveGame();
       }
 
-      // =========================
       // 🏁 MATCH END
-      // =========================
       if(live.minute >= 90){
 
         live.running = false;
@@ -720,7 +710,8 @@ function runMatchLoop({ onTick, onEnd } = {}){
         matchInterval = null;
 
         endMatch(onEnd);
-        break;
+
+        return; // 🔥 NICHT break! (wir sind im setInterval)
       }
 
       accumulator -= STEP;
