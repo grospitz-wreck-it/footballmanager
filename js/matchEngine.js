@@ -312,7 +312,7 @@ const playerMatch = round.find(m => isMyMatch(m));
 if(!playerMatch){
   console.warn("⚽ BYE: Team hat spielfrei", round);
 
-  // 🔥 Match-State sauber setzen (wichtig!)
+  // 🔥 Match-State sauber setzen
   game.match._scheduleRef = null;
 
   game.match.current = null;
@@ -332,6 +332,9 @@ if(!playerMatch){
     home: 0,
     away: 0
   };
+
+  // 🔥 NEU: andere Matches trotzdem starten
+  initOtherMatches(round);
 
   return {
     isBye: true
@@ -429,7 +432,7 @@ try {
     home: game.match.home,
     away: game.match.away
   });
-
+initOtherMatches(round);
   return true;
 }
 
