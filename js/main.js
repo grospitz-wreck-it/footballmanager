@@ -422,8 +422,8 @@ async function init(){
 
   try {
 
-  // =========================
-// 🏆 TEAMS (ZUERST!)
+// =========================
+// 🏆 TEAMS ZUERST LADEN
 // =========================
 const { data: teamsRaw, error: teamsError } =
   await supabase.from("teams").select("*");
@@ -437,12 +437,9 @@ window.teams = teams;
 
 console.log("🏆 Teams loaded:", teams.length);
 
-
 // =========================
-// 👥 PLAYERS (DANACH!)
+// 🔧 HELPERS (LOKAL)
 // =========================
-
-// 🔧 helpers
 function assignTeamDeterministic(player, teams){
   if(!teams?.length) return null;
 
@@ -473,7 +470,7 @@ function getCountryForPlayer(player, team, league){
   const seed = (player.id || "") + (team?.id || "");
   let hash = 0;
 
-  for(let i=0;i<seed.length;i++){
+  for(let i = 0; i < seed.length; i++){
     hash = ((hash << 5) - hash) + seed.charCodeAt(i);
     hash |= 0;
   }
@@ -490,6 +487,68 @@ function getCountryForPlayer(player, team, league){
   return countries[index];
 }
 
+// =========================
+// 👥 PLAYERS LADEN (NACH TEAMS!)
+// =========================
+const players = await loadPlayers();
+
+if(!players?.length){
+  console.warn("⚠️ Keine Spieler geladen!");
+}
+
+// 🔥 IMPORTANT: league kann hier noch null sein → fallback!
+const league = game.league?.current || { level: 7 };
+
+window.playerPool = (players || []).map(p => {
+
+  let teamId = p.team_id;
+
+  // 🔥 FIX: null / "null" sauber behandeln
+  if(
+    teamId === "null" ||
+    teamId === null ||
+    teamId === undefined ||
+    teamId === ""
+  ){
+    teamId = assignTeamDeterministic(p, window.teams);
+  }
+
+  const team = window.teams.find(t =>
+    String(t.id) === String(teamId)
+  );
+
+  const country = getCountryForPlayer(p, team, league);
+
+  return {
+    ...p,
+    team_id: teamId ? String(teamId) : null,
+    country
+  };
+});
+
+// =========================
+// 🔥 GLOBAL SYNC (WICHTIG)
+// =========================
+game.players = window.playerPool;
+
+// =========================
+// 🧪 DEBUG
+// =========================
+console.log("🧠 READY PLAYERS:", window.playerPool.slice(0,5));
+
+// 👉 extra check (EXTREM hilfreich)
+const testTeam = window.teams[0]?.id;
+
+if(testTeam){
+  const testPlayers = window.playerPool.filter(p =>
+    String(p.team_id) === String(testTeam)
+  );
+
+  console.log("🧪 TEST TEAM:", testTeam);
+  console.log("🧪 PLAYERS IN TEAM:", testPlayers.length);
+}
+
+    
 // =========================
 // 🚀 LOAD PLAYERS
 // =========================
