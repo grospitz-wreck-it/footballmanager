@@ -17,23 +17,20 @@ export async function loadGameEvents(){
     .from("game_events")
     .select("*");
 
+  // 🔥 HIER rein
+  console.log("RAW RESPONSE:", { data, error });
+
   if(error){
     console.error("❌ loadGameEvents error:", error);
     return [];
   }
 
-  // 🔥 NORMALIZE (wichtig für Resolver!)
-  const normalized = (data || []).map(e => ({
-    ...e,
-    type: String(e.type || "").toLowerCase().trim()
-  }));
-
   game.data = game.data || {};
-  game.data.gameEvents = normalized;
+  game.data.gameEvents = data || [];
 
-  console.log("🔥 Events geladen:", normalized.length);
+  console.log("🔥 Events geladen:", game.data.gameEvents);
 
-  return normalized; // 🔥 DAS HAT GEFehlt
+  return data || [];
 }
 
 // =========================
