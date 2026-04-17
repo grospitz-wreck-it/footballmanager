@@ -986,7 +986,7 @@ async function saveGameEvent(){
   console.log("🎮 SAVE GAME EVENT:", payload);
 
   const { error } = await supabase
-    .from("game_events")
+    .from("event_definitions")
     .insert(payload);
 
   if(error){
