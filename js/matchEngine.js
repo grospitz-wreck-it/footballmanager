@@ -92,19 +92,51 @@ function getTeamNameById(id){
 function emitMatchEvent(type, payload = {}) {
 
   const live = game.match?.live;
-  if (!live) return;
+  const match = game.match?.current;
+
+  if (!live || !match) return;
+
+  const teamId = payload.teamId;
+
+  // 🔥 TEAM NAME RESOLVE (ZENTRAL!)
+  let teamName = null;
+
+  if(teamId){
+    const isHome = String(teamId) === String(match.homeTeamId);
+
+    teamName = isHome
+      ? match.home?.name
+      : match.away?.name;
+  }
+
+  // 🔥 PLAYER NAME RESOLVE
+  let playerName = null;
+
+  if(payload.playerId){
+    const pool = window.playerPool || [];
+
+    const player = pool.find(p =>
+      String(p.id) === String(payload.playerId)
+    );
+
+    playerName = player?.name || null;
+  }
 
   const event = {
     id: crypto.randomUUID(),
     type: type || "UNKNOWN_EVENT",
     minute: live.minute ?? 0,
 
-    ...payload
+    // 🔥 ENRICHED DATA
+    ...payload,
+    teamName,
+    playerName
   };
+
+  console.log("📡 FINAL EVENT:", event);
 
   emit(EVENTS.MATCH_EVENT, event);
 }
-
 // =========================
 // 🎮 GAME EVENT EFFECT HANDLER
 // =========================
