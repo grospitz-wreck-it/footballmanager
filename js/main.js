@@ -422,14 +422,27 @@ async function init(){
 
   try {
 
-    // =========================
-    // 👥 PLAYERS
-    // =========================
+  // =========================
+// 🏆 TEAMS (ZUERST!)
 // =========================
-// 👥 PLAYERS (FINAL CLEAN)
+const { data: teamsRaw, error: teamsError } =
+  await supabase.from("teams").select("*");
+
+if(teamsError){
+  console.error("❌ Teams load failed:", teamsError);
+}
+
+const teams = teamsRaw || [];
+window.teams = teams;
+
+console.log("🏆 Teams loaded:", teams.length);
+
+
+// =========================
+// 👥 PLAYERS (DANACH!)
 // =========================
 
-// 🔧 helpers direkt hier (kein extra import nötig)
+// 🔧 helpers
 function assignTeamDeterministic(player, teams){
   if(!teams?.length) return null;
 
@@ -447,7 +460,7 @@ function assignTeamDeterministic(player, teams){
 
 function getCountryForPlayer(player, team, league){
 
-  const level = league?.level || 7; // fallback Kreisliga
+  const level = league?.level || 7;
 
   let foreignChance = 0;
 
@@ -478,18 +491,17 @@ function getCountryForPlayer(player, team, league){
 }
 
 // =========================
-// 🚀 LOAD + BUILD
+// 🚀 LOAD PLAYERS
 // =========================
-
 const players = await loadPlayers();
 
-const league = game.league?.current || { level: 7 }; // fallback
+// ⚠️ league kann hier noch null sein → fallback
+const league = game.league?.current || { level: 7 };
 
 window.playerPool = (players || []).map(p => {
 
   let teamId = p.team_id;
 
-  // 🔥 null / "null" fix
   if(teamId === "null" || teamId === undefined || teamId === null){
     teamId = assignTeamDeterministic(p, window.teams);
   }
@@ -506,20 +518,6 @@ window.playerPool = (players || []).map(p => {
 });
 
 console.log("🧠 READY PLAYERS:", window.playerPool.slice(0,5));
-    
-    // =========================
-    // 🏆 TEAMS
-    // =========================
-    const { data: teamsRaw, error: teamsError } =
-      await supabase.from("teams").select("*");
-
-    if(teamsError){
-      console.error("❌ Teams load failed:", teamsError);
-    }
-
-    const teams = teamsRaw || [];
-    window.teams = teams;
-    console.log("🏆 Teams loaded:", teams.length);
 
     // =========================
     // 🏟 COMPETITIONS
