@@ -747,18 +747,28 @@ updateUI();
 
 
 // =========================
-// ▶️ MAIN BUTTON
+// ▶️ MAIN BUTTON (FINAL FIX)
 // =========================
-
-
 const mainBtn = document.getElementById("mainButton");
 
 function updateMainButtonText(){
 
   const live = game.match?.live;
-  if(!mainBtn || !live) return;
 
-  if(live.minute >= 90){
+  if(!mainBtn){
+    console.warn("⚠️ mainButton fehlt im DOM");
+    return;
+  }
+
+  if(!live){
+    mainBtn.textContent = "Start Match";
+    return;
+  }
+
+  if(live.phase === "bye"){
+    mainBtn.textContent = "No Match";
+  }
+  else if(live.minute >= 90){
     mainBtn.textContent = "Next Match";
   }
   else if(live.phase === "halftime"){
@@ -780,14 +790,184 @@ mainBtn?.addEventListener("click", () => {
   let live = game.match?.live;
   const league = game.league?.current;
 
+  // =========================
+  // ❌ NO LEAGUE
+  // =========================
   if(!league){
     console.warn("❌ Keine Liga aktiv");
     return;
   }
 
+  // =========================
+  // 🔧 PHASE FIX
+  // =========================
   if(game.phase === "setup"){
     game.phase = "idle";
   }
+
+  // =========================
+  // 🆕 AUTO INIT (KRITISCH)
+  // =========================
+  if(!live){
+
+    console.warn("⚠️ Kein live → initMatch wird ausgeführt");
+
+    const round = league.schedule?.[game.league?.currentRound || 0];
+
+    if(!round){
+      console.error("❌ Kein Spieltag vorhanden");
+      return;
+    }
+
+    const ok = initMatch(round);
+
+    if(!ok){
+      console.error("❌ initMatch fehlgeschlagen");
+      return;
+    }
+
+    live = game.match?.live;
+
+    if(!live){
+      console.error("❌ live nach init fehlt");
+      return;
+    }
+
+    live.running = false;
+    live.phase = "first_half";
+
+    console.log("✅ MATCH AUTO INIT OK");
+  }
+
+  // =========================
+  // 🚫 BYE
+  // =========================
+  if(live.phase === "bye"){
+    console.warn("⚽ Spielfrei → kein Start");
+    return;
+  }
+
+  // =========================
+  // 🏁 NEXT MATCH
+  // =========================
+  if(live.minute >= 90){
+
+    game.league.currentRound++;
+
+    const round = league.schedule?.[game.league?.currentRound || 0];
+
+    if(!round){
+      console.warn("🏁 Saison Ende erreicht");
+      return;
+    }
+
+    const ok = initMatch(round);
+
+    if(!ok){
+      console.error("❌ Next Match init fehlgeschlagen");
+      return;
+    }
+
+    startBackgroundSimulation();
+
+    game.match.live.running = true;
+    matchLoopRunning = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    updateUI();
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ⏸ HALFTIME
+  // =========================
+  if(
+    live.phase === "halftime" ||
+    (live.minute === 45 && !live.running)
+  ){
+
+    if(matchLoopRunning) return;
+
+    startBackgroundSimulation();
+
+    live.phase = "second_half";
+    live.running = true;
+    matchLoopRunning = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    return;
+  }
+
+  // =========================
+  // ▶️ START / RESUME
+  // =========================
+  if(live.running === false){
+
+    if(matchLoopRunning) return;
+
+    if(live.minute === 0){
+      live.phase = "first_half";
+    }
+
+    startBackgroundSimulation();
+
+    live.running = true;
+    matchLoopRunning = true;
+
+    runMatchLoop({
+      onTick: () => {
+        updateUI();
+        updateMainButtonText();
+      },
+      onEnd: () => {
+        matchLoopRunning = false;
+        updateUI();
+        updateMainButtonText();
+      }
+    });
+
+    updateMainButtonText();
+    return;
+  }
+
+  // =========================
+  // ⏸ PAUSE
+  // =========================
+  if(live.running === true){
+    live.running = false;
+    matchLoopRunning = false;
+    updateMainButtonText();
+    return;
+  }
+
+});
+
+// 🔥 INIT TEXT
+updateMainButtonText();
+
 
   // =========================
   // 🆕 INIT MATCH
