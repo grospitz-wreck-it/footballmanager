@@ -1011,7 +1011,7 @@ async function saveGameEvent(){
 async function loadGameEvents(){
 
   const { data } = await supabase
-    .from("game_events")
+    .from("event_definitions")
     .select("*")
     .order("created_at", { ascending: false });
 
@@ -1024,7 +1024,7 @@ async function deleteGameEvent(id){
   if(!confirm("Event wirklich löschen?")) return;
 
   const { error } = await supabase
-    .from("game_events")
+    .from("event_definitions")
     .delete()
     .eq("id", id);
 
