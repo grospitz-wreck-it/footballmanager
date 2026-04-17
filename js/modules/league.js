@@ -287,7 +287,7 @@ function initLeagueSelect(leaguesInput){
   game.league = game.league || {};
   game.league.current = leagues[0];
 
-  // 🔥 zuerst Schedule
+// 🔥 zuerst Schedule
 if(!game.league.current.schedule || !game.league.current.schedule.length){
   generateSchedule(game.league.current);
 }
