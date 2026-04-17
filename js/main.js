@@ -314,10 +314,7 @@ function handleAppVisibility(){
 
 
 // =========================
-// 📍 PLZ → REGION → LIGA (FINAL UI READY)
-// =========================
-// =========================
-// 📍 DISTRICT AUS PLZ HOLEN (NEU)
+// 📍 DISTRICT AUS PLZ₃ HOLEN
 // =========================
 async function getDistrictsByPLZPrefix(code){
 
@@ -326,7 +323,7 @@ async function getDistrictsByPLZPrefix(code){
   const { data, error } = await supabase
     .from("cities")
     .select("district_id")
-    .eq("plz", code); // 🔥 nutzt dein plz_3 Feld
+    .eq("plz", code); // 🔥 plz_3
 
   if(error){
     console.error("❌ cities lookup error:", error);
@@ -345,22 +342,23 @@ async function getDistrictsByPLZPrefix(code){
   return districtIds;
 }
 
+
 // =========================
-// 🔎 LIGEN FINDEN (FIXED)
+// 🔎 LIGEN FINDEN (PLZ₃ FIX)
 // =========================
 async function findLeaguesByCode(input){
 
   console.log("🔍 INPUT:", input);
   console.log("📦 AVAILABLE LEAGUES:", game.league?.available);
 
-  if(!input || input.length < 2) return [];
+  if(!input || input.length < 3) return [];
 
   const leagues = game.league?.available || [];
 
   console.log("📦 AVAILABLE LEAGUES:", leagues.length);
 
   // =========================
-  // ⏳ RETRY WENN LEER
+  // ⏳ RETRY
   // =========================
   if(!leagues.length){
     console.warn("⏳ Ligen noch nicht geladen → retry");
@@ -376,8 +374,8 @@ async function findLeaguesByCode(input){
     return retryLeagues;
   }
 
-  // 👉 aktuell 2-stellig (passt zu deinem bisherigen System)
-  const code = input.slice(0, 2);
+  // 🔥 3-stellig (MASTERPROMPT)
+  const code = input.slice(0, 3);
 
   let districtIds = [];
 
@@ -408,7 +406,7 @@ async function findLeaguesByCode(input){
       districtIds
     });
 
-    // 👉 Ligen ohne district (z.B. Bezirksliga) immer erlauben
+    // 👉 Ligen ohne district (z.B. Bezirksliga)
     if(!l.district_id) return true;
 
     const leagueDistrict = String(l.district_id).trim();
