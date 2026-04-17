@@ -1,94 +1,49 @@
 console.log("🚀 MAIN.JS LOADED");
+
 // =========================
-// 📦 CORE
+// 📦 IMPORTS (CLEAN)
 // =========================
+
+// CORE
 import { game } from "./core/state.js";
-console.log("🔥 STEP 1");
 import { on } from "./core/events.js";
-console.log("🔥 STEP 2");
 import { EVENTS } from "./core/events.constants.js";
-console.log("🔥 STEP 3");
-import { initLeagueSelect, setLeagueById } from "./modules/league.js";
-console.log("🔥 STEP 4");
 import "./core/eventStore.js";
-console.log("🔥 STEP 5");
-import { loadPlayers } from "./modules/loader.js";
-console.log("🔥 STEP 6");
-import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
-console.log("🔥 STEP 7");
-import { generateSchedule, advanceSchedule, renderSchedule, nextMatch } from "./modules/scheduler.js";
-console.log("🔥 STEP 7einHalb");
-// =========================
-// START GAME
-// =========================
-// =========================
-// START GAME
-// =========================
-async function startGame(){
 
-  // 🔥 NEU: direkt aus event_definitions laden
-  const { data, error } = await supabase
-    .from("event_definitions")
-    .select("*");
-
-  if(error){
-    console.error("❌ EventDefinitions Load Error:", error);
-  }
-
-  game.data = game.data || {};
-  game.data.eventDefinitions = data || [];
-
-  console.log("✅ INIT eventDefinitions:", game.data.eventDefinitions.length);
-
-  // 🔥 realtime für echte Match-Events bleibt!
-  subscribeGameEvents();
-}
-
-startGame();
-// =========================
-// 🔌 SUPABASE
-// =========================
+// SUPABASE
 import { supabase } from "./client.js";
-console.log("🔥 STEP 8");
-// =========================
-// 🔧 MODULES
-// =========================
+
+// MODULES
+import { initLeagueSelect, setLeagueById } from "./modules/league.js";
+import { loadPlayers } from "./modules/loader.js";
 import { startAdEngine } from "./modules/ads.js";
-console.log("🔥 STEP 9");
-import { generateSchedule, advanceSchedule, renderSchedule } from "./modules/scheduler.js";
-console.log("🔥 STEP 10");
+import { generateSchedule, advanceSchedule, renderSchedule, nextMatch } from "./modules/scheduler.js";
 import { initTable } from "./modules/table.js";
-console.log("🔥 STEP 11");
 import { initPlayerPool } from "./modules/playerPool.js";
-console.log("🔥 STEP 12");
-import { importPlayers } from "../tools/importer.js";
-console.log("🔥 STEP 13");
-window.importPlayers = importPlayers;
 import { buildAllTeams } from "./modules/teamGenerator.js";
+
+// TOOLS
+import { importPlayers } from "../tools/importer.js";
+window.importPlayers = importPlayers;
 window.buildAllTeams = buildAllTeams;
-console.log("🔥 STEP 14");
-// =========================
-// 🎮 ENGINE
-// =========================
+
+// ENGINE
 import { runMatchLoop, initMatch, simulateOtherMatches } from "./matchEngine.js";
-console.log("🔥 STEP 15");
 import { initMatchEventSlides } from "./engine/matchEventSlideSystem.js";
-console.log("🔥 STEP 16");
-// =========================
-// 💾 STORAGE
-// =========================
+
+// SERVICES
 import { loadGame } from "./services/storage.js";
-console.log("🔥 STEP 17");
-// =========================
-// 🖥 UI
-// =========================
+import { loadGameEvents, subscribeGameEvents } from "./services/gameEventsRealtime.js";
+
+// UI
 import { updateUI } from "./ui/ui.js";
-console.log("🔥 STEP 18");
-// =========================
-// 🐞 DEBUG
-// =========================
+
+// DEBUG
 import { initDebugOverlay } from "../debug/debugOverlay.js";
-console.log("🔥 STEP 19");
+
+console.log("🔥 IMPORTS DONE");
+
+
 // =========================
 // 🔥 LOOP GUARD
 // =========================
