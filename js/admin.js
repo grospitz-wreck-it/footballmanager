@@ -979,16 +979,31 @@ async function saveGameEvent(){
     probability: Number(qs("geProbability")?.value || 0),
     value: Number(qs("geValue")?.value || 0),
     duration: Number(qs("geDuration")?.value || 0),
-
-    // 🔥 WICHTIG
     assets: assets,
-
     active: true
   };
 
   console.log("🎮 SAVE GAME EVENT:", payload);
 
-  await supabase.from("game_events").insert(payload);
+  const { error } = await supabase
+    .from("game_events")
+    .insert(payload);
+
+  if(error){
+    console.error("❌ Save GameEvent Error:", error);
+    alert("Speichern fehlgeschlagen");
+    return;
+  }
+
+  console.log("✅ GameEvent gespeichert");
+
+  // 🔥 reset form (optional aber sinnvoll)
+  ["geTitle","geProbability","geValue","geDuration"].forEach(id=>{
+    const el = qs(id);
+    if(el) el.value = "";
+  });
+
+  qs("geMedia").value = "";
 
   loadGameEvents();
 }
