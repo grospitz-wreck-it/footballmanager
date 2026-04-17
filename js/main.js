@@ -470,10 +470,14 @@ async function init(){
     // 👥 PLAYERS
     // =========================
     const players = await loadPlayers();
-    window.playerPool = players || [];
+    window.playerPool = (players || []).map(p => ({
+  ...p,
+  team_id: (p.team_id === "null" || p.team_id === undefined)
+    ? null
+    : p.team_id
+}));
 
-    console.log("👥 Players loaded:", window.playerPool.length);
-
+console.log("🧼 CLEANED PLAYERS:", window.playerPool.slice(0,5));
     // =========================
     // 🏆 TEAMS
     // =========================
