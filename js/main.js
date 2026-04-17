@@ -840,11 +840,17 @@ mainBtn?.addEventListener("click", () => {
 if(live.phase === "bye"){
   console.warn("⚽ Spielfrei → skip");
 
+  // =========================
+  // 🖥 UI FEEDBACK
+  // =========================
   const feed = document.getElementById("liveFeed");
   if(feed){
     feed.innerHTML = `<div style="padding:8px;color:#999">Spielfrei – nächster Spieltag...</div>`;
   }
 
+  // =========================
+  // ⏭ NEXT ROUND
+  // =========================
   game.league.currentRound++;
 
   const nextRound = league.schedule?.[game.league.currentRound];
@@ -854,24 +860,48 @@ if(live.phase === "bye"){
     return;
   }
 
+  // =========================
+  // 🆕 INIT MATCH
+  // =========================
   const ok = initMatch(nextRound);
   if(!ok){
     console.error("❌ Skip Match init fehlgeschlagen");
     return;
   }
 
-  // 🔥 HIER DER WICHTIGE TEIL
+  // =========================
+  // 🤖 ANDERE MATCHES SIMULIEREN
+  // =========================
   simulateOtherMatches(nextRound);
 
-  game.match.live.running = false;
+  // =========================
+  // 🔥 EVENT SYSTEM RESET (WICHTIG!)
+  // =========================
+  game.events = game.events || {};
+  game.events.history = [];
+
+  // =========================
+  // 🧠 MATCH STATE FIX
+  // =========================
+  if(game.match?.live){
+    game.match.live.running = false;   // wartet auf Button
+    game.match.live.phase = "first_half";
+    game.match.live.minute = 0;
+  }
+
   matchLoopRunning = false;
 
+  // =========================
+  // 🖥 UI UPDATE
+  // =========================
   updateUI();
   updateMainButtonText();
 
   return;
 }
 
+
+  
   // =========================
   // 🏁 NEXT MATCH
   // =========================
