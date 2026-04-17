@@ -241,40 +241,6 @@ if(game){
     selectedId: null
   };
 
- // =========================
-// 🏆 LEAGUE
-// =========================
-export function resetGame(){
-
-  console.log("🔄 RESET GAME");
-
-  localStorage.clear();
-
-  if(game){
-
-    game.team = {
-      selectedId: null
-    };
-
-    // 🔥 WICHTIG: LEAGUES NICHT ZERSTÖREN
-    game.league = game.league || {};
-    game.league.current = null;
-
-    game.match = null;
-
-    game.events = {
-      history: []
-    };
-
-    game.ui = {
-      sidebarOpen: false,
-      tab: "table"
-    };
-  }
-
-  console.log("✅ Game state cleared");
-}
-
   
   // =========================
   // 🎮 MATCH
