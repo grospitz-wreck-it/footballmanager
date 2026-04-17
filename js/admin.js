@@ -1,4 +1,4 @@
-console.log("KEY CHECK:", SUPABASE_KEY);
+
 let insightChart = null;
 import { supabase } from "./client.js";
 // =====================
