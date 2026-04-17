@@ -688,13 +688,13 @@ function runMatchLoop({ onTick, onEnd } = {}){
         console.warn("⚠️ Simulation error", e);
       }
 
-const gameEvents = game.data?.eventDefinitions;
+const gameEvents = game.data?.gameEvents;
       
       if(Array.isArray(gameEvents)){
         gameEvents.forEach(ev => {
 
-          if(!ev.active) return;
-
+    if(ev.active === false) return;
+          
           if(ev.trigger === "always"){
             if(live.minute % 5 === 0){
               applyGameEventEffect(ev, ctx);
