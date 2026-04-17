@@ -99,7 +99,6 @@ function emitMatchEvent(type, payload = {}) {
     type: type || "UNKNOWN_EVENT",
     minute: live.minute ?? 0,
 
-    // 🔥 NUR ROHDATEN
     ...payload
   };
 
