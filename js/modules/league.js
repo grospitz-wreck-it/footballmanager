@@ -261,9 +261,9 @@ function initLeagueSelect(leaguesInput){
 
       game.league.current = league;
 
-      if(!league.schedule || !league.schedule.length){
-        generateSchedule(league);
-      }
+     if(!league.schedule || !league.schedule.length){
+  generateSchedule(league);
+}
 
       initLeague(league);
 
