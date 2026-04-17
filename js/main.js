@@ -840,13 +840,11 @@ mainBtn?.addEventListener("click", () => {
 if(live.phase === "bye"){
   console.warn("⚽ Spielfrei → skip");
 
-  // 👉 UI Feedback
   const feed = document.getElementById("liveFeed");
   if(feed){
     feed.innerHTML = `<div style="padding:8px;color:#999">Spielfrei – nächster Spieltag...</div>`;
   }
 
-  // 👉 nächsten Spieltag laden
   game.league.currentRound++;
 
   const nextRound = league.schedule?.[game.league.currentRound];
@@ -857,16 +855,15 @@ if(live.phase === "bye"){
   }
 
   const ok = initMatch(nextRound);
-
   if(!ok){
     console.error("❌ Skip Match init fehlgeschlagen");
     return;
   }
 
-  // 👉 optional direkt starten
-  startBackgroundSimulation();
+  // 🔥 HIER DER WICHTIGE TEIL
+  simulateOtherMatches(nextRound);
 
-  game.match.live.running = false; // NICHT auto-start
+  game.match.live.running = false;
   matchLoopRunning = false;
 
   updateUI();
