@@ -266,18 +266,14 @@ function updateScore(){
     if(current){
 
       const homeName =
-        current.homeName ||
-        (typeof current.home === "string"
-          ? current.home
-          : current.home?.name || current.home?.Team) ||
-        "-";
+  game.match?.home?.name ||
+  current?.home?.name ||
+  "-";
 
-      const awayName =
-        current.awayName ||
-        (typeof current.away === "string"
-          ? current.away
-          : current.away?.name || current.away?.Team) ||
-        "-";
+const awayName =
+  game.match?.away?.name ||
+  current?.away?.name ||
+  "-";
 
       teamsEl.textContent = `${homeName} vs ${awayName}`;
     }
