@@ -87,3 +87,7 @@ function updateOtherMatches(round){
   });
 
 }
+export {
+  initOtherMatches,
+  updateOtherMatches
+};
