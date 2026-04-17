@@ -62,90 +62,93 @@ function getLiveTable(){
   const league = game.league?.current;
   if(!league) return [];
 
-  if(!league.table || league.table.length === 0){
-    initTable();
-  }
+  const teams = league.teams || [];
 
-  const table = league.table.map(t => ({ ...t }));
-  const round = league.schedule?.[league.currentRound || 0];
+  // 🔥 IMMER FRISCH STARTEN
+  const table = teams.map(team => ({
+    id: String(team.id),
+    name: team.name,
+    played: 0,
+    wins: 0,
+    draws: 0,
+    losses: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    points: 0
+  }));
 
-  if(!round) return table;
+  const schedule = league.schedule || [];
 
-  round.forEach(match => {
+  schedule.forEach(round => {
 
-    const home = table.find(t => t.id === String(match.homeTeamId));
-    const away = table.find(t => t.id === String(match.awayTeamId));
+    round.forEach(match => {
 
-    if(!home || !away) return;
+      const home = table.find(t => t.id === String(match.homeTeamId));
+      const away = table.find(t => t.id === String(match.awayTeamId));
 
-    let h = 0;
-    let a = 0;
+      if(!home || !away) return;
 
-    // =========================
-    // 🔴 1. DEIN MATCH (PRIO)
-    // =========================
-    if(
-      game.match?.current &&
-      match.id === game.match.current.id
-    ){
-      h = game.match.live?.score?.home ?? 0;
-      a = game.match.live?.score?.away ?? 0;
-    }
+      let h = 0;
+      let a = 0;
 
-    // =========================
-    // 🟡 2. ANDERE LIVE MATCHES
-    // =========================
-    else if(match.live){
-      h = match.live.score?.home ?? 0;
-      a = match.live.score?.away ?? 0;
-    }
+      // 🔴 dein Match
+      if(
+        game.match?.current &&
+        match.id === game.match.current.id
+      ){
+        h = game.match.live?.score?.home ?? 0;
+        a = game.match.live?.score?.away ?? 0;
+      }
 
-    // =========================
-    // 🟢 3. ABGESCHLOSSENE MATCHES
-    // =========================
-    else if(match._processed && match.result){
-      h = match.result.home;
-      a = match.result.away;
-    }
+      // 🟡 live matches
+      else if(match.live){
+        h = match.live.score?.home ?? 0;
+        a = match.live.score?.away ?? 0;
+      }
 
-    else{
-      return;
-    }
+      // 🟢 finished
+      else if(match._processed && match.result){
+        h = match.result.home;
+        a = match.result.away;
+      }
 
-    // =========================
-    // 📊 APPLY
-    // =========================
-    home.goalsFor += h;
-    home.goalsAgainst += a;
+      else{
+        return;
+      }
 
-    away.goalsFor += a;
-    away.goalsAgainst += h;
+      // APPLY (safe, weil fresh table!)
+      home.goalsFor += h;
+      home.goalsAgainst += a;
 
-    home.played++;
-    away.played++;
+      away.goalsFor += a;
+      away.goalsAgainst += h;
 
-    if(h > a){
-      home.points += 3;
-      home.wins++;
-      away.losses++;
-    }
-    else if(a > h){
-      away.points += 3;
-      away.wins++;
-      home.losses++;
-    }
-    else{
-      home.points++;
-      away.points++;
-      home.draws++;
-      away.draws++;
-    }
+      home.played++;
+      away.played++;
+
+      if(h > a){
+        home.points += 3;
+        home.wins++;
+        away.losses++;
+      }
+      else if(a > h){
+        away.points += 3;
+        away.wins++;
+        home.losses++;
+      }
+      else{
+        home.points++;
+        away.points++;
+        home.draws++;
+        away.draws++;
+      }
+
+    });
 
   });
 
   return table;
 }
-
 // =========================
 // 🧾 RENDER TABLE
 // =========================
