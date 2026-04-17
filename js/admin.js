@@ -1,8 +1,5 @@
 let insightChart = null;
 import { supabase } from "./client.js";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-console.log("CONFIG:", SUPABASE_URL, SUPABASE_KEY);
 // =====================
 // STATE
 // =====================
