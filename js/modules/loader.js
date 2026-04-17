@@ -48,3 +48,38 @@ export async function loadPlayers(){
 
   return cleaned;
 }
+function getCountryForPlayer(player, team, league){
+
+  const level = league?.level || 99;
+
+  // 🔥 Wahrscheinlichkeiten je Liga
+  let foreignChance = 0;
+
+  if(level >= 7) foreignChance = 0.05;      // Kreisliga
+  else if(level >= 6) foreignChance = 0.15; // Bezirksliga
+  else if(level >= 5) foreignChance = 0.3;
+  else if(level >= 4) foreignChance = 0.5;
+  else foreignChance = 0.7;
+
+  // 🔥 deterministischer seed
+  const seed = (player.id || "") + (team?.id || "");
+  let hash = 0;
+
+  for(let i=0;i<seed.length;i++){
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+
+  const rand = Math.abs(hash % 100) / 100;
+
+  if(rand > foreignChance){
+    return "DE";
+  }
+
+  // 🌍 Foreign Pool
+  const countries = ["PL","TR","NL","FR","ES","IT","BR","AR","NG","GH"];
+
+  const index = Math.abs(hash) % countries.length;
+
+  return countries[index];
+}
