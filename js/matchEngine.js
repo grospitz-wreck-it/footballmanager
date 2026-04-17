@@ -777,7 +777,7 @@ if(Array.isArray(gameEvents)){
   matchInterval = null;
 
   endMatch(onEnd);
-  break;
+  return;
 }
 
       accumulator -= STEP;
