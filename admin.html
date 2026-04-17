@@ -174,42 +174,45 @@
 
     <input id="geTitle" placeholder="Name des Events (z.B. 'Brutales Foul')">
 
-    <select id="geType" title="Event-Typ (muss zur Engine passen, z.B. goal, foul)"></select>
+    <select id="geType" title="Event-Typ (z.B. goal, foul)"></select>
 
     <select id="geTrigger" title="Wann das Event ausgelöst wird">
       <option value="random">Random (zufällig im Spiel)</option>
-      <option value="always">Always (immer aktiv)</option>
+      <option value="always">Always (Debug / Test)</option>
       <option value="goal">Goal (bei Tor)</option>
       <option value="foul">Foul (bei Foul)</option>
     </select>
 
-    <input 
-      id="geProbability" 
-      type="number" 
-      step="0.01"
-      placeholder="Chance (0–1, z.B. 0.3 = 30%)"
-      title="Wie oft das Event vorkommt (0 = nie, 1 = immer)"
-    >
+    <div>
+      <input 
+        id="geProbability" 
+        type="number" 
+        step="0.01"
+        min="0"
+        max="1"
+        placeholder="Chance (0–1, z.B. 0.3 = 30%)"
+      >
+      <small style="opacity:0.6; font-size:12px;">
+        0 = nie, 1 = immer
+      </small>
+    </div>
 
     <input 
       id="geValue" 
       type="number"
       placeholder="Effektstärke (z.B. 4)"
-      title="Wie stark das Event wirkt"
     >
 
     <input 
       id="geDuration" 
       type="number"
       placeholder="Dauer in Sekunden (z.B. 3)"
-      title="Wie lange das Event sichtbar ist"
     >
 
     <input 
       type="file" 
       id="geMedia" 
       multiple
-      title="Bild oder Video für das Event"
     >
 
     <button id="saveGameEventBtn">💾 Speichern</button>
