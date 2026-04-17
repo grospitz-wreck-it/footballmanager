@@ -74,14 +74,17 @@ function initLeague(league){
   // 📊 TABLE INIT
   // =========================
   league.table = league.teams.map(team => ({
-    id: normalizeId(team.id),
-    name: team.name,
-    played: 0,
-    points: 0,
-    goalsFor: 0,
-    goalsAgainst: 0,
-    strength: team.strength || 50
-  }));
+  id: normalizeId(team.id),
+  name: team.name,
+  played: 0,
+  wins: 0,
+  draws: 0,
+  losses: 0,
+  goalsFor: 0,
+  goalsAgainst: 0,
+  points: 0,
+  strength: team.strength || 50
+}));
 
   console.log("📊 Tabelle erstellt");
 
