@@ -10,6 +10,7 @@ import { EVENTS } from "../core/events.constants.js";
 // =========================
 // 📥 INITIAL LOAD
 // =========================
+
 export async function loadGameEvents(){
 
   const { data, error } = await supabase
@@ -18,20 +19,21 @@ export async function loadGameEvents(){
 
   if(error){
     console.error("❌ loadGameEvents error:", error);
-    return;
+    return [];
   }
 
+  // 🔥 NORMALIZE (EXTREM WICHTIG)
+  const normalized = (data || []).map(e => ({
+    ...e,
+    type: String(e.type || "").toLowerCase().trim()
+  }));
+
   game.data = game.data || {};
+  game.data.gameEvents = normalized;
 
-  // 🔥 RESET (gegen alten Cache)
-  game.data.gameEvents = [];
+  console.log("🔥 Events geladen:", normalized.length);
 
-  // 🔥 ASSIGN
-  game.data.gameEvents = data || [];
-
-  console.log("🔥 Events geladen:", game.data.gameEvents);
-
-  emit(EVENTS.STATE_CHANGED);
+  return normalized; // 🔥 WICHTIG
 }
 
 // =========================
