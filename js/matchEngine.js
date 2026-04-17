@@ -689,9 +689,17 @@ function runMatchLoop({ onTick, onEnd } = {}){
     const live = game.match?.live;
     const currentMatch = game.match?.current;
 
-    if(!live || !currentMatch) return;
-    if(live.phase === "bye") return;
-    if(live.running === false) return;
+
+  const round = game.league?.current?.schedule?.[game.league.currentRound];
+
+// 🔥 OTHER MATCHES IMMER UPDATEN
+updateOtherMatches(round);
+
+// 🔽 Dein Match nur wenn vorhanden
+if(!live || !currentMatch) return;
+if(live.phase === "bye") return;
+if(live.running === false) return;
+    
 
     const now = performance.now();
     const delta = now - lastTime;
