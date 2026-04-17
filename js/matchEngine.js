@@ -6,7 +6,7 @@ import { game } from "./core/state.js";
 import { emit } from "./core/events.js";
 import { EVENTS, EVENT_TYPES, EVENT_OUTCOMES } from "./core/events.constants.js";
 import { RULES } from "./core/rules.js";
-
+import { initOtherMatches, updateOtherMatches } from "./engine/otherMatchesEngine.js";
 import {
   updateEvents,
   rollRandomEvents
