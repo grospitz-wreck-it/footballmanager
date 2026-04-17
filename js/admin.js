@@ -1361,9 +1361,10 @@ if(tab === "insights"){
 // =====================
 document.addEventListener("click", (e)=>{
 
-  const a = e.target.dataset.action;
-  if(!a) return;
+  const target = e.target.closest("[data-action]");
+if(!target) return;
 
+const a = target.dataset.action;
   console.log("🖱 ACTION:", a); // 🔥 DEBUG
 
   // =====================
