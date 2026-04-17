@@ -647,10 +647,11 @@ if(!leagueTeams.length){
 // =========================
 leagueMap.set(leagueId, {
   id: leagueId,
-  name: displayName,
-  raw_name: rawName,
-  region_id: c.region_id,
-  teams: leagueTeams
+name: displayName,
+raw_name: rawName,
+region_id: c.region_id,
+level: Number(c.level) || 7,   // 🔥 DAS IST DER FIX
+teams: leagueTeams
 });
 
 });
