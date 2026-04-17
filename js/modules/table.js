@@ -219,53 +219,6 @@ function renderLiveTable(){
 }
 
 // =========================
-// 🧠 APPLY MATCH
-// =========================
-function applyMatchToTable(){
-
-  const league = game.league?.current;
-  const match = game.match?.current;
-
-  if(!league?.table || !match) return;
-
-  const home = league.table.find(t => t.id === String(match.homeTeamId));
-  const away = league.table.find(t => t.id === String(match.awayTeamId));
-
-  if(!home || !away) return;
-
-  const h = match.live.score.home ?? 0;
-  const a = match.live.score.away ?? 0;
-
-  home.goalsFor += h;
-  home.goalsAgainst += a;
-
-  away.goalsFor += a;
-  away.goalsAgainst += h;
-
-  home.played++;
-  away.played++;
-
-  if(h > a){
-    home.points += 3;
-    home.wins++;
-    away.losses++;
-  }
-  else if(a > h){
-    away.points += 3;
-    away.wins++;
-    home.losses++;
-  }
-  else{
-    home.points++;
-    away.points++;
-    home.draws++;
-    away.draws++;
-  }
-
-  console.log("✅ Match applied to table");
-}
-
-// =========================
 // 📦 EXPORTS
 // =========================
 export {
