@@ -1286,7 +1286,7 @@ async function removeAssetFromEvent(eventId, assetId, table){
     .eq("id", eventId);
 
   if(table === "events") loadEvents();
-  if(table === "game_events") loadGameEvents();
+  if(table === "event_definitions") loadGameEvents();
 }
 async function uploadInlineAssets(eventId, files, table){
 
