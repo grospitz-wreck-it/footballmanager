@@ -980,7 +980,7 @@ async function saveGameEvent(){
     value: Number(qs("geValue")?.value || 0),
     duration: Number(qs("geDuration")?.value || 0),
     assets: assets,
-    active: true
+    
   };
 
   console.log("🎮 SAVE GAME EVENT:", payload);
