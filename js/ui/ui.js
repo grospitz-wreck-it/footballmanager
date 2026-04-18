@@ -1164,7 +1164,7 @@ function renderTacticBar(label, value){
     <div class="tactic-row">
       <div class="tactic-label">${label} (${value})</div>
       <div class="tactic-bar">
-        <div class="tactic-fill" style="width:${value}%"></div>
+        <div class="tactic-fill" data-value="${value}"></div>
       </div>
     </div>
   `;
