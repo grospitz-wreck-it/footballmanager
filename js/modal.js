@@ -3,58 +3,81 @@
 // =========================
 function renderStat(label, value){
 
-  const v = Math.max(0, Math.min(150, value ?? 0));
+  const v = Math.max(0, Math.min(100, Math.round(value ?? 0)));
+
+  // 🔥 dynamische Farbe (rot → gelb → grün)
+  let color = "#22c55e"; // grün
+
+  if(v < 40) color = "#ef4444";      // rot
+  else if(v < 70) color = "#f59e0b"; // gelb
 
   return `
-    <div style="margin:6px 0;">
-      <div style="font-size:12px; opacity:0.8;">
-        ${label} (${v})
-      </div>
+    <div style="margin:8px 0;">
       <div style="
-        background:#222;
-        height:8px;
-        border-radius:6px;
+        display:flex;
+        justify-content:space-between;
+        font-size:12px;
+        opacity:0.9;
+      ">
+        <span>${label}</span>
+        <span>${v}</span>
+      </div>
+
+      <div style="
+        background:#1a1a1a;
+        height:10px;
+        border-radius:999px;
         overflow:hidden;
+        margin-top:3px;
       ">
         <div style="
           width:${v}%;
           height:100%;
-          background:linear-gradient(90deg,#00ff88,#22c55e);
-          transition:width 0.3s ease;
+          background:linear-gradient(90deg, ${color}, #22c55e);
+          transition:width 0.4s ease;
         "></div>
       </div>
     </div>
   `;
 }
+
+
 function getPlayerStats(player){
 
   const pos = (player.position || "").toUpperCase();
 
-  // =========================
-  // ⚽ ATTACK
-  // =========================
-  let attack = player.shooting ?? 50;
-
-  // =========================
-  // 🛡 DEFENSE
-  // =========================
+  let attack  = player.shooting ?? 50;
   let defense = player.defending ?? 50;
-
-  // =========================
-  // 🎮 CONTROL
-  // =========================
   let control = player.passing ?? 50;
 
-  // =========================
-  // 🧤 GK SPECIAL
-  // =========================
+  // 🧤 GK Spezial
   if(pos === "GK"){
     defense = player.goalkeeping ?? 50;
     attack = 10;
     control = 40;
   }
 
-  return { attack, defense, control };
+  // 🔥 leichte Positionsgewichtung
+  if(["ST","CF","FW"].includes(pos)){
+    attack *= 1.1;
+  }
+
+  if(["CB","LB","RB"].includes(pos)){
+    defense *= 1.1;
+  }
+
+  if(["CM","CDM","CAM"].includes(pos)){
+    control *= 1.1;
+  }
+
+  // clamp
+  const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
+
+  return {
+    attack: clamp(attack),
+    defense: clamp(defense),
+    control: clamp(control)
+  };
 }
 
 // =========================
@@ -129,20 +152,18 @@ export function openPlayerModal(player){
   }
 
   // =========================
-  // 📊 STATS
-  // =========================
-  const statsEl = modal.querySelector("#modalStats");
+// 📊 STATS
+// =========================
+const statsEl = modal.querySelector("#modalStats");
 
-  const attack  = player.attack  ?? player.overall ?? 50;
-  const defense = player.defense ?? player.overall ?? 50;
-  const control = player.control ?? player.overall ?? 50;
+// 👉 echte Werte aus DB + Mapping
+const stats = getPlayerStats(player);
 
-  statsEl.innerHTML = `
-    ${renderStat("Angriff", attack)}
-    ${renderStat("Verteidigung", defense)}
-    ${renderStat("Kontrolle", control)}
-  `;
-
+statsEl.innerHTML = `
+  ${renderStat("Angriff", stats.attack)}
+  ${renderStat("Verteidigung", stats.defense)}
+  ${renderStat("Kontrolle", stats.control)}
+`;
   // =========================
   // 🚀 SHOW
   // =========================
