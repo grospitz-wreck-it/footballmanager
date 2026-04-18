@@ -22,7 +22,7 @@ let initialized = false;
 let lastRenderedEventId = null;
 let liveTableInterval = null;
 let scheduleViewIndex = null;
-
+let selectedPlayerId = null;
 
 
 // =========================
@@ -689,75 +689,103 @@ function renderTeam(){
     if(player) starters.push(player);
   });
 
-  // =========================
-  // 🪑 BENCH
-  // =========================
-  const bench = players.filter(p => !starters.includes(p));
+// =========================
+// 🎨 RENDER FIELD
+// =========================
+let html = `
+  <h3>Startelf (${formation})</h3>
+  <div class="team-field">
+`;
 
-  // =========================
-  // 🎨 RENDER FIELD
-  // =========================
-  let html = `
-    <h3>Starting XI (${formation})</h3>
-    <div class="team-field">
+layout.forEach(slot => {
+
+  const slotRole = normalizeSlotRole(slot.role);
+
+  const player = starters.find(p =>
+    !p._used && mapPositionToRole(p.position) === slotRole
+  ) || starters.find(p => !p._used);
+
+  if(!player) return;
+  player._used = true;
+
+  html += `
+    <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
+      ${renderPlayerDot(player)}
+    </div>
   `;
+});
 
-  layout.forEach(slot => {
+html += `</div>`;
 
-   const slotRole = normalizeSlotRole(slot.role);
+// reset flags
+starters.forEach(p => delete p._used);
 
-const player = starters.find(p =>
-  !p._used && mapPositionToRole(p.position_type) === slotRole
-) || starters.find(p => !p._used);
 
-    if(!player) return;
-    player._used = true;
+// =========================
+// 🪑 BENCH (NEU)
+// =========================
+html += `
+  <h3>Bank</h3>
+  <div class="bench-row">
+`;
 
-    html += `
-      <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
-        ${renderPlayerDot(player)}
+bench.forEach(p => {
+
+  const stats = getPlayerStats(p);
+
+  html += `
+    <div class="bench-card" data-id="${p.id}">
+      <div class="bench-name">${p.name}</div>
+      <div class="bench-ovr">${p.overall}</div>
+
+      <div class="bench-stats">
+        <span>A ${stats.attack}</span>
+        <span>D ${stats.defense}</span>
+        <span>K ${stats.control}</span>
       </div>
-    `;
-  });
+    </div>
+  `;
+});
 
-  html += `</div>`;
+html += `</div>`;
 
-  // reset flag
-  starters.forEach(p => delete p._used);
 
-  // =========================
-  // 🪑 BENCH (CLEAN UI)
-  // =========================
-  html += `<h3>Bench</h3>
-    <div style="display:flex; gap:8px; overflow-x:auto;">`;
+// =========================
+// 🧱 IN DOM
+// =========================
+container.innerHTML = html;
 
-  bench.forEach(p => {
-    html += `
-      <div style="min-width:60px;">
-        ${renderPlayerDot(p)}
-      </div>
-    `;
-  });
 
-  html += `</div>`;
+// =========================
+// 🖱 CLICK SYSTEM
+// =========================
+container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
+  el.onclick = (e) => {
+    e.stopPropagation();
 
-  container.innerHTML = html;
+    const id = el.dataset.id;
+    if(!id) return;
 
-  // =========================
-  // 🖱 CLICK FIX (WICHTIG)
-  // =========================
-  container.querySelectorAll(".player-dot").forEach(el => {
-    el.onclick = (e) => {
-      e.stopPropagation();
+    if(!selectedPlayerId){
+      selectedPlayerId = id;
+      highlightSelection(id);
+      return;
+    }
 
-      const id = el.dataset.id;
-      if(!id) return;
+    if(selectedPlayerId === id){
+      selectedPlayerId = null;
+      clearSelection();
+      return;
+    }
 
-      const player = players.find(p => String(p.id) === String(id));
-      if(player) openPlayerModal(player);
-    };
-  });
-}
+    swapPlayers(selectedPlayerId, id);
+
+    selectedPlayerId = null;
+    clearSelection();
+
+    renderTeam();
+  };
+});
 
 // =========================
 // 🔵 PLAYER DOT
@@ -778,6 +806,51 @@ function renderPlayerDot(player){
   `;
 }
 
+function swapPlayers(id1, id2){
+
+  const lineup = game.team?.lineup;
+  if(!lineup?.slots) return;
+
+  let slotA = null;
+  let slotB = null;
+
+  // 👉 finde Slots
+  for(const key in lineup.slots){
+    if(lineup.slots[key] === id1) slotA = key;
+    if(lineup.slots[key] === id2) slotB = key;
+  }
+
+  // 👉 beide im Feld → einfach tauschen
+  if(slotA && slotB){
+    [lineup.slots[slotA], lineup.slots[slotB]] =
+    [lineup.slots[slotB], lineup.slots[slotA]];
+    return;
+  }
+
+  // 👉 einer ist auf Bench
+  if(slotA){
+    lineup.slots[slotA] = id2;
+    return;
+  }
+
+  if(slotB){
+    lineup.slots[slotB] = id1;
+    return;
+  }
+}
+
+  function highlightSelection(id){
+  document.querySelectorAll(".player-dot, .bench-card").forEach(el => {
+    el.classList.toggle("selected", el.dataset.id === id);
+  });
+}
+
+function clearSelection(){
+  document.querySelectorAll(".selected").forEach(el => {
+    el.classList.remove("selected");
+  });
+}
+  
 // =========================
 // 📊 STATS
 // =========================
