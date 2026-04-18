@@ -614,81 +614,77 @@ function renderTeam(){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
-  }
 
   // =========================
   // 🧠 SORT + GROUP
   // =========================
-const byType = { GK: [], DEF: [], MID: [], ST: [] };
+  const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
-// =========================
-// 🧠 GROUP BY ROLE (CLEAN)
-// =========================
-players.forEach(p => {
+  // =========================
+  // 🧠 GROUP BY ROLE (CLEAN)
+  // =========================
+  players.forEach(p => {
 
-  const role = mapPositionToRole(p.position_type);
+    const role = mapPositionToRole(p.position_type);
 
-  if(!byType[role]){
-    console.warn("⚠️ Unknown role:", role, p);
-    return;
+    if(!byType[role]){
+      console.warn("⚠️ Unknown role:", role, p);
+      return;
+    }
+
+    byType[role].push(p);
+  });
+
+  // =========================
+  // 🔥 SORT (BEST FIRST)
+  // =========================
+  Object.values(byType).forEach(arr => {
+    if(!Array.isArray(arr)) return;
+    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+  });
+
+  // =========================
+  // ⚙️ FORMATION
+  // =========================
+  const formation = game.team?.formation || "4-4-2";
+  const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+
+  // 👉 copy pools (wichtig!)
+  const poolCopy = {
+    GK: [...byType.GK],
+    DEF: [...byType.DEF],
+    MID: [...byType.MID],
+    ST: [...byType.ST]
+  };
+
+  // =========================
+  // 🧠 SLOT → ROLE MAPPING (CLEAN)
+  // =========================
+  function normalizeSlotRole(roleRaw){
+
+    const role = (roleRaw || "").toUpperCase();
+
+    if(["CB","LB","RB","WB","RWB","LWB","DEF"].includes(role)) return "DEF";
+    if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
+    if(["ST","CF","FW","LW","RW","ATT"].includes(role)) return "ST";
+    if(role.includes("GK")) return "GK";
+
+    return "MID"; // fallback
   }
 
-  byType[role].push(p);
-});
+  // =========================
+  // 🧠 STARTING XI
+  // =========================
+  const starters = [];
 
-// =========================
-// 🔥 SORT (BEST FIRST)
-// =========================
-Object.values(byType).forEach(arr => {
-  if(!Array.isArray(arr)) return;
-  arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-});
+  layout.forEach(slot => {
 
+    const role = normalizeSlotRole(slot.role);
 
-// =========================
-// ⚙️ FORMATION
-// =========================
-const formation = game.team?.formation || "4-4-2";
-const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+    const player = pickPlayer(role, poolCopy);
 
-// 👉 copy pools (wichtig!)
-const poolCopy = {
-  GK: [...byType.GK],
-  DEF: [...byType.DEF],
-  MID: [...byType.MID],
-  ST: [...byType.ST]
-};
-
-
-// =========================
-// 🧠 SLOT → ROLE MAPPING (CLEAN)
-// =========================
-function normalizeSlotRole(roleRaw){
-
-  const role = (roleRaw || "").toUpperCase();
-
-  if(["CB","LB","RB","WB","RWB","LWB","DEF"].includes(role)) return "DEF";
-  if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
-  if(["ST","CF","FW","LW","RW","ATT"].includes(role)) return "ST";
-  if(role.includes("GK")) return "GK";
-
-  return "MID"; // fallback
-}
-
-
-// =========================
-// 🧠 STARTING XI
-// =========================
-const starters = [];
-
-layout.forEach(slot => {
-
-  const role = normalizeSlotRole(slot.role);
-
-  const player = pickPlayer(role, poolCopy);
-
-  if(player) starters.push(player);
-});
+    if(player) starters.push(player);
+  });
 
   // =========================
   // 🪑 BENCH
@@ -756,8 +752,7 @@ layout.forEach(slot => {
       if(player) openPlayerModal(player);
     };
   });
-
-
+}
 
 // =========================
 // 🔵 PLAYER DOT
