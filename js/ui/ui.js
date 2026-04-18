@@ -72,24 +72,31 @@ function updateUI(){
 
   updateTabs();
 
-  // =========================
-  // 📊 TABLE
-  // =========================
-  if(game.ui.tab === "table"){
+// =========================
+// 📊 TABLE
+// =========================
+if(game.ui.tab === "table"){
 
-    renderLiveTable();
+  renderLiveTable();
 
-    if(game.match?.live?.running){
-      ensureLiveTableLoop();
-    }
+  if(game.match?.live?.running){
+    ensureLiveTableLoop();
   }
+}
 
-  // =========================
-  // 👥 TEAM
-  // =========================
-  if(game.ui.tab === "team"){
-    renderTeam();
-  }
+// =========================
+// 📅 SCHEDULE
+// =========================
+if(game.ui.tab === "schedule"){
+  renderSchedule();
+}
+
+// =========================
+// 👥 TEAM
+// =========================
+if(game.ui.tab === "team"){
+  renderTeam();
+}
 
   // =========================
   // ⚙️ TACTICS
