@@ -1229,19 +1229,28 @@ function triggerChanceEvent(){
 
   const events = [
     { type: "attack_boost", value: +15, text: "🔥 Offensivschub!" },
-    { type: "defense_boost", value: +15, text: "🛡 Abwehr stabilisiert!" },
+    { type: "defense_boost", value: +15, text: "🛡 Defensiv stabil!" },
     { type: "control_boost", value: +15, text: "🎯 Spielkontrolle erhöht!" },
 
     { type: "attack_nerf", value: -10, text: "❌ Angriff schwächelt!" },
-    { type: "defense_nerf", value: -10, text: "⚠️ Abwehr wackelt!" }
+    { type: "defense_nerf", value: -10, text: "⚠️ Abwehr unsicher!" }
   ];
 
   const event = events[Math.floor(Math.random() * events.length)];
 
-  // 🔒 init falls nicht vorhanden
   game.tempEffects = game.tempEffects || {};
 
-  // 👉 Effekt
+  // 👉 Effekt setzen
+  game.tempEffects[event.type] = event.value;
+
+  console.log("🎲 Chance Event:", event);
+
+  // 👉 kleines Feedback
+  alert(event.text);
+
+  // 👉 UI aktualisieren
+  renderTacticStats();
+}
 
 function renderTacticBar(label, value){
 
