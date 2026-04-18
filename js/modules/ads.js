@@ -6,6 +6,18 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js";
 import { game } from "../core/state.js";
 import { SUPABASE_URL, SUPABASE_KEY } from "../config.js";
 
+function getSessionId() {
+
+  let id = localStorage.getItem("session_id");
+
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("session_id", id);
+  }
+
+  return id;
+}
+
 // =========================
 // 🔌 INIT
 // =========================
