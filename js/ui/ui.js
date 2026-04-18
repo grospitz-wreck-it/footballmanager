@@ -625,12 +625,7 @@ function openPlayerModal(player){
 
   const name = `${player.first_name || ""} ${player.last_name || ""}`.trim();
 
-  alert(
-    `${name || "Spieler"}\n\n` +
-    `OVR: ${player.overall ?? "-"}\n` +
-    `Position: ${player.position_type ?? "-"}\n` +
-    `Tier: ${player.tier ?? "-"}`
-  );
+  
 }
 
   
