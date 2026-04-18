@@ -16,10 +16,7 @@ function getSessionId() {
   return id;
 }
 
-// =========================
-// 🔌 INIT
-// =========================
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
 
 // =========================
 // 📦 STATE
