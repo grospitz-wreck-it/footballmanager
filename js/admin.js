@@ -357,7 +357,6 @@ loadCampaigns();
 // LOAD
 // =====================
 async function loadCampaigns(){
-console.log("LOADED CAMPAIGNS:", campaigns);
   // =========================
   // 🔥 LOAD CAMPAIGNS
   // =========================
@@ -365,6 +364,7 @@ console.log("LOADED CAMPAIGNS:", campaigns);
     .from("campaigns")
     .select("*")
     .order("created_at", { ascending: false });
+console.log("LOADED CAMPAIGNS:", campaigns);
 
   if(cError){
     console.error("❌ Campaign Load Error", cError);
