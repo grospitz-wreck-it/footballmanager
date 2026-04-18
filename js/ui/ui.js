@@ -828,43 +828,69 @@ function calculateTeamStats(){
   // =========================
   // 🧠 STATS BERECHNUNG
   // =========================
-  let attack = 0;
-  let defense = 0;
-  let control = 0;
+ let attack = 0;
+let defense = 0;
+let control = 0;
 
-  players.forEach(p => {
+// =========================
+// 🧠 POSITION WEIGHTS
+// =========================
+const POSITION_WEIGHTS = {
 
-    const rating = p.overall ?? 50;
-    const type = (p.position_type || "MID").toUpperCase();
+  // 🧤 GK
+  GK: { defense: 1.6 },
 
-    // ⚔️ Attack
-    if(type.includes("ST")){
-      attack += rating * 1.2;
+  // 🛡 DEFENSE
+  CB: { defense: 1.4 },
+  LB: { defense: 1.1, control: 0.3 },
+  RB: { defense: 1.1, control: 0.3 },
+  WB: { defense: 0.9, control: 0.5, attack: 0.3 },
+
+  // 🧠 MIDFIELD
+  CDM: { defense: 0.8, control: 1.2 },
+  CM:  { control: 1.2, attack: 0.4 },
+  CAM: { attack: 0.8, control: 1.0 },
+
+  // ⚔️ ATTACK
+  ST: { attack: 1.4 },
+  CF: { attack: 1.2, control: 0.3 },
+  FW: { attack: 1.3 }
+};
+
+// =========================
+// 🔁 LOOP
+// =========================
+players.forEach(p => {
+
+  const rating = p.overall ?? 50;
+
+  const raw =
+    (p.position_type ||
+     p.position ||
+     "MID")
+    .toUpperCase();
+
+  // 👉 passende Definition finden
+  let weights = null;
+
+  for(const key in POSITION_WEIGHTS){
+    if(raw.includes(key)){
+      weights = POSITION_WEIGHTS[key];
+      break;
     }
+  }
 
-    // 🧠 Midfield
-    else if(type.includes("MID")){
-      attack += rating * 0.6;
-      control += rating * 1.0;
-    }
+  // 👉 fallback
+  if(!weights){
+    weights = { control: 0.6 };
+  }
 
-    // 🛡 Defense
-    else if(type.includes("DEF")){
-      defense += rating * 1.2;
-    }
+  // 👉 apply
+  attack  += rating * (weights.attack  || 0);
+  defense += rating * (weights.defense || 0);
+  control += rating * (weights.control || 0);
 
-    // 🧤 Goalkeeper
-    else if(type.includes("GK")){
-      defense += rating * 1.5;
-    }
-
-    // 🔄 Unknown fallback
-    else{
-      control += rating * 0.5;
-    }
-
-  });
-
+});
   // =========================
   // 📊 NORMALIZE
   // =========================
