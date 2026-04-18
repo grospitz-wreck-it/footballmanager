@@ -79,11 +79,15 @@ export function openPlayerModal(player){
   // =========================
   const statsEl = modal.querySelector("#modalStats");
 
-  statsEl.innerHTML = `
-    ${renderStat("Attack", player.attack)}
-    ${renderStat("Defense", player.defense)}
-    ${renderStat("Control", player.control)}
-  `;
+  const attack  = player.attack  ?? player.overall ?? 50;
+const defense = player.defense ?? player.overall ?? 50;
+const control = player.control ?? player.overall ?? 50;
+
+statsEl.innerHTML = `
+  ${renderStat("Angriff", attack)}
+  ${renderStat("Verteidigung", defense)}
+  ${renderStat("Kontrolle", control)}
+`;
 
   // =========================
   // 🚀 SHOW
