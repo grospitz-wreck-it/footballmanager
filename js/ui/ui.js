@@ -10,6 +10,10 @@ import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
 import { FORMATIONS } from "../core/football/formation.js";
 import { mapPositionToRole } from "../core/football/positions.js";
+function mapRoleForUI(role){
+  if(role === "ATT") return "ST";
+  return role;
+}
 // =========================
 // 🔒 INTERNAL
 // =========================
