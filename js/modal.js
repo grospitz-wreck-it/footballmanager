@@ -1,4 +1,7 @@
-function openPlayerModal(player){
+// =========================
+// 🪟 OPEN
+// =========================
+export function openPlayerModal(player){
 
   let modal = document.getElementById("playerModal");
 
@@ -54,7 +57,7 @@ function openPlayerModal(player){
   modal.querySelector("#modalName").textContent = name || "Spieler";
   modal.querySelector("#modalRating").textContent = player.overall ?? "-";
 
-  // Avatar (optional fallback)
+  // Avatar
   const avatar = modal.querySelector("#player-avatar");
   avatar.src = player.image || "./gfx/default_player.png";
 
@@ -94,7 +97,7 @@ function openPlayerModal(player){
 // =========================
 // ❌ CLOSE
 // =========================
-function closePlayerModal(){
+export function closePlayerModal(){
   const modal = document.getElementById("playerModal");
   if(!modal) return;
 
