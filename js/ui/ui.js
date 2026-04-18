@@ -1056,56 +1056,6 @@ function renderTacticStats(){
   `;
 }
 
-  // =========================
-  // ⚙️ TACTICS APPLY
-  // =========================
-
-  if(t.tempo === "fast"){
-    attack *= 1.2;
-    control *= 0.9;
-  }
-
-  if(t.tempo === "slow"){
-    defense *= 1.15;
-    attack *= 0.9;
-  }
-
-  if(t.pressing === "high"){
-    attack *= 1.15;
-    defense *= 0.9;
-  }
-
-  if(t.pressing === "low"){
-    defense *= 1.2;
-    attack *= 0.9;
-  }
-
-  if(t.line === "high"){
-    attack *= 1.1;
-    defense *= 0.85;
-  }
-
-  if(t.line === "low"){
-    defense *= 1.2;
-    attack *= 0.95;
-  }
-
-  // Clamp
-  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
-
-  attack = clamp(attack);
-  defense = clamp(defense);
-  control = clamp(control);
-
-  // =========================
-  // 🎨 RENDER
-  // =========================
-  el.innerHTML = `
-    ${renderTacticBar("Attack", attack)}
-    ${renderTacticBar("Defense", defense)}
-    ${renderTacticBar("Control", control)}
-  `;
-}
 
 function renderTacticBar(label, value){
 
