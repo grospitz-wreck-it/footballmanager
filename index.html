@@ -101,21 +101,30 @@
   <!-- =========================
   🍔 SIDEBAR
   ========================= -->
-  <div id="sidebarWrapper" class="sidebar-wrapper">
-    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div id="sidebar">
 
-    <div id="sidebar">
-      <button id="saveBtn">💾 Speichern</button>
-      <button id="loadBtn">📂 Laden</button>
-      <button id="resetBtn">🗑 Reset</button>
-
-      <hr>
-
-      <select id="leagueSelectMenu"></select>
-      <select id="teamSelectMenu"></select>
-    </div>
+  <div class="sidebar-header">
+    <div class="sidebar-title">⚙️ Menü</div>
+    <div class="sidebar-sub">Manager Panel</div>
   </div>
 
+  <div class="sidebar-section">
+
+    <button id="saveBtn" class="sb-btn">
+      💾 <span>Speichern</span>
+    </button>
+
+    <button id="loadBtn" class="sb-btn">
+      📂 <span>Laden</span>
+    </button>
+
+    <button id="resetBtn" class="sb-btn danger">
+      🗑 <span>Neues Spiel</span>
+    </button>
+
+  </div>
+
+</div>
   <!-- =========================
   📦 MAIN CONTAINER
   ========================= -->
