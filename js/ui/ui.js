@@ -989,16 +989,72 @@ function renderTacticStats(){
 
   const base = calculateTeamStats();
 
-if(!base){
-  el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
-  return;
-}
+  if(!base){
+    el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
+    return;
+  }
 
   const t = game.tactics || {};
 
   let attack = base.attack;
   let defense = base.defense;
   let control = base.control;
+
+  // =========================
+  // ⚙️ TACTICS APPLY
+  // =========================
+
+  // 🎮 TEMPO
+  if(t.tempo === "fast"){
+    attack *= 1.2;
+    control *= 0.85;
+  }
+
+  if(t.tempo === "slow"){
+    defense *= 1.15;
+    attack *= 0.9;
+  }
+
+  // 🔥 PRESSING
+  if(t.pressing === "high"){
+    attack *= 1.15;
+    defense *= 0.85;
+  }
+
+  if(t.pressing === "low"){
+    defense *= 1.25;
+    attack *= 0.85;
+  }
+
+  // 📏 LINE HEIGHT
+  if(t.line === "high"){
+    attack *= 1.1;
+    defense *= 0.8;
+  }
+
+  if(t.line === "low"){
+    defense *= 1.3;
+    attack *= 0.9;
+  }
+
+  // =========================
+  // 🔒 CLAMP + ROUND
+  // =========================
+  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+
+  attack = clamp(attack);
+  defense = clamp(defense);
+  control = clamp(control);
+
+  // =========================
+  // 🎨 RENDER
+  // =========================
+  el.innerHTML = `
+    ${renderTacticBar("Attack", attack)}
+    ${renderTacticBar("Defense", defense)}
+    ${renderTacticBar("Control", control)}
+  `;
+}
 
   // =========================
   // ⚙️ TACTICS APPLY
