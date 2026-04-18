@@ -19,32 +19,43 @@
 <!-- =========================
 ⚙️ TACTICS OVERLAY
 ========================= -->
-<div class="tactics-grid">
+<div id="tacticsOverlay" class="tactics-overlay">
 
-  <!-- 🔥 LEFT: PRESETS -->
-  <div class="tactics-presets">
-    <button data-preset="offensive">Offensiv</button>
-    <button data-preset="balanced">Balanced</button>
-    <button data-preset="defensive">Defensiv</button>
+  <div class="tactics-sheet">
+
+    <h3>Taktik</h3>
+
+    <div id="tacticsStats"></div>
+
+    <div class="tactics-grid">
+
+      <!-- LEFT -->
+      <div class="tactics-presets">
+        <button data-preset="offensive">Offensiv</button>
+        <button data-preset="balanced">Balanced</button>
+        <button data-preset="defensive">Defensiv</button>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="tactics-formation">
+        <label>Formation</label>
+        <select id="formationSelect">
+          <option value="4-4-2">4-4-2</option>
+          <option value="4-3-3">4-3-3</option>
+          <option value="3-5-2">3-5-2</option>
+          <option value="5-3-2">5-3-2</option>
+        </select>
+      </div>
+
+      <!-- FULL WIDTH -->
+      <button id="chanceBtn" class="chance-btn">
+        🎲 Chance Event
+      </button>
+
+    </div>
+
   </div>
-
-  <!-- 🔥 RIGHT: FORMATION -->
-  <div class="tactics-formation">
-    <label>Formation</label>
-    <select id="formationSelect">
-      <option value="4-4-2">4-4-2</option>
-      <option value="4-3-3">4-3-3</option>
-      <option value="3-5-2">3-5-2</option>
-      <option value="5-3-2">5-3-2</option>
-    </select>
-  </div>
-
 </div>
-
-<!-- 🎲 CHANCE BUTTON -->
-<button id="chanceBtn" class="chance-btn">
-  🎲 Chance Event
-</button>
 
 <!-- =========================
 🟣 SPLASH SCREEN
