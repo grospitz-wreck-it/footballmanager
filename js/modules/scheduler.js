@@ -276,6 +276,17 @@ function nextMatch(){
   return fallback;
 }
 
+
+function isSeasonFinished(){
+
+  const schedule = game.league?.current?.schedule;
+  if(!schedule?.length) return true;
+
+  return schedule.every(round =>
+    round.every(match => match._processed)
+  );
+}
+
 // =========================
 // ⏭ ADVANCE
 // =========================
