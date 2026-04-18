@@ -17,6 +17,8 @@ let lastRenderedEventId = null;
 let liveTableInterval = null;
 let scheduleViewIndex = null;
 
+
+
 // =========================
 // 📂 SIDEBAR APPLY
 // =========================
