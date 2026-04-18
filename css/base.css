@@ -7,11 +7,19 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
   font-family: system-ui, -apple-system, sans-serif;
   background: #0f172a;
   color: #e5e7eb;
+
+  /* 🔥 verhindert Scroll-Bugs bei Overlays */
+  overflow-x: hidden;
 }
 
 /* =========================
@@ -19,6 +27,8 @@ body {
 ========================= */
 #app {
   width: 100%;
+  min-height: 100vh;
+  position: relative;
 }
 
 /* =========================
@@ -34,6 +44,22 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* =========================
+🖼 MEDIA RESET
+========================= */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Overlay Images */
+#overlayImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 /* =========================
@@ -53,18 +79,55 @@ button {
   color: #04130A;
   font-weight: 700;
   box-shadow: 0 8px 24px rgba(34,197,94,0.3);
+  transition: transform 0.2s ease;
 }
 
 .main-btn:hover {
   transform: translateY(-2px);
 }
-#overlayImage {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+
+/* =========================
+🧠 LAYER SYSTEM (WICHTIG!)
+========================= */
+
+/* Sidebar */
+.sidebar-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
 }
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+
+/* Match Overlay (Tor / Events) */
+#matchOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+
+/* Tactics Overlay */
+.tactics-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal (Spieler etc.) */
+#playerModal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+/* =========================
+🧹 SAFE DEFAULTS
+========================= */
+
+/* verhindert dass random div styles dein Layout zerstören */
+div {
+  position: relative;
 }
