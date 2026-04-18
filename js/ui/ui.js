@@ -545,14 +545,42 @@ function ensureLiveTableLoop(){
 // =========================
 // 🧠 ROLE PICKER
 // =========================
+
 function pickPlayer(role, byType){
 
   if(!byType) return null;
 
+  // =========================
+  // 🎯 1. PRIMARY ROLE
+  // =========================
   if(byType[role]?.length){
     return byType[role].shift();
   }
 
+  // =========================
+  // 🔄 2. SMART FALLBACKS
+  // =========================
+  const fallbackMap = {
+    GK: [],
+
+    DEF: ["MID"],
+
+    MID: ["DEF", "ST"],
+
+    ST: ["MID"]
+  };
+
+  const fallbacks = fallbackMap[role] || [];
+
+  for(const fb of fallbacks){
+    if(byType[fb]?.length){
+      return byType[fb].shift();
+    }
+  }
+
+  // =========================
+  // 🆘 3. LAST RESORT
+  // =========================
   return (
     byType.GK?.shift() ||
     byType.DEF?.shift() ||
@@ -561,6 +589,8 @@ function pickPlayer(role, byType){
     null
   );
 }
+
+
 // =========================
 // ⚽ TEAM
 // =========================
