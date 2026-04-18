@@ -129,8 +129,11 @@ export function openPlayerModal(player){
   // =========================
   // 🧠 DATA
   // =========================
-  const name = `${player.first_name || ""} ${player.last_name || ""}`.trim();
-
+  const name =
+  player.name ||
+  `${player.first_name || ""} ${player.last_name || ""}`.trim() ||
+  "Spieler";
+  
   modal.querySelector("#modalName").textContent = name || "Spieler";
   modal.querySelector("#modalRating").textContent = player.overall ?? "-";
 
