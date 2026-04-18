@@ -137,60 +137,70 @@ function renderAds() {
   const campaign = campaigns[adIndex % campaigns.length];
 
   const adSets = campaign.ad_sets || [];
+  if (!adSets.length) return;
 
-  if (!adSets.length) {
-    el.innerHTML = `<div>Kein AdSet</div>`;
-    return;
-  }
-
-  // 👉 zufälliges AdSet wählen
+  // 👉 zufälliges AdSet
   const set = adSets[Math.floor(Math.random() * adSets.length)];
 
   const assets = set.assets || [];
+  if (!assets.length) return;
 
-  if (!assets.length) {
-    el.innerHTML = `<div>Kein Asset</div>`;
-    return;
-  }
-
-  // 👉 zufälliges Asset wählen
+  // 👉 zufälliges Asset
   const asset = assets[Math.floor(Math.random() * assets.length)];
   const img = asset?.url;
 
-  if (!img) {
-    el.innerHTML = `<div>Asset kaputt</div>`;
-    return;
-  }
+  if (!img) return;
 
-  // 👉 dedupe (jetzt auf asset-level, nicht campaign)
+  // 👉 dedupe (verhindert unnötige Updates)
   if (lastRenderedAdId === asset.id) return;
   lastRenderedAdId = asset.id;
 
-  el.innerHTML = `
-    <div class="adItem">
-      ${
-        campaign.link
-          ? `<a href="${campaign.link}" target="_blank" rel="noopener" data-id="${campaign.id}" class="adLink">
-               <img src="${img}" alt="Ad" loading="lazy">
-             </a>`
-          : `<img src="${img}" alt="Ad" loading="lazy">`
-      }
-    </div>
-  `;
+  // =========================
+  // 🔥 SOFT RENDER (KEIN FLICKER)
+  // =========================
+  let imgEl = el.querySelector("img");
+  let linkEl = el.querySelector(".adLink");
 
-  // 👁️ Impression
+  if (imgEl) {
+
+    // 👉 nur Bild austauschen
+    imgEl.src = img;
+
+    // 👉 Link updaten (falls vorhanden)
+    if (linkEl && campaign.link) {
+      linkEl.href = campaign.link;
+    }
+
+  } else {
+
+    // 👉 initial render
+    el.innerHTML = `
+      <div class="adItem">
+        ${
+          campaign.link
+            ? `<a href="${campaign.link}" target="_blank" rel="noopener" class="adLink">
+                 <img src="${img}" alt="Ad" loading="lazy">
+               </a>`
+            : `<img src="${img}" alt="Ad" loading="lazy">`
+        }
+      </div>
+    `;
+
+    imgEl = el.querySelector("img");
+    linkEl = el.querySelector(".adLink");
+  }
+
+  // =========================
+  // 👁️ TRACKING
+  // =========================
   trackEvent(campaign.id, "impression");
 
-  // 🖱 Click Tracking
-  const linkEl = el.querySelector(".adLink");
-
   if (linkEl) {
-    linkEl.addEventListener("click", () => {
+    linkEl.onclick = () => {
       trackEvent(campaign.id, "click");
-    }, { once: true });
+    };
   }
 }
-
 // =========================
 // 🔄 ROTATION (fixed)
 // =========================
