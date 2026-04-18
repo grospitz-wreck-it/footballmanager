@@ -1,0 +1,144 @@
+/* =========================
+🟡 SPLASH SCREEN (UPGRADE)
+========================= */
+#splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+
+  padding: 20px;
+
+  /* 🔥 moderner BG */
+  background:
+    radial-gradient(circle at top, #1e293b, #020617 70%),
+    linear-gradient(180deg, #020617, #000);
+
+  color: white;
+  text-align: center;
+}
+
+/* LOGO */
+#logo {
+  width: 80%;
+  max-width: 240px;
+
+  image-rendering: pixelated;
+
+  filter:
+    drop-shadow(0 10px 30px rgba(0,0,0,0.8))
+    contrast(1.1);
+
+  animation: fadeInUp 0.6s ease;
+}
+
+/* INPUTS + SELECTS */
+#splash input,
+#splash select {
+  width: 100%;
+  max-width: 280px;
+
+  padding: 12px;
+  border-radius: 12px;
+
+  border: 1px solid #1e293b;
+
+  background: #020617;
+  color: white;
+
+  font-size: 14px;
+
+  transition: all 0.2s ease;
+}
+
+/* FOCUS */
+#splash input:focus,
+#splash select:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.2);
+}
+
+/* BUTTON */
+#splash button {
+  width: 100%;
+  max-width: 280px;
+
+  padding: 14px;
+
+  border-radius: 14px;
+  border: none;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #022c22;
+
+  background: linear-gradient(135deg, #22c55e, #4ade80);
+
+  box-shadow:
+    0 10px 30px rgba(34,197,94,0.3);
+
+  transition: all 0.2s ease;
+}
+
+/* HOVER */
+#splash button:hover {
+  transform: translateY(-2px);
+}
+
+/* CLICK */
+#splash button:active {
+  transform: scale(0.96);
+}
+
+/* =========================
+🔍 PLZ DROPDOWN
+========================= */
+#leagueResults {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  background: #020617;
+  border-radius: 10px;
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.league-result {
+  padding: 10px;
+  font-size: 14px;
+
+  border-bottom: 1px solid #1e293b;
+
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.league-result:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* =========================
+✨ ANIMATION
+========================= */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
