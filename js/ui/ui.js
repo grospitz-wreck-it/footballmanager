@@ -589,17 +589,16 @@ function renderTeam(){
   // =========================
   // 🧠 SORT + GROUP
   // =========================
-  import { mapPosition } from "../core/football/position.js";
+ import { mapPositionToRole } from "../core/football/position.js";
 
 const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
+// =========================
+// 🧠 GROUP BY ROLE (CLEAN)
+// =========================
 players.forEach(p => {
 
-  // 🔥 zentrale Logik (aus positions.js)
-  let role = mapPosition(p.position_type);
-
-  // 🔥 UI-Kompatibilität (ATT → ST)
-  if(role === "ATT") role = "ST";
+  const role = mapPositionToRole(p.position_type);
 
   if(!byType[role]){
     console.warn("⚠️ Unknown role:", role, p);
@@ -609,38 +608,54 @@ players.forEach(p => {
   byType[role].push(p);
 });
 
-// 🔥 sortieren (beste Spieler zuerst)
+// =========================
+// 🔥 SORT (BEST FIRST)
+// =========================
 Object.values(byType).forEach(arr => {
   if(!Array.isArray(arr)) return;
   arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
 });
-  // =========================
-  // ⚙️ FORMATION
-  // =========================
-  const formation = game.team?.formation || "4-4-2";
-  const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
-  // 👉 copy pools (wichtig!)
-  const poolCopy = {
-    GK: [...byType.GK],
-    DEF: [...byType.DEF],
-    MID: [...byType.MID],
-    ST: [...byType.ST]
-  };
 
-  // =========================
-  // 🧠 STARTING XI
-  // =========================
-  const starters = [];
+// =========================
+// ⚙️ FORMATION
+// =========================
+const formation = game.team?.formation || "4-4-2";
+const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
- layout.forEach(slot => {
+// 👉 copy pools (wichtig!)
+const poolCopy = {
+  GK: [...byType.GK],
+  DEF: [...byType.DEF],
+  MID: [...byType.MID],
+  ST: [...byType.ST]
+};
 
-  let role = slot.role;
 
-  // 🔥 falls detaillierte Positionen kommen → mappen
-  if(["CB","LB","RB","WB","RWB","LWB"].includes(role)) role = "DEF";
-  if(["CM","CDM","CAM"].includes(role)) role = "MID";
-  if(["ST","CF","FW","LW","RW"].includes(role)) role = "ST";
+// =========================
+// 🧠 SLOT → ROLE MAPPING (CLEAN)
+// =========================
+function normalizeSlotRole(roleRaw){
+
+  const role = (roleRaw || "").toUpperCase();
+
+  if(["CB","LB","RB","WB","RWB","LWB","DEF"].includes(role)) return "DEF";
+  if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
+  if(["ST","CF","FW","LW","RW","ATT"].includes(role)) return "ST";
+  if(role.includes("GK")) return "GK";
+
+  return "MID"; // fallback
+}
+
+
+// =========================
+// 🧠 STARTING XI
+// =========================
+const starters = [];
+
+layout.forEach(slot => {
+
+  const role = normalizeSlotRole(slot.role);
 
   const player = pickPlayer(role, poolCopy);
 
