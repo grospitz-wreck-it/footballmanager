@@ -1,3 +1,5 @@
+
+console.log("🔥 UI LOADED:", import.meta.url);
 // =========================
 // 🖥 UI ENGINE (FULL + LIVE TABLE SAFE)
 // =========================
