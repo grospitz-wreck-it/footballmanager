@@ -1,13 +1,40 @@
 // =========================
+// 📊 STAT RENDER (EINMAL!)
+// =========================
+function renderStat(label, value){
+
+  const v = Math.max(0, Math.min(150, value ?? 0));
+
+  return `
+    <div style="margin:6px 0;">
+      <div style="font-size:12px; opacity:0.8;">
+        ${label} (${v})
+      </div>
+      <div style="
+        background:#222;
+        height:8px;
+        border-radius:6px;
+        overflow:hidden;
+      ">
+        <div style="
+          width:${v}%;
+          height:100%;
+          background:linear-gradient(90deg,#00ff88,#22c55e);
+          transition:width 0.3s ease;
+        "></div>
+      </div>
+    </div>
+  `;
+}
+
+
+// =========================
 // 🪟 OPEN
 // =========================
 export function openPlayerModal(player){
 
   let modal = document.getElementById("playerModal");
 
-  // =========================
-  // 🏗 CREATE (falls fehlt)
-  // =========================
   if(!modal){
     modal = document.createElement("div");
     modal.id = "playerModal";
@@ -37,9 +64,6 @@ export function openPlayerModal(player){
 
     document.body.appendChild(modal);
 
-    // =========================
-    // ❌ CLOSE EVENTS
-    // =========================
     modal.querySelector(".close-btn").onclick = closePlayerModal;
 
     modal.querySelector(".modal-overlay").onclick = (e) => {
@@ -50,14 +74,14 @@ export function openPlayerModal(player){
   }
 
   // =========================
-  // 🧠 FILL DATA
+  // 🧠 DATA
   // =========================
   const name = `${player.first_name || ""} ${player.last_name || ""}`.trim();
 
   modal.querySelector("#modalName").textContent = name || "Spieler";
   modal.querySelector("#modalRating").textContent = player.overall ?? "-";
 
-  // Avatar
+  // 🔥 REAL PLAYER IMAGE
   const avatar = modal.querySelector("#player-avatar");
   avatar.src = player.image || "./gfx/default_player.png";
 
@@ -80,14 +104,14 @@ export function openPlayerModal(player){
   const statsEl = modal.querySelector("#modalStats");
 
   const attack  = player.attack  ?? player.overall ?? 50;
-const defense = player.defense ?? player.overall ?? 50;
-const control = player.control ?? player.overall ?? 50;
+  const defense = player.defense ?? player.overall ?? 50;
+  const control = player.control ?? player.overall ?? 50;
 
-statsEl.innerHTML = `
-  ${renderStat("Angriff", attack)}
-  ${renderStat("Verteidigung", defense)}
-  ${renderStat("Kontrolle", control)}
-`;
+  statsEl.innerHTML = `
+    ${renderStat("Angriff", attack)}
+    ${renderStat("Verteidigung", defense)}
+    ${renderStat("Kontrolle", control)}
+  `;
 
   // =========================
   // 🚀 SHOW
@@ -96,20 +120,7 @@ statsEl.innerHTML = `
     modal.classList.add("show");
   });
 }
-function renderStat(label, value){
 
-  const v = value ?? 0;
-
-  return `
-    <div class="stat-row">
-      <span>${label}</span>
-      <div class="stat-bar">
-        <div class="fill" style="width:${v}%"></div>
-      </div>
-      <span>${v}</span>
-    </div>
-  `;
-}
 
 // =========================
 // ❌ CLOSE
