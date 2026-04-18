@@ -1,0 +1,131 @@
+// =========================
+// 🎮 SIDEBAR SYSTEM (ULTRA)
+// =========================
+
+import { game } from "../core/state.js";
+
+// =========================
+// 🔒 INTERNAL STATE
+// =========================
+let initialized = false;
+
+
+// =========================
+// 🧱 INIT
+// =========================
+export function initSidebar(){
+
+  if(initialized) return;
+  initialized = true;
+
+  const wrapper = document.getElementById("sidebarWrapper");
+  const overlay = document.getElementById("sidebarOverlay");
+  const sidebar = document.getElementById("sidebar");
+  const burger = document.getElementById("burgerBtn");
+
+  if(!wrapper || !sidebar || !burger){
+    console.warn("❌ Sidebar DOM fehlt");
+    return;
+  }
+
+  // =========================
+  // 🍔 BURGER CLICK
+  // =========================
+  burger.onclick = () => toggleSidebar();
+
+  // =========================
+  // 🌑 OVERLAY CLICK = CLOSE
+  // =========================
+  overlay?.addEventListener("click", closeSidebar);
+
+  // =========================
+  // 📱 SWIPE CLOSE (MOBILE)
+  // =========================
+  let startX = null;
+
+  sidebar.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+  });
+
+  sidebar.addEventListener("touchend", (e) => {
+    if(startX === null) return;
+
+    const diff = e.changedTouches[0].clientX - startX;
+
+    if(diff < -50){
+      closeSidebar();
+    }
+
+    startX = null;
+  });
+
+  // =========================
+  // ⌨️ ESC CLOSE
+  // =========================
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape"){
+      closeSidebar();
+    }
+  });
+
+  console.log("🎮 Sidebar ready");
+}
+
+
+// =========================
+// 🔄 TOGGLE
+// =========================
+export function toggleSidebar(){
+
+  game.ui.sidebarOpen = !game.ui.sidebarOpen;
+  applySidebar();
+}
+
+
+// =========================
+// ❌ CLOSE
+// =========================
+export function closeSidebar(){
+
+  game.ui.sidebarOpen = false;
+  applySidebar();
+}
+
+
+// =========================
+// 🎨 APPLY STATE
+// =========================
+export function applySidebar(){
+
+  const wrapper = document.getElementById("sidebarWrapper");
+  if(!wrapper) return;
+
+  wrapper.classList.toggle("open", !!game.ui.sidebarOpen);
+
+  // 🔥 BODY LOCK (WICHTIG)
+  document.body.style.overflow = game.ui.sidebarOpen
+    ? "hidden"
+    : "";
+}
+
+
+// =========================
+// ✨ OPTIONAL: MENU CONTENT UPDATE
+// =========================
+export function updateSidebarContent(){
+
+  const sidebar = document.getElementById("sidebar");
+  if(!sidebar) return;
+
+  const teamName = game.team?.name || "Dein Team";
+  const manager = game.user?.name || "Manager";
+
+  const header = sidebar.querySelector(".sidebar-header");
+
+  if(header){
+    header.innerHTML = `
+      <div style="font-weight:700;">${teamName}</div>
+      <div style="font-size:12px; opacity:0.6;">${manager}</div>
+    `;
+  }
+}
