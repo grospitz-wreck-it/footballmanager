@@ -720,7 +720,7 @@ html += `</div>`;
 // reset flags
 starters.forEach(p => delete p._used);
 
-
+const bench = players.filter(p => !starters.includes(p));
 // =========================
 // 🪑 BENCH (NEU)
 // =========================
