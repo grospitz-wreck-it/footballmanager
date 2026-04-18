@@ -701,9 +701,11 @@ function renderTeam(){
 
   layout.forEach(slot => {
 
-    const player = starters.find(p =>
-      !p._used && p.position_type?.toUpperCase().includes(slot.role)
-    ) || starters.find(p => !p._used);
+   const slotRole = normalizeSlotRole(slot.role);
+
+const player = starters.find(p =>
+  !p._used && mapPositionToRole(p.position_type) === slotRole
+) || starters.find(p => !p._used);
 
     if(!player) return;
     player._used = true;
