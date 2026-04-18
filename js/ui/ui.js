@@ -1222,6 +1222,26 @@ function renderTacticStats(){
   });
 }
 
+// =========================
+// 🎲 CHANCE EVENT SYSTEM
+// =========================
+function triggerChanceEvent(){
+
+  const events = [
+    { type: "attack_boost", value: +15, text: "🔥 Offensivschub!" },
+    { type: "defense_boost", value: +15, text: "🛡 Abwehr stabilisiert!" },
+    { type: "control_boost", value: +15, text: "🎯 Spielkontrolle erhöht!" },
+
+    { type: "attack_nerf", value: -10, text: "❌ Angriff schwächelt!" },
+    { type: "defense_nerf", value: -10, text: "⚠️ Abwehr wackelt!" }
+  ];
+
+  const event = events[Math.floor(Math.random() * events.length)];
+
+  // 🔒 init falls nicht vorhanden
+  game.tempEffects = game.tempEffects || {};
+
+  // 👉 Effekt
 
 function renderTacticBar(label, value){
 
