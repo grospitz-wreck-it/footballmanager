@@ -1,5 +1,5 @@
 // =========================
-// 📅 SPIELPLAN GENERIEREN (FINAL CLEAN)
+// 📅 SPIELPLAN GENERIEREN (FINAL CLEAN FIXED)
 // =========================
 import { game } from "../core/state.js";
 
@@ -53,7 +53,12 @@ function generateSchedule(){
     return;
   }
 
-  if(league.schedule && league.schedule.length > 0){
+  // 🔥 FIX: Schedule nur behalten wenn Teamzahl gleich
+  if(
+    league.schedule &&
+    league.schedule.length > 0 &&
+    league._teamCount === league.teams.length
+  ){
     console.log("ℹ️ Spielplan existiert bereits");
     return;
   }
@@ -66,45 +71,43 @@ function generateSchedule(){
 
   league.teams.forEach(t => {
 
-  const id = resolveTeamId(t);
+    const id = resolveTeamId(t);
 
-  if(!id){
-    console.error("❌ Team ohne ID:", t);
-    return;
-  }
+    if(!id){
+      console.error("❌ Team ohne ID:", t);
+      return;
+    }
 
-  if(seen.has(id)){
-    console.warn("⚠️ Duplicate Team ID:", id);
-    return;
-  }
+    if(seen.has(id)){
+      console.warn("⚠️ Duplicate Team ID:", id);
+      return;
+    }
 
-  seen.add(id);
+    seen.add(id);
 
-  teams.push({
-    id: String(id),
-    name: t.name || "Unbekannt"
+    teams.push({
+      id: String(id),
+      name: t.name || "Unbekannt"
+    });
   });
-});
 
-console.log("✅ Validierte Teams:", teams.length);
-
-  const originalCount = teams.length;
+  console.log("✅ Validierte Teams:", teams.length);
 
   // =========================
   // 🔁 BYE
   // =========================
- if(teams.length % 2 !== 0){
-  teams.push({ id: "BYE", name: "BYE" });
-}
+  if(teams.length % 2 !== 0){
+    teams.push({ id: "BYE", name: "BYE" });
+  }
 
-// 🔥 HIER setzen (direkt nach Team-Finalisierung)
-const effectiveTeamCount = teams.filter(t => t.id !== "BYE").length;
+  const effectiveTeamCount = teams.filter(t => t.id !== "BYE").length;
 
-const totalRounds = teams.length - 1;
-const half = teams.length / 2;
+  const totalRounds = teams.length - 1;
+  const half = teams.length / 2;
 
-const rounds = [];
-let rotation = [...teams];
+  const rounds = [];
+  let rotation = [...teams];
+
   // =========================
   // 🔥 HINRUNDE
   // =========================
@@ -141,7 +144,6 @@ let rotation = [...teams];
     shuffleArray(round);
     rounds.push(round);
 
-    // Rotation
     const fixed = rotation[0];
     const rest = rotation.slice(1);
 
@@ -194,6 +196,9 @@ let rotation = [...teams];
 
   league.currentRound = 0;
   league.currentMatchIndex = 0;
+
+  // 🔥 FIX: Team Count speichern
+  league._teamCount = league.teams.length;
 
   console.log("✅ Spielplan erstellt:", league.schedule.length);
 
@@ -248,12 +253,10 @@ function nextMatch(){
 
       if(match._processed) continue;
 
-      // 👉 fallback merken (erstes offenes Match)
       if(!fallback){
         fallback = match;
       }
 
-      // 👉 dein Team hat Prio
       if(
         normalizeId(match.homeTeamId) === myTeamId ||
         normalizeId(match.awayTeamId) === myTeamId
@@ -265,7 +268,11 @@ function nextMatch(){
     }
   }
 
-  // 👉 wenn kein eigenes Match → erstes offenes zurück
+  if(!fallback){
+    console.warn("⚠️ Keine offenen Matches mehr");
+    return null;
+  }
+
   return fallback;
 }
 
@@ -328,9 +335,12 @@ function renderSchedule(){
       <h3>Spieltag ${rIndex + 1}</h3>
       <ul style="list-style:none;padding:0;">`;
 
-    round.forEach(match => {
+    round.forEach((match, mIndex) => {
 
-      const isActive = myMatch && match.id === myMatch.id;
+      const isActive =
+        (myMatch && match.id === myMatch.id) ||
+        (rIndex === game.league.currentRound &&
+         mIndex === game.league.currentMatchIndex);
 
       html += `
         <li style="
