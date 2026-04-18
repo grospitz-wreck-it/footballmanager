@@ -246,3 +246,6 @@
   background: rgba(255,255,255,0.05);
   transform: translateX(4px);
 }
+/* Splash Container darf NICHT clippen */
+#splash {
+  overflow
