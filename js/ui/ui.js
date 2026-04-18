@@ -850,7 +850,7 @@ function clearSelection(){
     el.classList.remove("selected");
   });
 }
-  }
+  
 // =========================
 // 📊 STATS
 // =========================
