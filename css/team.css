@@ -1,0 +1,74 @@
+/* =========================
+⚽ TEAM SYSTEM
+========================= */
+
+#teamView {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#teamView h3 {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* FIELD */
+.team-field {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: url("./gfx/field.svg") center/cover no-repeat;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* CENTER */
+.team-field::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* PLAYER */
+.player-pos {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.player-dot {
+  width: 44px;
+  height: 44px;
+  position: relative;
+  cursor: pointer;
+}
+
+.player-dot img {
+  width: 100%;
+}
+
+/* BENCH */
+.bench-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.bench-card {
+  min-width: 90px;
+  background: #1f2430;
+  border-radius: 10px;
+  padding: 6px;
+  cursor: pointer;
+}
+
+/* SELECTION */
+.selected {
+  outline: 2px solid #00ff88;
+}
