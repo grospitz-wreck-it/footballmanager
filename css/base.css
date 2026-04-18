@@ -105,15 +105,20 @@ button {
   pointer-events: none;
 }
 
-/* Tactics Overlay */
 .tactics-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
 
-  display: flex;
+  display: none; /* 🔥 WICHTIG */
   align-items: center;
   justify-content: center;
+
+  background: rgba(0,0,0,0.6);
+}
+
+.tactics-overlay.open {
+  display: flex;
 }
 
 /* Modal (Spieler etc.) */
