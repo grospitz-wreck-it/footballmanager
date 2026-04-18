@@ -26,7 +26,36 @@ function renderStat(label, value){
     </div>
   `;
 }
+function getPlayerStats(player){
 
+  const pos = (player.position || "").toUpperCase();
+
+  // =========================
+  // ⚽ ATTACK
+  // =========================
+  let attack = player.shooting ?? 50;
+
+  // =========================
+  // 🛡 DEFENSE
+  // =========================
+  let defense = player.defending ?? 50;
+
+  // =========================
+  // 🎮 CONTROL
+  // =========================
+  let control = player.passing ?? 50;
+
+  // =========================
+  // 🧤 GK SPECIAL
+  // =========================
+  if(pos === "GK"){
+    defense = player.goalkeeping ?? 50;
+    attack = 10;
+    control = 40;
+  }
+
+  return { attack, defense, control };
+}
 
 // =========================
 // 🪟 OPEN
