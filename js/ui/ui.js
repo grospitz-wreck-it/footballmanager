@@ -584,6 +584,7 @@ function renderTeam(){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
+  }
 
   // =========================
   // 🧠 SORT + GROUP
