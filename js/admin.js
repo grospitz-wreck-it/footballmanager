@@ -357,7 +357,7 @@ loadCampaigns();
 // LOAD
 // =====================
 async function loadCampaigns(){
-
+console.log("LOADED CAMPAIGNS:", campaigns);
   // =========================
   // 🔥 LOAD CAMPAIGNS
   // =========================
