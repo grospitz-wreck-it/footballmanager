@@ -63,8 +63,6 @@ button {
   max-height: 100%;
   object-fit: contain;
 }
-<img src="./gfx/dotred.webp" />
-
 img {
   max-width: 100%;
   height: auto;
