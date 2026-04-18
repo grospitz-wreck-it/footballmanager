@@ -32,6 +32,7 @@ function renderStat(label, value){
 // 🪟 OPEN
 // =========================
 export function openPlayerModal(player){
+  console.log("PLAYER DEBUG:", player); // 👈 HIER
 
   let modal = document.getElementById("playerModal");
 
