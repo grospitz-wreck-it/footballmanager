@@ -171,3 +171,14 @@
 #scheduleView {
   display: block;
 }
+#teamView {
+  display: block;
+}
+
+.team-field {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: #0b3d1a;
+  border-radius: 12px;
+}
