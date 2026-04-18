@@ -97,48 +97,68 @@ function renderAds() {
   const el = document.getElementById("adContainer");
   if (!el) return;
 
-  const ads = getMatchingAds();
+  const campaigns = getMatchingAds();
 
-  if (!ads.length) {
+  if (!campaigns.length) {
     el.innerHTML = `<div>Keine Werbung</div>`;
     lastRenderedAdId = null;
     return;
   }
 
-  // 👉 Rotation berücksichtigen
-  const ad = ads[adIndex % ads.length];
-  const img = ad.assets?.[0]?.url;
+  // 👉 Kampagne rotieren
+  const campaign = campaigns[adIndex % campaigns.length];
 
-  if (!img) {
+  const adSets = campaign.ad_sets || [];
+
+  if (!adSets.length) {
+    el.innerHTML = `<div>Kein AdSet</div>`;
+    return;
+  }
+
+  // 👉 zufälliges AdSet wählen
+  const set = adSets[Math.floor(Math.random() * adSets.length)];
+
+  const assets = set.assets || [];
+
+  if (!assets.length) {
     el.innerHTML = `<div>Kein Asset</div>`;
     return;
   }
 
-  // 👉 Nicht neu rendern wenn gleiche Ad
-  if (lastRenderedAdId === ad.id) return;
-  lastRenderedAdId = ad.id;
+  // 👉 zufälliges Asset wählen
+  const asset = assets[Math.floor(Math.random() * assets.length)];
+  const img = asset?.url;
 
-el.innerHTML = `
-  <div class="adItem">
-    ${
-      ad.link
-        ? `<a href="${ad.link}" target="_blank" rel="noopener" data-id="${ad.id}" class="adLink">
-             <img src="${img}" alt="Ad" loading="lazy">
-           </a>`
-        : `<img src="${img}" alt="Ad" loading="lazy">`
-    }
-  </div>
-`;
+  if (!img) {
+    el.innerHTML = `<div>Asset kaputt</div>`;
+    return;
+  }
 
-  // 👁️ IMPRESSION (nur einmal pro Anzeige)
-  trackEvent(ad.id, "impression");
+  // 👉 dedupe (jetzt auf asset-level, nicht campaign)
+  if (lastRenderedAdId === asset.id) return;
+  lastRenderedAdId = asset.id;
 
-  // 🖱 CLICK TRACKING
+  el.innerHTML = `
+    <div class="adItem">
+      ${
+        campaign.link
+          ? `<a href="${campaign.link}" target="_blank" rel="noopener" data-id="${campaign.id}" class="adLink">
+               <img src="${img}" alt="Ad" loading="lazy">
+             </a>`
+          : `<img src="${img}" alt="Ad" loading="lazy">`
+      }
+    </div>
+  `;
+
+  // 👁️ Impression
+  trackEvent(campaign.id, "impression");
+
+  // 🖱 Click Tracking
   const linkEl = el.querySelector(".adLink");
 
   if (linkEl) {
     linkEl.addEventListener("click", () => {
-      trackEvent(ad.id, "click");
+      trackEvent(campaign.id, "click");
     }, { once: true });
   }
 }
