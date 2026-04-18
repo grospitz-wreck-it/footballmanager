@@ -1,179 +1,149 @@
-// =========================
-// 🎮 SIDEBAR SYSTEM (ULTRA)
-// =========================
-#sidebar {
-  background: red !important;
-}
-import { game } from "../core/state.js";
-
-// =========================
-// 🔒 INTERNAL STATE
-// =========================
-let initialized = false;
-
-
-// =========================
-// 🧱 INIT
-// =========================
-export function initSidebar(){
-
-  if(initialized) return;
-  initialized = true;
-
-  const wrapper = document.getElementById("sidebarWrapper");
-  const overlay = document.getElementById("sidebarOverlay");
-  const sidebar = document.getElementById("sidebar");
-  const burger = document.getElementById("burgerBtn");
-
-  if(!wrapper || !sidebar || !burger){
-    console.warn("❌ Sidebar DOM fehlt");
-    return;
-  }
-
-  // =========================
-  // 🍔 BURGER CLICK
-  // =========================
-  burger.onclick = () => toggleSidebar();
-
-  // =========================
-  // 🌑 OVERLAY CLICK = CLOSE
-  // =========================
-  overlay?.addEventListener("click", closeSidebar);
-
-  // =========================
-  // 📱 SWIPE CLOSE (MOBILE)
-  // =========================
-  let startX = null;
-
-  sidebar.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-  });
-
-  sidebar.addEventListener("touchend", (e) => {
-    if(startX === null) return;
-
-    const diff = e.changedTouches[0].clientX - startX;
-
-    if(diff < -50){
-      closeSidebar();
-    }
-
-    startX = null;
-  });
-
-  // =========================
-  // ⌨️ ESC CLOSE
-  // =========================
-  document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape"){
-      closeSidebar();
-    }
-  });
-
-  console.log("🎮 Sidebar ready");
-}
-
-
-// =========================
-// 🔄 TOGGLE
-// =========================
-export function toggleSidebar(){
-
-  game.ui.sidebarOpen = !game.ui.sidebarOpen;
-  applySidebar();
-}
-
-
-// =========================
-// ❌ CLOSE
-// =========================
-export function closeSidebar(){
-
-  game.ui.sidebarOpen = false;
-  applySidebar();
-}
-
-
-// =========================
-// 🎨 APPLY STATE
-// =========================
-export function applySidebar(){
-
-  const wrapper = document.getElementById("sidebarWrapper");
-  if(!wrapper) return;
-
-  wrapper.classList.toggle("open", !!game.ui.sidebarOpen);
-
-  // 🔥 BODY LOCK (WICHTIG)
-  document.body.style.overflow = game.ui.sidebarOpen
-    ? "hidden"
-    : "";
-}
-
-
-// =========================
-// ✨ OPTIONAL: MENU CONTENT UPDATE
-// =========================
-export function updateSidebarContent(){
-
-  const sidebar = document.getElementById("sidebar");
-  if(!sidebar) return;
-
-  const teamName = game.team?.name || "Dein Team";
-  const manager = game.user?.name || "Manager";
-
-  const header = sidebar.querySelector(".sidebar-header");
-
-  if(header){
-    header.innerHTML = `
-      <div style="font-weight:700;">${teamName}</div>
-      <div style="font-size:12px; opacity:0.6;">${manager}</div>
-    `;
-  }
-}
 /* =========================
-🔥 SIDEBAR FORCE STYLE
+   🎮 WRAPPER
+========================= */
+
+.sidebar-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+
+  pointer-events: none;
+}
+
+.sidebar-wrapper.open {
+  pointer-events: auto;
+}
+
+/* =========================
+   🌑 OVERLAY
+========================= */
+
+.sidebar-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-wrapper.open .sidebar-overlay {
+  opacity: 1;
+}
+
+/* =========================
+   📦 PANEL
+========================= */
+
+#sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 280px;
+  height: 100%;
+
+  padding: 20px 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  background:
+    linear-gradient(160deg, #020617, #0f172a),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+
+  box-shadow:
+    20px 0 60px rgba(0,0,0,0.8),
+    inset 0 0 40px rgba(255,255,255,0.05);
+
+  transform: translateX(-110%);
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+}
+
+.sidebar-wrapper.open #sidebar {
+  transform: translateX(0);
+}
+
+/* =========================
+   🧠 HEADER
+========================= */
+
+.sidebar-header {
+  margin-bottom: 10px;
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: 700;
+
+  background: linear-gradient(90deg, #22c55e, #38bdf8, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-sub {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* =========================
+   🔘 BUTTONS
 ========================= */
 
 #sidebar button {
-  all: unset; /* 🔥 killt ALLES */
-
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 
   width: 100%;
 
-  padding: 12px;
-  border-radius: 12px;
+  padding: 12px 14px;
 
-  background: #111827;
-  color: white;
+  border-radius: 14px;
+  border: none;
 
   font-size: 14px;
+  font-weight: 600;
 
-  cursor: pointer;
+  color: #e5e7eb;
+
+  background: linear-gradient(145deg, #111827, #1f2937);
+
+  box-shadow:
+    inset 0 0 8px rgba(0,0,0,0.6),
+    0 6px 20px rgba(0,0,0,0.6);
 
   transition: all 0.2s ease;
 }
 
-#sidebar button:hover {
-  background: #1f2937;
-  transform: translateX(4px);
+#sidebar button:active {
+  transform: scale(0.96);
 }
 
-#sidebar select {
-  all: unset;
+#sidebar button:hover {
+  box-shadow:
+    0 0 12px rgba(34,197,94,0.3),
+    0 0 30px rgba(168,85,247,0.2);
+}
 
-  width: 100%;
+/* =========================
+   ⚠️ RESET BUTTON
+========================= */
 
-  padding: 10px;
-  border-radius: 10px;
-
-  background: #020617;
+#resetBtn {
+  background: linear-gradient(135deg, #7f1d1d, #ef4444);
   color: white;
 
-  border: 1px solid #1e293b;
-
-  font-size: 13px;
+  box-shadow:
+    0 0 20px rgba(239,68,68,0.4),
+    0 0 40px rgba(239,68,68,0.2);
 }
