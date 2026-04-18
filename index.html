@@ -2,34 +2,28 @@
 <html lang="de">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- CSS -->
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/layout.css">
+  <link rel="stylesheet" href="./css/team.css">
+  <link rel="stylesheet" href="./css/modal.css">
 
-<link rel="stylesheet" href="./css/base.css">
-<link rel="stylesheet" href="./css/layout.css">
-<link rel="stylesheet" href="./css/team.css">
-<link rel="stylesheet" href="./css/modal.css">
-  
+  <title>Kreisliga Manager</title>
 </head>
 
 <body>
 
-<!-- 🔥 TACTICS BUTTON -->
-<img 
-  id="tacticsBtn" 
-  src="./gfx/tacticsettings.webp" 
-  class="tactics-btn"
-/>
-
-<!-- 🔥 TACTICS OVERLAY -->
+<!-- =========================
+⚙️ TACTICS OVERLAY
+========================= -->
 <div id="tacticsOverlay" class="tactics-overlay">
   <div class="tactics-sheet">
 
     <h3>Taktik</h3>
 
-    <!-- 🔥 NEU: HIER REIN -->
     <div id="tacticsStats"></div>
 
     <div class="tactics-row">
@@ -47,7 +41,9 @@
   </div>
 </div>
 
-<!-- SPLASH -->
+<!-- =========================
+🟣 SPLASH SCREEN
+========================= -->
 <div id="splash">
   <input id="nameInput" placeholder="Dein Name">
 
@@ -62,16 +58,37 @@
   <button id="startBtn">Spiel starten</button>
 </div>
 
-<!-- APP -->
+<!-- =========================
+🟢 APP
+========================= -->
 <div id="app">
 
-  <!-- HEADER -->
+  <!-- =========================
+  🧷 HEADER
+  ========================= -->
   <div id="header">
+
+    <!-- LEFT -->
     <button id="burgerBtn">☰</button>
-    <div>Kreisliga Manager</div>
+
+    <!-- CENTER -->
+    <div class="header-center">
+      <div class="header-title">Kreisliga Manager</div>
+      <div id="headerUserName" class="header-user"></div>
+    </div>
+
+    <!-- RIGHT -->
+    <img 
+      id="tacticsBtn" 
+      src="./gfx/tacticsettings.webp" 
+      class="tactics-btn"
+    />
+
   </div>
 
-  <!-- SIDEBAR -->
+  <!-- =========================
+  🍔 SIDEBAR
+  ========================= -->
   <div id="sidebarWrapper" class="sidebar-wrapper">
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
@@ -87,23 +104,29 @@
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- =========================
+  📦 MAIN CONTAINER
+  ========================= -->
   <div class="container">
 
+    <!-- SCORE BAR -->
     <div id="topBar">
       <div id="topTeams">- vs -</div>
       <div id="topScore">0 : 0</div>
       <div id="topMinute">0'</div>
     </div>
 
+    <!-- PROGRESS -->
     <div id="progressBar">
       <div id="progressFill"></div>
     </div>
 
+    <!-- GAME FIELD -->
     <div id="gameCanvas">
 
       <canvas id="gameCanvasInner"></canvas>
 
+      <!-- MATCH OVERLAY -->
       <div id="matchOverlay" class="hidden">
         <img id="overlayImage" />
         <div id="overlayText"></div>
@@ -111,24 +134,32 @@
 
     </div>
 
+    <!-- EVENTS -->
     <div id="eventBar">
       <div id="eventText">Willkommen im Spiel</div>
     </div>
 
+    <!-- MAIN BUTTON -->
     <button id="mainButton">Spiel starten</button>
 
+    <!-- ADS -->
     <div id="adContainer"></div>
 
-    <!-- TABS -->
+    <!-- =========================
+    📊 TABS
+    ========================= -->
     <div class="tabs">
       <button class="tab active" data-tab="table">Tabelle</button>
       <button class="tab" data-tab="schedule">Spieltage</button>
       <button class="tab" data-tab="team">Team</button>
     </div>
 
-    <!-- TAB CONTENT -->
+    <!-- =========================
+    📄 TAB CONTENT
+    ========================= -->
     <div id="tabContent">
 
+      <!-- TABLE -->
       <div id="tableView" class="tab-view">
         <div id="table">
           <table>
@@ -150,7 +181,10 @@
         </div>
       </div>
 
+      <!-- SCHEDULE -->
       <div id="scheduleView" class="tab-view" style="display:none;"></div>
+
+      <!-- TEAM -->
       <div id="teamView" class="tab-view" style="display:none;"></div>
 
     </div>
@@ -159,7 +193,10 @@
 
 </div>
 
-<!-- SCRIPT -->
+<!-- =========================
+🚀 SCRIPT
+========================= -->
 <script type="module" src="./js/main.js"></script>
+
 </body>
 </html>
