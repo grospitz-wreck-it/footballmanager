@@ -32,6 +32,15 @@ body {
 }
 
 /* =========================
+HEADER
+========================= */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* =========================
 📦 CONTAINER
 ========================= */
 .container {
