@@ -567,110 +567,83 @@ function renderTeam(){
   const teamId = game.team?.selectedId;
 
   const pool =
-  (window.playerPool && window.playerPool.length)
-    ? window.playerPool
-    : (game.players || []);
+    (window.playerPool && window.playerPool.length)
+      ? window.playerPool
+      : (game.players || []);
 
-const players = pool.filter(p => 
-  String(p.team_id) === String(teamId)
-);
+  const players = pool.filter(p =>
+    String(p.team_id) === String(teamId)
+  );
 
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
 
+  // =========================
+  // 🧠 SORT + GROUP
+  // =========================
   const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
   players.forEach(p => {
-    const type = p.position_type || "MID";
-    (byType[type] || byType.MID).push(p);
+    const raw = (p.position_type || "MID").toUpperCase();
+
+    if(raw.includes("GK")) byType.GK.push(p);
+    else if(raw.match(/CB|LB|RB|WB|DEF/)) byType.DEF.push(p);
+    else if(raw.includes("MID")) byType.MID.push(p);
+    else if(raw.includes("ST")) byType.ST.push(p);
+    else byType.MID.push(p);
   });
 
-  // Sortieren (safe)
   Object.values(byType).forEach(arr => {
-    if(!Array.isArray(arr)) return;
     arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
   });
 
   // =========================
-  // 🔥 LINEUP INTEGRATION
+  // ⚙️ FORMATION
   // =========================
-
-  const lineup = game.team?.lineup;
-
-  let starters = [];
-
-  if(lineup?.slots){
-
-    const pool = window.playerPool || players;
-
-    const ids = Object.values(lineup.slots).filter(Boolean);
-
-    if(ids.length){
-      starters = pool.filter(p =>
-        ids.includes(String(p.id))
-      );
-    }
-  }
-
-  // 👉 FALLBACK (dein bestehendes System bleibt!)
-  if(!starters.length){
-    starters = [
-      ...byType.GK.slice(0,1),
-      ...byType.DEF.slice(0,4),
-      ...byType.MID.slice(0,4),
-      ...byType.ST.slice(0,2)
-    ];
-  }
-
-  const bench = players.filter(p => !starters.includes(p));
-
-  const formation = lineup?.formation || game.team?.formation || "4-4-2";
+  const formation = game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
-  // 🔥 Mapping Slot → Player (wichtig!)
-  const slotOrder = [
-    "GK",
-    "DEF_1","DEF_2","DEF_3","DEF_4",
-    "MID_1","MID_2","MID_3","MID_4",
-    "ST_1","ST_2"
-  ];
-
-  const positionPool = {
+  // 👉 copy pools (wichtig!)
+  const poolCopy = {
     GK: [...byType.GK],
     DEF: [...byType.DEF],
     MID: [...byType.MID],
     ST: [...byType.ST]
   };
 
+  // =========================
+  // 🧠 STARTING XI
+  // =========================
+  const starters = [];
+
+  layout.forEach(slot => {
+    const player = pickPlayer(slot.role, poolCopy);
+    if(player) starters.push(player);
+  });
+
+  // =========================
+  // 🪑 BENCH
+  // =========================
+  const bench = players.filter(p => !starters.includes(p));
+
+  // =========================
+  // 🎨 RENDER FIELD
+  // =========================
   let html = `
-    <h3>Starting XI</h3>
+    <h3>Starting XI (${formation})</h3>
     <div class="team-field">
   `;
 
-  layout.forEach((slot, i) => {
+  layout.forEach(slot => {
 
-    if(!slot) return;
-
-    let player = null;
-
-    // 🔥 1. Versuche Lineup
-    if(lineup?.slots){
-      const slotKey = slotOrder[i];
-      const playerId = lineup.slots[slotKey];
-
-      if(playerId){
-        player = players.find(p => String(p.id) === String(playerId));
-      }
-    }
-
-    // 🔥 2. Fallback (dein altes System)
-    if(!player){
-      player = pickPlayer(slot.role, positionPool);
-    }
+    const player = starters.find(p =>
+      !p._used && p.position_type?.toUpperCase().includes(slot.role)
+    ) || starters.find(p => !p._used);
 
     if(!player) return;
+    player._used = true;
 
     html += `
       <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
@@ -681,42 +654,19 @@ const players = pool.filter(p =>
 
   html += `</div>`;
 
-  // =========================
-  // 🪑 BENCH (UNVERÄNDERT)
-  // =========================
+  // reset flag
+  starters.forEach(p => delete p._used);
 
-  html += `<h3>Bench</h3>`;
-
-  const benchByType = { GK: [], DEF: [], MID: [], ST: [] };
+  // =========================
+  // 🪑 BENCH (CLEAN UI)
+  // =========================
+  html += `<h3>Bench</h3>
+    <div style="display:flex; gap:8px; overflow-x:auto;">`;
 
   bench.forEach(p => {
-    const type = p.position_type || "MID";
-    (benchByType[type] || benchByType.MID).push(p);
-  });
-
-  Object.values(benchByType).forEach(arr => {
-    if(!Array.isArray(arr)) return;
-    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-  });
-
-  html += `<div class="bench-container">`;
-
-  Object.entries(benchByType).forEach(([role, players]) => {
-
-    if(!players || players.length === 0) return;
-
     html += `
-      <div class="bench-group">
-        <div class="bench-title">${role}</div>
-        <div class="bench-row">
-    `;
-
-    players.forEach(p => {
-      html += renderPlayerDot(p);
-    });
-
-    html += `
-        </div>
+      <div style="min-width:60px;">
+        ${renderPlayerDot(p)}
       </div>
     `;
   });
@@ -726,19 +676,21 @@ const players = pool.filter(p =>
   container.innerHTML = html;
 
   // =========================
-  // 🖱️ CLICKS (UNVERÄNDERT)
+  // 🖱 CLICK FIX (WICHTIG)
   // =========================
+  container.querySelectorAll(".player-dot").forEach(el => {
+    el.onclick = (e) => {
+      e.stopPropagation();
 
-  document.querySelectorAll(".player-dot").forEach(el => {
-    el.onclick = () => {
       const id = el.dataset.id;
       if(!id) return;
 
-      const player = (game.players || []).find(p => String(p.id) === String(id));
+      const player = players.find(p => String(p.id) === String(id));
       if(player) openPlayerModal(player);
     };
   });
 }
+
 
 // =========================
 // 🔵 PLAYER DOT
