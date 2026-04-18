@@ -131,3 +131,49 @@ export function updateSidebarContent(){
     `;
   }
 }
+/* =========================
+🔥 SIDEBAR FORCE STYLE
+========================= */
+
+#sidebar button {
+  all: unset; /* 🔥 killt ALLES */
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+
+  padding: 12px;
+  border-radius: 12px;
+
+  background: #111827;
+  color: white;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+#sidebar button:hover {
+  background: #1f2937;
+  transform: translateX(4px);
+}
+
+#sidebar select {
+  all: unset;
+
+  width: 100%;
+
+  padding: 10px;
+  border-radius: 10px;
+
+  background: #020617;
+  color: white;
+
+  border: 1px solid #1e293b;
+
+  font-size: 13px;
+}
