@@ -1070,19 +1070,22 @@ function applyTactics(base){
     attack *= 0.9;
   }
 
-  // =========================
-  // ⚖️ BALANCE NORMALIZATION
-  // =========================
-  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+// =========================
+// ⚖️ BALANCE NORMALIZATION
+// =========================
+const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
 
-  return {
-    attack: clamp(attack),
-    defense: clamp(defense),
-    control: clamp(control)
-  };
+return {
+  attack: clamp(attack),
+  defense: clamp(defense),
+  control: clamp(control)
+};
 }
 
 
+// =========================
+// 📊 RENDER TACTIC STATS
+// =========================
 function renderTacticStats(){
 
   const el = document.getElementById("tacticsStats");
@@ -1090,6 +1093,9 @@ function renderTacticStats(){
 
   const base = calculateTeamStats();
 
+  // =========================
+  // ❌ NO DATA
+  // =========================
   if(!base){
     el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
     return;
@@ -1139,7 +1145,7 @@ function renderTacticStats(){
   }
 
   // =========================
-  // 🔒 CLAMP + ROUND
+  // 🔒 CLAMP
   // =========================
   const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
 
@@ -1148,13 +1154,31 @@ function renderTacticStats(){
   control = clamp(control);
 
   // =========================
-  // 🎨 RENDER
+  // 🎨 RENDER HTML
   // =========================
   el.innerHTML = `
     ${renderTacticBar("Attack", attack)}
     ${renderTacticBar("Defense", defense)}
     ${renderTacticBar("Control", control)}
   `;
+
+  // =========================
+  // 🚀 ANIMATION TRIGGER
+  // =========================
+  requestAnimationFrame(() => {
+
+    el.querySelectorAll(".tactic-fill").forEach((bar, i) => {
+
+      const target = bar.dataset.value;
+
+      // 🔥 leichter Stagger (sieht krass aus)
+      setTimeout(() => {
+        bar.style.width = target + "%";
+      }, i * 120);
+
+    });
+
+  });
 }
 
 
