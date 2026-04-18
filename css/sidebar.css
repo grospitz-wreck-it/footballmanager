@@ -1,7 +1,9 @@
 // =========================
 // 🎮 SIDEBAR SYSTEM (ULTRA)
 // =========================
-
+#sidebar {
+  background: red !important;
+}
 import { game } from "../core/state.js";
 
 // =========================
