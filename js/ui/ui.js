@@ -616,17 +616,6 @@ function renderTeam(){
     return;
   }
 
-// =========================
-// ⚽ Modal
-// =========================
-function openPlayerModal(player){
-
-  if(!player) return;
-
-  const name = `${player.first_name || ""} ${player.last_name || ""}`.trim();
-openPlayerModal(player);
-  
-}
 
   
   // =========================
