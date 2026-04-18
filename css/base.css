@@ -121,6 +121,31 @@ button {
   display: flex;
 }
 
+/* =========================
+⚙️ TACTICS BUTTON
+========================= */
+.tactics-btn {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+/* =========================
+📌 IN HEADER POSITIONIEREN
+========================= */
+#header {
+  position: relative;
+}
+
+#tacticsBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
 /* Modal (Spieler etc.) */
 #playerModal {
   position: fixed;
