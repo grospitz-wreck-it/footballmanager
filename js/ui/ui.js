@@ -588,22 +588,31 @@ function renderTeam(){
   // =========================
   // 🧠 SORT + GROUP
   // =========================
-  const byType = { GK: [], DEF: [], MID: [], ST: [] };
+  import { mapPosition } from "../core/football/positions.js";
 
-  players.forEach(p => {
-    const raw = (p.position_type || "MID").toUpperCase();
+const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
-    if(raw.includes("GK")) byType.GK.push(p);
-    else if(raw.match(/CB|LB|RB|WB|DEF/)) byType.DEF.push(p);
-    else if(raw.includes("MID")) byType.MID.push(p);
-    else if(raw.includes("ST")) byType.ST.push(p);
-    else byType.MID.push(p);
-  });
+players.forEach(p => {
 
-  Object.values(byType).forEach(arr => {
-    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-  });
+  // 🔥 zentrale Logik (aus positions.js)
+  let role = mapPosition(p.position_type);
 
+  // 🔥 UI-Kompatibilität (ATT → ST)
+  if(role === "ATT") role = "ST";
+
+  if(!byType[role]){
+    console.warn("⚠️ Unknown role:", role, p);
+    return;
+  }
+
+  byType[role].push(p);
+});
+
+// 🔥 sortieren (beste Spieler zuerst)
+Object.values(byType).forEach(arr => {
+  if(!Array.isArray(arr)) return;
+  arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+});
   // =========================
   // ⚙️ FORMATION
   // =========================
@@ -623,10 +632,19 @@ function renderTeam(){
   // =========================
   const starters = [];
 
-  layout.forEach(slot => {
-    const player = pickPlayer(slot.role, poolCopy);
-    if(player) starters.push(player);
-  });
+ layout.forEach(slot => {
+
+  let role = slot.role;
+
+  // 🔥 falls detaillierte Positionen kommen → mappen
+  if(["CB","LB","RB","WB","RWB","LWB"].includes(role)) role = "DEF";
+  if(["CM","CDM","CAM"].includes(role)) role = "MID";
+  if(["ST","CF","FW","LW","RW"].includes(role)) role = "ST";
+
+  const player = pickPlayer(role, poolCopy);
+
+  if(player) starters.push(player);
+});
 
   // =========================
   // 🪑 BENCH
