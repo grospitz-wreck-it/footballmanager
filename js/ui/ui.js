@@ -1272,7 +1272,42 @@ function renderSchedule(){
     startX = null;
   };
 }
+function getPlayerStats(player){
 
+  const pos = (player.position || "").toUpperCase();
+
+  let attack  = player.shooting ?? 50;
+  let defense = player.defending ?? 50;
+  let control = player.passing ?? 50;
+
+  // 🧤 GK Spezial
+  if(pos === "GK"){
+    defense = player.goalkeeping ?? 50;
+    attack = 10;
+    control = 40;
+  }
+
+  // 🔥 Positionsgewichtung
+  if(["ST","CF","FW"].includes(pos)){
+    attack *= 1.1;
+  }
+
+  if(["CB","LB","RB"].includes(pos)){
+    defense *= 1.1;
+  }
+
+  if(["CM","CDM","CAM"].includes(pos)){
+    control *= 1.1;
+  }
+
+  const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
+
+  return {
+    attack: clamp(attack),
+    defense: clamp(defense),
+    control: clamp(control)
+  };
+}
 export {
   updateUI,
   renderSchedule,
