@@ -92,7 +92,20 @@ export function openPlayerModal(player){
     modal.classList.add("show");
   });
 }
+function renderStat(label, value){
 
+  const v = value ?? 0;
+
+  return `
+    <div class="stat-row">
+      <span>${label}</span>
+      <div class="stat-bar">
+        <div class="fill" style="width:${v}%"></div>
+      </div>
+      <span>${v}</span>
+    </div>
+  `;
+}
 
 // =========================
 // ❌ CLOSE
