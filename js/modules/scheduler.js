@@ -281,34 +281,43 @@ function nextMatch(){
 // =========================
 function advanceSchedule(){
 
-  const schedule = game.league.current?.schedule;
+  const schedule = game.league?.current?.schedule;
   if(!schedule?.length) return;
 
-  let r = game.league.currentRound || 0;
-  let m = game.league.currentMatchIndex || 0;
+  let r = game.league.currentRound ?? 0;
+  let m = game.league.currentMatchIndex ?? 0;
 
+  // 👉 nächstes Match
   m++;
 
-  if(m >= schedule[r].length){
+  // 👉 nächster Spieltag
+  if(m >= (schedule[r]?.length || 0)){
     m = 0;
     r++;
   }
 
+  // 👉 Saison Ende Guard
+  if(r >= schedule.length){
+    console.log("🏁 Saison beendet");
+    game.league.currentRound = schedule.length - 1;
+    game.league.currentMatchIndex = 0;
+    return;
+  }
+
+  // 👉 State setzen
   game.league.currentRound = r;
   game.league.currentMatchIndex = m;
-}
 
-// =========================
-// 🏁 SEASON END
-// =========================
-function isSeasonFinished(){
+  // 👉 UI SYNC (🔥 wichtig für deinen Swipe-View)
+  if(typeof window !== "undefined"){
+    window.scheduleViewIndex = r;
+  }
 
-  const schedule = game.league.current?.schedule;
-  if(!schedule?.length) return true;
-
-  return schedule.every(round =>
-    round.every(match => match._processed)
-  );
+  // 👉 optional Debug
+  console.log("➡️ Advance:", {
+    round: r,
+    match: m
+  });
 }
 
 // =========================
