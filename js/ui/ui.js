@@ -139,14 +139,19 @@ function initUI(){
 
   console.log("🧱 UI init");
 
-  const burger = document.getElementById("burgerBtn");
-  const wrapper = document.getElementById("sidebarWrapper");
-  const overlay = document.getElementById("sidebarOverlay");
+ const burger  = document.getElementById("burgerBtn");
+const wrapper = document.getElementById("sidebarWrapper");
+const overlay = document.getElementById("sidebarOverlay");
+const sidebar = document.getElementById("sidebar");
 
-  if(!burger || !wrapper){
-    console.error("❌ Sidebar DOM fehlt");
-    return;
-  }
+if(!burger || !wrapper || !sidebar){
+  console.error("❌ Sidebar DOM fehlt", {
+    burger,
+    wrapper,
+    sidebar
+  });
+  return;
+}
 
   // =========================
   // 🍔 SIDEBAR
