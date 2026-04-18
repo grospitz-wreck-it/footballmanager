@@ -148,6 +148,9 @@ function initUI(){
     return;
   }
 
+  // =========================
+  // 🍔 SIDEBAR
+  // =========================
   burger.addEventListener("click", () => {
     game.ui.sidebarOpen = !game.ui.sidebarOpen;
     applySidebar();
@@ -158,12 +161,50 @@ function initUI(){
     applySidebar();
   });
 
+  // =========================
   // 🔥 STATE LISTENER
+  // =========================
   on(EVENTS.STATE_CHANGED, () => {
-  if(game.events?.history?.length){
-    updateEvents();
+    if(game.events?.history?.length){
+      updateEvents();
+    }
+  });
+
+  // =========================
+  // ⚽ FORMATION SELECT
+  // =========================
+  const formationSelect = document.getElementById("formationSelect");
+
+  if(formationSelect){
+    formationSelect.value = game.team?.formation || "4-4-2";
+
+    formationSelect.addEventListener("change", (e) => {
+      const value = e.target.value;
+
+      console.log("⚽ Formation changed:", value);
+
+      game.team.formation = value;
+
+      renderTeam();     // 🔥 sofort neu zeichnen
+      renderTacticStats(); // optional sync
+    });
+  } else {
+    console.warn("⚠️ formationSelect nicht gefunden");
   }
-});
+
+  // =========================
+  // 🎲 CHANCE BUTTON
+  // =========================
+  const chanceBtn = document.getElementById("chanceBtn");
+
+  if(chanceBtn){
+    chanceBtn.addEventListener("click", () => {
+      triggerChanceEvent();
+    });
+  } else {
+    console.warn("⚠️ chanceBtn nicht gefunden");
+  }
+}
 
   // =========================
   // ⚙️ TACTICS BUTTON (OPEN)
