@@ -1186,6 +1186,18 @@ function renderTacticStats(){
   }
 
   // =========================
+  // 🎲 CHANCE EFFECTS (NEU)
+  // =========================
+  const fx = game.tempEffects || {};
+
+  attack  += fx.attack_boost  || 0;
+  defense += fx.defense_boost || 0;
+  control += fx.control_boost || 0;
+
+  attack  += fx.attack_nerf  || 0;
+  defense += fx.defense_nerf || 0;
+
+  // =========================
   // 🔒 CLAMP
   // =========================
   const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
@@ -1212,7 +1224,6 @@ function renderTacticStats(){
 
       const target = bar.dataset.value;
 
-      // 🔥 leichter Stagger (sieht krass aus)
       setTimeout(() => {
         bar.style.width = target + "%";
       }, i * 120);
