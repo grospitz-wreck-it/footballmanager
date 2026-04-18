@@ -713,7 +713,7 @@ Object.values(byType).forEach(arr => {
       if(player) openPlayerModal(player);
     };
   });
-}
+
 
 
 // =========================
