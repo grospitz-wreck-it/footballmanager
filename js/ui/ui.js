@@ -8,7 +8,7 @@ import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
-import { openPlayerModal } from "/js/modal.js";
+import { openPlayerModal } from "../modal.js";
 import { FORMATIONS } from "../core/football/formation.js";
 import { mapPositionToRole } from "../core/football/position.js";
 function mapRoleForUI(role){
