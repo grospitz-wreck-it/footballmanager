@@ -919,6 +919,69 @@ players.forEach(p => {
   return result;
 }
 
+// =========================
+// ⚙️ TACTIC MODIFIERS ENGINE
+// =========================
+function applyTactics(base){
+
+  const t = game.tactics || {};
+
+  let attack = base.attack;
+  let defense = base.defense;
+  let control = base.control;
+
+  // =========================
+  // 🎮 TEMPO
+  // =========================
+  if(t.tempo === "fast"){
+    attack *= 1.2;
+    control *= 0.85;
+  }
+
+  if(t.tempo === "slow"){
+    defense *= 1.15;
+    attack *= 0.9;
+  }
+
+  // =========================
+  // 🔥 PRESSING
+  // =========================
+  if(t.pressing === "high"){
+    attack *= 1.15;
+    defense *= 0.85;
+  }
+
+  if(t.pressing === "low"){
+    defense *= 1.25;
+    attack *= 0.85;
+  }
+
+  // =========================
+  // 📏 LINE HEIGHT
+  // =========================
+  if(t.line === "high"){
+    attack *= 1.1;
+    defense *= 0.8;
+  }
+
+  if(t.line === "low"){
+    defense *= 1.3;
+    attack *= 0.9;
+  }
+
+  // =========================
+  // ⚖️ BALANCE NORMALIZATION
+  // =========================
+  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+
+  return {
+    attack: clamp(attack),
+    defense: clamp(defense),
+    control: clamp(control)
+  };
+}
+
+
 function renderTacticStats(){
 
   const el = document.getElementById("tacticsStats");
