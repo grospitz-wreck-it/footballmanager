@@ -295,10 +295,6 @@ function initUI(){
 
   });
 
-  // initial sync
-  updateTacticsUI();
-}
-
 
 
 // =========================
