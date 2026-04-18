@@ -182,3 +182,12 @@
   background: #0b3d1a;
   border-radius: 12px;
 }
+#gameCanvas {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 14px;
+
+  background:
+    url("../gfx/field.svg") center/cover no-repeat,
+    linear-gradient(180deg,#14532D,#15803D);
+}
