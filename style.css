@@ -799,8 +799,12 @@ tr:hover {
 
   color: white;
 
-  background: linear-gradient(160deg, #111A2B, #0B1220);
-
+  background: linear-gradient(
+  160deg,
+  #2d3444 0%,
+  #232938 50%,
+  #1a1f2b 100%
+);
   background-image:
     linear-gradient(160deg, rgba(255,255,255,0.05), transparent),
     repeating-linear-gradient(
@@ -912,8 +916,8 @@ tr:hover {
 }
 
 #player-avatar {
-  width: 96px;
-  height: 96px;
+  width: 140px;
+  height: 140px;
 
   image-rendering: pixelated;
 
@@ -1009,7 +1013,7 @@ tr:hover {
 ========================= */
 
 .player-modal[data-stars="5"] {
-  transform: scale(1.05);
+  transform: scale(2.05);
 }
 
 
