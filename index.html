@@ -19,27 +19,32 @@
 <!-- =========================
 ⚙️ TACTICS OVERLAY
 ========================= -->
-<div id="tacticsOverlay" class="tactics-overlay">
-  <div class="tactics-sheet">
+<div class="tactics-grid">
 
-    <h3>Taktik</h3>
-
-    <div id="tacticsStats"></div>
-
-    <div class="tactics-row">
-      <button data-preset="offensive">Offensiv</button>
-      <button data-preset="balanced">Balanced</button>
-      <button data-preset="defensive">Defensiv</button>
-    </div>
-
-    <div class="tactics-row">
-      <button data-tempo="slow">Langsam</button>
-      <button data-tempo="normal">Normal</button>
-      <button data-tempo="fast">Schnell</button>
-    </div>
-
+  <!-- 🔥 LEFT: PRESETS -->
+  <div class="tactics-presets">
+    <button data-preset="offensive">Offensiv</button>
+    <button data-preset="balanced">Balanced</button>
+    <button data-preset="defensive">Defensiv</button>
   </div>
+
+  <!-- 🔥 RIGHT: FORMATION -->
+  <div class="tactics-formation">
+    <label>Formation</label>
+    <select id="formationSelect">
+      <option value="4-4-2">4-4-2</option>
+      <option value="4-3-3">4-3-3</option>
+      <option value="3-5-2">3-5-2</option>
+      <option value="5-3-2">5-3-2</option>
+    </select>
+  </div>
+
 </div>
+
+<!-- 🎲 CHANCE BUTTON -->
+<button id="chanceBtn" class="chance-btn">
+  🎲 Chance Event
+</button>
 
 <!-- =========================
 🟣 SPLASH SCREEN
