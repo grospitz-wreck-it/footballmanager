@@ -619,8 +619,6 @@ function renderTeam(){
   // =========================
   // 🧠 SORT + GROUP
   // =========================
- import { mapPositionToRole } from "../core/football/position.js";
-
 const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
 // =========================
