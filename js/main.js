@@ -21,7 +21,6 @@ import { generateSchedule, advanceSchedule, renderSchedule, nextMatch } from "./
 import { initTable } from "./modules/table.js";
 import { initPlayerPool } from "./modules/playerPool.js";
 import { buildAllTeams } from "./modules/teamGenerator.js";
-import { initSidebar } from "./sidebar.js";
 
 // TOOLS
 import { importPlayers } from "../tools/importer.js";
@@ -1131,5 +1130,4 @@ document.getElementById("resetBtn")?.addEventListener("click", async () => {
 // =========================
 document.addEventListener("DOMContentLoaded", () => {
   init();
-  initSidebar();
 });
