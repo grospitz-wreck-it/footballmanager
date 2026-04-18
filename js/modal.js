@@ -70,7 +70,7 @@ export function openPlayerModal(player){
   const tier = player.tier ?? 1;
   for(let i=0; i<tier; i++){
     const img = document.createElement("img");
-    img.src = "./gfx/star.png";
+    img.src = "./gfx/star1.webp";
     starsEl.appendChild(img);
   }
 
