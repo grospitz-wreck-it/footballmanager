@@ -32,7 +32,7 @@
 
   aspect-ratio: 16/9;
 
-  background: url("./gfx/field.svg") center/cover no-repeat;
+  background: url("../gfx/field.svg") center/cover no-repeat;
 
   border-radius: 14px;
   overflow: hidden;
