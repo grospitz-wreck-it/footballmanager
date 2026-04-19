@@ -167,15 +167,34 @@ function handleAppVisibility(){
   const splash = document.getElementById("splash");
   const app = document.getElementById("app");
 
-  if(game.team?.selectedId){
-    if(splash) splash.style.display = "none";
-    if(app) app.classList.remove("hidden");
+  const hasTeam = !!game.team?.selectedId;
+
+  console.log("👁 VISIBILITY", {
+    hasTeam,
+    team: game.team
+  });
+
+  if(hasTeam){
+
+    if(splash){
+      splash.style.display = "none";
+    }
+
+    if(app){
+      app.style.display = "block";
+    }
+
   } else {
-    if(splash) splash.style.display = "flex";
-    if(app) app.classList.add("hidden");
+
+    if(splash){
+      splash.style.display = "flex";
+    }
+
+    if(app){
+      app.style.display = "none";
+    }
   }
 }
-
 // =========================
 // 🚀 INIT
 // =========================
