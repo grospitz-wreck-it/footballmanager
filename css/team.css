@@ -1,92 +1,90 @@
 /* =========================
-⚽ TEAM SYSTEM (NEON EDITION)
+👕 TEAM TAB (MATCH STYLE)
 ========================= */
 
 #teamView {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 
   height: 100%;
   overflow-y: auto;
   padding-bottom: 40px;
 }
 
+/* SECTION TITLES */
 #teamView h3 {
+  margin: 6px 2px;
   font-size: 14px;
-  letter-spacing: 0.5px;
-
-  background: linear-gradient(90deg, #38bdf8, #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+  color: #94a3b8;
 }
 
 /* =========================
-🏟 FIELD (FIXED)
+⚽ TEAM FORMATION FIELD
 ========================= */
 
 .team-field {
+  position: relative;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
 
   aspect-ratio: 16/9;
-  position: relative;
+
+  background: url("./gfx/field.svg") center/cover no-repeat;
+
+  border-radius: 14px;
   overflow: hidden;
+}
 
-  border-radius: 16px;
-
-  /* 🔥 visueller Halt */
-  background: linear-gradient(180deg, #065f46, #022c22);
-
-  box-shadow:
-    inset 0 0 40px rgba(0,0,0,0.6),
-    0 10px 40px rgba(0,0,0,0.8);
+/* optional center circle overlay */
+.team-field::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 /* =========================
-📍 PLAYER POSITION (NEU - CRITICAL)
+📍 PLAYER POSITION
 ========================= */
 
 .player-pos {
   position: absolute;
 
-  /* 🔥 DAS IST DER FIX */
+  /* 🔥 CRITICAL FIX */
   transform: translate(-50%, -50%);
+
+  width: 60px;
+  height: 60px;
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  pointer-events: none; /* verhindert click chaos */
 }
 
 /* =========================
-👤 PLAYER DOT FIXED
+🟡 PLAYER DOT
 ========================= */
 
 .player-dot {
+  position: relative;
+
   width: 48px;
   height: 48px;
-
-  min-width: 48px;
-  min-height: 48px;
-
-  max-width: 48px;
-  max-height: 48px;
-
-  position: relative;
-  cursor: pointer;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 50%;
-  overflow: hidden;
+  cursor: pointer;
 
-  background: radial-gradient(circle, rgba(255,0,0,0.85), rgba(255,0,0,0.25));
-
-  /* 🔥 verhindert Layout-Zerfall */
-  flex-shrink: 0;
+  pointer-events: auto;
 
   transition: transform 0.15s ease;
 }
@@ -95,21 +93,43 @@
   transform: scale(0.92);
 }
 
+/* Bild */
 .player-dot img {
-  width: 100% !important;
-  height: 100% !important;
-
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+/* Initialen */
+.player-dot .label {
+  position: absolute;
+
+  font-size: 13px;
+  font-weight: 800;
+  color: white;
+
+  letter-spacing: 0.5px;
+
+  text-shadow:
+    0 0 4px rgba(0,0,0,0.9),
+    0 1px 2px rgba(0,0,0,0.9),
+    0 0 8px rgba(0,0,0,0.6);
+
   pointer-events: none;
 }
 
-/* optional: initials */
-.player-dot .label {
-  position: absolute;
-  font-size: 10px;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+/* =========================
+✨ SELECTION
+========================= */
+
+.selected {
+  outline: 2px solid #22c55e;
+
+  box-shadow:
+    0 0 12px rgba(34,197,94,0.6),
+    0 0 24px rgba(34,197,94,0.3);
 }
 
 /* =========================
@@ -118,27 +138,23 @@
 
 .bench-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 
   overflow-x: auto;
+  padding-bottom: 6px;
 
-  margin-top: 10px;
-  min-height: 90px;
-
-  padding-bottom: 10px; /* 🔥 verhindert Abschneiden */
+  scroll-behavior: smooth;
 }
 
 /* CARD */
 .bench-card {
-  color: white;
-
   display: flex;
   flex-direction: column;
   gap: 6px;
 
   min-width: 120px;
 
-  flex-shrink: 0; /* 🔥 wichtig bei scroll */
+  color: white;
 }
 
 .bench-card:active {
@@ -150,7 +166,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
 }
 
 .bench-name {
@@ -221,16 +236,4 @@
 
 .mini-fill.control {
   background: linear-gradient(90deg, #a855f7, #ec4899);
-}
-
-/* =========================
-✨ SELECTION
-========================= */
-
-.selected {
-  outline: 2px solid #22c55e;
-
-  box-shadow:
-    0 0 12px rgba(34,197,94,0.6),
-    0 0 24px rgba(34,197,94,0.3);
 }
