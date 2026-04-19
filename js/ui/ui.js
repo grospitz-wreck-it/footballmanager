@@ -780,25 +780,25 @@ const poolCopy = [...players];
 
   layout.forEach(slot => {
 
-    const slotRole = normalizeSlotRole(slot.role);
+  const slotRole = normalizeSlotRole(slot.role);
 
-    let player = startersPool.find(p => {
+  let player = startersPool.find(p => {
 
-      if(p._rendered) return false;
+    if(p._rendered) return false;
 
-      const role = mapPositionToRole(
-        p.position_type || p.position
-      );
+    const role = mapPositionToRole(
+      p.position_type || p.position
+    );
 
-      return role === slotRole;
-    });
+    return role === slotRole;
+  });
 
-    // 🔁 fallback
-    if(!player){
-      player = startersPool.find(p => !p._rendered);
-    }
+  // 🔁 fallback
+  if(!player){
+    player = startersPool.find(p => !p._rendered);
+  }
 
-    if(player) player._rendered = true;
+  if(player) player._rendered = true;
 
     html += `
   <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
