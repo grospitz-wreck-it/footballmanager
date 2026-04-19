@@ -286,7 +286,7 @@ async function init(){
   console.warn("⚠️ Kein Team in Liga gefunden");
 }
 
-}
+
 
   // 🔥 ALLES HIER REIN
   handleAppVisibility();
