@@ -1006,6 +1006,17 @@ function applyTactics(base){
   };
 }
 
+function renderTacticBar(label, value){
+
+  return `
+    <div class="tactic-row">
+      <div class="tactic-label">${label} (${value})</div>
+      <div class="tactic-bar">
+        <div class="tactic-fill" data-value="${value}"></div>
+      </div>
+    </div>
+  `;
+}
 
 // =========================
 // 📊 RENDER TACTIC STATS (FIXED)
