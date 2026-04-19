@@ -1061,6 +1061,123 @@ function renderTacticStats(){
 
   });
 }
+// =========================
+// 📦 EXPORTS
+// =========================
+
+// 🔥 WICHTIG: MUSS EXISTIEREN (für league.js Import)
+function renderCurrentMatch(){
+  console.log("⚽ renderCurrentMatch");
+}
+
+// =========================
+// 📅 SCHEDULE (FIXED FULL)
+// =========================
+function renderSchedule(){
+
+  const container = document.getElementById("scheduleView");
+  if(!container) return;
+
+  const schedule = game.league?.current?.schedule;
+
+  if(!schedule?.length){
+    container.innerHTML = "<p>Kein Spielplan vorhanden</p>";
+    return;
+  }
+
+  if(scheduleViewIndex === null){
+    scheduleViewIndex = game.league.currentRound || 0;
+  }
+
+  const round = schedule[scheduleViewIndex];
+  if(!round) return;
+
+  const myMatch = game.match?.current;
+
+  const nav = `
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    ">
+      <button id="prevRound">⬅</button>
+      <strong>Spieltag ${scheduleViewIndex + 1}</strong>
+      <button id="nextRound">➡</button>
+    </div>
+  `;
+
+  const list = round.map((match, mIndex) => {
+
+    const isActive =
+      (myMatch && match.id === myMatch.id) ||
+      (scheduleViewIndex === game.league.currentRound &&
+       mIndex === game.league.currentMatchIndex);
+
+    return `
+      <div style="
+        padding:8px;
+        margin:4px 0;
+        border-radius:6px;
+        background:${isActive ? "#111" : "#0b0b0b"};
+        color:${isActive ? "#00ff88" : "#ccc"};
+        font-weight:${isActive ? "bold" : "normal"};
+      ">
+        ${match.home?.name || "-"}
+        ${match.result ? match.result.home + ":" + match.result.away : "vs"}
+        ${match.away?.name || "-"}
+        ${match._processed ? " ✅" : ""}
+      </div>
+    `;
+  }).join("");
+
+  container.innerHTML = nav + list;
+
+  // =========================
+  // 🔘 NAV BUTTONS
+  // =========================
+  document.getElementById("prevRound")?.addEventListener("click", () => {
+    scheduleViewIndex = Math.max(0, scheduleViewIndex - 1);
+    renderSchedule();
+  });
+
+  document.getElementById("nextRound")?.addEventListener("click", () => {
+    scheduleViewIndex = Math.min(schedule.length - 1, scheduleViewIndex + 1);
+    renderSchedule();
+  });
+
+  // =========================
+  // 👉 SWIPE SUPPORT
+  // =========================
+  let startX = null;
+
+  container.ontouchstart = (e) => {
+    startX = e.touches[0].clientX;
+  };
+
+  container.ontouchend = (e) => {
+
+    if(startX === null) return;
+
+    const diff = startX - e.changedTouches[0].clientX;
+
+    if(Math.abs(diff) < 50) return;
+
+    if(diff > 0){
+      scheduleViewIndex = Math.min(schedule.length - 1, scheduleViewIndex + 1);
+    } else {
+      scheduleViewIndex = Math.max(0, scheduleViewIndex - 1);
+    }
+
+    renderSchedule();
+    startX = null;
+  };
+}
+
+
+// =========================
+// 📦 EXPORTS (FINAL)
+// =========================
 export {
   updateUI,
   renderSchedule,
