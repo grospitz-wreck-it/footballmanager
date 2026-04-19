@@ -801,10 +801,10 @@ const poolCopy = [...players];
     if(player) player._rendered = true;
 
     html += `
-      <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
-        ${player ? renderPlayerDot(player) : "—"}
-      </div>
-    `;
+  <div class="player-pos" style="top:${slot.top}%; left:${slot.left}%;">
+    ${player ? renderPlayerDot(player) : "—"}
+  </div>
+`;
   });
 
   html += `</div>`;
