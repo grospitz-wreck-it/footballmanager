@@ -1,5 +1,5 @@
 /* =========================
-   🎮 TACTICS OVERLAY
+🎮 TACTICS OVERLAY
 ========================= */
 
 #tacticsOverlay {
@@ -29,7 +29,7 @@
 }
 
 /* =========================
-   📦 SHEET (BOTTOM SLIDE)
+📦 SHEET (BOTTOM SLIDE)
 ========================= */
 
 .tactics-sheet {
@@ -53,31 +53,25 @@
     inset 0 0 40px rgba(255,255,255,0.05);
 
   transform: translateY(110%);
-  opacity: 0;
-
-  transition:
-    transform 0.35s cubic-bezier(.2,.8,.2,1),
-    opacity 0.25s ease;
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
 }
 
 #tacticsOverlay.open .tactics-sheet {
   transform: translateY(0);
-  opacity: 1;
 }
 
 /* =========================
-   🧠 HEADER
+🧠 HEADER
 ========================= */
 
 .tactics-sheet h3 {
   margin: 0 0 12px;
   font-size: 18px;
   color: #38bdf8;
-  letter-spacing: 0.5px;
 }
 
 /* =========================
-   📊 TACTIC BARS
+📊 TACTIC BARS
 ========================= */
 
 .tactic-row {
@@ -93,18 +87,14 @@
 .tactic-bar {
   width: 100%;
   height: 10px;
-
   background: #020617;
   border-radius: 999px;
   overflow: hidden;
-
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
 }
 
 .tactic-fill {
   height: 100%;
   width: 0%;
-
   border-radius: 999px;
 
   background:
@@ -115,12 +105,7 @@
       transparent 6px,
       transparent 12px
     ),
-    linear-gradient(
-      90deg,
-      #22c55e,
-      #38bdf8,
-      #a855f7
-    );
+    linear-gradient(90deg, #22c55e, #38bdf8, #a855f7);
 
   box-shadow:
     0 0 12px rgba(34,197,94,0.4),
@@ -130,7 +115,7 @@
 }
 
 /* =========================
-   🔲 GRID (PRESET + FORMATION)
+🔲 GRID
 ========================= */
 
 .tactics-grid {
@@ -141,7 +126,7 @@
 }
 
 /* =========================
-   🎯 PRESETS
+🎯 PRESETS
 ========================= */
 
 .tactics-presets {
@@ -169,14 +154,13 @@
   color: #022c22;
 
   box-shadow:
-    0 0 20px rgba(34,197,94,0.5),
-    0 0 40px rgba(34,197,94,0.2);
+    0 0 20px rgba(34,197,94,0.5);
 
   transform: scale(1.02);
 }
 
 /* =========================
-   📐 FORMATION (UPGRADED)
+📐 FORMATION
 ========================= */
 
 .tactics-formation {
@@ -195,34 +179,22 @@
   border-radius: 14px;
   border: none;
 
-  background:
-    linear-gradient(145deg, #020617, #0f172a);
-
+  background: linear-gradient(145deg, #020617, #0f172a);
   color: white;
-  font-size: 14px;
 
   box-shadow:
     inset 0 0 10px rgba(0,0,0,0.7),
     0 6px 20px rgba(0,0,0,0.6);
-
-  transition: all 0.2s ease;
-}
-
-.tactics-formation select:focus {
-  outline: none;
-  box-shadow:
-    0 0 0 2px rgba(34,197,94,0.4),
-    0 0 20px rgba(34,197,94,0.3);
 }
 
 /* =========================
-   🎲 CHANCE BUTTON (unter Formation)
+🎲 CHANCE BUTTON
 ========================= */
 
 .chance-btn {
   grid-column: span 2;
 
-  margin-top: 6px;
+  margin-top: 10px;
   padding: 14px;
 
   border-radius: 16px;
@@ -231,13 +203,7 @@
   font-size: 15px;
   font-weight: 700;
 
-  background: linear-gradient(
-    135deg,
-    #22c55e,
-    #38bdf8,
-    #a855f7
-  );
-
+  background: linear-gradient(135deg, #22c55e, #38bdf8, #a855f7);
   color: #020617;
 
   box-shadow:
@@ -249,167 +215,4 @@
 
 .chance-btn:active {
   transform: scale(0.96);
-}
-
-/* =========================
-   📊 TACTIC BARS (TACHO STYLE)
-========================= */
-
-.tactic-row {
-  margin-bottom: 10px;
-}
-
-.tactic-label {
-  font-size: 12px;
-  margin-bottom: 4px;
-  opacity: 0.8;
-}
-
-.tactic-bar {
-  width: 100%;
-  height: 10px;
-
-  background: #020617;
-  border-radius: 999px;
-  overflow: hidden;
-
-  box-shadow:
-    inset 0 0 10px rgba(0,0,0,0.8);
-}
-
-.tactic-fill {
-  height: 100%;
-  width: 0%;
-
-  border-radius: 999px;
-
-  /* 🔥 Splash Farben */
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(0,0,0,0.25) 0px,
-      rgba(0,0,0,0.25) 6px,
-      transparent 6px,
-      transparent 12px
-    ),
-    linear-gradient(
-      90deg,
-      #22c55e,
-      #38bdf8,
-      #a855f7
-    );
-
-  box-shadow:
-    0 0 10px rgba(34,197,94,0.4),
-    0 0 20px rgba(168,85,247,0.3);
-
-  transition: width 0.6s cubic-bezier(.2,.8,.2,1);
-}
-
-/* =========================
-   🔲 GRID (PRESETS + FORMATION)
-========================= */
-
-.tactics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 14px;
-}
-
-/* =========================
-   🎯 PRESETS
-========================= */
-
-.tactics-presets {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.tactics-presets button {
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  background: linear-gradient(145deg, #111827, #1f2937);
-  color: #e5e7eb;
-
-  transition: all 0.2s ease;
-}
-
-.tactics-presets button.active {
-  background: linear-gradient(135deg, #22c55e, #4ade80);
-  color: #022c22;
-
-  box-shadow: 0 0 16px rgba(34,197,94,0.5);
-  transform: scale(1.02);
-}
-
-/* =========================
-   📐 FORMATION
-========================= */
-
-.tactics-formation {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.tactics-formation label {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-.tactics-formation select {
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-
-  background: linear-gradient(145deg, #020617, #0f172a);
-  color: white;
-
-  font-size: 14px;
-
-  box-shadow:
-    inset 0 0 8px rgba(0,0,0,0.6),
-    0 4px 10px rgba(0,0,0,0.5);
-}
-
-/* =========================
-   🎲 CHANCE BUTTON
-========================= */
-
-.chance-btn {
-  width: 100%;
-  margin-top: 14px;
-  padding: 12px;
-
-  border-radius: 14px;
-  border: none;
-
-  font-size: 15px;
-  font-weight: 700;
-
-  background: linear-gradient(
-    135deg,
-    #22c55e,
-    #38bdf8,
-    #a855f7
-  );
-
-  color: #020617;
-
-  box-shadow:
-    0 10px 30px rgba(34,197,94,0.4),
-    0 0 20px rgba(168,85,247,0.3);
-
-  transition: all 0.2s ease;
-}
-
-.chance-btn:active {
-  transform: scale(0.95);
 }
