@@ -704,20 +704,20 @@ function renderTeam(){
     ST: [...byType.ST]
   };
 
-  // =========================
-  // 🧠 SLOT → ROLE MAPPING (CLEAN)
-  // =========================
-  function normalizeSlotRole(roleRaw){
+ // =========================
+// 🧠 SLOT → ROLE MAPPING
+// =========================
+function normalizeSlotRole(roleRaw){
 
-    const role = (roleRaw || "").toUpperCase();
+  const role = (roleRaw || "").toUpperCase();
 
-    if(["CB","LB","RB","WB","RWB","LWB","DEF"].includes(role)) return "DEF";
-    if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
-    if(["ST","CF","FW","LW","RW","ATT"].includes(role)) return "ST";
-    if(role.includes("GK")) return "GK";
+  if(["CB","LB","RB","DEF","WB","LWB","RWB"].includes(role)) return "DEF";
+  if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
+  if(["ST","CF","FW","ATT","LW","RW"].includes(role)) return "ST";
+  if(role.includes("GK")) return "GK";
 
-    return "MID"; // fallback
-  }
+  return "MID";
+}
 
   // =========================
   // 🧠 STARTING XI
@@ -733,23 +733,95 @@ function renderTeam(){
     if(player) starters.push(player);
   });
 
+let html = `
+  <h3>Startelf (${formation})</h3>
+  <div class="team-field">
+`;
+
 // =========================
-// 🎨 RENDER FIELD
+// 🧠 ROLE NORMALIZER
+// =========================
+function normalizeSlotRole(roleRaw){
+
+  const role = (roleRaw || "").toUpperCase();
+
+  if(["CB","LB","RB","DEF","WB","LWB","RWB"].includes(role)) return "DEF";
+  if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
+  if(["ST","CF","FW","ATT","LW","RW"].includes(role)) return "ST";
+  if(role.includes("GK")) return "GK";
+
+  return "MID";
+}
+
+// =========================
+// 🧠 SLOT → PLAYER MATCH
+// =========================
+function pickPlayerForSlot(slotRole, pool){
+
+  // 🔥 1. exakter Match
+  let player = pool.find(p => {
+
+    if(p._used) return false;
+
+    const playerRole = mapPositionToRole(
+      p.position_type || p.position
+    );
+
+    return playerRole === slotRole;
+  });
+
+  if(player){
+    player._used = true;
+    return player;
+  }
+
+  // 🔁 2. fallback (nächster freier)
+  player = pool.find(p => !p._used);
+
+  if(player){
+    player._used = true;
+    return player;
+  }
+
+  return null;
+}
+
+// =========================
+// ⚽ RENDER
 // =========================
 let html = `
   <h3>Startelf (${formation})</h3>
   <div class="team-field">
 `;
 
+// 👉 Kopie damit wir _used sauber nutzen
+const startersPool = [...starters];
+
 layout.forEach(slot => {
 
   const slotRole = normalizeSlotRole(slot.role);
 
-  const player = starters.find(p =>
-    !p._used && mapPositionToRole(p.position) === slotRole
-  ) || starters.find(p => !p._used);
+  // =========================
+  // 🧠 MATCH PLAYER ZUM SLOT
+  // =========================
+  let player = startersPool.find(p => {
+
+    if(p._used) return false;
+
+    const role = mapPositionToRole(
+      p.position_type || p.position
+    );
+
+    return role === slotRole;
+  });
+
+  // 🔁 fallback
+  if(!player){
+    player = startersPool.find(p => !p._used);
+  }
 
   if(!player) return;
+
   player._used = true;
 
   html += `
@@ -762,11 +834,15 @@ layout.forEach(slot => {
 html += `</div>`;
 
 // reset flags
-starters.forEach(p => delete p._used);
+startersPool.forEach(p => delete p._used);
 
-const bench = players.filter(p => !starters.includes(p));
 // =========================
-// 🪑 BENCH (NEU)
+// 🪑 BENCH
+// =========================
+const bench = players.filter(p => !starters.includes(p));
+
+// =========================
+// 🪑 BENCH (UPGRADED)
 // =========================
 html += `
   <h3>Bank</h3>
@@ -779,14 +855,28 @@ bench.forEach(p => {
 
   html += `
     <div class="bench-card" data-id="${p.id}">
-      <div class="bench-name">${p.name}</div>
-      <div class="bench-ovr">${p.overall}</div>
 
-      <div class="bench-stats">
-        <span>A ${stats.attack}</span>
-        <span>D ${stats.defense}</span>
-        <span>K ${stats.control}</span>
+      <div class="bench-top">
+        <div class="bench-name">${p.name}</div>
+        <div class="bench-ovr">${p.overall}</div>
       </div>
+
+      <div class="bench-bars">
+
+        <div class="mini-bar">
+          <div class="mini-fill" style="width:${stats.attack}%"></div>
+        </div>
+
+        <div class="mini-bar">
+          <div class="mini-fill defense" style="width:${stats.defense}%"></div>
+        </div>
+
+        <div class="mini-bar">
+          <div class="mini-fill control" style="width:${stats.control}%"></div>
+        </div>
+
+      </div>
+
     </div>
   `;
 });
