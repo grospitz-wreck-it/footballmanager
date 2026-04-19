@@ -755,8 +755,8 @@ function buildStartingXI({ layout, players, formation }){
   const starters = [];
 
   // 👉 saubere Kopie (für _used Flag)
-  const poolCopy = players.map(p => ({ ...p }));
-
+const poolCopy = [...players];
+  
   // =========================
   // 🎯 STARTER PICK
   // =========================
