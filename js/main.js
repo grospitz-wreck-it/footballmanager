@@ -268,17 +268,23 @@ async function init(){
 
   if(firstTeam){
 
-  console.log("🎯 Auto-select Team via League");
+  console.log("🎯 Auto-select Team (delayed)");
 
-  // 👉 WICHTIG: UI + State synchron
-  if(typeof window.selectTeamById === "function"){
-    window.selectTeamById(String(firstTeam.id));
-  } else {
-    // fallback
-    game.team = {
-      selectedId: String(firstTeam.id)
-    };
-  }
+  setTimeout(() => {
+
+    if(typeof window.selectTeamById === "function"){
+      window.selectTeamById(String(firstTeam.id));
+    } else {
+      game.team = {
+        selectedId: String(firstTeam.id)
+      };
+    }
+
+  }, 0);
+
+} else {
+  console.warn("⚠️ Kein Team in Liga gefunden");
+}
 
 }
 
