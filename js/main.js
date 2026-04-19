@@ -259,30 +259,29 @@ async function init(){
 
     if(leagues.length){
 
-      setLeagueById(leagues[0].id);
-      generateSchedule();
+  setLeagueById(leagues[0].id);
+  generateSchedule();
 
-      console.log("📅 SCHEDULE:", game.league.current?.schedule);
+  console.log("📅 SCHEDULE:", game.league.current?.schedule);
 
-      // 🔥 CRITICAL FIX: TEAM SETZEN
-      const firstTeam = leagues[0]?.teams?.[0];
+  const firstTeam = leagues[0]?.teams?.[0];
 
-      if(firstTeam){
-        game.team = {
-          selectedId: String(firstTeam.id)
-        };
-        console.log("✅ TEAM AUTO-SET:", game.team.selectedId);
-      } else {
-        console.warn("⚠️ Kein Team in Liga gefunden");
-      }
-      handleAppVisibility();
-      console.log("🧪 TEAM STATE:", game.team);
-    }
+  if(firstTeam){
+    game.team = {
+      selectedId: String(firstTeam.id)
+    };
+    console.log("✅ TEAM AUTO-SET:", game.team.selectedId);
+  } else {
+    console.warn("⚠️ Kein Team in Liga gefunden");
+  }
 
-    updateUI();
+  // 🔥 ALLES HIER REIN
+  handleAppVisibility();
+  updateUI();
+}
 
-    initMainButton();
-    updateMainButtonText();
+initMainButton();
+updateMainButtonText();
 
   } catch(e){
     console.error("💥 INIT CRASH:", e);
