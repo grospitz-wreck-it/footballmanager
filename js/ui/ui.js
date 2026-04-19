@@ -829,7 +829,230 @@ function renderTeam(){
       el.classList.remove("selected");
     });
   }
+function renderTeam(){
+
+  const container = document.getElementById("teamView");
+  if(!container) return;
+
+  const teamId = game.team?.selectedId;
+
+  const pool =
+    (window.playerPool && window.playerPool.length)
+      ? window.playerPool
+      : (game.players || []);
+
+  const allPlayers = pool.filter(p =>
+    String(p.team_id) === String(teamId)
+  );
+
+  if(!allPlayers.length){
+    container.innerHTML = "<p>Keine Spieler vorhanden</p>";
+    return;
+  }
 }
+  // =========================
+  // ⚙️ FORMATION
+  // =========================
+  const formation = game.team?.formation || "4-4-2";
+  const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+
+  // =========================
+  // 🧠 ROLE NORMALIZER
+  // =========================
+  function normalizeSlotRole(roleRaw){
+    const role = (roleRaw || "").toUpperCase();
+
+    if(["CB","LB","RB","DEF","WB","LWB","RWB"].includes(role)) return "DEF";
+    if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
+    if(["ST","CF","FW","ATT","LW","RW"].includes(role)) return "ST";
+    if(role.includes("GK")) return "GK";
+
+    return "MID";
+  }
+
+  function pickPlayerForSlot(slotRole, pool){
+
+    let player = pool.find(p => {
+
+      if(p._used) return false;
+
+      const playerRole = mapPositionToRole(
+        p.position_type || p.position
+      );
+
+      return playerRole === slotRole;
+    });
+
+    if(player){
+      player._used = true;
+      return player;
+    }
+
+    player = pool.find(p => !p._used);
+
+    if(player){
+      player._used = true;
+      return player;
+    }
+
+    return null;
+  }
+
+  // =========================
+  // 🧠 STARTERS
+  // =========================
+  const poolCopy = [...allPlayers];
+  const starters = [];
+
+  layout.forEach(slot => {
+    const role = normalizeSlotRole(slot.role);
+    const player = pickPlayerForSlot(role, poolCopy);
+    if(player) starters.push(player);
+  });
+
+  // =========================
+  // 🎨 FIELD
+  // =========================
+  let finalHTML = `
+    <h3>Startelf (${formation})</h3>
+    <div class="team-field">
+  `;
+
+  const startersPool = starters.map(p => ({ ...p }));
+
+  layout.forEach(slot => {
+
+    const slotRole = normalizeSlotRole(slot.role);
+
+    let player = startersPool.find(p => {
+
+      if(p._rendered) return false;
+
+      const role = mapPositionToRole(
+        p.position_type || p.position
+      );
+
+      return role === slotRole;
+    });
+
+    if(!player){
+      player = startersPool.find(p => !p._rendered);
+    }
+
+    if(player) player._rendered = true;
+
+    finalHTML += `
+      <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
+        ${player ? renderPlayerDot(player) : ""}
+      </div>
+    `;
+  });
+
+  finalHTML += `</div>`;
+
+  // =========================
+  // 🪑 BENCH (ROBUST FIX)
+  // =========================
+  const starterIds = new Set(starters.map(p => String(p.id)));
+
+  const bench = allPlayers.filter(p =>
+    !starterIds.has(String(p.id))
+  );
+
+  console.log("🪑 BENCH DEBUG:", bench.length);
+
+  finalHTML += `
+    <h3>Bank</h3>
+    <div class="bench-row">
+  `;
+
+  bench.forEach(p => {
+
+    const stats = getPlayerStats(p);
+
+    finalHTML += `
+      <div class="bench-card" data-id="${p.id}">
+        <div class="bench-top">
+          <div class="bench-name">${p.name}</div>
+          <div class="bench-ovr">${p.overall}</div>
+        </div>
+
+        <div class="bench-bars">
+          <div class="mini-bar">
+            <div class="mini-fill" style="width:${stats.attack}%"></div>
+          </div>
+
+          <div class="mini-bar">
+            <div class="mini-fill defense" style="width:${stats.defense}%"></div>
+          </div>
+
+          <div class="mini-bar">
+            <div class="mini-fill control" style="width:${stats.control}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  finalHTML += `</div>`;
+
+  // =========================
+  // 🧱 DOM WRITE
+  // =========================
+  container.innerHTML = finalHTML;
+
+  // =========================
+  // 🖱 CLICK
+  // =========================
+  container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
+
+    el.onclick = (e) => {
+      e.stopPropagation();
+
+      const id = el.dataset.id;
+      if(!id) return;
+
+      if(!selectedPlayerId){
+        selectedPlayerId = id;
+        highlightSelection(id);
+        return;
+      }
+
+      if(selectedPlayerId === id){
+        selectedPlayerId = null;
+        clearSelection();
+        return;
+      }
+
+      swapPlayers(selectedPlayerId, id);
+
+      selectedPlayerId = null;
+      clearSelection();
+
+      renderTeam();
+    };
+  });
+
+  function renderPlayerDot(player){
+    return `
+      <div class="player-dot" data-id="${player.id}">
+        <img src="./gfx/dotred.webp" />
+      </div>
+    `;
+  }
+
+  function highlightSelection(id){
+    container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
+      el.classList.toggle("selected", el.dataset.id === id);
+    });
+  }
+
+  function clearSelection(){
+    container.querySelectorAll(".selected").forEach(el => {
+      el.classList.remove("selected");
+    });
+  }
+
 // =========================
 // 📊 STATS
 // =========================
