@@ -27,46 +27,15 @@
 
 .team-field {
   position: relative;
-  aspect-ratio: 16/9;
+
+  width: 100%;
+  height: 260px; /* 🔥 FIXED HEIGHT statt aspect-ratio */
 
   border-radius: 18px;
-  overflow: hidden;
-
-  background:
-    url("../gfx/field.svg") center/cover no-repeat;
-
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.7),
-    inset 0 0 40px rgba(255,255,255,0.05);
+  overflow: visible;
 }
 
-/* Glow Overlay */
-.team-field::before {
-  content: "";
-  position: absolute;
-  inset: 0;
 
-  background:
-    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.2), transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(168,85,247,0.2), transparent 50%);
-
-  pointer-events: none;
-}
-
-/* CENTER CIRCLE */
-.team-field::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 30%;
-  aspect-ratio: 1;
-
-  transform: translate(-50%, -50%);
-
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 50%;
-}
 
 /* =========================
 👤 PLAYER DOT FIXED
