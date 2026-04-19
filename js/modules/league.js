@@ -318,14 +318,27 @@ initLeague(game.league.current);
 
   populateTeamSelect();
 
-  const round = game.league.current?.schedule?.[0];
+  // 👉 sicherstellen, dass ein Team gesetzt ist
+if(!game.team?.selectedId){
+  const firstTeam = game.league.current.teams[0];
 
-  if(round && round.length > 0){
-    const ok = initMatch(round);
-    if(ok){
-      game.match.live.running = false;
-    }
+  game.team = game.team || {};
+  game.team.selected = firstTeam.name;
+  game.team.selectedId = normalizeId(firstTeam.id);
+}
+
+// 👉 jetzt Match starten
+const round = game.league.current?.schedule?.[0];
+
+if(round && round.length > 0){
+  const ok = initMatch(round);
+
+  console.log("🧪 initMatch default:", ok);
+
+  if(ok){
+    game.match.live.running = false;
   }
+}
 }
 
 // =========================
