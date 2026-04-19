@@ -1061,3 +1061,8 @@ function renderTacticStats(){
 
   });
 }
+export {
+  updateUI,
+  renderSchedule,
+  renderCurrentMatch
+};
