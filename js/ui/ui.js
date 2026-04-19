@@ -696,13 +696,6 @@ function renderTeam(){
   const formation = game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
-  // 👉 copy pools (wichtig!)
-  const poolCopy = {
-    GK: [...byType.GK],
-    DEF: [...byType.DEF],
-    MID: [...byType.MID],
-    ST: [...byType.ST]
-  };
 
  // =========================
 // 🧠 SLOT → ROLE MAPPING
@@ -719,20 +712,6 @@ function normalizeSlotRole(roleRaw){
   return "MID";
 }
 
-  // =========================
-// 🧠 ROLE NORMALIZER
-// =========================
-function normalizeSlotRole(roleRaw){
-
-  const role = (roleRaw || "").toUpperCase();
-
-  if(["CB","LB","RB","DEF","WB","LWB","RWB"].includes(role)) return "DEF";
-  if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
-  if(["ST","CF","FW","ATT","LW","RW"].includes(role)) return "ST";
-  if(role.includes("GK")) return "GK";
-
-  return "MID";
-}
 
 // =========================
 // 🧠 SLOT → PLAYER MATCH
@@ -767,6 +746,7 @@ function pickPlayerForSlot(slotRole, pool){
   return null;
 }
 
+
 // =========================
 // 🧠 STARTING XI
 // =========================
@@ -774,9 +754,12 @@ function buildStartingXI({ layout, players, formation }){
 
   const starters = [];
 
-  // 👉 saubere Kopie (wichtig für _used)
+  // 👉 saubere Kopie (für _used Flag)
   const poolCopy = players.map(p => ({ ...p }));
 
+  // =========================
+  // 🎯 STARTER PICK
+  // =========================
   layout.forEach(slot => {
     const role = normalizeSlotRole(slot.role);
     const player = pickPlayerForSlot(role, poolCopy);
@@ -792,13 +775,15 @@ function buildStartingXI({ layout, players, formation }){
     <div class="team-field">
   `;
 
-  const startersPool = [...starters];
+  // 👉 separate Kopie fürs Rendering
+  const startersPool = starters.map(p => ({ ...p }));
 
   layout.forEach(slot => {
 
     const slotRole = normalizeSlotRole(slot.role);
 
-    const player = startersPool.find(p => {
+    let player = startersPool.find(p => {
+
       if(p._rendered) return false;
 
       const role = mapPositionToRole(
@@ -806,30 +791,98 @@ function buildStartingXI({ layout, players, formation }){
       );
 
       return role === slotRole;
-    }) || startersPool.find(p => !p._rendered);
+    });
+
+    // 🔁 fallback
+    if(!player){
+      player = startersPool.find(p => !p._rendered);
+    }
 
     if(player) player._rendered = true;
 
     html += `
-      <div class="player ${slotRole.toLowerCase()}">
-        ${player ? player.name : "—"}
+      <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
+        ${player ? renderPlayerDot(player) : "—"}
       </div>
     `;
   });
 
   html += `</div>`;
 
-  return html;
+  // 👉 cleanup (wichtig falls reuse)
+  startersPool.forEach(p => delete p._rendered);
+
+  // 👉 WICHTIG: wir geben BEIDES zurück
+  return {
+    html,
+    starters
+  };
 }
-
-
+  
+const { html, starters } = buildStartingXI({
+  layout,
+  players,
+  formation
+});
 
 // =========================
-// 🧱 IN DOM
+// 🪑 BENCH (CLEAN)
 // =========================
-container.innerHTML = html;
+const starterIds = new Set(starters.map(p => String(p.id)));
 
+const bench = players.filter(p =>
+  !starterIds.has(String(p.id))
+);
 
+// optional sort (best first)
+bench.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+  
+let finalHTML = html;
+
+finalHTML += `
+  <h3>Bank</h3>
+  <div class="bench-row">
+`;
+
+bench.forEach(p => {
+
+  const stats = getPlayerStats(p);
+
+  finalHTML += `
+    <div class="bench-card" data-id="${p.id}">
+
+      <div class="bench-top">
+        <div class="bench-name">${p.name}</div>
+        <div class="bench-ovr">${p.overall}</div>
+      </div>
+
+      <div class="bench-bars">
+
+        <div class="mini-bar">
+          <div class="mini-fill" style="width:${stats.attack}%"></div>
+        </div>
+
+        <div class="mini-bar">
+          <div class="mini-fill defense" style="width:${stats.defense}%"></div>
+        </div>
+
+        <div class="mini-bar">
+          <div class="mini-fill control" style="width:${stats.control}%"></div>
+        </div>
+
+      </div>
+
+    </div>
+  `;
+});
+
+finalHTML += `</div>`;
+
+// =========================
+// 🧱 IN DOM (NUR EINMAL!)
+// =========================
+container.innerHTML = finalHTML;
+  
 // =========================
 // 🖱 CLICK SYSTEM
 // =========================
