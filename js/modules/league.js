@@ -276,7 +276,8 @@ if(!round){
   console.error("❌ Kein Round nach Teamwahl");
   return;
 }
-
+console.log("🧪 selected team:", game.team?.selectedId);
+console.log("🧪 round:", round);
 const ok = initMatch(round);
 
 if(!ok){
