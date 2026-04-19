@@ -20,17 +20,16 @@ let leagueIndexMap = [];
 // 🔥 FIX: verhindert doppelte Initialisierung
 let leagueSelectInitialized = false;
 
-async function ensureTeamPlayers(team){
-  
+function ensureTeamPlayers(team){
+
   if(team.players && team.players.length > 0){
     return team.players;
   }
 
   console.log(`⚽ Generiere Kader für ${team.name}`);
 
-  const players = await generateTeam(team);
-  team.players = players;
-  
+  team.players = generateTeam(team);
+
   console.log(`✅ ${team.players.length} Spieler für ${team.name}`);
 
   return team.players;
@@ -51,8 +50,8 @@ function getCurrentRound(){
 // =========================
 // 🏗️ INIT LEAGUE
 // =========================
-async function initLeague(league){
-  
+function initLeague(league){
+
   if(!league){
     console.error("❌ Keine Liga übergeben");
     return;
@@ -75,17 +74,17 @@ async function initLeague(league){
   // 📊 TABLE INIT
   // =========================
   league.table = league.teams.map(team => ({
-    id: normalizeId(team.id),
-    name: team.name,
-    played: 0,
-    wins: 0,
-    draws: 0,
-    losses: 0,
-    goalsFor: 0,
-    goalsAgainst: 0,
-    points: 0,
-    strength: team.strength || 50
-  }));
+  id: normalizeId(team.id),
+  name: team.name,
+  played: 0,
+  wins: 0,
+  draws: 0,
+  losses: 0,
+  goalsFor: 0,
+  goalsAgainst: 0,
+  points: 0,
+  strength: team.strength || 50
+}));
 
   console.log("📊 Tabelle erstellt");
 
@@ -116,14 +115,14 @@ async function initLeague(league){
   league.playerRound = 0;
 
   // =========================
-  // 👥 PLAYERS INIT (FIXED ASYNC)
+  // 👥 PLAYERS INIT (CRITICAL FIX)
   // =========================
-  for (const team of league.teams) {
+  league.teams.forEach(team => {
 
     if(!team.players || team.players.length === 0){
 
       try {
-        const players = await ensureTeamPlayers(team);
+        const players = ensureTeamPlayers(team);
 
         if(players && players.length){
           team.players = players;
@@ -135,7 +134,8 @@ async function initLeague(league){
         console.error("❌ Player generation crashed:", team.name, e);
       }
     }
-  }
+
+  });
 
   console.log("👥 Spieler generiert für Liga:", league.name);
 
@@ -197,8 +197,7 @@ function nextMatch(){
 // =========================
 // 🏆 INIT LEAGUE SELECT
 // =========================
-async function initLeagueSelect(leaguesInput){
-
+function initLeagueSelect(leaguesInput){
   if(leagueSelectInitialized){
     console.log("⚠️ initLeagueSelect already initialized → skip");
     return;
@@ -220,6 +219,7 @@ async function initLeagueSelect(leaguesInput){
 
   const selects = [splashSelect, menuSelect].filter(Boolean);
 
+  // 🔥 FIX: NIMM PARAMETER!
   const source = leaguesInput || game.league?.available || [];
 
   if (!source.length) {
@@ -248,11 +248,14 @@ async function initLeagueSelect(leaguesInput){
     leagues.forEach((league, i) => {
       const option = document.createElement("option");
       option.value = i;
+
+      // 🔥 BONUS: besserer Name
       option.textContent = `${league.name} (${league.teams.length})`;
+
       select.appendChild(option);
     });
 
-    select.addEventListener("change", async (e) => {
+    select.addEventListener("change", (e) => {
 
       const index = Number(e.target.value);
       const league = leagues[index];
@@ -261,39 +264,58 @@ async function initLeagueSelect(leaguesInput){
 
       game.league.current = league;
 
-      if(!league.schedule || !league.schedule.length){
-        generateSchedule(league);
-      }
+     if(!league.schedule || !league.schedule.length){
+  generateSchedule(league);
+}
 
-      await initLeague(league);
+      initLeague(league);
 
       const round = league.schedule?.[league.currentRound || 0];
 
-      if(!round) return;
+if(!round){
+  console.error("❌ Kein Round nach Teamwahl");
+  return true;
+}
 
-      const ok = initMatch(round);
+const ok = initMatch(round);
 
-      if(ok){
-        game.match.live.running = false;
-      }
+if(!ok){
+  console.error("❌ initMatch fehlgeschlagen nach Teamwahl");
+  return true;
+}
+
+// 🔥 ABSICHERUNG
+if(!game.match?.live){
+  console.error("❌ live fehlt nach initMatch");
+  return true;
+}
+
+game.match.live.running = false;
+game.match.live.phase = game.match.live.phase || "first_half";
+
+console.log("✅ Match ready nach Teamwahl:", game.match);
 
       selects.forEach(s => {
         if(s !== select) s.value = index;
       });
 
-      await populateTeamSelect();
+      populateTeamSelect();
     });
   });
 
+  // 🔥 DEFAULT SELECT
   game.league = game.league || {};
   game.league.current = leagues[0];
 
-  if(!game.league.current.schedule || !game.league.current.schedule.length){
-    generateSchedule(game.league.current);
-  }
+// 🔥 zuerst Schedule
+if(!game.league.current.schedule || !game.league.current.schedule.length){
+  generateSchedule(game.league.current);
+}
 
-  await initLeague(game.league.current);
-  await populateTeamSelect();
+// dann init
+initLeague(game.league.current);
+
+  populateTeamSelect();
 
   const round = game.league.current?.schedule?.[0];
 
@@ -308,7 +330,7 @@ async function initLeagueSelect(leaguesInput){
 // =========================
 // 🔥 SET LEAGUE (PLZ)
 // =========================
-async function setLeagueById(leagueId){
+function setLeagueById(leagueId){
 
   const league = leagueIndexMap.find(
     l => normalizeId(l.id) === normalizeId(leagueId)
@@ -328,26 +350,36 @@ async function setLeagueById(leagueId){
 
   game.league.current = league;
 
-  if(!game.league.current.schedule || !game.league.current.schedule.length){
-    generateSchedule(game.league.current);
+if(!game.league.current.schedule || !game.league.current.schedule.length){
+  generateSchedule(game.league.current);
+}
+
+// dann init
+initLeague(league);
+
+  selects.forEach(select => {
+    select.value = index;
+  });
+
+  populateTeamSelect();
+
+  // 🔥 FIX: Match nach TeamSelect kommt später sauber
+  const round = league.schedule?.[0];
+  if(round && round.length > 0){
+    const ok = initMatch(round);
+    if(ok){
+      game.match.live.running = false;
+    }
   }
 
-  await initLeague(league);
-await populateTeamSelect();
+  console.log("✅ Liga extern gesetzt:", league.name);
+}
 
-const round = league.schedule?.[0];
-if(round && round.length){
-  const ok = initMatch(round);
-  if(ok){
-    game.match.live.running = false;
-  }
-}
-}
 // =========================
 // 👕 TEAM SELECT (ID BASED)
 // =========================
-async function populateTeamSelect() {
-  
+function populateTeamSelect() {
+
   const splashSelect = document.getElementById("teamSelect");
   const menuSelect   = document.getElementById("teamSelectMenu");
 
@@ -371,26 +403,47 @@ async function populateTeamSelect() {
       select.appendChild(option);
     });
 
-    select.onchange = async (e) => {
+ select.onchange = (e) => {
 
-      const teamId = normalizeId(e.target.value);
-      if(!teamId) return;
+if(!game.league?.current){
+  console.warn("⏳ Liga noch nicht ready → retry TeamSelect");
 
-      const success = await selectTeamById(teamId);
+  setTimeout(() => {
+    setLeagueById(id);
+  }, 100);
 
-      if(success){
-        selects.forEach(s => {
-          if(s !== select) s.value = teamId;
-        });
-      }
-    };
-  });
+  return;
+}
+
+  const teamId = normalizeId(e.target.value);
+
+  // 🔥 zusätzlicher Guard (optional aber gut)
+  if(!teamId){
+    console.warn("⚠️ Ungültige Team-ID");
+    return;
+  }
+
+  const success = selectTeamById(teamId);
+
+  // 🔥 nur syncen wenn wirklich erfolgreich
+  if(success){
+    selects.forEach(s => {
+      if(s !== select) s.value = teamId;
+    });
+  }
+};
+});
 
   const firstTeam = league.teams[0];
 
-  game.team = game.team || {};
-  game.team.selected = firstTeam.name;
-  game.team.selectedId = normalizeId(firstTeam.id);
+game.team = game.team || {};
+game.team.selected = firstTeam.name;
+game.team.selectedId = normalizeId(firstTeam.id);
+
+// 🔥 FIX: alle Teams vorbereiten (nicht nur eins)
+league.teams.forEach(t => {
+  ensureTeamPlayers(t);
+});
 
   console.log("✅ Teams geladen:", league.teams.length);
 }
@@ -398,8 +451,8 @@ async function populateTeamSelect() {
 // =========================
 // 👤 TEAM WÄHLEN (ID)
 // =========================
-async function selectTeamById(teamId){
-  
+function selectTeamById(teamId){
+
   const league = game.league?.current;
 
   if(!league || !Array.isArray(league.teams)){
@@ -419,8 +472,10 @@ async function selectTeamById(teamId){
   game.team.selected = team.name;
   game.team.selectedId = normalizeId(team.id);
 
-  const players = await ensureTeamPlayers(team);
+  const players = ensureTeamPlayers(team);
   game.team.players = players;
+
+  console.log("✅ Team gewählt (ID):", team.id);
 
   const round = league.schedule?.[0];
   if(round && round.length > 0){
