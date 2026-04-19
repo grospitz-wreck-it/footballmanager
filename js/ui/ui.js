@@ -720,25 +720,6 @@ function normalizeSlotRole(roleRaw){
 }
 
   // =========================
-  // 🧠 STARTING XI
-  // =========================
-  const starters = [];
-
-  layout.forEach(slot => {
-
-    const role = normalizeSlotRole(slot.role);
-
-    const player = pickPlayer(role, poolCopy);
-
-    if(player) starters.push(player);
-  });
-
-let html = `
-  <h3>Startelf (${formation})</h3>
-  <div class="team-field">
-`;
-
-// =========================
 // 🧠 ROLE NORMALIZER
 // =========================
 function normalizeSlotRole(roleRaw){
@@ -787,19 +768,59 @@ function pickPlayerForSlot(slotRole, pool){
 }
 
 // =========================
-// ⚽ RENDER
+// 🧠 STARTING XI
 // =========================
-let html = `
-  <h3>Startelf (${formation})</h3>
-  <div class="team-field">
-`;
+function buildStartingXI({ layout, players, formation }){
 
-// 👉 Kopie damit wir _used sauber nutzen
-const startersPool = [...starters];
+  const starters = [];
 
-layout.forEach(slot => {
+  // 👉 saubere Kopie (wichtig für _used)
+  const poolCopy = players.map(p => ({ ...p }));
 
-  const slotRole = normalizeSlotRole(slot.role);
+  layout.forEach(slot => {
+    const role = normalizeSlotRole(slot.role);
+    const player = pickPlayerForSlot(role, poolCopy);
+
+    if(player) starters.push(player);
+  });
+
+  // =========================
+  // ⚽ RENDER
+  // =========================
+  let html = `
+    <h3>Startelf (${formation})</h3>
+    <div class="team-field">
+  `;
+
+  const startersPool = [...starters];
+
+  layout.forEach(slot => {
+
+    const slotRole = normalizeSlotRole(slot.role);
+
+    const player = startersPool.find(p => {
+      if(p._rendered) return false;
+
+      const role = mapPositionToRole(
+        p.position_type || p.position
+      );
+
+      return role === slotRole;
+    }) || startersPool.find(p => !p._rendered);
+
+    if(player) player._rendered = true;
+
+    html += `
+      <div class="player ${slotRole.toLowerCase()}">
+        ${player ? player.name : "—"}
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  return html;
+}
 
   // =========================
   // 🧠 MATCH PLAYER ZUM SLOT
