@@ -575,11 +575,11 @@ function renderTeam(){
       ? window.playerPool
       : (game.players || []);
 
-  const players = pool.filter(p =>
+  const allPlayers = pool.filter(p =>
     String(p.team_id) === String(teamId)
   );
 
-  if(!players.length){
+  if(!allPlayers.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
@@ -604,9 +604,6 @@ function renderTeam(){
     return "MID";
   }
 
-  // =========================
-  // 🧠 PICK PLAYER
-  // =========================
   function pickPlayerForSlot(slotRole, pool){
 
     let player = pool.find(p => {
@@ -636,9 +633,9 @@ function renderTeam(){
   }
 
   // =========================
-  // 🧠 STARTING XI
+  // 🧠 STARTERS
   // =========================
-  const poolCopy = [...players];
+  const poolCopy = [...allPlayers];
   const starters = [];
 
   layout.forEach(slot => {
@@ -648,7 +645,7 @@ function renderTeam(){
   });
 
   // =========================
-  // 🎨 FIELD RENDER
+  // 🎨 FIELD
   // =========================
   let finalHTML = `
     <h3>Startelf (${formation})</h3>
@@ -678,7 +675,6 @@ function renderTeam(){
 
     if(player) player._rendered = true;
 
-    // 🔥 FIX: KEIN doppelte %
     finalHTML += `
       <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
         ${player ? renderPlayerDot(player) : ""}
@@ -689,13 +685,15 @@ function renderTeam(){
   finalHTML += `</div>`;
 
   // =========================
-  // 🪑 BENCH (FIX!)
+  // 🪑 BENCH (ROBUST FIX)
   // =========================
   const starterIds = new Set(starters.map(p => String(p.id)));
 
-  const bench = players.filter(p =>
+  const bench = allPlayers.filter(p =>
     !starterIds.has(String(p.id))
   );
+
+  console.log("🪑 BENCH DEBUG:", bench.length);
 
   finalHTML += `
     <h3>Bank</h3>
@@ -733,12 +731,12 @@ function renderTeam(){
   finalHTML += `</div>`;
 
   // =========================
-  // 🧱 DOM WRITE (ONCE)
+  // 🧱 DOM WRITE
   // =========================
   container.innerHTML = finalHTML;
 
   // =========================
-  // 🖱 CLICK SYSTEM
+  // 🖱 CLICK
   // =========================
   container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
 
@@ -769,22 +767,26 @@ function renderTeam(){
     };
   });
 
-  // =========================
-  // 🔵 PLAYER DOT
-  // =========================
   function renderPlayerDot(player){
-
-    const initials =
-      (player.first_name?.[0] || "") +
-      (player.last_name?.[0] || "");
-
     return `
       <div class="player-dot" data-id="${player.id}">
         <img src="./gfx/dotred.webp" />
-        <span class="label">${initials}</span>
       </div>
     `;
   }
+
+  function highlightSelection(id){
+    container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
+      el.classList.toggle("selected", el.dataset.id === id);
+    });
+  }
+
+  function clearSelection(){
+    container.querySelectorAll(".selected").forEach(el => {
+      el.classList.remove("selected");
+    });
+  }
+}
 
   function swapPlayers(id1, id2){
 
