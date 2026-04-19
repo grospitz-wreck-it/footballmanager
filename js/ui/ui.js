@@ -755,7 +755,7 @@ function buildStartingXI({ layout, players, formation }){
   const starters = [];
 
   // 👉 saubere Kopie (für _used Flag)
-const poolCopy = [...players];
+  const poolCopy = [...players];
   
   // =========================
   // 🎯 STARTER PICK
@@ -775,30 +775,10 @@ const poolCopy = [...players];
     <div class="team-field">
   `;
 
-  // 👉 separate Kopie fürs Rendering
-  const startersPool = starters.map(p => ({ ...p }));
+  // 👉 FIX: direkt aus starters rendern (kein doppelte Logik mehr)
+  layout.forEach((slot, i) => {
 
-  layout.forEach(slot => {
-
-  const slotRole = normalizeSlotRole(slot.role);
-
-  let player = startersPool.find(p => {
-
-    if(p._rendered) return false;
-
-    const role = mapPositionToRole(
-      p.position_type || p.position
-    );
-
-    return role === slotRole;
-  });
-
-  // 🔁 fallback
-  if(!player){
-    player = startersPool.find(p => !p._rendered);
-  }
-
-  if(player) player._rendered = true;
+    const player = starters[i] || null;
 
     html += `
   <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
@@ -809,9 +789,8 @@ const poolCopy = [...players];
 
   html += `</div>`;
 
-  // 👉 cleanup (wichtig falls reuse)
-    poolCopy.forEach(p => delete p._used);
-    startersPool.forEach(p => delete p._rendered);
+  // 👉 cleanup (nur noch _used nötig)
+  poolCopy.forEach(p => delete p._used);
 
   // 👉 WICHTIG: wir geben BEIDES zurück
   return {
