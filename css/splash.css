@@ -1,5 +1,5 @@
 /* =========================
-🌌 ULTRA SPLASH (FIXED)
+🌌 ULTRA SPLASH (FINAL FIXED)
 ========================= */
 
 #splash {
@@ -15,14 +15,11 @@
 
   padding: 20px;
 
-  /* 🔥 WICHTIG */
-  position: fixed;
-  overflow: visible; /* 🔥 FIX (war kaputt) */
+  overflow: visible; /* 🔥 FIX */
 
   color: white;
   text-align: center;
 
-  /* 🔥 DEEP BACKGROUND */
   background:
     radial-gradient(circle at 20% 20%, rgba(34,197,94,0.25), transparent 40%),
     radial-gradient(circle at 80% 30%, rgba(59,130,246,0.25), transparent 40%),
@@ -83,11 +80,11 @@
 
 
 /* =========================
-📦 CONTENT LAYER (NEU)
+📦 CONTENT LAYER (CLICK SAFE)
 ========================= */
 #splash > * {
   position: relative;
-  z-index: 2; /* 🔥 verhindert Overlay-Probleme */
+  z-index: 2;
 }
 
 
@@ -120,7 +117,7 @@
 
 
 /* =========================
-📦 INPUT BLOCK
+📦 INPUTS
 ========================= */
 #splash input,
 #splash select {
@@ -173,7 +170,6 @@
 
   font-size: 16px;
   font-weight: 800;
-  letter-spacing: 0.5px;
 
   color: #022c22;
 
@@ -188,7 +184,7 @@
   overflow: hidden;
 
   transition: all 0.2s ease;
-  z-index: 3; /* 🔥 extra safety */
+  z-index: 3;
 }
 
 #splash button::before {
@@ -205,6 +201,7 @@
 
   transform: translateX(-120%);
   animation: shine 3s infinite;
+
   pointer-events: none;
 }
 
@@ -224,7 +221,7 @@
 
 
 /* =========================
-🔍 DROPDOWN (FIXED)
+🔍 DROPDOWN (SAFE)
 ========================= */
 #leagueResults {
   position: absolute;
@@ -233,7 +230,6 @@
   right: 0;
 
   background: #020617;
-
   border-radius: 12px;
 
   overflow: hidden;
@@ -242,16 +238,14 @@
 
   z-index: 5;
 
-  display: none; /* 🔥 WICHTIG → blockiert sonst Klicks */
+  display: none; /* 🔥 verhindert Klick-Block */
 }
 
 .league-result {
   padding: 10px;
   border-bottom: 1px solid #1e293b;
-  transition: all 0.15s ease;
 }
 
 .league-result:hover {
   background: rgba(255,255,255,0.05);
-  transform: translateX(4px);
 }
