@@ -13,7 +13,7 @@ import "./core/eventStore.js";
 
 import { supabase } from "./client.js";
 
-import { initLeagueSelect, setLeagueById } from "./modules/league.js";
+import { initLeagueSelect, setLeagueById, selectTeamById } from "./modules/league.js";
 import { loadPlayers } from "./modules/loader.js";
 import { startAdEngine } from "./modules/ads.js";
 import {
@@ -270,17 +270,9 @@ async function init(){
 
   console.log("🎯 Auto-select Team (delayed)");
 
-  setTimeout(() => {
-
-    if(typeof window.selectTeamById === "function"){
-      window.selectTeamById(String(firstTeam.id));
-    } else {
-      game.team = {
-        selectedId: String(firstTeam.id)
-      };
-    }
-
-  }, 50);
+ setTimeout(() => {
+  selectTeamById(String(firstTeam.id));
+}, 50);
 
 } else {
   console.warn("⚠️ Kein Team in Liga gefunden");
