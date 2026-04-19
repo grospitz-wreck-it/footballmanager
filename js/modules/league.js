@@ -419,19 +419,22 @@ function populateTeamSelect() {
 
  select.onchange = (e) => {
 
-if(!game.league?.current){
-  console.warn("⏳ Liga noch nicht ready → retry TeamSelect");
+  if(!game.league?.current){
+    console.warn("⏳ Liga noch nicht ready → retry TeamSelect");
 
-  setTimeout(() => {
-  setLeagueById(game.league?.current?.id);
-}, 100);
+    const retryTeamId = normalizeId(e.target.value); // 🔥 FIX
 
-  return;
-}
+    setTimeout(() => {
+      if(retryTeamId){
+        selectTeamById(retryTeamId); // 🔥 NICHT setLeagueById!
+      }
+    }, 100);
+
+    return;
+  }
 
   const teamId = normalizeId(e.target.value);
 
-  // 🔥 zusätzlicher Guard (optional aber gut)
   if(!teamId){
     console.warn("⚠️ Ungültige Team-ID");
     return;
@@ -439,31 +442,12 @@ if(!game.league?.current){
 
   const success = selectTeamById(teamId);
 
-  // 🔥 nur syncen wenn wirklich erfolgreich
   if(success){
     selects.forEach(s => {
       if(s !== select) s.value = teamId;
     });
   }
 };
-});
-
-// 👉 Team nur setzen, wenn noch nichts gewählt wurde
-if(!game.team?.selectedId){
-
-  const firstTeam = league.teams[0];
-
-  game.team = game.team || {};
-  game.team.selected = firstTeam.name;
-  game.team.selectedId = normalizeId(firstTeam.id);
-}
-
-// 👉 Spieler nur generieren, wenn wirklich nötig
-league.teams.forEach(t => {
-  if(!t.players || !t.players.length){
-    ensureTeamPlayers(t);
-  }
-});
   console.log("✅ Teams geladen:", league.teams.length);
 }
 
