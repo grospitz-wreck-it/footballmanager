@@ -860,6 +860,7 @@ function updateMainButtonText(){
 }
 
 mainBtn?.addEventListener("click", () => {
+console.log("🟢 BUTTON CLICKED"); // 👈 EINBAUEN
 
   let live = game.match?.live;
   const league = game.league?.current;
@@ -880,7 +881,7 @@ mainBtn?.addEventListener("click", () => {
   // 🆕 INIT MATCH
   // =========================
 if(!live){
-
+console.log("🧠 INIT MATCH BLOCK");
   const round = league.schedule?.[league.currentRound || 0];
 
   if(!round){
