@@ -450,7 +450,7 @@ function populateTeamSelect() {
 };
   console.log("✅ Teams geladen:", league.teams.length);
 }
-
+}
 // =========================
 // 👤 TEAM WÄHLEN (ID)
 // =========================
