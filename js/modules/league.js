@@ -409,8 +409,8 @@ if(!game.league?.current){
   console.warn("⏳ Liga noch nicht ready → retry TeamSelect");
 
   setTimeout(() => {
-    setLeagueById(id);
-  }, 100);
+  setLeagueById(game.league?.current?.id);
+}, 100);
 
   return;
 }
