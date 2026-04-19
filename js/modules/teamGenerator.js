@@ -65,17 +65,17 @@ async function fetchPlayers(pos, n){
   const filter = buildPositionFilter(pos);
 
   const { data, error } = await supabase
-    .from("players")
-    .select("id, position, position_type")
-   .or(`${filter}`).is("team_id", null)
-    .limit(n * 4); // 🔥 Puffer
+  .from("players")
+  .update({ team_id: teamId })
+  .in("id", ids)
+  .is("team_id", null)
+  .select("id");
 
-  if(error){
-    console.error("❌ Fetch Fehler:", error.message);
-    return [];
-  }
+if(error){
+  console.error("❌ Save Fehler:", error.message);
+}
 
-  console.log(`📊 Fetch ${pos}:`, data.length);
+console.log("💾 gespeichert:", data?.length || 0, "/", ids.length);
 
   return sample(data, n);
 }
