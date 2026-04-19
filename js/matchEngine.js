@@ -208,6 +208,15 @@ function autoFillLineup(teamId){
   const pool = getPlayersOfTeam(teamId);
   if(!pool.length) return;
 
+  // 🔥 FIX: lineup sicherstellen (CRITICAL)
+  if(!game.team.lineup){
+    game.team.lineup = { slots: {} };
+  }
+
+  if(!game.team.lineup.slots){
+    game.team.lineup.slots = {};
+  }
+
   const lineup = game.team.lineup;
 
   const byPos = {
@@ -218,7 +227,7 @@ function autoFillLineup(teamId){
   };
 
   pool.forEach(p => {
-    const pos = (p.position_type || "").toUpperCase();
+    const pos = (p.position_type || p.position || "").toUpperCase();
 
     if(pos.includes("GK")) byPos.GK.push(p);
     else if(pos.includes("DEF")) byPos.DEF.push(p);
@@ -230,9 +239,30 @@ function autoFillLineup(teamId){
     return arr.shift()?.id || null;
   }
 
+  // 🔥 FIX: wenn slots leer → default slots erzeugen
+  if(Object.keys(lineup.slots).length === 0){
+
+    lineup.slots = {
+      GK: null,
+
+      DEF1: null,
+      DEF2: null,
+      DEF3: null,
+      DEF4: null,
+
+      MID1: null,
+      MID2: null,
+      MID3: null,
+      MID4: null,
+
+      ST1: null,
+      ST2: null
+    };
+  }
+
   Object.keys(lineup.slots).forEach(slot => {
 
-    if(lineup.slots[slot]) return; // schon gesetzt
+    if(lineup.slots[slot]) return;
 
     if(slot === "GK") lineup.slots[slot] = pick(byPos.GK);
 
