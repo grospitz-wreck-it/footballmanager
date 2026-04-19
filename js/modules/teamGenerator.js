@@ -67,7 +67,7 @@ async function fetchPlayers(pos, n){
   const { data, error } = await supabase
     .from("players")
     .select("id, position, position_type")
-    .or(`${filter},team_id.is.null`)
+   .or(`${filter}`).is("team_id", null)
     .limit(n * 4); // 🔥 Puffer
 
   if(error){
