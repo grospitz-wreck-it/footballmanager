@@ -13,10 +13,12 @@ import { EVENTS } from "../core/events.constants.js";
 import { openPlayerModal } from "../modal.js";
 import { FORMATIONS } from "../core/football/formation.js";
 import { mapPositionToRole } from "../core/football/position.js";
+
 function mapRoleForUI(role){
   if(role === "ATT") return "ST";
   return role;
 }
+
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -52,21 +54,17 @@ function updateUI(){
 
   initUI();
 
-  // 🔥 OVERLAY PRIORITY SYSTEM (FIX)
   const matchOverlay = document.getElementById("matchOverlay");
 
   if(matchOverlay){
-    // 👉 wenn hidden → darf NIE blockieren
     if(matchOverlay.classList.contains("hidden")){
       matchOverlay.style.pointerEvents = "none";
     }
 
-    // 👉 wenn sichtbar → nur dann klickbar
     if(matchOverlay.classList.contains("show")){
       matchOverlay.style.pointerEvents = "auto";
     }
 
-    // 👉 safety: wenn match läuft und overlay NICHT aktiv → kill
     if(game.match?.live?.running && !matchOverlay.classList.contains("show")){
       matchOverlay.classList.add("hidden");
       matchOverlay.style.pointerEvents = "none";
@@ -77,61 +75,57 @@ function updateUI(){
 
   updateScore();
   updateProgress();
-
   updateTabs();
 
-// =========================
-// 📊 TABLE
-// =========================
-if(game.ui.tab === "table"){
+  // =========================
+  // 📊 TABLE
+  // =========================
+  if(game.ui.tab === "table"){
+    renderLiveTable();
 
-  renderLiveTable();
-
-  if(game.match?.live?.running){
-    ensureLiveTableLoop();
+    if(game.match?.live?.running){
+      ensureLiveTableLoop();
+    }
   }
-}
 
-// =========================
-// 📅 SCHEDULE
-// =========================
-if(game.ui.tab === "schedule"){
-  renderSchedule();
-}
+  // =========================
+  // 📅 SCHEDULE
+  // =========================
+  if(game.ui.tab === "schedule"){
+    renderSchedule();
+  }
 
-// =========================
-// 👥 TEAM
-// =========================
-if(game.ui.tab === "team"){
-  renderTeam();
-}
+  // =========================
+  // 👥 TEAM
+  // =========================
+  if(game.ui.tab === "team"){
+    renderTeam();
+  }
 
   // =========================
   // ⚙️ TACTICS
   // =========================
   updateTacticsUI();
 
- // 🔥 AUTO CLOSE OVERLAY BEI MATCH START
-if(game.match?.live?.running && game.ui.tacticsOpen){
-  game.ui.tacticsOpen = false;
-}
+  if(game.match?.live?.running && game.ui.tacticsOpen){
+    game.ui.tacticsOpen = false;
+  }
 
-// 🔥 FIX: NUR WENN OVERLAY OFFEN
-if(game.ui.tacticsOpen){
-  renderTacticStats();
-}
+  if(game.ui.tacticsOpen){
+    renderTacticStats();
+  }
 
-  // =========================
-  // 🪟 OVERLAY
-  // =========================
   const tacticsOverlay = document.getElementById("tacticsOverlay");
 
   if(tacticsOverlay){
     tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
   }
 }
- 
 
+
+// =========================
+// 🔧 INIT UI (FIXED SCOPE BUG)
+// =========================
 function initUI(){
 
   if(initialized) return;
@@ -139,19 +133,15 @@ function initUI(){
 
   console.log("🧱 UI init");
 
- const burger  = document.getElementById("burgerBtn");
-const wrapper = document.getElementById("sidebarWrapper");
-const overlay = document.getElementById("sidebarOverlay");
-const sidebar = document.getElementById("sidebar");
+  const burger  = document.getElementById("burgerBtn");
+  const wrapper = document.getElementById("sidebarWrapper");
+  const overlay = document.getElementById("sidebarOverlay");
+  const sidebar = document.getElementById("sidebar");
 
-if(!burger || !wrapper || !sidebar){
-  console.error("❌ Sidebar DOM fehlt", {
-    burger,
-    wrapper,
-    sidebar
-  });
-  return;
-}
+  if(!burger || !wrapper || !sidebar){
+    console.error("❌ Sidebar DOM fehlt", { burger, wrapper, sidebar });
+    return;
+  }
 
   // =========================
   // 🍔 SIDEBAR
@@ -186,15 +176,11 @@ if(!burger || !wrapper || !sidebar){
     formationSelect.addEventListener("change", (e) => {
       const value = e.target.value;
 
-      console.log("⚽ Formation changed:", value);
-
       game.team.formation = value;
 
-      renderTeam();     // 🔥 sofort neu zeichnen
-      renderTacticStats(); // optional sync
+      renderTeam();
+      renderTacticStats();
     });
-  } else {
-    console.warn("⚠️ formationSelect nicht gefunden");
   }
 
   // =========================
@@ -206,28 +192,22 @@ if(!burger || !wrapper || !sidebar){
     chanceBtn.addEventListener("click", () => {
       triggerChanceEvent();
     });
-  } else {
-    console.warn("⚠️ chanceBtn nicht gefunden");
   }
-}
 
   // =========================
-  // ⚙️ TACTICS BUTTON (OPEN)
+  // ⚙️ TACTICS BUTTON (FIX: WAR AUSSERHALB!)
   // =========================
   const tacticsBtn = document.getElementById("tacticsBtn");
 
   if(tacticsBtn){
     tacticsBtn.onclick = () => {
       game.ui.tacticsOpen = !game.ui.tacticsOpen;
-
-      console.log("⚙️ tactics toggled:", game.ui.tacticsOpen);
-
       updateUI();
     };
   }
 
   // =========================
-  // 🎮 TACTICS OVERLAY CLOSE
+  // 🎮 OVERLAY CLOSE
   // =========================
   const tacticsOverlay = document.getElementById("tacticsOverlay");
 
@@ -241,10 +221,8 @@ if(!burger || !wrapper || !sidebar){
   }
 
   // =========================
-  // 🎮 TACTICS SYSTEM (PRESETS)
+  // 🎮 TACTICS PRESETS
   // =========================
-
-  // safety init
   game.tactics = game.tactics || {
     preset: "balanced",
     tempo: "normal",
@@ -253,33 +231,16 @@ if(!burger || !wrapper || !sidebar){
   };
 
   const PRESETS = {
-    offensive: {
-      tempo: "fast",
-      pressing: "high",
-      line: "high"
-    },
-    balanced: {
-      tempo: "normal",
-      pressing: "medium",
-      line: "medium"
-    },
-    defensive: {
-      tempo: "slow",
-      pressing: "low",
-      line: "low"
-    }
+    offensive: { tempo: "fast", pressing: "high", line: "high" },
+    balanced: { tempo: "normal", pressing: "medium", line: "medium" },
+    defensive: { tempo: "slow", pressing: "low", line: "low" }
   };
 
-  // =========================
-  // 🎯 PRESET BUTTONS
-  // =========================
   document.querySelectorAll("[data-preset]").forEach(btn => {
 
     btn.onclick = () => {
 
       const preset = btn.dataset.preset;
-      if(!preset) return;
-
       const config = PRESETS[preset];
       if(!config) return;
 
@@ -288,9 +249,6 @@ if(!burger || !wrapper || !sidebar){
       game.tactics.pressing = config.pressing;
       game.tactics.line = config.line;
 
-      console.log("⚙️ preset applied:", preset, config);
-
-      // UI highlight
       document.querySelectorAll("[data-preset]").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
 
@@ -299,9 +257,7 @@ if(!burger || !wrapper || !sidebar){
     };
 
   });
-
-
-
+}
 // =========================
 // ⚽ SCORE
 // =========================
@@ -313,29 +269,26 @@ function updateScore(){
   const scoreEl = document.getElementById("topScore");
   const teamsEl = document.getElementById("topTeams");
   const minuteEl = document.getElementById("topMinute");
-  const tacticsEl = document.getElementById("topTactics"); // 🔥 NEU (optional)
+  const tacticsEl = document.getElementById("topTactics");
 
   // =========================
-  // 🏷 TEAM NAMES
+  // 🏷 TEAM NAMES (FIX: fallback robuster)
   // =========================
   if(teamsEl){
 
     const current = game.match?.current;
 
-    if(current){
+    const homeName =
+      game.match?.home?.name ||
+      current?.home?.name ||
+      "-";
 
-      const homeName =
-  game.match?.home?.name ||
-  current?.home?.name ||
-  "-";
+    const awayName =
+      game.match?.away?.name ||
+      current?.away?.name ||
+      "-";
 
-const awayName =
-  game.match?.away?.name ||
-  current?.away?.name ||
-  "-";
-
-      teamsEl.textContent = `${homeName} vs ${awayName}`;
-    }
+    teamsEl.textContent = `${homeName} vs ${awayName}`;
   }
 
   // =========================
@@ -350,7 +303,7 @@ const awayName =
   }
 
   // =========================
-  // ⚙️ TACTICS (NEU, SAFE)
+  // ⚙️ TACTICS
   // =========================
   if(tacticsEl && game.tactics){
 
@@ -362,6 +315,7 @@ const awayName =
         : preset.toUpperCase();
   }
 }
+
 
 // =========================
 // ⏱ PROGRESS
@@ -377,6 +331,7 @@ function updateProgress(){
   el.style.width = percent + "%";
 }
 
+
 // =========================
 // 📰 EVENTS
 // =========================
@@ -389,23 +344,19 @@ function updateEvents(){
   if(!events?.length) return;
 
   const newest = events[events.length - 1];
-
   if(!newest) return;
 
-  console.log("🧪 EVENT DEBUG:", newest);
+  // 🔥 FIX: id fallback (verhindert silent break)
+  const eventId = newest.id ?? `${newest.minute}-${events.length}`;
 
-  // 🔥 doppelte Render verhindern
-  if(newest.id === lastRenderedEventId) return;
-  lastRenderedEventId = newest.id;
+  if(eventId === lastRenderedEventId) return;
+  lastRenderedEventId = eventId;
 
   track("game_event", {
     minute: newest.minute,
     text: newest.text || null
   });
 
-  // =========================
-  // 🧠 TEXT
-  // =========================
   let text = newest.text;
 
   if(!text){
@@ -418,9 +369,6 @@ function updateEvents(){
 
   if(!text) return;
 
-  // =========================
-  // 📰 FEED UPDATE
-  // =========================
   const div = document.createElement("div");
 
   div.innerHTML = `
@@ -431,7 +379,7 @@ function updateEvents(){
   container.appendChild(div);
 
   // =========================
-  // 🎬 OVERLAY (optional)
+  // 🎬 OVERLAY
   // =========================
   if(newest.assets?.length){
 
@@ -439,11 +387,11 @@ function updateEvents(){
     const url = asset?.url;
 
     if(url){
-      console.log("🎬 CALL OVERLAY:", url);
       showOverlay(url, text);
     }
   }
 }
+
 
 // =========================
 // 🎮 OVERLAY TRIGGER
@@ -459,11 +407,9 @@ export function showOverlay(imageUrl, text, duration = 2500){
   const overlayText = document.getElementById("overlayText");
 
   if(!overlayEl || !overlayImg || !overlayText){
-    console.warn("❌ Overlay DOM fehlt");
     return;
   }
 
-  // 🔥 Timer cleanup (stabilisiert bei Spam)
   if(overlayTimeout){
     clearTimeout(overlayTimeout);
     overlayTimeout = null;
@@ -474,23 +420,17 @@ export function showOverlay(imageUrl, text, duration = 2500){
     overlayHideTimeout = null;
   }
 
-  // 🔥 Content setzen
   overlayImg.src = imageUrl || "";
   overlayText.innerText = text || "";
 
-  // 🔥 HARD RESET
-  overlayEl.classList.remove("show");
-  overlayEl.classList.remove("hidden");
+  overlayEl.classList.remove("show", "hidden");
 
-  // 🔥 Reflow (safe)
   overlayEl.getBoundingClientRect();
 
-  // 🔥 SHOW
   requestAnimationFrame(() => {
     overlayEl.classList.add("show");
   });
 
-  // 🔥 AUTO HIDE (guarded)
   overlayTimeout = setTimeout(() => {
 
     overlayEl.classList.remove("show");
@@ -501,6 +441,7 @@ export function showOverlay(imageUrl, text, duration = 2500){
 
   }, Math.max(0, duration || 0));
 }
+
 
 // =========================
 // 📊 TABS
@@ -525,26 +466,21 @@ function updateTabs(){
         v.style.display = "none";
       });
 
-      // 🔥 safe DOM access
-      if(name === "table"){
-  const el = document.getElementById("tableView");
-  if(el) el.style.display = "block";
-}
+      // 🔥 FIX: kompakter & sicherer
+      const map = {
+        table: "tableView",
+        schedule: "scheduleView",
+        team: "teamView"
+      };
 
-if(name === "schedule"){
-  const el = document.getElementById("scheduleView");
-  if(el) el.style.display = "block";
-}
-
-if(name === "team"){
-  const el = document.getElementById("teamView");
-  if(el) el.style.display = "block";
-}
+      const target = document.getElementById(map[name]);
+      if(target) target.style.display = "block";
 
       updateUI();
     };
   });
 }
+
 
 // =========================
 // ⚙️ TACTICS UI SYNC
@@ -570,6 +506,7 @@ function updateTacticsUI(){
   });
 }
 
+
 // =========================
 // 🔥 LIVE TABLE LOOP
 // =========================
@@ -579,7 +516,6 @@ function ensureLiveTableLoop(){
 
   liveTableInterval = setInterval(() => {
 
-    // 🔥 extra guard
     if(game.ui?.tab !== "table") return;
 
     renderLiveTable();
@@ -587,31 +523,22 @@ function ensureLiveTableLoop(){
   }, 1000);
 }
 
+
 // =========================
 // 🧠 ROLE PICKER
 // =========================
-
 function pickPlayer(role, byType){
 
   if(!byType) return null;
 
-  // =========================
-  // 🎯 1. PRIMARY ROLE
-  // =========================
   if(byType[role]?.length){
     return byType[role].shift();
   }
 
-  // =========================
-  // 🔄 2. SMART FALLBACKS
-  // =========================
   const fallbackMap = {
     GK: [],
-
     DEF: ["MID"],
-
     MID: ["DEF", "ST"],
-
     ST: ["MID"]
   };
 
@@ -623,9 +550,6 @@ function pickPlayer(role, byType){
     }
   }
 
-  // =========================
-  // 🆘 3. LAST RESORT
-  // =========================
   return (
     byType.GK?.shift() ||
     byType.DEF?.shift() ||
@@ -660,122 +584,77 @@ function renderTeam(){
     return;
   }
 
-
-  
-  // =========================
-  // 🧠 SORT + GROUP
-  // =========================
-  const byType = { GK: [], DEF: [], MID: [], ST: [] };
-
-  // =========================
-  // 🧠 GROUP BY ROLE (CLEAN)
-  // =========================
-  players.forEach(p => {
-
-    const role = mapPositionToRole(p.position_type);
-
-    if(!byType[role]){
-      console.warn("⚠️ Unknown role:", role, p);
-      return;
-    }
-
-    byType[role].push(p);
-  });
-
-  // =========================
-  // 🔥 SORT (BEST FIRST)
-  // =========================
-  Object.values(byType).forEach(arr => {
-    if(!Array.isArray(arr)) return;
-    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-  });
-
   // =========================
   // ⚙️ FORMATION
   // =========================
   const formation = game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
+  // =========================
+  // 🧠 ROLE NORMALIZER
+  // =========================
+  function normalizeSlotRole(roleRaw){
+    const role = (roleRaw || "").toUpperCase();
 
- // =========================
-// 🧠 SLOT → ROLE MAPPING
-// =========================
-function normalizeSlotRole(roleRaw){
+    if(["CB","LB","RB","DEF","WB","LWB","RWB"].includes(role)) return "DEF";
+    if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
+    if(["ST","CF","FW","ATT","LW","RW"].includes(role)) return "ST";
+    if(role.includes("GK")) return "GK";
 
-  const role = (roleRaw || "").toUpperCase();
-
-  if(["CB","LB","RB","DEF","WB","LWB","RWB"].includes(role)) return "DEF";
-  if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
-  if(["ST","CF","FW","ATT","LW","RW"].includes(role)) return "ST";
-  if(role.includes("GK")) return "GK";
-
-  return "MID";
-}
-
-
-// =========================
-// 🧠 SLOT → PLAYER MATCH
-// =========================
-function pickPlayerForSlot(slotRole, pool){
-
-  // 🔥 1. exakter Match
-  let player = pool.find(p => {
-
-    if(p._used) return false;
-
-    const playerRole = mapPositionToRole(
-      p.position_type || p.position
-    );
-
-    return playerRole === slotRole;
-  });
-
-  if(player){
-    player._used = true;
-    return player;
+    return "MID";
   }
 
-  // 🔁 2. fallback (nächster freier)
-  player = pool.find(p => !p._used);
+  // =========================
+  // 🧠 PICK PLAYER
+  // =========================
+  function pickPlayerForSlot(slotRole, pool){
 
-  if(player){
-    player._used = true;
-    return player;
+    let player = pool.find(p => {
+
+      if(p._used) return false;
+
+      const playerRole = mapPositionToRole(
+        p.position_type || p.position
+      );
+
+      return playerRole === slotRole;
+    });
+
+    if(player){
+      player._used = true;
+      return player;
+    }
+
+    player = pool.find(p => !p._used);
+
+    if(player){
+      player._used = true;
+      return player;
+    }
+
+    return null;
   }
 
-  return null;
-}
-
-
-// =========================
-// 🧠 STARTING XI
-// =========================
-function buildStartingXI({ layout, players, formation }){
-
+  // =========================
+  // 🧠 STARTING XI
+  // =========================
+  const poolCopy = [...players];
   const starters = [];
 
-  // 👉 saubere Kopie (für _used Flag)
-const poolCopy = [...players];
-  
-  // =========================
-  // 🎯 STARTER PICK
-  // =========================
   layout.forEach(slot => {
     const role = normalizeSlotRole(slot.role);
     const player = pickPlayerForSlot(role, poolCopy);
-
     if(player) starters.push(player);
   });
 
   // =========================
-  // ⚽ RENDER
+  // 🎨 FIELD RENDER
   // =========================
-  let html = `
+  let finalHTML = `
     <h3>Startelf (${formation})</h3>
     <div class="team-field">
   `;
 
-  // 👉 separate Kopie fürs Rendering
   const startersPool = starters.map(p => ({ ...p }));
 
   layout.forEach(slot => {
@@ -793,180 +672,162 @@ const poolCopy = [...players];
       return role === slotRole;
     });
 
-    // 🔁 fallback
     if(!player){
       player = startersPool.find(p => !p._rendered);
     }
 
     if(player) player._rendered = true;
 
-    html += `
-  <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
-    ${player ? renderPlayerDot(player) : "—"}
-  </div>
-`;
+    // 🔥 FIX: KEIN doppelte %
+    finalHTML += `
+      <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
+        ${player ? renderPlayerDot(player) : ""}
+      </div>
+    `;
   });
 
-  html += `</div>`;
+  finalHTML += `</div>`;
 
-  // 👉 cleanup (wichtig falls reuse)
-    poolCopy.forEach(p => delete p._used);
-    startersPool.forEach(p => delete p._rendered);
+  // =========================
+  // 🪑 BENCH (FIX!)
+  // =========================
+  const starterIds = new Set(starters.map(p => String(p.id)));
 
-  // 👉 WICHTIG: wir geben BEIDES zurück
-  return {
-    html,
-    starters
-  };
-}
-  
-const { html, starters } = buildStartingXI({
-  layout,
-  players,
-  formation
-});
-
-// =========================
-// 🪑 BENCH (CLEAN)
-// =========================
-finalHTML += `
-  <h3>Bank</h3>
-  <div class="bench-row">
-`;
-
-bench.forEach(p => {
-
-  const stats = getPlayerStats(p);
+  const bench = players.filter(p =>
+    !starterIds.has(String(p.id))
+  );
 
   finalHTML += `
-    <div class="bench-card" data-id="${p.id}">
-
-      <div class="bench-top">
-        <div class="bench-name">${p.name}</div>
-        <div class="bench-ovr">${p.overall}</div>
-      </div>
-
-      <div class="bench-bars">
-
-        <div class="mini-bar">
-          <div class="mini-fill" style="width:${stats.attack}%"></div>
-        </div>
-
-        <div class="mini-bar">
-          <div class="mini-fill defense" style="width:${stats.defense}%"></div>
-        </div>
-
-        <div class="mini-bar">
-          <div class="mini-fill control" style="width:${stats.control}%"></div>
-        </div>
-
-      </div>
-
-    </div>
+    <h3>Bank</h3>
+    <div class="bench-row">
   `;
-});
 
-finalHTML += `</div>`;
-// =========================
-// 🧱 IN DOM (NUR EINMAL!)
-// =========================
-container.innerHTML = finalHTML;
-  
-// =========================
-// 🖱 CLICK SYSTEM
-// =========================
-container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
-  el.onclick = (e) => {
-    e.stopPropagation();
+  bench.forEach(p => {
 
-    const id = el.dataset.id;
-    if(!id) return;
+    const stats = getPlayerStats(p);
 
-    if(!selectedPlayerId){
-      selectedPlayerId = id;
-      highlightSelection(id);
-      return;
-    }
+    finalHTML += `
+      <div class="bench-card" data-id="${p.id}">
+        <div class="bench-top">
+          <div class="bench-name">${p.name}</div>
+          <div class="bench-ovr">${p.overall}</div>
+        </div>
 
-    if(selectedPlayerId === id){
+        <div class="bench-bars">
+          <div class="mini-bar">
+            <div class="mini-fill" style="width:${stats.attack}%"></div>
+          </div>
+
+          <div class="mini-bar">
+            <div class="mini-fill defense" style="width:${stats.defense}%"></div>
+          </div>
+
+          <div class="mini-bar">
+            <div class="mini-fill control" style="width:${stats.control}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  finalHTML += `</div>`;
+
+  // =========================
+  // 🧱 DOM WRITE (ONCE)
+  // =========================
+  container.innerHTML = finalHTML;
+
+  // =========================
+  // 🖱 CLICK SYSTEM
+  // =========================
+  container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
+
+    el.onclick = (e) => {
+      e.stopPropagation();
+
+      const id = el.dataset.id;
+      if(!id) return;
+
+      if(!selectedPlayerId){
+        selectedPlayerId = id;
+        highlightSelection(id);
+        return;
+      }
+
+      if(selectedPlayerId === id){
+        selectedPlayerId = null;
+        clearSelection();
+        return;
+      }
+
+      swapPlayers(selectedPlayerId, id);
+
       selectedPlayerId = null;
       clearSelection();
+
+      renderTeam();
+    };
+  });
+
+  // =========================
+  // 🔵 PLAYER DOT
+  // =========================
+  function renderPlayerDot(player){
+
+    const initials =
+      (player.first_name?.[0] || "") +
+      (player.last_name?.[0] || "");
+
+    return `
+      <div class="player-dot" data-id="${player.id}">
+        <img src="./gfx/dotred.webp" />
+        <span class="label">${initials}</span>
+      </div>
+    `;
+  }
+
+  function swapPlayers(id1, id2){
+
+    const lineup = game.team?.lineup;
+    if(!lineup?.slots) return;
+
+    let slotA = null;
+    let slotB = null;
+
+    for(const key in lineup.slots){
+      if(lineup.slots[key] === id1) slotA = key;
+      if(lineup.slots[key] === id2) slotB = key;
+    }
+
+    if(slotA && slotB){
+      [lineup.slots[slotA], lineup.slots[slotB]] =
+      [lineup.slots[slotB], lineup.slots[slotA]];
       return;
     }
 
-    swapPlayers(selectedPlayerId, id);
+    if(slotA){
+      lineup.slots[slotA] = id2;
+      return;
+    }
 
-    selectedPlayerId = null;
-    clearSelection();
-
-    renderTeam();
-  };
-});
-
-// =========================
-// 🔵 PLAYER DOT
-// =========================
-function renderPlayerDot(player){
-
-  if(!player) return "";
-
-  const initials =
-    (player.first_name?.[0] || "") +
-    (player.last_name?.[0] || "");
-
-  return `
-    <div class="player-dot" data-id="${player.id}" data-tier="${player.tier}">
-      <img src="./gfx/dotred.webp" />
-      <span class="label">${initials}</span>
-    </div>
-  `;
-}
-
-function swapPlayers(id1, id2){
-
-  const lineup = game.team?.lineup;
-  if(!lineup?.slots) return;
-
-  let slotA = null;
-  let slotB = null;
-
-  // 👉 finde Slots
-  for(const key in lineup.slots){
-    if(lineup.slots[key] === id1) slotA = key;
-    if(lineup.slots[key] === id2) slotB = key;
+    if(slotB){
+      lineup.slots[slotB] = id1;
+      return;
+    }
   }
-
-  // 👉 beide im Feld → einfach tauschen
-  if(slotA && slotB){
-    [lineup.slots[slotA], lineup.slots[slotB]] =
-    [lineup.slots[slotB], lineup.slots[slotA]];
-    return;
-  }
-
-  // 👉 einer ist auf Bench
-  if(slotA){
-    lineup.slots[slotA] = id2;
-    return;
-  }
-
-  if(slotB){
-    lineup.slots[slotB] = id1;
-    return;
-  }
-}
 
   function highlightSelection(id){
-  document.querySelectorAll(".player-dot, .bench-card").forEach(el => {
-    el.classList.toggle("selected", el.dataset.id === id);
-  });
-}
-
-function clearSelection(){
-  document.querySelectorAll(".selected").forEach(el => {
-    el.classList.remove("selected");
-  });
-}
+    container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
+      el.classList.toggle("selected", el.dataset.id === id);
+    });
   }
+
+  function clearSelection(){
+    container.querySelectorAll(".selected").forEach(el => {
+      el.classList.remove("selected");
+    });
+  }
+}
 // =========================
 // 📊 STATS
 // =========================
@@ -987,9 +848,6 @@ function renderStat(label, value){
 
 function calculateTeamStats(){
 
-  // =========================
-  // 🔥 TEAM ID
-  // =========================
   const teamId =
     game.team?.selectedId ||
     game.team?.id;
@@ -999,9 +857,6 @@ function calculateTeamStats(){
     return null;
   }
 
-  // =========================
-  // 🔥 DATENQUELLE
-  // =========================
   const pool =
     (window.playerPool && window.playerPool.length)
       ? window.playerPool
@@ -1016,14 +871,10 @@ function calculateTeamStats(){
     return null;
   }
 
-  // =========================
-  // 🔥 LINEUP → STARTERS
-  // =========================
   const lineup = game.team?.lineup;
   let players = [];
 
   if(lineup?.slots){
-
     const ids = Object.values(lineup.slots).filter(Boolean);
 
     if(ids.length){
@@ -1033,106 +884,77 @@ function calculateTeamStats(){
     }
   }
 
-  // =========================
-  // 🔄 FALLBACK (alle Spieler)
-  // =========================
+  // 👉 fallback bleibt (optional)
   if(!players.length){
     players = allPlayers;
   }
 
-  // =========================
-  // 🧠 STATS BERECHNUNG
-  // =========================
- let attack = 0;
-let defense = 0;
-let control = 0;
+  let attack = 0;
+  let defense = 0;
+  let control = 0;
 
-// =========================
-// 🧠 POSITION WEIGHTS
-// =========================
-const POSITION_WEIGHTS = {
+  const POSITION_WEIGHTS = {
 
-  // 🧤 GK
-  GK: { defense: 1.6 },
+    GK: { defense: 1.6 },
 
-  // 🛡 DEFENSE
-  CB: { defense: 1.4 },
-  LB: { defense: 1.1, control: 0.3 },
-  RB: { defense: 1.1, control: 0.3 },
-  WB: { defense: 0.9, control: 0.5, attack: 0.3 },
+    CB: { defense: 1.4 },
+    LB: { defense: 1.1, control: 0.3 },
+    RB: { defense: 1.1, control: 0.3 },
+    WB: { defense: 0.9, control: 0.5, attack: 0.3 },
 
-  // 🧠 MIDFIELD
-  CDM: { defense: 0.8, control: 1.2 },
-  CM:  { control: 1.2, attack: 0.4 },
-  CAM: { attack: 0.8, control: 1.0 },
+    CDM: { defense: 0.8, control: 1.2 },
+    CM:  { control: 1.2, attack: 0.4 },
+    CAM: { attack: 0.8, control: 1.0 },
 
-  // ⚔️ ATTACK
-  ST: { attack: 1.4 },
-  CF: { attack: 1.2, control: 0.3 },
-  FW: { attack: 1.3 }
-};
-
-// =========================
-// 🔁 LOOP
-// =========================
-players.forEach(p => {
-
-  const rating = p.overall ?? 50;
-
-  const raw =
-    (p.position_type ||
-     p.position ||
-     "MID")
-    .toUpperCase();
-
-  // 👉 passende Definition finden
-  let weights = null;
-
-  for(const key in POSITION_WEIGHTS){
-    if(raw.includes(key)){
-      weights = POSITION_WEIGHTS[key];
-      break;
-    }
-  }
-
-  // 👉 fallback
-  if(!weights){
-    weights = { control: 0.6 };
-  }
-
-  // 👉 apply
-  attack  += rating * (weights.attack  || 0);
-  defense += rating * (weights.defense || 0);
-  control += rating * (weights.control || 0);
-
-});
-  // =========================
-  // 📊 NORMALIZE
-  // =========================
-  const count = players.length || 1;
-
-  let result = {
-    attack: Math.round(attack / count),
-    defense: Math.round(defense / count),
-    control: Math.round(control / count)
+    ST: { attack: 1.4 },
+    CF: { attack: 1.2, control: 0.3 },
+    FW: { attack: 1.3 }
   };
 
-  // =========================
-  // 🔒 SAFETY CLAMP
-  // =========================
-  const clamp = v => Math.max(0, Math.min(150, v));
+  players.forEach(p => {
 
-  result.attack = clamp(result.attack);
-  result.defense = clamp(result.defense);
-  result.control = clamp(result.control);
+    const rating = p.overall ?? 50;
 
-  // =========================
-  // 🧪 DEBUG (optional)
-  // =========================
+    const raw =
+      (p.position_type ||
+       p.position ||
+       "MID")
+      .toUpperCase();
+
+    let weights = null;
+
+    for(const key in POSITION_WEIGHTS){
+      if(raw.includes(key)){
+        weights = POSITION_WEIGHTS[key];
+        break;
+      }
+    }
+
+    if(!weights){
+      weights = { control: 0.6 };
+    }
+
+    attack  += rating * (weights.attack  || 0);
+    defense += rating * (weights.defense || 0);
+    control += rating * (weights.control || 0);
+
+  });
+
+  const count = players.length || 1;
+
+  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+
+  const result = {
+    attack: clamp(attack / count),
+    defense: clamp(defense / count),
+    control: clamp(control / count)
+  };
+
   console.log("📊 TeamStats:", result);
 
   return result;
 }
+
 
 // =========================
 // ⚙️ TACTIC MODIFIERS ENGINE
@@ -1145,9 +967,6 @@ function applyTactics(base){
   let defense = base.defense;
   let control = base.control;
 
-  // =========================
-  // 🎮 TEMPO
-  // =========================
   if(t.tempo === "fast"){
     attack *= 1.2;
     control *= 0.85;
@@ -1158,9 +977,6 @@ function applyTactics(base){
     attack *= 0.9;
   }
 
-  // =========================
-  // 🔥 PRESSING
-  // =========================
   if(t.pressing === "high"){
     attack *= 1.15;
     defense *= 0.85;
@@ -1171,9 +987,6 @@ function applyTactics(base){
     attack *= 0.85;
   }
 
-  // =========================
-  // 📏 LINE HEIGHT
-  // =========================
   if(t.line === "high"){
     attack *= 1.1;
     defense *= 0.8;
@@ -1184,21 +997,18 @@ function applyTactics(base){
     attack *= 0.9;
   }
 
-// =========================
-// ⚖️ BALANCE NORMALIZATION
-// =========================
-const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
 
-return {
-  attack: clamp(attack),
-  defense: clamp(defense),
-  control: clamp(control)
-};
+  return {
+    attack: clamp(attack),
+    defense: clamp(defense),
+    control: clamp(control)
+  };
 }
 
 
 // =========================
-// 📊 RENDER TACTIC STATS
+// 📊 RENDER TACTIC STATS (FIXED)
 // =========================
 function renderTacticStats(){
 
@@ -1207,95 +1017,41 @@ function renderTacticStats(){
 
   const base = calculateTeamStats();
 
-  // =========================
-  // ❌ NO DATA
-  // =========================
   if(!base){
     el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
     return;
   }
 
-  const t = game.tactics || {};
+  // 🔥 FIX: EINZIGE LOGIKQUELLE
+  let result = applyTactics(base);
 
-  let attack = base.attack;
-  let defense = base.defense;
-  let control = base.control;
-
-  // =========================
-  // ⚙️ TACTICS APPLY
-  // =========================
-
-  // 🎮 TEMPO
-  if(t.tempo === "fast"){
-    attack *= 1.2;
-    control *= 0.85;
-  }
-
-  if(t.tempo === "slow"){
-    defense *= 1.15;
-    attack *= 0.9;
-  }
-
-  // 🔥 PRESSING
-  if(t.pressing === "high"){
-    attack *= 1.15;
-    defense *= 0.85;
-  }
-
-  if(t.pressing === "low"){
-    defense *= 1.25;
-    attack *= 0.85;
-  }
-
-  // 📏 LINE HEIGHT
-  if(t.line === "high"){
-    attack *= 1.1;
-    defense *= 0.8;
-  }
-
-  if(t.line === "low"){
-    defense *= 1.3;
-    attack *= 0.9;
-  }
-
-  // =========================
-  // 🎲 CHANCE EFFECTS (NEU)
-  // =========================
+  // 🎲 TEMP EFFECTS
   const fx = game.tempEffects || {};
 
-  attack  += fx.attack_boost  || 0;
-  defense += fx.defense_boost || 0;
-  control += fx.control_boost || 0;
+  result.attack  += fx.attack_boost  || 0;
+  result.defense += fx.defense_boost || 0;
+  result.control += fx.control_boost || 0;
 
-  attack  += fx.attack_nerf  || 0;
-  defense += fx.defense_nerf || 0;
+  result.attack  += fx.attack_nerf  || 0;
+  result.defense += fx.defense_nerf || 0;
 
-  // =========================
-  // 🔒 CLAMP
-  // =========================
   const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
 
-  attack = clamp(attack);
-  defense = clamp(defense);
-  control = clamp(control);
+  result.attack  = clamp(result.attack);
+  result.defense = clamp(result.defense);
+  result.control = clamp(result.control);
 
-  // =========================
-  // 🎨 RENDER HTML
-  // =========================
   el.innerHTML = `
-    ${renderTacticBar("Attack", attack)}
-    ${renderTacticBar("Defense", defense)}
-    ${renderTacticBar("Control", control)}
+    ${renderTacticBar("Attack", result.attack)}
+    ${renderTacticBar("Defense", result.defense)}
+    ${renderTacticBar("Control", result.control)}
   `;
 
-  // =========================
-  // 🚀 ANIMATION TRIGGER
-  // =========================
   requestAnimationFrame(() => {
 
     el.querySelectorAll(".tactic-fill").forEach((bar, i) => {
 
-      const target = bar.dataset.value;
+      const target = bar.dataset.value || 0;
 
       setTimeout(() => {
         bar.style.width = target + "%";
@@ -1305,189 +1061,3 @@ function renderTacticStats(){
 
   });
 }
-
-// =========================
-// 🎲 CHANCE EVENT SYSTEM
-// =========================
-function triggerChanceEvent(){
-
-  const events = [
-    { type: "attack_boost", value: +15, text: "🔥 Offensivschub!" },
-    { type: "defense_boost", value: +15, text: "🛡 Defensiv stabil!" },
-    { type: "control_boost", value: +15, text: "🎯 Spielkontrolle erhöht!" },
-
-    { type: "attack_nerf", value: -10, text: "❌ Angriff schwächelt!" },
-    { type: "defense_nerf", value: -10, text: "⚠️ Abwehr unsicher!" }
-  ];
-
-  const event = events[Math.floor(Math.random() * events.length)];
-
-  game.tempEffects = game.tempEffects || {};
-
-  // 👉 Effekt setzen
-  game.tempEffects[event.type] = event.value;
-
-  console.log("🎲 Chance Event:", event);
-
-  // 👉 kleines Feedback
-  alert(event.text);
-
-  // 👉 UI aktualisieren
-  renderTacticStats();
-}
-
-function renderTacticBar(label, value){
-
-  return `
-    <div class="tactic-row">
-      <div class="tactic-label">${label} (${value})</div>
-      <div class="tactic-bar">
-        <div class="tactic-fill" data-value="${value}"></div>
-      </div>
-    </div>
-  `;
-}
-
-// =========================
-// 📦 EXPORTS
-// =========================
-function renderCurrentMatch(){
-  console.log("⚽ renderCurrentMatch");
-}
-
-function renderSchedule(){
-
-  const container = document.getElementById("scheduleView");
-  if(!container) return;
-
-  const schedule = game.league?.current?.schedule;
-  if(!schedule?.length){
-    container.innerHTML = "<p>Kein Spielplan vorhanden</p>";
-    return;
-  }
-
-  if(scheduleViewIndex === null){
-    scheduleViewIndex = game.league.currentRound || 0;
-  }
-
-  const round = schedule[scheduleViewIndex];
-  if(!round) return;
-
-  const myMatch = game.match?.current;
-
-  const nav = `
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:10px;
-    ">
-      <button id="prevRound">⬅</button>
-      <strong>Spieltag ${scheduleViewIndex + 1}</strong>
-      <button id="nextRound">➡</button>
-    </div>
-  `;
-
-  const list = round.map((match, mIndex) => {
-
-    const isActive =
-      (myMatch && match.id === myMatch.id) ||
-      (scheduleViewIndex === game.league.currentRound &&
-       mIndex === game.league.currentMatchIndex);
-
-    return `
-      <div style="
-        padding:8px;
-        margin:4px 0;
-        border-radius:6px;
-        background:${isActive ? "#111" : "#0b0b0b"};
-        color:${isActive ? "#00ff88" : "#ccc"};
-        font-weight:${isActive ? "bold" : "normal"};
-      ">
-        ${match.home?.name || "-"}
-        ${match.result ? match.result.home + ":" + match.result.away : "vs"}
-        ${match.away?.name || "-"}
-        ${match._processed ? " ✅" : ""}
-      </div>
-    `;
-  }).join("");
-
-  container.innerHTML = nav + list;
-
-  // NAV
-  document.getElementById("prevRound")?.addEventListener("click", () => {
-    scheduleViewIndex = Math.max(0, scheduleViewIndex - 1);
-    renderSchedule();
-  });
-
-  document.getElementById("nextRound")?.addEventListener("click", () => {
-    scheduleViewIndex = Math.min(schedule.length - 1, scheduleViewIndex + 1);
-    renderSchedule();
-  });
-
-  // SWIPE
-  let startX = null;
-
-  container.ontouchstart = (e) => {
-    startX = e.touches[0].clientX;
-  };
-
-  container.ontouchend = (e) => {
-
-    if(startX === null) return;
-
-    const diff = startX - e.changedTouches[0].clientX;
-
-    if(Math.abs(diff) < 50) return;
-
-    if(diff > 0){
-      scheduleViewIndex = Math.min(schedule.length - 1, scheduleViewIndex + 1);
-    } else {
-      scheduleViewIndex = Math.max(0, scheduleViewIndex - 1);
-    }
-
-    renderSchedule();
-    startX = null;
-  };
-}
-function getPlayerStats(player){
-
-  const pos = (player.position || "").toUpperCase();
-
-  let attack  = player.shooting ?? 50;
-  let defense = player.defending ?? 50;
-  let control = player.passing ?? 50;
-
-  // 🧤 GK Spezial
-  if(pos === "GK"){
-    defense = player.goalkeeping ?? 50;
-    attack = 10;
-    control = 40;
-  }
-
-  // 🔥 Positionsgewichtung
-  if(["ST","CF","FW"].includes(pos)){
-    attack *= 1.1;
-  }
-
-  if(["CB","LB","RB"].includes(pos)){
-    defense *= 1.1;
-  }
-
-  if(["CM","CDM","CAM"].includes(pos)){
-    control *= 1.1;
-  }
-
-  const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
-
-  return {
-    attack: clamp(attack),
-    defense: clamp(defense),
-    control: clamp(control)
-  };
-}
-export {
-  updateUI,
-  renderSchedule,
-  renderCurrentMatch
-};
