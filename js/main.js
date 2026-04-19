@@ -280,7 +280,7 @@ async function init(){
       };
     }
 
-  }, 0);
+  }, 50);
 
 } else {
   console.warn("⚠️ Kein Team in Liga gefunden");
