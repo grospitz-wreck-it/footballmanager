@@ -26,15 +26,14 @@
 ========================= */
 
 .team-field {
-  position: relative;
   width: 100%;
-  height: 260px;
+  max-width: 600px; /* 🔥 verhindert Eskalation */
+  margin: 0 auto;
 
-  border-radius: 18px;
-
-  overflow: hidden; /* 🔥 DAS ist entscheidend */
+  aspect-ratio: 16/9;
+  position: relative;
+  overflow: hidden;
 }
-
 
 /* =========================
 👤 PLAYER DOT FIXED
