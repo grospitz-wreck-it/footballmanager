@@ -417,37 +417,40 @@ function populateTeamSelect() {
       select.appendChild(option);
     });
 
- select.onchange = (e) => {
+    select.onchange = (e) => {
 
-  if(!game.league?.current){
-    console.warn("⏳ Liga noch nicht ready → retry TeamSelect");
+      if(!game.league?.current){
+        console.warn("⏳ Liga noch nicht ready → retry TeamSelect");
 
-    const retryTeamId = normalizeId(e.target.value); // 🔥 FIX
+        const retryTeamId = normalizeId(e.target.value);
 
-    setTimeout(() => {
-      if(retryTeamId){
-        selectTeamById(retryTeamId); // 🔥 NICHT setLeagueById!
+        setTimeout(() => {
+          if(retryTeamId){
+            selectTeamById(retryTeamId);
+          }
+        }, 100);
+
+        return;
       }
-    }, 100);
 
-    return;
-  }
+      const teamId = normalizeId(e.target.value);
 
-  const teamId = normalizeId(e.target.value);
+      if(!teamId){
+        console.warn("⚠️ Ungültige Team-ID");
+        return;
+      }
 
-  if(!teamId){
-    console.warn("⚠️ Ungültige Team-ID");
-    return;
-  }
+      const success = selectTeamById(teamId);
 
-  const success = selectTeamById(teamId);
+      if(success){
+        selects.forEach(s => {
+          if(s !== select) s.value = teamId;
+        });
+      }
+    };
 
-  if(success){
-    selects.forEach(s => {
-      if(s !== select) s.value = teamId;
-    });
-  }
-};
+  }); // 🔥 DAS HAT GEFEHLT
+}
 
 // =========================
 // 👤 TEAM WÄHLEN (ID)
