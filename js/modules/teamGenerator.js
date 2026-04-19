@@ -125,7 +125,12 @@ export async function generateTeam(team){
 
   const style = random(TEAM_STYLES);
   const dist = getDistribution(style);
+console.log("📊 DISTRIBUTION:", dist);
 
+const expectedTotal =
+  dist.GK + dist.DEF + dist.MID + dist.ST;
+
+console.log("🎯 expected players:", expectedTotal);
   console.log(`⚙️ ${team.name} → ${style}`);
 
   let squad = [];
@@ -143,10 +148,21 @@ export async function generateTeam(team){
   }
 
   // 🎯 Positionsverteilung
-  squad.push(...await pick("GK", dist.GK));
-  squad.push(...await pick("DEF", dist.DEF));
-  squad.push(...await pick("MID", dist.MID));
-  squad.push(...await pick("ST", dist.ST));
+ const gk = await pick("GK", dist.GK);
+console.log("🧤 GK:", gk.length);
+squad.push(...gk);
+
+const def = await pick("DEF", dist.DEF);
+console.log("🛡 DEF:", def.length);
+squad.push(...def);
+
+const mid = await pick("MID", dist.MID);
+console.log("🧠 MID:", mid.length);
+squad.push(...mid);
+
+const st = await pick("ST", dist.ST);
+console.log("⚔️ ST:", st.length);
+squad.push(...st);
 
   // 🔥 GARANTIE: 25 Spieler
   if(squad.length < 25){
