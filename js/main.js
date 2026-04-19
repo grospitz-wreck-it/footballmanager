@@ -879,7 +879,7 @@ mainBtn?.addEventListener("click", () => {
   // =========================
   // 🆕 INIT MATCH
   // =========================
-  if(!live){
+if(!live){
 
   const round = league.schedule?.[league.currentRound || 0];
 
@@ -902,24 +902,6 @@ mainBtn?.addEventListener("click", () => {
     return;
   }
 
-  live.running = false;
-  live.phase = "first_half";
-  live.minute = live.minute || 0;
-}
-
-  if(!ok){
-    console.error("❌ initMatch fehlgeschlagen");
-    return;
-  }
-
-  live = game.match?.live;
-
-  if(!live){
-    console.error("❌ Live-State fehlt");
-    return;
-  }
-
-  // 🔥 saubere Initialisierung
   live.running = false;
   live.phase = "first_half";
   live.minute = live.minute || 0;
