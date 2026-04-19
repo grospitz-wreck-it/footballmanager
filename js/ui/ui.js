@@ -829,15 +829,20 @@ const { html, starters } = buildStartingXI({
 // =========================
 // 🪑 BENCH (CLEAN)
 // =========================
-const starterIds = new Set(starters.map(p => String(p.id)));
-
-const bench = players.filter(p =>
-  !starterIds.has(String(p.id))
+// =========================
+// 🪑 BENCH (SAFE VERSION)
+// =========================
+const starterIds = new Set(
+  starters.map(p => String(p.id))
 );
 
-// optional sort (best first)
-bench.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-  
+const bench = players.filter(p => {
+  return !starterIds.has(String(p.id));
+});
+
+// DEBUG
+console.log("🧪 bench players:", bench);
+
 let finalHTML = html;
 
 finalHTML += `
@@ -851,28 +856,8 @@ bench.forEach(p => {
 
   finalHTML += `
     <div class="bench-card" data-id="${p.id}">
-
-      <div class="bench-top">
-        <div class="bench-name">${p.name}</div>
-        <div class="bench-ovr">${p.overall}</div>
-      </div>
-
-      <div class="bench-bars">
-
-        <div class="mini-bar">
-          <div class="mini-fill" style="width:${stats.attack}%"></div>
-        </div>
-
-        <div class="mini-bar">
-          <div class="mini-fill defense" style="width:${stats.defense}%"></div>
-        </div>
-
-        <div class="mini-bar">
-          <div class="mini-fill control" style="width:${stats.control}%"></div>
-        </div>
-
-      </div>
-
+      <div class="bench-name">${p.name}</div>
+      <div>${p.overall}</div>
     </div>
   `;
 });
