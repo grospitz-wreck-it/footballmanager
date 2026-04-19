@@ -202,14 +202,19 @@ async function init(){
 
     const competitions = competitionsRaw || [];
 
-    const leagues = competitions.map(c => ({
-      id: String(c.id),
-      name: c.name,
-      level: Number(c.level) || 7,
-      teams: teams.filter(t =>
+    const leagues = competitions.map(c => {
+
+      const leagueTeams = teams.filter(t =>
         String(t.competition_id) === String(c.id)
-      )
-    }));
+      ) || [];
+
+      return {
+        id: String(c.id),
+        name: c.name,
+        level: Number(c.level) || 7,
+        teams: leagueTeams
+      };
+    });
 
     game.leagues = leagues;
     game.league = { available: leagues };
@@ -217,8 +222,23 @@ async function init(){
     initLeagueSelect(leagues);
 
     if(leagues.length){
+
       setLeagueById(leagues[0].id);
       generateSchedule();
+
+      console.log("📅 SCHEDULE:", game.league.current?.schedule);
+
+      // 🔥 CRITICAL FIX: TEAM SETZEN
+      const firstTeam = leagues[0]?.teams?.[0];
+
+      if(firstTeam){
+        game.team = {
+          selectedId: String(firstTeam.id)
+        };
+        console.log("✅ TEAM AUTO-SET:", game.team.selectedId);
+      } else {
+        console.warn("⚠️ Kein Team in Liga gefunden");
+      }
     }
 
     updateUI();
@@ -230,6 +250,7 @@ async function init(){
     console.error("💥 INIT CRASH:", e);
   }
 }
+    
 // =========================
 // 🎯 MAIN BUTTON
 // =========================
