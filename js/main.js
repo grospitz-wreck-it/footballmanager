@@ -160,6 +160,23 @@ function renderEvents(){
 }
 
 // =========================
+// 👁 APP VISIBILITY
+// =========================
+function handleAppVisibility(){
+
+  const splash = document.getElementById("splash");
+  const app = document.getElementById("app");
+
+  if(game.team?.selectedId){
+    if(splash) splash.style.display = "none";
+    if(app) app.classList.remove("hidden");
+  } else {
+    if(splash) splash.style.display = "flex";
+    if(app) app.classList.add("hidden");
+  }
+}
+
+// =========================
 // 🚀 INIT
 // =========================
 async function init(){
@@ -239,6 +256,8 @@ async function init(){
       } else {
         console.warn("⚠️ Kein Team in Liga gefunden");
       }
+      handleAppVisibility();
+      console.log("🧪 TEAM STATE:", game.team);
     }
 
     updateUI();
