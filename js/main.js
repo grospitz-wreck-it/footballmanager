@@ -267,13 +267,20 @@ async function init(){
   const firstTeam = leagues[0]?.teams?.[0];
 
   if(firstTeam){
+
+  console.log("🎯 Auto-select Team via League");
+
+  // 👉 WICHTIG: UI + State synchron
+  if(typeof window.selectTeamById === "function"){
+    window.selectTeamById(String(firstTeam.id));
+  } else {
+    // fallback
     game.team = {
       selectedId: String(firstTeam.id)
     };
-    console.log("✅ TEAM AUTO-SET:", game.team.selectedId);
-  } else {
-    console.warn("⚠️ Kein Team in Liga gefunden");
   }
+
+}
 
   // 🔥 ALLES HIER REIN
   handleAppVisibility();
