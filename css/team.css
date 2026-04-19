@@ -27,14 +27,13 @@
 
 .team-field {
   position: relative;
-
   width: 100%;
-  height: 260px; /* 🔥 FIXED HEIGHT statt aspect-ratio */
+  height: 260px;
 
   border-radius: 18px;
-  overflow: visible;
-}
 
+  overflow: hidden; /* 🔥 DAS ist entscheidend */
+}
 
 
 /* =========================
