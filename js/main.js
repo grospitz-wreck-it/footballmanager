@@ -280,8 +280,9 @@ async function init(){
   updateUI();
 }
 
-initMainButton();
-updateMainButtonText();
+    initMainButton();
+    updateMainButtonText();
+    initResetButton();
 
   } catch(e){
     console.error("💥 INIT CRASH:", e);
