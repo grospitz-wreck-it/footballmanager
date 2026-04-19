@@ -810,7 +810,8 @@ const poolCopy = [...players];
   html += `</div>`;
 
   // 👉 cleanup (wichtig falls reuse)
-  startersPool.forEach(p => delete p._rendered);
+    poolCopy.forEach(p => delete p._used);
+    startersPool.forEach(p => delete p._rendered);
 
   // 👉 WICHTIG: wir geben BEIDES zurück
   return {
