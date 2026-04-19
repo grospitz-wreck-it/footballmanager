@@ -333,13 +333,16 @@ async function setLeagueById(leagueId){
   }
 
   await initLeague(league);
-  await populateTeamSelect();
+await populateTeamSelect();
 
-  selects.forEach(select => {
-    select.value = index;
-  });
+const round = league.schedule?.[0];
+if(round && round.length){
+  const ok = initMatch(round);
+  if(ok){
+    game.match.live.running = false;
+  }
 }
-
+}
 // =========================
 // 👕 TEAM SELECT (ID BASED)
 // =========================
@@ -388,10 +391,6 @@ async function populateTeamSelect() {
   game.team = game.team || {};
   game.team.selected = firstTeam.name;
   game.team.selectedId = normalizeId(firstTeam.id);
-
-  for (const t of league.teams) {
-    await ensureTeamPlayers(t);
-  }
 
   console.log("✅ Teams geladen:", league.teams.length);
 }
