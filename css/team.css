@@ -80,8 +80,11 @@
 .bench-row {
   display: flex;
   gap: 12px;
+
   overflow-x: auto;
-  padding-bottom: 6px;
+
+  margin-top: 10px;
+  min-height: 80px; /* 🔥 wichtig */
 }
 
 /* CARD */
