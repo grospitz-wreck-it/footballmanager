@@ -435,18 +435,22 @@ if(!game.league?.current){
 };
 });
 
+// 👉 Team nur setzen, wenn noch nichts gewählt wurde
+if(!game.team?.selectedId){
+
   const firstTeam = league.teams[0];
 
-game.team = game.team || {};
-game.team.selected = firstTeam.name;
-game.team.selectedId = normalizeId(firstTeam.id);
+  game.team = game.team || {};
+  game.team.selected = firstTeam.name;
+  game.team.selectedId = normalizeId(firstTeam.id);
+}
 
+// 👉 Spieler nur generieren, wenn wirklich nötig
 league.teams.forEach(t => {
   if(!t.players || !t.players.length){
     ensureTeamPlayers(t);
   }
 });
-
   console.log("✅ Teams geladen:", league.teams.length);
 }
 
