@@ -307,19 +307,31 @@ function initMainButton(){
     // INIT
     if(!live){
 
-      const round = league.schedule?.[league.currentRound || 0];
-      if(!round) return;
+  const round = league.schedule?.[league.currentRound || 0];
+  if(!round){
+    console.warn("❌ Kein Round");
+    return;
+  }
 
-      if(!initMatch(round)) return;
+  if(!initMatch(round)){
+    console.warn("❌ initMatch failed");
+    return;
+  }
 
-      live = game.match.live;
-      live.running = false;
-      live.phase = "first_half";
-      live.minute = 0;
+  live = game.match.live;
 
-      updateMainButtonText();
-      return;
-    }
+  if(!live){
+    console.error("❌ live fehlt nach init");
+    return;
+  }
+
+  live.running = false;
+  live.phase = "first_half";
+  live.minute = 0;
+
+  console.log("🆕 MATCH INITIALIZED", live);
+
+}
 
     // BYE
     if(live.phase === "bye"){
