@@ -320,7 +320,35 @@ function initMainButton(){
       updateMainButtonText();
       return;
     }
+// =========================
+// 🔄 RESET BUTTON
+// =========================
+function initResetButton(){
 
+  const btn = document.getElementById("resetBtn");
+
+  if(!btn){
+    console.warn("⚠️ resetBtn nicht gefunden");
+    return;
+  }
+
+  console.log("🔄 resetBtn ready");
+
+  btn.onclick = async () => {
+
+    console.log("🔄 RESET CLICKED");
+
+    const m = await import("./services/storage.js");
+    m.resetGame();
+
+    game.team = null;
+    game.match = null;
+    game.league.current = null;
+
+    handleAppVisibility();
+    updateUI();
+  };
+}
     // BYE
     if(live.phase === "bye"){
 
