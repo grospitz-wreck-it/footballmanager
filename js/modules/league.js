@@ -20,16 +20,17 @@ let leagueIndexMap = [];
 // 🔥 FIX: verhindert doppelte Initialisierung
 let leagueSelectInitialized = false;
 
-function ensureTeamPlayers(team){
-
+async function ensureTeamPlayers(team){
+  
   if(team.players && team.players.length > 0){
     return team.players;
   }
 
   console.log(`⚽ Generiere Kader für ${team.name}`);
 
-  team.players = generateTeam(team);
-
+const players = await generateTeam(team);
+team.players = players;
+  
   console.log(`✅ ${team.players.length} Spieler für ${team.name}`);
 
   return team.players;
@@ -50,8 +51,8 @@ function getCurrentRound(){
 // =========================
 // 🏗️ INIT LEAGUE
 // =========================
-function initLeague(league){
-
+async function initLeague(league){
+  
   if(!league){
     console.error("❌ Keine Liga übergeben");
     return;
@@ -117,27 +118,27 @@ function initLeague(league){
   // =========================
   // 👥 PLAYERS INIT (CRITICAL FIX)
   // =========================
-  league.teams.forEach(team => {
+  for (const team of league.teams) {
 
-    if(!team.players || team.players.length === 0){
+  if(!team.players || team.players.length === 0){
 
-      try {
-        const players = ensureTeamPlayers(team);
+    try {
+      const players = await ensureTeamPlayers(team);
 
-        if(players && players.length){
-          team.players = players;
-        } else {
-          console.warn("⚠️ Keine Spieler generiert für:", team.name);
-        }
-
-      } catch(e){
-        console.error("❌ Player generation crashed:", team.name, e);
+      if(players && players.length){
+        team.players = players;
+      } else {
+        console.warn("⚠️ Keine Spieler generiert für:", team.name);
       }
+
+    } catch(e){
+      console.error("❌ Player generation crashed:", team.name, e);
     }
+  }
 
-  });
+}
 
-  console.log("👥 Spieler generiert für Liga:", league.name);
+console.log("👥 Spieler generiert für Liga:", league.name);
 
   // =========================
   // ✅ DONE
@@ -378,8 +379,8 @@ initLeague(league);
 // =========================
 // 👕 TEAM SELECT (ID BASED)
 // =========================
-function populateTeamSelect() {
-
+async function populateTeamSelect() {
+  
   const splashSelect = document.getElementById("teamSelect");
   const menuSelect   = document.getElementById("teamSelectMenu");
 
@@ -441,9 +442,9 @@ game.team.selected = firstTeam.name;
 game.team.selectedId = normalizeId(firstTeam.id);
 
 // 🔥 FIX: alle Teams vorbereiten (nicht nur eins)
-league.teams.forEach(t => {
-  ensureTeamPlayers(t);
-});
+for (const t of league.teams) {
+  await ensureTeamPlayers(t);
+}
 
   console.log("✅ Teams geladen:", league.teams.length);
 }
@@ -451,8 +452,8 @@ league.teams.forEach(t => {
 // =========================
 // 👤 TEAM WÄHLEN (ID)
 // =========================
-function selectTeamById(teamId){
-
+async function selectTeamById(teamId){
+  
   const league = game.league?.current;
 
   if(!league || !Array.isArray(league.teams)){
@@ -472,7 +473,7 @@ function selectTeamById(teamId){
   game.team.selected = team.name;
   game.team.selectedId = normalizeId(team.id);
 
-  const players = ensureTeamPlayers(team);
+  const players = await ensureTeamPlayers(team);
   game.team.players = players;
 
   console.log("✅ Team gewählt (ID):", team.id);
