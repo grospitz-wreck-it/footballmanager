@@ -881,21 +881,31 @@ mainBtn?.addEventListener("click", () => {
   // =========================
   if(!live){
 
-  // 🔥 RICHTIG: einzelnes Match holen
-  const match = nextMatch();
+  const round = league.schedule?.[league.currentRound || 0];
 
-  if(!match){
-    console.warn("❌ Kein Match verfügbar");
+  if(!round){
+    console.warn("❌ Kein Round verfügbar");
     return;
   }
 
-  console.log("🎯 MATCH GEFUNDEN:", {
-    home: match.homeTeamId,
-    away: match.awayTeamId,
-    myTeam: game.team?.selectedId
-  });
+  const ok = initMatch(round);
 
-  const ok = initMatch(match);
+  if(!ok){
+    console.error("❌ initMatch fehlgeschlagen");
+    return;
+  }
+
+  live = game.match?.live;
+
+  if(!live){
+    console.error("❌ Live-State fehlt");
+    return;
+  }
+
+  live.running = false;
+  live.phase = "first_half";
+  live.minute = live.minute || 0;
+}
 
   if(!ok){
     console.error("❌ initMatch fehlgeschlagen");
