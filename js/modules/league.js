@@ -440,9 +440,10 @@ game.team = game.team || {};
 game.team.selected = firstTeam.name;
 game.team.selectedId = normalizeId(firstTeam.id);
 
-// 🔥 FIX: alle Teams vorbereiten (nicht nur eins)
 league.teams.forEach(t => {
-  ensureTeamPlayers(t);
+  if(!t.players || !t.players.length){
+    ensureTeamPlayers(t);
+  }
 });
 
   console.log("✅ Teams geladen:", league.teams.length);
