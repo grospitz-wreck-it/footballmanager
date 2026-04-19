@@ -651,15 +651,24 @@ function renderTeam(){
       ? window.playerPool
       : (game.players || []);
 
-// 👉 🔥 HIER DEBUG EINBAUEN
-  console.log("🧠 teamId:", teamId);
-  console.log("📦 pool size:", pool.length);
-  console.log("🧾 sample team_ids:", pool.slice(0, 10).map(p => p.team_id));
 
-  
-  const players = pool.filter(p =>
-    String(p.team_id) === String(teamId)
-  );
+  // =========================
+// 🧪 DEBUG TEAM FILTER
+// =========================
+console.log("🧠 teamId:", teamId);
+console.log("📦 pool size:", pool.length);
+console.log("🧾 sample team_ids:", pool.slice(0, 10).map(p => p.team_id));
+
+const players = pool.filter(p => {
+
+  const match = String(p.team_id) === String(teamId);
+
+  if (!match) {
+    console.log("⛔ mismatch:", p.team_id, "!=", teamId);
+  }
+
+  return match;
+});
 
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
