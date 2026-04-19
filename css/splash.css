@@ -1,5 +1,5 @@
 /* =========================
-🌌 ULTRA SPLASH (FANCY MODE)
+🌌 ULTRA SPLASH (FIXED)
 ========================= */
 
 #splash {
@@ -14,7 +14,10 @@
   gap: 18px;
 
   padding: 20px;
-  overflow: hidden;
+
+  /* 🔥 WICHTIG */
+  position: fixed;
+  overflow: visible; /* 🔥 FIX (war kaputt) */
 
   color: white;
   text-align: center;
@@ -39,7 +42,8 @@
   background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 60%);
   animation: splashFog 18s linear infinite;
 
-  pointer-events: none;
+  pointer-events: none; /* 🔥 wichtig */
+  z-index: 0;
 }
 
 @keyframes splashFog {
@@ -68,7 +72,8 @@
   opacity: 0.2;
   animation: rays 20s linear infinite;
 
-  pointer-events: none;
+  pointer-events: none; /* 🔥 wichtig */
+  z-index: 0;
 }
 
 @keyframes rays {
@@ -78,7 +83,16 @@
 
 
 /* =========================
-🏆 LOGO (BIG + GLOW)
+📦 CONTENT LAYER (NEU)
+========================= */
+#splash > * {
+  position: relative;
+  z-index: 2; /* 🔥 verhindert Overlay-Probleme */
+}
+
+
+/* =========================
+🏆 LOGO
 ========================= */
 #logo {
   width: clamp(120px, 40vw, 220px);
@@ -134,11 +148,9 @@
   transition: all 0.2s ease;
 }
 
-/* 🔥 FOCUS GLOW */
 #splash input:focus,
 #splash select:focus {
   outline: none;
-
   border-color: #22c55e;
 
   box-shadow:
@@ -148,7 +160,7 @@
 
 
 /* =========================
-🚀 START BUTTON (BEAST MODE)
+🚀 START BUTTON
 ========================= */
 #splash button {
   width: 100%;
@@ -176,9 +188,9 @@
   overflow: hidden;
 
   transition: all 0.2s ease;
+  z-index: 3; /* 🔥 extra safety */
 }
 
-/* ✨ SHINE SWEEP */
 #splash button::before {
   content: "";
   position: absolute;
@@ -193,6 +205,7 @@
 
   transform: translateX(-120%);
   animation: shine 3s infinite;
+  pointer-events: none;
 }
 
 @keyframes shine {
@@ -201,52 +214,44 @@
   }
 }
 
-/* HOVER */
 #splash button:hover {
   transform: translateY(-2px) scale(1.02);
-
-  box-shadow:
-    0 20px 60px rgba(34,197,94,0.6),
-    0 0 30px rgba(34,197,94,0.5);
 }
 
-/* CLICK */
 #splash button:active {
   transform: scale(0.95);
 }
 
 
 /* =========================
-🔍 DROPDOWN
+🔍 DROPDOWN (FIXED)
 ========================= */
 #leagueResults {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
 
   background: #020617;
 
   border-radius: 12px;
-  margin-top: 6px;
 
   overflow: hidden;
 
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+
+  z-index: 5;
+
+  display: none; /* 🔥 WICHTIG → blockiert sonst Klicks */
 }
 
 .league-result {
   padding: 10px;
   border-bottom: 1px solid #1e293b;
-
   transition: all 0.15s ease;
 }
 
 .league-result:hover {
   background: rgba(255,255,255,0.05);
   transform: translateX(4px);
-}
-/* Splash Container darf NICHT clippen */
-#splash {
-  overflow
 }
