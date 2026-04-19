@@ -274,7 +274,7 @@ function initLeagueSelect(leaguesInput){
 
 if(!round){
   console.error("❌ Kein Round nach Teamwahl");
-  return true;
+  return;
 }
 
 const ok = initMatch(round);
