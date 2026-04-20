@@ -207,15 +207,32 @@ async function init(){
   try {
 
     // =========================
-    // 🏆 TEAMS
-    // =========================
-    const { data: teamsRaw } =
-      await supabase.from("teams").select("*");
+// 🏆 TEAMS
+// =========================
+const { data: teamsRaw } =
+  await supabase.from("teams").select("*");
 
-    const teams = teamsRaw || [];
-    window.teams = teams;
+const teams = teamsRaw || [];
+game.teams = teams;
 
-    console.log("🏆 Teams:", teams.length);
+console.log("🏆 Teams:", teams.length);
+
+// =========================
+// 🏙 CITIES
+// =========================
+const { data: citiesRaw } =
+  await supabase.from("cities").select("*");
+
+game.cities = citiesRaw || [];
+
+console.log("🏙 Cities:", game.cities.length);
+
+// =========================
+// ⚡ CITY MAP (FAST LOOKUP)
+// =========================
+game.cityMap = Object.fromEntries(
+  game.cities.map(c => [c.id, c])
+);
 
     // =========================
     // 👥 PLAYERS
