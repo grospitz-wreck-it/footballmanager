@@ -257,16 +257,7 @@ async function init(){
 
     initLeagueSelect(leagues);
 
-    if(leagues.length){
-
-  setLeagueById(leagues[0].id);
-  generateSchedule();
-
-  console.log("📅 SCHEDULE:", game.league.current?.schedule);
-
-  const firstTeam = leagues[0]?.teams?.[0];
-
-  if(leagues.length){
+if(leagues.length){
 
   setLeagueById(leagues[0].id);
   generateSchedule();
@@ -300,16 +291,13 @@ async function init(){
   }
 }
 
-// 👉 BUTTONS BLEIBEN AUSSERHALB
+// 👉 BUTTONS (IMMER HIER, INNERHALB try)
 initMainButton();
 updateMainButtonText();
 initResetButton();
-
-} catch(e){
+    } catch(e){
   console.error("💥 INIT CRASH:", e);
 }
-}
-    
 // =========================
 // 🎯 MAIN BUTTON
 // =========================
