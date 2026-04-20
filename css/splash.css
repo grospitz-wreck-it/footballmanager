@@ -1,5 +1,5 @@
 /* =========================
-🌌 ULTRA SPLASH (FINAL CLEAN)
+🌌 ULTRA SPLASH (FINAL FIXED)
 ========================= */
 
 #splash {
@@ -33,33 +33,25 @@
   content: "";
   position: absolute;
   inset: -50%;
-
   background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 60%);
   animation: splashFog 18s linear infinite;
-
   pointer-events: none;
-  z-index: 0;
 }
 
 #splash::after {
   content: "";
   position: absolute;
   inset: 0;
-
-  background:
-    repeating-linear-gradient(
-      120deg,
-      rgba(255,255,255,0.04) 0px,
-      rgba(255,255,255,0.04) 2px,
-      transparent 2px,
-      transparent 80px
-    );
-
+  background: repeating-linear-gradient(
+    120deg,
+    rgba(255,255,255,0.04) 0px,
+    rgba(255,255,255,0.04) 2px,
+    transparent 2px,
+    transparent 80px
+  );
   opacity: 0.2;
   animation: rays 20s linear infinite;
-
   pointer-events: none;
-  z-index: 0;
 }
 
 @keyframes splashFog {
@@ -85,30 +77,16 @@
 ========================= */
 #logo {
   width: clamp(120px, 40vw, 220px);
-
   filter:
     drop-shadow(0 0 20px rgba(34,197,94,0.6))
     drop-shadow(0 10px 40px rgba(0,0,0,0.9));
-
-  animation: logoPop 0.8s ease;
-}
-
-@keyframes logoPop {
-  from {
-    opacity: 0;
-    transform: scale(0.8) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 /* =========================
 🧱 FORM BASE (ALLE FELDER)
 ========================= */
-#splash input,
-#splash select {
+input,
+select {
   width: 100%;
   max-width: 320px;
 
@@ -134,15 +112,13 @@
     0 10px 30px rgba(0,0,0,0.5);
 
   outline: none;
-
   transition: all 0.2s ease;
 }
 
 /* Focus */
-#splash input:focus,
-#splash select:focus {
+input:focus,
+select:focus {
   border-color: #22c55e;
-
   box-shadow:
     0 0 0 2px rgba(34,197,94,0.25),
     0 0 25px rgba(34,197,94,0.2);
@@ -151,7 +127,7 @@
 /* =========================
 🎛 SELECT STYLE
 ========================= */
-#splash select {
+select {
   appearance: none;
   cursor: pointer;
 
@@ -173,19 +149,17 @@
 }
 
 /* =========================
-📍 PLZ SEARCH CONTAINER
+📍 PLZ SEARCH
 ========================= */
 #plzSearch {
+  position: relative;
   width: 100%;
   max-width: 320px;
 
   padding: 6px;
-
   border-radius: 16px;
 
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.85), rgba(2,6,23,0.7));
-
+  background: linear-gradient(180deg, rgba(2,6,23,0.85), rgba(2,6,23,0.7));
   backdrop-filter: blur(12px);
 
   border: 1px solid rgba(255,255,255,0.06);
@@ -196,7 +170,7 @@
 }
 
 /* =========================
-🔍 DROPDOWN
+🔍 DROPDOWN (FIXED)
 ========================= */
 #leagueResults {
   position: absolute;
@@ -207,9 +181,7 @@
   border-radius: 14px;
   padding: 4px;
 
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.75));
-
+  background: linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.75));
   backdrop-filter: blur(12px);
 
   border: 1px solid rgba(255,255,255,0.08);
@@ -218,34 +190,32 @@
     0 15px 40px rgba(0,0,0,0.8),
     0 0 20px rgba(34,197,94,0.2);
 
-  overflow: hidden;
   z-index: 10;
 
   opacity: 0;
   transform: translateY(10px) scale(0.98);
-  transition: all 0.18s ease;
+  pointer-events: none;
 
-  display: none;
+  transition: all 0.18s ease;
 }
 
 #leagueResults.show {
   opacity: 1;
   transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 /* =========================
-📦 DROPDOWN ITEMS
+📦 ITEMS
 ========================= */
 .league-result {
   padding: 12px 14px;
+  border-radius: 10px;
 
   font-size: 14px;
   font-weight: 600;
 
   color: rgba(255,255,255,0.9);
-
-  border-radius: 10px;
-
   cursor: pointer;
 
   transition: all 0.18s ease;
@@ -254,13 +224,16 @@
 .league-result:hover {
   background: rgba(255,255,255,0.05);
   transform: translateX(4px);
-
-  box-shadow:
-    0 0 15px rgba(34,197,94,0.25);
+  box-shadow: 0 0 15px rgba(34,197,94,0.25);
 }
 
 .league-result.selected {
   color: #22c55e;
+}
+
+.league-result.empty {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* =========================
@@ -269,7 +242,6 @@
 #splash button {
   width: 100%;
   max-width: 320px;
-
   height: 50px;
 
   border-radius: 16px;
