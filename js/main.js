@@ -772,51 +772,6 @@ function initPlzInput(){
 }
 
 // =========================
-// 📦 TOP 5
-// =========================
-const top = filtered.slice(0, 5);
-
-results.innerHTML = top
-  .map(
-    (l, i) => `
-  <div class="league-result ${i === 0 ? "selected" : ""}" data-id="${l.id}">
-    ${l.name}
-  </div>
-`,
-  )
-  .join("");
-
-open();
-
-results.querySelectorAll(".league-result").forEach((el) => {
-  el.onclick = () => {
-    const id = el.dataset.id;
-    const league = top.find((l) => String(l.id) === String(id));
-    if (!league) return;
-
-    console.log("🏆 SELECTED:", league.name);
-
-    setLeagueById(league.id);
-
-    const leagueSelect = document.getElementById("leagueSelect");
-    const selected = leagueSelect?.querySelector(".selected");
-
-    if (selected) {
-      selected.textContent = `${league.name} (${league.teams?.length || 0})`;
-    }
-
-    // 🔥 TEAM SELECT AUFBAUEN
-    initCustomTeamSelect(league);
-
-    close();
-
-    handleAppVisibility();
-    updateUI();
-    updateMainButtonText();
-  };
-});
-
-// =========================
 // OUTSIDE CLICK FIX
 // =========================
 document.addEventListener("click", (e) => {
