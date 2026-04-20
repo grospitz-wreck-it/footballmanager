@@ -348,9 +348,14 @@ if(!live){
     return;
   }
 
-  live.running = false;
+ live.running = false;
+
+// 🔥 WICHTIG: phase nur setzen wenn KEIN bye
+if(live.phase !== "bye"){
   live.phase = "first_half";
-  live.minute = 0;
+}
+
+live.minute = 0;
 
   console.log("🆕 MATCH INITIALIZED", live);
 
@@ -359,8 +364,12 @@ if(!live){
 // =========================
 // ▶️ AUTO START NACH INIT
 // =========================
-if(live && live.running === false){
-
+if(
+  live &&
+  live.running === false &&
+  live.phase !== "bye" &&
+  live.phase !== "halftime"
+){
   console.log("▶️ AUTO START MATCH");
 
   startBackgroundSimulation();
