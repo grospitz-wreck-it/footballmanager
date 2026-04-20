@@ -642,9 +642,9 @@ function initPlzInput(){
       const scored = game.leagues
         .map(league => {
 
-          // 🔥 nur bis Tier 7
-          if((league.level || 99) > 7) return null;
-
+          // 🔥 nur  Tier 7-9
+          if((league.level || 0) < 7) return null;
+          
           if(!league?.teams?.length) return null;
 
           let score = 0;
