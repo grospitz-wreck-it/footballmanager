@@ -505,6 +505,14 @@ function updateMainButtonText(){
   const btn = document.getElementById("mainButton");
   if(!btn) return;
 
+  // =========================
+  // 🚀 SETUP STATE (NEU)
+  // =========================
+  if(game.phase === "setup"){
+    btn.textContent = "Start Game";
+    return;
+  }
+
   const live = game.match?.live;
 
   if(!live){
@@ -512,12 +520,24 @@ function updateMainButtonText(){
     return;
   }
 
-  if(live.phase === "bye") btn.textContent = "No Match";
-  else if(live.minute >= 90) btn.textContent = "Next Match";
-  else if(live.phase === "halftime") btn.textContent = "Start 2nd Half";
-  else if(live.running) btn.textContent = "Pause";
-  else if(live.minute > 0) btn.textContent = "Resume";
-  else btn.textContent = "Start Match";
+  if(live.phase === "bye"){
+    btn.textContent = "No Match";
+  }
+  else if(live.minute >= 90){
+    btn.textContent = "Next Match";
+  }
+  else if(live.phase === "halftime"){
+    btn.textContent = "Start 2nd Half";
+  }
+  else if(live.running){
+    btn.textContent = "Pause";
+  }
+  else if(live.minute > 0){
+    btn.textContent = "Resume";
+  }
+  else{
+    btn.textContent = "Start Match";
+  }
 }
 
 // =========================
