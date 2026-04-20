@@ -312,16 +312,14 @@ function initMainButton(){
     console.log("🟢 BUTTON CLICK");
 
     let live = game.match?.live;
-    const league = game.league?.current;
+const league = game.league?.current;
 
-    if(!league) return;
+// =========================
+// 🚀 FIRST START MUSS IMMER GEHEN
+// =========================
+game.phase = game.phase || "setup";
 
-    // =========================
-    // 🚀 FIRST START (FIXED)
-    // =========================
-    game.phase = game.phase || "setup";
-
-if(game.phase === "setup"){
+if (game.phase === "setup") {
   console.log("🚀 FIRST START");
 
   game.phase = "playing";
@@ -330,7 +328,16 @@ if(game.phase === "setup"){
   updateUI();
   updateMainButtonText();
 
-  // ❗ KEIN RETURN
+  // 🔥 HIER RETURN!
+  return;
+}
+
+// =========================
+// ❗ ERST DANACH LEAGUE CHECK
+// =========================
+if (!league) {
+  console.warn("❌ League fehlt beim Start");
+  return;
 }
 
     // =========================
