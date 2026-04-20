@@ -308,96 +308,99 @@ function initMainButton(){
 
   btn.onclick = () => {
 
+    console.log("🟢 BUTTON CLICK");
+
     let live = game.match?.live;
-const league = game.league?.current;
+    const league = game.league?.current;
 
-if(!league) return;
+    if(!league) return;
 
-// =========================
-// 🚀 FIRST START (GO STATE)
-// =========================
-game.phase = game.phase || "setup";
-    
-  console.log("🚀 FIRST START");
+    // =========================
+    // 🚀 FIRST START (FIXED)
+    // =========================
+    game.phase = game.phase || "setup";
 
-  game.phase = "playing"; // sauberer State
+    if(game.phase === "setup"){
+      console.log("🚀 FIRST START");
 
-  handleAppVisibility();
-  updateUI();
-  updateMainButtonText();
+      game.phase = "playing";
 
-  // ❗ KEIN RETURN
-}
-
-// =========================
-// 🆕 INIT MATCH
-// =========================
-if(!live){
-
-  const round = league.schedule?.[league.currentRound || 0];
-  if(!round){
-    console.warn("❌ Kein Round");
-    return;
-  }
-
-  if(!initMatch(round)){
-    console.warn("❌ initMatch failed");
-    return;
-  }
-
-  live = game.match.live;
-
-  if(!live){
-    console.error("❌ live fehlt nach init");
-    return;
-  }
-
- live.running = false;
-
-// 🔥 WICHTIG: phase nur setzen wenn KEIN bye
-if(live.phase !== "bye"){
-  live.phase = "first_half";
-}
-
-live.minute = 0;
-
-  console.log("🆕 MATCH INITIALIZED", live);
-
-}
-
-// =========================
-// ▶️ AUTO START NACH INIT
-// =========================
-if(
-  live &&
-  live.running === false &&
-  live.phase !== "bye" &&
-  live.phase !== "halftime"
-){
-  console.log("▶️ AUTO START MATCH");
-
-  startBackgroundSimulation();
-
-  live.running = true;
-  matchLoopRunning = true;
-
-  runMatchLoop({
-    onTick: () => {
+      handleAppVisibility();
       updateUI();
       updateMainButtonText();
-    },
-    onEnd: () => {
-      matchLoopRunning = false;
-      updateUI();
-      updateMainButtonText();
+
+      // ❗ KEIN RETURN → Flow geht weiter
     }
-  });
 
-  updateMainButtonText();
-  return;
-}
-    
+    // =========================
+    // 🆕 INIT MATCH
+    // =========================
+    if(!live){
+
+      const round = league.schedule?.[league.currentRound || 0];
+      if(!round){
+        console.warn("❌ Kein Round");
+        return;
+      }
+
+      if(!initMatch(round)){
+        console.warn("❌ initMatch failed");
+        return;
+      }
+
+      live = game.match.live;
+
+      if(!live){
+        console.error("❌ live fehlt nach init");
+        return;
+      }
+
+      live.running = false;
+
+      if(live.phase !== "bye"){
+        live.phase = "first_half";
+      }
+
+      live.minute = 0;
+
+      console.log("🆕 MATCH INITIALIZED", live);
+    }
+
+    // =========================
+    // ▶️ AUTO START NACH INIT
+    // =========================
+    if(
+      live &&
+      live.running === false &&
+      live.phase !== "bye" &&
+      live.phase !== "halftime"
+    ){
+      console.log("▶️ AUTO START MATCH");
+
+      startBackgroundSimulation();
+
+      live.running = true;
+      matchLoopRunning = true;
+
+      runMatchLoop({
+        onTick: () => {
+          updateUI();
+          updateMainButtonText();
+        },
+        onEnd: () => {
+          matchLoopRunning = false;
+          updateUI();
+          updateMainButtonText();
+        }
+      });
+
+      updateMainButtonText();
+      return;
+    }
+
+    // =========================
     // BYE
+    // =========================
     if(live.phase === "bye"){
 
       game.league.currentRound++;
@@ -415,7 +418,9 @@ if(
       return;
     }
 
+    // =========================
     // NEXT MATCH
+    // =========================
     if(live.minute >= 90){
 
       game.league.currentRound++;
@@ -444,7 +449,10 @@ if(
 
       return;
     }
-        // HALFTIME
+
+    // =========================
+    // HALFTIME
+    // =========================
     if(
       live.phase === "halftime" ||
       (live.minute === 45 && !live.running)
@@ -473,7 +481,9 @@ if(
       return;
     }
 
+    // =========================
     // START / RESUME
+    // =========================
     if(live.running === false){
 
       if(matchLoopRunning) return;
@@ -498,7 +508,9 @@ if(
       return;
     }
 
+    // =========================
     // PAUSE
+    // =========================
     if(live.running === true){
       live.running = false;
       matchLoopRunning = false;
