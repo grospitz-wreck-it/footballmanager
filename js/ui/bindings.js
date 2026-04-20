@@ -21,7 +21,7 @@ import { game } from "../core/state.js";
 function bindUI(){
 
   const teamSelect = document.getElementById("teamSelect");
-  const startBtn = document.getElementById("startBtn");
+  const mainButton = document.getElementById("mainButton");
 
   const saveBtn = document.getElementById("saveBtn");
   const loadBtn = document.getElementById("loadBtn");
@@ -39,8 +39,8 @@ function bindUI(){
   // =========================
   // 🟡 SPLASH START
   // =========================
-  if(startBtn){
-    startBtn.onclick = () => {
+  if(mainButton){
+    mainButton.onclick = () => {
       // 🔥 NEUE SESSION erzwingen
       track("session_start");
       
