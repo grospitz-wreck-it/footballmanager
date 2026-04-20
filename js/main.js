@@ -605,34 +605,14 @@ function initResetButton(){
 function initPlzInput(){
 
   const input = document.getElementById("plzInput");
-  const results = document.getElementById("leagueResults");
-  const container = document.getElementById("plzSearch");
-
-  if(!input || !results){
-    console.warn("❌ plzInput oder leagueResults fehlt");
+  if(!input){
+    console.warn("❌ plzInput fehlt");
     return;
   }
 
   console.log("✅ PLZ System ready");
 
   let debounce;
-
-  function open(){
-    results.style.display = "block";
-    requestAnimationFrame(() => {
-      results.classList.add("show");
-      if(container) container.classList.add("open");
-    });
-  }
-
-  function close(){
-    results.classList.remove("show");
-    if(container) container.classList.remove("open");
-
-    setTimeout(() => {
-      results.style.display = "none";
-    }, 150);
-  }
 
   input.addEventListener("input", () => {
 
@@ -641,12 +621,6 @@ function initPlzInput(){
     debounce = setTimeout(() => {
 
       const plz = input.value.trim();
-
-      if(plz.length < 2){
-        results.innerHTML = "";
-        close();
-        return;
-      }
 
       if(!game.leagues || !game.leagues.length){
         return;
@@ -661,14 +635,14 @@ function initPlzInput(){
           let score = 0;
 
           for(const team of league.teams){
-            const city = game.cityMap && game.cityMap[team.city_id];
-            if(!city || !city.plz) continue;
+            const city = game.cityMap?.[team.city_id];
+            if(!city?.plz) continue;
 
             const cityPlz = String(city.plz);
 
             if(plz.length === 3 && cityPlz.startsWith(plz)) score += 100;
             else if(plz.length === 2 && cityPlz.startsWith(plz)) score += 50;
-            else if(cityPlz.startsWith(plz[0])) score += 10;
+            else if(plz.length === 1 && cityPlz.startsWith(plz)) score += 10;
           }
 
           return score > 0 ? { league, score } : null;
@@ -679,95 +653,32 @@ function initPlzInput(){
       const filtered = scored.map(s => s.league);
 
       if(filtered.length === 0){
-        results.innerHTML = "<div class='league-result empty'>Keine Liga gefunden</div>";
-        open();
-        return;
-      }
-
-      if(filtered.length === 1){
-        const league = filtered[0];
-
-        setLeagueById(league.id);
-
-        const leagueSelect = document.getElementById("leagueSelect");
-        const selected = leagueSelect && leagueSelect.querySelector(".selected");
-
-        if(selected){
-          selected.textContent = league.name + " (" + (league.teams ? league.teams.length : 0) + ")";
-        }
-
-        initCustomTeamSelect(league);
-
-        results.innerHTML = "<div class='league-result selected'>✅ " + league.name + "</div>";
-
-        open();
-        setTimeout(close, 800);
-
-        handleAppVisibility();
-        updateUI();
-        updateMainButtonText();
-
+        initCustomLeagueSelect([]);
         return;
       }
 
       const top = filtered.slice(0,5);
 
-      results.innerHTML = top.map((l,i) =>
-        "<div class='league-result " + (i===0?"selected":"") + "' data-id='" + l.id + "'>" +
-        l.name +
-        "</div>"
-      ).join("");
+      initCustomLeagueSelect(top);
 
-      open();
+      // 🔥 Dropdown automatisch öffnen
+      const leagueContainer = document.getElementById("leagueSelect");
+      if(leagueContainer){
+        leagueContainer.classList.add("open");
+      }
 
-      results.querySelectorAll(".league-result").forEach(el => {
+    },150);
 
-        el.onclick = (e) => {
-
-          e.stopPropagation();
-
-          const id = el.dataset.id;
-          const league = top.find(l => String(l.id) === String(id));
-          if(!league) return;
-
-          setLeagueById(league.id);
-
-          const leagueSelect = document.getElementById("leagueSelect");
-          const selected = leagueSelect && leagueSelect.querySelector(".selected");
-
-          if(selected){
-            selected.textContent = league.name + " (" + (league.teams ? league.teams.length : 0) + ")";
-          }
-
-          initCustomTeamSelect(league);
-
-          close();
-
-          handleAppVisibility();
-          updateUI();
-          updateMainButtonText();
-        };
-
-      });
-
-    }, 150);
-  });
-
-  document.addEventListener("click", (e) => {
-    if(results.contains(e.target)) return;
-    if(input.contains(e.target)) return;
-    close();
   });
 }
 
-function initCustomLeagueSelect() {
+function initCustomLeagueSelect(list = game.leagues) {
+
   const container = document.getElementById("leagueSelect");
   if (!container) return;
 
-  container.classList.remove("open"); // 🔥 FIX
+  container.classList.remove("open");
   container.innerHTML = "";
-
-  const leagues = game.leagues || [];
 
   container.innerHTML = `
     <div class="selected">Liga wählen</div>
@@ -777,54 +688,65 @@ function initCustomLeagueSelect() {
   const selected = container.querySelector(".selected");
   const options = container.querySelector(".options");
 
-  const filtered = leagues.filter((l) => (l.level || 0) >= 7);
+  // 🔥 WICHTIG: NICHT mehr game.leagues nehmen!
+  const filtered = (list || []).filter((l) => (l.level || 0) >= 7);
 
   options.innerHTML = filtered
-    .map(
-      (l) => `
-    <div class="option" data-id="${l.id}">
-      ${l.name} (${l.teams?.length || 0})
-    </div>
-  `,
-    )
+    .map(l => `
+      <div class="option" data-id="${l.id}">
+        ${l.name} (${l.teams?.length || 0})
+      </div>
+    `)
     .join("");
 
   selected.onclick = (e) => {
-    e.stopPropagation(); // 🔥 FIX
+    e.stopPropagation();
     container.classList.toggle("open");
   };
 
-  options.querySelectorAll(".option").forEach((el) => {
+  options.querySelectorAll(".option").forEach(el => {
+
     el.onclick = (e) => {
-      e.stopPropagation(); // 🔥 FIX
+      e.stopPropagation();
 
       const id = el.dataset.id;
-      const league = filtered.find((l) => String(l.id) === String(id));
+      const league = filtered.find(l => String(l.id) === String(id));
       if (!league) return;
 
       selected.textContent = `${league.name} (${league.teams.length})`;
 
       setLeagueById(league.id);
 
-      container.classList.remove("open");
+      // 🔥 TEAM FREISCHALTEN
+      const teamContainer = document.getElementById("teamSelect");
+      teamContainer.classList.remove("disabled");
 
       initCustomTeamSelect(league);
 
+      container.classList.remove("open");
+
       updateUI();
     };
+
   });
 }
 
 function initCustomTeamSelect(league) {
+
   const container = document.getElementById("teamSelect");
   if (!container) return;
-    console.log("🔥 TEAM SELECT INIT", league);
-  // 🔥 Reset
+
   container.classList.remove("open");
 
   const teams = league?.teams || [];
 
-  // 🔥 HTML komplett neu setzen
+  // 🔥 DISABLED wenn keine Liga
+  if (!league || !teams.length) {
+    container.classList.add("disabled");
+  } else {
+    container.classList.remove("disabled");
+  }
+
   container.innerHTML = `
     <div class="selected">${teams.length ? "Team wählen" : "Keine Teams"}</div>
     <div class="options">
@@ -846,13 +768,13 @@ function initCustomTeamSelect(league) {
   // 🔽 OPEN / CLOSE
   selected.onclick = (e) => {
     e.stopPropagation();
+    if (container.classList.contains("disabled")) return;
     container.classList.toggle("open");
   };
 
   // 🔥 OPTION CLICK
   options.querySelectorAll(".option").forEach(el => {
 
-    // skip empty state
     if (el.classList.contains("empty")) return;
 
     el.onclick = (e) => {
@@ -862,10 +784,8 @@ function initCustomTeamSelect(league) {
       const team = teams.find(t => String(t.id) === String(id));
       if (!team) return;
 
-      // 🔥 UI Update
       selected.textContent = team.name;
 
-      // 🔥 GAME STATE
       selectTeamById(team.id);
 
       container.classList.remove("open");
@@ -875,13 +795,6 @@ function initCustomTeamSelect(league) {
       updateMainButtonText();
     };
 
-  });
-
-  // 🔥 OUTSIDE CLICK (schließt Dropdown)
-  document.addEventListener("click", (e) => {
-    if (!container.contains(e.target)) {
-      container.classList.remove("open");
-    }
   });
 }
 
