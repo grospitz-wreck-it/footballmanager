@@ -312,7 +312,8 @@ initMainButton();
 updateMainButtonText();
 initResetButton();
 initPlzInput();
-
+initCustomLeagueSelect();
+    
     } catch(e){
   console.error("💥 INIT CRASH:", e);
 }
@@ -696,31 +697,42 @@ function initPlzInput(){
         return;
       }
 
-      // =========================
-      // ⚡ AUTO SELECT
-      // =========================
-      if(filtered.length === 1){
+    // =========================
+// ⚡ AUTO SELECT
+// =========================
+if(filtered.length === 1){
 
-        const league = filtered[0];
+  const league = filtered[0];
 
-        console.log("⚡ AUTO SELECT:", league.name);
+  console.log("⚡ AUTO SELECT:", league.name);
 
-        setLeagueById(league.id);
+  setLeagueById(league.id);
 
-        results.innerHTML = `
-          <div class="league-result selected">✅ ${league.name}</div>
-        `;
+  // 🔥 NUR TEXT UPDATEN (kein re-init!)
+  const leagueSelect = document.getElementById("leagueSelect");
+  const selected = leagueSelect?.querySelector(".selected");
 
-        open();
+  if(selected){
+    selected.textContent = `${league.name} (${league.teams?.length || 0})`;
+  }
 
-        setTimeout(close, 800);
+  // 🔥 TEAM SELECT NEU LADEN
+  initCustomTeamSelect(league);
 
-        handleAppVisibility();
-        updateUI();
-        updateMainButtonText();
+  results.innerHTML = `
+    <div class="league-result selected">✅ ${league.name}</div>
+  `;
 
-        return;
-      }
+  open();
+
+  setTimeout(close, 800);
+
+  handleAppVisibility();
+  updateUI();
+  updateMainButtonText();
+
+  return;
+}
 
       // =========================
       // 📦 TOP 5
@@ -767,6 +779,102 @@ function initPlzInput(){
     if(input.contains(e.target)) return;
 
     close();
+  });
+}
+
+function initCustomLeagueSelect(){
+
+  const container = document.getElementById("leagueSelect");
+  if(!container) return;
+
+  const leagues = game.leagues || [];
+
+  container.innerHTML = `
+    <div class="selected">Liga wählen</div>
+    <div class="options"></div>
+  `;
+
+  const selected = container.querySelector(".selected");
+  const options = container.querySelector(".options");
+
+  // 🔥 nur Tier 7+
+  const filtered = leagues.filter(l => (l.level || 0) >= 7);
+
+  options.innerHTML = filtered.map(l => `
+    <div class="option" data-id="${l.id}">
+      ${l.name} (${l.teams?.length || 0})
+    </div>
+  `).join("");
+
+  // open / close
+  selected.onclick = () => {
+    container.classList.toggle("open");
+  };
+
+  // select
+  options.querySelectorAll(".option").forEach(el => {
+    el.onclick = () => {
+
+      const id = el.dataset.id;
+      const league = filtered.find(l => String(l.id) === String(id));
+      if(!league) return;
+
+      selected.textContent = `${league.name} (${league.teams.length})`;
+
+      setLeagueById(league.id);
+
+      container.classList.remove("open");
+
+      // 🔥 TEAM SELECT NEU LADEN
+      initCustomTeamSelect(league);
+
+      updateUI();
+    };
+  });
+}
+
+function initCustomTeamSelect(league){
+
+  const container = document.getElementById("teamSelect");
+  if(!container) return;
+
+  const teams = league?.teams || [];
+
+  container.innerHTML = `
+    <div class="selected">Team wählen</div>
+    <div class="options"></div>
+  `;
+
+  const selected = container.querySelector(".selected");
+  const options = container.querySelector(".options");
+
+  options.innerHTML = teams.map(t => `
+    <div class="option" data-id="${t.id}">
+      ${t.name}
+    </div>
+  `).join("");
+
+  selected.onclick = () => {
+    container.classList.toggle("open");
+  };
+
+  options.querySelectorAll(".option").forEach(el => {
+    el.onclick = () => {
+
+      const id = el.dataset.id;
+      const team = teams.find(t => String(t.id) === String(id));
+      if(!team) return;
+
+      selected.textContent = team.name;
+
+      selectTeamById(team.id);
+
+      container.classList.remove("open");
+
+      handleAppVisibility();
+      updateUI();
+      updateMainButtonText();
+    };
   });
 }
 
