@@ -818,7 +818,7 @@ function initCustomLeagueSelect() {
 function initCustomTeamSelect(league) {
   const container = document.getElementById("teamSelect");
   if (!container) return;
-
+    console.log("🔥 TEAM SELECT INIT", league);
   // 🔥 Reset
   container.classList.remove("open");
 
