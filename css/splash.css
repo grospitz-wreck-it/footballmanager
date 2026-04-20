@@ -270,14 +270,22 @@ select {
   transform: scale(0.95);
 }
 /* =========================
-🎛 CUSTOM SELECT
+🎛 CUSTOM SELECT FIXED
 ========================= */
-.custom-select {
+
+.select-group {
   width: 100%;
   max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
+/* Container */
+.custom-select {
+  width: 100%;
   position: relative;
-  cursor: pointer;
+  z-index: 100;
 }
 
 /* Selected */
@@ -302,6 +310,7 @@ select {
 
   color: white;
   font-weight: 600;
+  cursor: pointer;
 }
 
 /* Arrow */
@@ -317,22 +326,23 @@ select {
   left: 0;
   right: 0;
 
+  display: none;
+
   background:
-    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.8));
+    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.85));
 
   border-radius: 14px;
-  overflow: hidden;
 
   border: 1px solid rgba(255,255,255,0.08);
 
   box-shadow:
-    0 20px 50px rgba(0,0,0,0.8),
+    0 25px 60px rgba(0,0,0,0.9),
     0 0 20px rgba(34,197,94,0.2);
 
-  display: none;
-  z-index: 20;
+  z-index: 9999;
 }
 
+/* Open state */
 .custom-select.open .options {
   display: block;
 }
@@ -341,10 +351,14 @@ select {
 .custom-select .option {
   padding: 12px 14px;
   color: white;
-
+  cursor: pointer;
   transition: all 0.15s ease;
 }
 
+.custom-select .option:hover {
+  background: rgba(255,255,255,0.05);
+  transform: translateX(4px);
+}
 .custom-select .option:hover {
   background: rgba(255,255,255,0.05);
   transform: translateX(4px);
