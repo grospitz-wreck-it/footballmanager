@@ -1,5 +1,5 @@
 /* =========================
-🌌 ULTRA SPLASH (FINAL FIXED)
+🌌 ULTRA SPLASH (FINAL CLEAN)
 ========================= */
 
 #splash {
@@ -14,8 +14,7 @@
   gap: 18px;
 
   padding: 20px;
-
-  overflow: visible; /* 🔥 FIX */
+  overflow: visible;
 
   color: white;
   text-align: center;
@@ -27,9 +26,8 @@
     linear-gradient(180deg, #020617, #000);
 }
 
-
 /* =========================
-✨ ANIMATED LIGHT FOG
+✨ BACKGROUND FX
 ========================= */
 #splash::before {
   content: "";
@@ -39,19 +37,10 @@
   background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 60%);
   animation: splashFog 18s linear infinite;
 
-  pointer-events: none; /* 🔥 wichtig */
+  pointer-events: none;
   z-index: 0;
 }
 
-@keyframes splashFog {
-  from { transform: translateY(0) rotate(0deg); }
-  to   { transform: translateY(-10%) rotate(360deg); }
-}
-
-
-/* =========================
-💡 LIGHT RAYS
-========================= */
 #splash::after {
   content: "";
   position: absolute;
@@ -69,8 +58,13 @@
   opacity: 0.2;
   animation: rays 20s linear infinite;
 
-  pointer-events: none; /* 🔥 wichtig */
+  pointer-events: none;
   z-index: 0;
+}
+
+@keyframes splashFog {
+  from { transform: translateY(0) rotate(0deg); }
+  to   { transform: translateY(-10%) rotate(360deg); }
 }
 
 @keyframes rays {
@@ -78,24 +72,19 @@
   to   { transform: translateX(200px); }
 }
 
-
 /* =========================
-📦 CONTENT LAYER (CLICK SAFE)
+📦 CONTENT LAYER
 ========================= */
 #splash > * {
   position: relative;
   z-index: 2;
 }
 
-
 /* =========================
 🏆 LOGO
 ========================= */
 #logo {
   width: clamp(120px, 40vw, 220px);
-  height: auto;
-
-  image-rendering: pixelated;
 
   filter:
     drop-shadow(0 0 20px rgba(34,197,94,0.6))
@@ -115,58 +104,128 @@
   }
 }
 
-
 /* =========================
-📦 INPUTS
+🧱 FORM BASE (ALLE FELDER)
 ========================= */
 #splash input,
 #splash select {
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
 
-  padding: 13px 14px;
+  height: 48px;
+  padding: 0 16px;
+
   border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
 
-  border: 1px solid rgba(255,255,255,0.1);
-
-  background:
-    linear-gradient(180deg, #020617, #020617),
-    linear-gradient(120deg, rgba(255,255,255,0.1), transparent);
+  font-size: 15px;
+  font-weight: 500;
 
   color: white;
-  font-size: 14px;
 
-  backdrop-filter: blur(6px);
+  background:
+    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.85)),
+    linear-gradient(120deg, rgba(255,255,255,0.08), transparent);
+
+  backdrop-filter: blur(10px);
 
   box-shadow:
     inset 0 0 10px rgba(255,255,255,0.05),
     0 10px 30px rgba(0,0,0,0.5);
 
+  outline: none;
+
   transition: all 0.2s ease;
 }
 
+/* Focus */
 #splash input:focus,
 #splash select:focus {
-  outline: none;
   border-color: #22c55e;
 
   box-shadow:
     0 0 0 2px rgba(34,197,94,0.25),
-    0 10px 40px rgba(34,197,94,0.2);
-}
-#plzSearch.open {
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
+    0 0 25px rgba(34,197,94,0.2);
 }
 
-#plzSearch.open #leagueResults {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+/* =========================
+🎛 SELECT STYLE
+========================= */
+#splash select {
+  appearance: none;
+  cursor: pointer;
+
+  background-image:
+    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.85)),
+    linear-gradient(120deg, rgba(255,255,255,0.08), transparent),
+    url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 20 20' width='20'><path d='M5 7l5 5 5-5'/></svg>");
+
+  background-repeat: no-repeat;
+  background-position:
+    0 0,
+    0 0,
+    right 14px center;
+
+  background-size:
+    cover,
+    cover,
+    14px;
 }
+
+/* =========================
+📍 PLZ SEARCH CONTAINER
+========================= */
+#plzSearch {
+  width: 100%;
+  max-width: 320px;
+
+  padding: 6px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(180deg, rgba(2,6,23,0.85), rgba(2,6,23,0.7));
+
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,255,255,0.06);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.5),
+    0 0 20px rgba(34,197,94,0.15);
+}
+
+/* =========================
+🔍 DROPDOWN
+========================= */
 #leagueResults {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+
+  border-radius: 14px;
+  padding: 4px;
+
+  background:
+    linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.75));
+
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow:
+    0 15px 40px rgba(0,0,0,0.8),
+    0 0 20px rgba(34,197,94,0.2);
+
+  overflow: hidden;
+  z-index: 10;
+
   opacity: 0;
   transform: translateY(10px) scale(0.98);
   transition: all 0.18s ease;
+
+  display: none;
 }
 
 #leagueResults.show {
@@ -175,13 +234,43 @@
 }
 
 /* =========================
-🚀 START BUTTON
+📦 DROPDOWN ITEMS
+========================= */
+.league-result {
+  padding: 12px 14px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  color: rgba(255,255,255,0.9);
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  transition: all 0.18s ease;
+}
+
+.league-result:hover {
+  background: rgba(255,255,255,0.05);
+  transform: translateX(4px);
+
+  box-shadow:
+    0 0 15px rgba(34,197,94,0.25);
+}
+
+.league-result.selected {
+  color: #22c55e;
+}
+
+/* =========================
+🚀 BUTTON
 ========================= */
 #splash button {
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
 
-  padding: 15px;
+  height: 50px;
 
   border-radius: 16px;
   border: none;
@@ -191,42 +280,14 @@
 
   color: #022c22;
 
-  background:
-    linear-gradient(135deg, #22c55e, #4ade80);
+  background: linear-gradient(135deg, #22c55e, #4ade80);
 
   box-shadow:
     0 10px 40px rgba(34,197,94,0.5),
     0 0 20px rgba(34,197,94,0.4);
 
-  position: relative;
-  overflow: hidden;
-
+  cursor: pointer;
   transition: all 0.2s ease;
-  z-index: 3;
-}
-
-#splash button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-
-  background: linear-gradient(
-    120deg,
-    transparent 20%,
-    rgba(255,255,255,0.6),
-    transparent 80%
-  );
-
-  transform: translateX(-120%);
-  animation: shine 3s infinite;
-
-  pointer-events: none;
-}
-
-@keyframes shine {
-  to {
-    transform: translateX(120%);
-  }
 }
 
 #splash button:hover {
@@ -236,198 +297,3 @@
 #splash button:active {
   transform: scale(0.95);
 }
-
-
-
-/* =========================
-📍 PLZ SEARCH – NEON GLASS
-========================= */
-#plzSearch {
-  position: relative;
-  z-index: 10000;
-
-  width: 100%;
-  max-width: 320px;
-
-  padding: 10px;
-
-  border-radius: 20px;
-
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.85), rgba(2,6,23,0.6)),
-    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.15), transparent 40%),
-    radial-gradient(circle at 80% 30%, rgba(59,130,246,0.15), transparent 40%);
-
-  backdrop-filter: blur(14px);
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.7),
-    0 0 30px rgba(34,197,94,0.2);
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* =========================
-⌨️ PLZ INPUT – MATCH STYLE
-========================= */
-#plzSearch input {
-  width: 100%;
-
-  padding: 14px 16px;
-
-  border-radius: 14px;
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  background:
-    linear-gradient(180deg, #020617, #020617),
-    linear-gradient(120deg, rgba(255,255,255,0.08), transparent);
-
-  color: white;
-  font-size: 15px;
-
-  outline: none;
-
-  box-shadow:
-    inset 0 0 10px rgba(255,255,255,0.05),
-    0 10px 30px rgba(0,0,0,0.5);
-
-  transition: all 0.2s ease;
-}
-
-/* ✨ FOCUS */
-#plzSearch input:focus {
-  border-color: #22c55e;
-
-  box-shadow:
-    0 0 0 2px rgba(34,197,94,0.25),
-    0 10px 40px rgba(34,197,94,0.2);
-}
-/* =========================
-🔍 DROPDOWN – NEON GLASS
-========================= */
-#leagueResults {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-
-  border-radius: 18px;
-
-  padding: 6px;
-
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.7)),
-    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.15), transparent 40%),
-    radial-gradient(circle at 80% 30%, rgba(59,130,246,0.15), transparent 40%);
-
-  backdrop-filter: blur(14px);
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  box-shadow:
-    0 20px 60px rgba(0,0,0,0.8),
-    0 0 30px rgba(34,197,94,0.2);
-
-  overflow: hidden;
-
-  z-index: 10;
-
-  display: none;
-}
-
-/* =========================
-📦 ITEMS
-========================= */
-.league-result {
-  padding: 14px 16px;
-
-  font-size: 14px;
-  font-weight: 600;
-
-  color: rgba(255,255,255,0.9);
-
-  border-radius: 12px;
-
-  cursor: pointer;
-
-  position: relative;
-
-  transition: all 0.18s ease;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* subtle divider */
-.league-result:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 0;
-
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255,255,255,0.08),
-    transparent
-  );
-}
-
-/* =========================
-✨ HOVER
-========================= */
-.league-result:hover {
-  background: rgba(255,255,255,0.05);
-
-  transform: translateX(4px) scale(1.01);
-
-  box-shadow:
-    inset 0 0 20px rgba(255,255,255,0.05),
-    0 0 20px rgba(34,197,94,0.25);
-
-  color: #fff;
-}
-
-/* =========================
-⚡ ACTIVE (CLICK)
-========================= */
-.league-result:active {
-  transform: scale(0.96);
-
-  box-shadow:
-    0 0 10px rgba(34,197,94,0.5);
-}
-
-/* =========================
-💡 SELECTED STATE (optional)
-========================= */
-.league-result.selected {
-  background: linear-gradient(
-    135deg,
-    rgba(34,197,94,0.2),
-    rgba(59,130,246,0.2)
-  );
-
-  box-shadow:
-    0 0 20px rgba(34,197,94,0.4);
-
-  color: #22c55e;
-}
-
-/* =========================
-🚀 EMPTY STATE
-========================= */
-.league-result.empty {
-  opacity: 0.6;
-  cursor: default;
-  text-align: center;
-}
-
