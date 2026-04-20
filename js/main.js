@@ -585,7 +585,7 @@ function initResetButton(){
 
 
 function initPlzInput(){
-
+  console.log("🔥 initPlzInput CALLED");
   let tries = 0;
 
   const tryBind = () => {
