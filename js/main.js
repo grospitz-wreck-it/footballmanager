@@ -266,30 +266,48 @@ async function init(){
 
   const firstTeam = leagues[0]?.teams?.[0];
 
+  if(leagues.length){
+
+  setLeagueById(leagues[0].id);
+  generateSchedule();
+
+  console.log("📅 SCHEDULE:", game.league.current?.schedule);
+
+  const firstTeam = leagues[0]?.teams?.[0];
+
   if(firstTeam){
 
-  console.log("🎯 Auto-select Team (delayed)");
+    console.log("🎯 Auto-select Team (delayed)");
 
- selectTeamById(String(firstTeam.id));
+    setTimeout(() => {
 
-} else {
-  console.warn("⚠️ Kein Team in Liga gefunden");
-}
+      const ok = selectTeamById(String(firstTeam.id));
 
+      console.log("🧪 selectTeam result:", ok);
 
+      if(ok){
+        handleAppVisibility();
+        updateUI();
+        updateMainButtonText();
+      } else {
+        console.warn("❌ Team Select fehlgeschlagen");
+      }
 
-  // 🔥 ALLES HIER REIN
-  handleAppVisibility();
-  updateUI();
-}
+    }, 50);
 
-    initMainButton();
-    updateMainButtonText();
-    initResetButton();
-
-  } catch(e){
-    console.error("💥 INIT CRASH:", e);
+  } else {
+    console.warn("⚠️ Kein Team in Liga gefunden");
   }
+}
+
+// 👉 BUTTONS BLEIBEN AUSSERHALB
+initMainButton();
+updateMainButtonText();
+initResetButton();
+
+} catch(e){
+  console.error("💥 INIT CRASH:", e);
+}
 }
     
 // =========================
