@@ -204,7 +204,6 @@ async function init(){
   game.phase = "setup";
   initEventBindings();
   startAdEngine();
-  initPlzInput();
   try {
 
     // =========================
@@ -295,6 +294,8 @@ if(leagues.length){
 initMainButton();
 updateMainButtonText();
 initResetButton();
+initPlzInput();
+
     } catch(e){
   console.error("💥 INIT CRASH:", e);
 }
