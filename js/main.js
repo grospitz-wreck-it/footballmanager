@@ -298,6 +298,7 @@ initResetButton();
     } catch(e){
   console.error("💥 INIT CRASH:", e);
 }
+}
 // =========================
 // 🎯 MAIN BUTTON
 // =========================
@@ -331,7 +332,7 @@ if(game.phase === "setup"){
 
   // ❗ KEIN RETURN
 }
-}
+
     // =========================
     // 🆕 INIT MATCH
     // =========================
