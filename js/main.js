@@ -341,13 +341,18 @@ game.phase = game.phase || "setup";
 if (game.phase === "setup") {
   console.log("🚀 FIRST START");
 
+  // ❗ WICHTIG: Team prüfen
+  if (!game.team?.selectedId) {
+    console.warn("❌ Kein Team gewählt");
+    return;
+  }
+
   game.phase = "playing";
 
   handleAppVisibility();
   updateUI();
   updateMainButtonText();
 
-  // 🔥 HIER RETURN!
   return;
 }
 
