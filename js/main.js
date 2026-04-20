@@ -819,44 +819,53 @@ function initCustomTeamSelect(league) {
   const container = document.getElementById("teamSelect");
   if (!container) return;
 
-  container.classList.remove("open"); // 🔥 FIX
-  container.innerHTML = "";
+  // 🔥 Reset
+  container.classList.remove("open");
 
   const teams = league?.teams || [];
 
+  // 🔥 HTML komplett neu setzen
   container.innerHTML = `
-    <div class="selected">Team wählen</div>
-    <div class="options"></div>
+    <div class="selected">${teams.length ? "Team wählen" : "Keine Teams"}</div>
+    <div class="options">
+      ${
+        teams.length
+          ? teams.map(t => `
+            <div class="option" data-id="${t.id}">
+              ${t.name}
+            </div>
+          `).join("")
+          : `<div class="option empty">Keine Teams vorhanden</div>`
+      }
+    </div>
   `;
 
   const selected = container.querySelector(".selected");
   const options = container.querySelector(".options");
 
-  options.innerHTML = teams
-    .map(
-      (t) => `
-    <div class="option" data-id="${t.id}">
-      ${t.name}
-    </div>
-  `,
-    )
-    .join("");
-
+  // 🔽 OPEN / CLOSE
   selected.onclick = (e) => {
-    e.stopPropagation(); // 🔥 FIX
+    e.stopPropagation();
     container.classList.toggle("open");
   };
 
-  options.querySelectorAll(".option").forEach((el) => {
+  // 🔥 OPTION CLICK
+  options.querySelectorAll(".option").forEach(el => {
+
+    // skip empty state
+    if (el.classList.contains("empty")) return;
+
     el.onclick = (e) => {
-      e.stopPropagation(); // 🔥 FIX
+      e.stopPropagation();
 
       const id = el.dataset.id;
-      const team = teams.find((t) => String(t.id) === String(id));
+      const team = teams.find(t => String(t.id) === String(id));
       if (!team) return;
 
+      // 🔥 UI Update
       selected.textContent = team.name;
 
+      // 🔥 GAME STATE
       selectTeamById(team.id);
 
       container.classList.remove("open");
@@ -865,6 +874,14 @@ function initCustomTeamSelect(league) {
       updateUI();
       updateMainButtonText();
     };
+
+  });
+
+  // 🔥 OUTSIDE CLICK (schließt Dropdown)
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) {
+      container.classList.remove("open");
+    }
   });
 }
 
