@@ -815,17 +815,31 @@ function initCustomTeamSelect(league) {
 // 🔘 BUTTON TEXT
 // =========================
 function updateMainButtonText() {
+
   const btn = document.getElementById("mainButton");
   if (!btn) return;
 
+  const REQUIRE_TEAM = true; // muss gleich sein wie oben
+
   // =========================
-  // 🚀 SETUP STATE (NEU)
+  // SETUP PHASE
   // =========================
   if (game.phase === "setup") {
-    btn.textContent = "Start Game";
+
+    const hasTeam = !!game.team?.selectedId;
+
+    // Text
+    btn.textContent = hasTeam ? "Spiel starten" : "Team wählen";
+
+    // 🔥 DAS IST DER BONUS
+    btn.disabled = REQUIRE_TEAM && !hasTeam;
+
     return;
   }
 
+  // =========================
+  // AB HIER DEIN ALTER CODE
+  // =========================
   const live = game.match?.live;
 
   if (!live) {
