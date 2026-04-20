@@ -601,43 +601,71 @@ function initPlzInput(){
     const plz = input.value.trim();
     console.log("📍 PLZ INPUT:", plz);
 
-    // 🔥 erst ab 2 Zeichen starten
+    // 🔥 erst ab 2 Zeichen
     if(plz.length < 2){
       results.style.display = "none";
       results.innerHTML = "";
       return;
     }
 
-    if(!game.leagues?.length){
+    if(!game.leagues || !game.leagues.length){
       console.warn("⏳ Ligen noch nicht geladen");
       return;
     }
 
-    // 🔥 FILTER LOGIK (simple Version)
+    // =========================
+    // 🔍 FILTER LOGIK (2 → 3 STELLEN)
+    // =========================
     const filtered = game.leagues.filter(l => {
 
-      // Beispiel: du brauchst später echte PLZ-Mapping Daten
       const name = l.name.toLowerCase();
 
-      if(plz.startsWith("32")) return name.includes("herford");
-      if(plz.startsWith("10")) return name.includes("berlin");
+      // 🔹 2-stellig (grobe Auswahl)
+      if(plz.length === 2){
 
-      // fallback → zeig alle
-      return true;
+        if(plz === "32") return name.includes("herford") || name.includes("bielefeld");
+        if(plz === "10") return name.includes("berlin");
+
+        return false;
+      }
+
+      // 🔹 3-stellig (genauer)
+      if(plz.length === 3){
+
+        if(plz === "320") return name.includes("herford");
+        if(plz === "101") return name.includes("berlin");
+
+        return false;
+      }
+
+      return false;
     });
 
     console.log("🔍 MATCHES:", filtered.length);
 
-    // 🔥 RENDER DROPDOWN
+    // =========================
+    // ❌ KEINE TREFFER
+    // =========================
+    if(filtered.length === 0){
+      results.innerHTML = `<div class="league-result">Keine Liga gefunden</div>`;
+      results.style.display = "block";
+      return;
+    }
+
+    // =========================
+    // 📦 RENDER DROPDOWN
+    // =========================
     results.innerHTML = filtered.map(l => `
       <div class="league-result" data-id="${l.id}">
         ${l.name}
       </div>
     `).join("");
 
-    results.style.display = filtered.length ? "block" : "none";
+    results.style.display = "block";
 
-    // 🔥 CLICK HANDLER
+    // =========================
+    // 🖱 CLICK HANDLER
+    // =========================
     results.querySelectorAll(".league-result").forEach(el => {
 
       el.onclick = () => {
