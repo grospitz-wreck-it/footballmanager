@@ -277,7 +277,7 @@ if(leagues.length){
 
   setLeagueById(leagues[0].id);
   generateSchedule();
-
+  initCustomTeamSelect(game.league.current);
   console.log("📅 SCHEDULE:", game.league.current?.schedule);
 
   const firstTeam = leagues[0]?.teams?.[0];
