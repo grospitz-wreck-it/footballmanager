@@ -201,7 +201,7 @@ function handleAppVisibility(){
 async function init(){
 
   window.game = game;
-
+  game.phase = "setup";
   initEventBindings();
   startAdEngine();
 
@@ -314,15 +314,15 @@ if(!league) return;
 // =========================
 if(game.phase === "setup"){
 
-  console.log("🚀 ENTER GAME");
+  console.log("🚀 FIRST START");
 
-  game.phase = "go";
+  game.phase = "playing"; // sauberer State
 
   handleAppVisibility();
   updateUI();
   updateMainButtonText();
 
-  return;
+  // ❗ KEIN RETURN
 }
 
 // =========================
@@ -356,6 +356,34 @@ if(!live){
 
 }
 
+// =========================
+// ▶️ AUTO START NACH INIT
+// =========================
+if(live && live.running === false){
+
+  console.log("▶️ AUTO START MATCH");
+
+  startBackgroundSimulation();
+
+  live.running = true;
+  matchLoopRunning = true;
+
+  runMatchLoop({
+    onTick: () => {
+      updateUI();
+      updateMainButtonText();
+    },
+    onEnd: () => {
+      matchLoopRunning = false;
+      updateUI();
+      updateMainButtonText();
+    }
+  });
+
+  updateMainButtonText();
+  return;
+}
+    
     // BYE
     if(live.phase === "bye"){
 
