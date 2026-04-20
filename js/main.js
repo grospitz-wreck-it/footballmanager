@@ -343,19 +343,49 @@ if (game.phase === "setup") {
 
   const hasTeam = !!game.team?.selectedId;
 
-  // ❗ OPTION: Verhalten steuerbar
-  const REQUIRE_TEAM = true; // ← HIER kannst du umschalten
-
-  if (REQUIRE_TEAM && !hasTeam) {
+  if (!hasTeam) {
     console.warn("❌ Kein Team gewählt");
-
-    // UX Feedback (optional)
-    alert("Bitte zuerst ein Team auswählen");
-
     return;
   }
 
+  const league = game.league?.current;
+  if (!league) {
+    console.warn("❌ Keine Liga");
+    return;
+  }
+
+  const round = league.schedule?.[league.currentRound || 0];
+  if (!round) {
+    console.warn("❌ Kein Spielplan");
+    return;
+  }
+
+  // 🔥 MATCH INITIALISIEREN
+  if (!initMatch(round)) {
+    console.warn("❌ initMatch failed");
+    return;
+  }
+
+  // 🔥 PHASE WECHSELN
   game.phase = "playing";
+
+  // 🔥 MATCH STARTEN
+  startBackgroundSimulation();
+
+  game.match.live.running = true;
+  matchLoopRunning = true;
+
+  runMatchLoop({
+    onTick: () => {
+      updateUI();
+      updateMainButtonText();
+    },
+    onEnd: () => {
+      matchLoopRunning = false;
+      updateUI();
+      updateMainButtonText();
+    }
+  });
 
   handleAppVisibility();
   updateUI();
