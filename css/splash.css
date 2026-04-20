@@ -221,8 +221,13 @@
 
 
 /* =========================
-🔍 DROPDOWN (SAFE)
+🔍 DROPDOWN (CLICKABLE FIXED)
 ========================= */
+#plzSearch {
+  position: relative;
+  z-index: 10000; /* 🔥 über Splash Content */
+}
+
 #leagueResults {
   position: absolute;
   top: calc(100% + 6px);
@@ -236,14 +241,17 @@
 
   box-shadow: 0 20px 50px rgba(0,0,0,0.6);
 
-  z-index: 5;
+  z-index: 10001; /* 🔥 höher als alles im Splash */
 
-  display: none; /* 🔥 verhindert Klick-Block */
+  display: none;
+
+  pointer-events: auto; /* 🔥 sicherstellen */
 }
 
 .league-result {
   padding: 10px;
   border-bottom: 1px solid #1e293b;
+  cursor: pointer; /* 🔥 wichtig für UX */
 }
 
 .league-result:hover {
