@@ -204,7 +204,7 @@ async function init(){
   game.phase = "setup";
   initEventBindings();
   startAdEngine();
-
+  initPlzInput();
   try {
 
     // =========================
@@ -581,6 +581,40 @@ function initResetButton(){
 
   };
 }
+
+function initPlzInput(){
+
+  const input = document.getElementById("plzInput");
+  if(!input){
+    console.warn("⚠️ plzInput nicht gefunden");
+    return;
+  }
+
+  input.addEventListener("change", () => {
+
+    const plz = input.value.trim();
+    console.log("📍 PLZ INPUT:", plz);
+
+    if(!plz) return;
+
+    // 🔥 HIER DEINE LOGIK
+    // aktuell einfach: erste Liga nehmen (Test)
+
+    const league = game.leagues?.[0];
+
+    if(!league){
+      console.warn("❌ Keine Liga gefunden");
+      return;
+    }
+
+    console.log("🏆 SET LEAGUE BY PLZ:", league.name);
+
+    setLeagueById(league.id);
+
+    updateUI();
+  });
+}
+
 
 // =========================
 // 🔘 BUTTON TEXT
