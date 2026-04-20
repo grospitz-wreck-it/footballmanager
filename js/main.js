@@ -605,6 +605,7 @@ function initPlzInput(){
 
   const input = document.getElementById("plzInput");
   const results = document.getElementById("leagueResults");
+  const container = document.getElementById("plzSearch");
 
   if(!input || !results){
     console.warn("❌ plzInput oder leagueResults fehlt");
@@ -615,6 +616,23 @@ function initPlzInput(){
 
   let debounce;
 
+  function open(){
+    results.style.display = "block";
+    requestAnimationFrame(() => {
+      results.classList.add("show");
+      container?.classList.add("open");
+    });
+  }
+
+  function close(){
+    results.classList.remove("show");
+    container?.classList.remove("open");
+
+    setTimeout(() => {
+      results.style.display = "none";
+    }, 150);
+  }
+
   input.addEventListener("input", () => {
 
     clearTimeout(debounce);
@@ -624,65 +642,44 @@ function initPlzInput(){
       const plz = input.value.trim();
       console.log("📍 PLZ INPUT:", plz);
 
-      // 🔥 erst ab 2 Zeichen
       if(plz.length < 2){
-        results.style.display = "none";
         results.innerHTML = "";
+        close();
         return;
       }
 
-      if(!game.leagues || !game.leagues.length){
+      if(!game.leagues?.length){
         console.warn("⏳ Ligen noch nicht geladen");
         return;
       }
 
       // =========================
-      // 🔍 FILTER + SCORING
+      // 🔍 FILTER
       // =========================
       const scored = game.leagues
         .map(league => {
 
-          // 🔥 nur  Tier 7-9
           if((league.level || 0) < 7) return null;
-          
           if(!league?.teams?.length) return null;
 
           let score = 0;
 
           for(const team of league.teams){
-
             const city = game.cityMap?.[team.city_id];
-            if(!city || !city.plz) continue;
+            if(!city?.plz) continue;
 
             const cityPlz = String(city.plz);
 
-            // 🎯 exakter Match
-            if(plz.length === 3 && cityPlz.startsWith(plz)){
-              score += 100;
-            }
-
-            // 🎯 2-stellig
-            else if(plz.length === 2 && cityPlz.startsWith(plz)){
-              score += 50;
-            }
-
-            // 🎯 fallback grob
-            else if(cityPlz.startsWith(plz[0])){
-              score += 10;
-            }
+            if(plz.length === 3 && cityPlz.startsWith(plz)) score += 100;
+            else if(plz.length === 2 && cityPlz.startsWith(plz)) score += 50;
+            else if(cityPlz.startsWith(plz[0])) score += 10;
           }
 
-          return score > 0
-            ? { league, score }
-            : null;
+          return score > 0 ? { league, score } : null;
         })
         .filter(Boolean)
-        .sort((a, b) => {
-
-          // 🔥 nach Relevanz
+        .sort((a,b) => {
           if(b.score !== a.score) return b.score - a.score;
-
-          // 🔥 dann nach Level
           return (a.league.level || 99) - (b.league.level || 99);
         });
 
@@ -691,16 +688,16 @@ function initPlzInput(){
       console.log("🔍 MATCHES:", filtered.length);
 
       // =========================
-      // ❌ KEINE TREFFER
+      // ❌ KEINE
       // =========================
       if(filtered.length === 0){
-        results.innerHTML = `<div class="league-result">Keine Liga gefunden</div>`;
-        results.style.display = "block";
+        results.innerHTML = `<div class="league-result empty">Keine Liga gefunden</div>`;
+        open();
         return;
       }
 
       // =========================
-      // ⚡ AUTO SELECT (1 MATCH)
+      // ⚡ AUTO SELECT
       // =========================
       if(filtered.length === 1){
 
@@ -711,14 +708,12 @@ function initPlzInput(){
         setLeagueById(league.id);
 
         results.innerHTML = `
-          <div class="league-result">✅ ${league.name}</div>
+          <div class="league-result selected">✅ ${league.name}</div>
         `;
 
-        results.style.display = "block";
+        open();
 
-        setTimeout(() => {
-          results.style.display = "none";
-        }, 800);
+        setTimeout(close, 800);
 
         handleAppVisibility();
         updateUI();
@@ -728,35 +723,31 @@ function initPlzInput(){
       }
 
       // =========================
-      // 📦 TOP 5 RENDER
+      // 📦 TOP 5
       // =========================
-      const top = filtered.slice(0, 5);
+      const top = filtered.slice(0,5);
 
-      results.innerHTML = top.map(l => `
-        <div class="league-result" data-id="${l.id}">
+      results.innerHTML = top.map((l,i) => `
+        <div class="league-result ${i===0?'selected':''}" data-id="${l.id}">
           ${l.name}
         </div>
       `).join("");
 
-      results.style.display = "block";
+      open();
 
-      // =========================
-      // 🖱 CLICK HANDLER
-      // =========================
       results.querySelectorAll(".league-result").forEach(el => {
 
         el.onclick = () => {
 
           const id = el.dataset.id;
           const league = top.find(l => String(l.id) === String(id));
-
           if(!league) return;
 
-          console.log("🏆 SELECTED LEAGUE:", league.name);
+          console.log("🏆 SELECTED:", league.name);
 
           setLeagueById(league.id);
 
-          results.style.display = "none";
+          close();
 
           handleAppVisibility();
           updateUI();
@@ -764,7 +755,18 @@ function initPlzInput(){
         };
       });
 
-    }, 150); // debounce
+    },150);
+  });
+
+  // =========================
+  // OUTSIDE CLICK FIX
+  // =========================
+  document.addEventListener("click", (e) => {
+
+    if(results.contains(e.target)) return;
+    if(input.contains(e.target)) return;
+
+    close();
   });
 }
 
