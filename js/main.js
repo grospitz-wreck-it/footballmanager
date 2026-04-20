@@ -488,12 +488,36 @@ function initResetButton(){
     const m = await import("./services/storage.js");
     m.resetGame();
 
+    // =========================
+    // 🧠 STATE RESET (WICHTIG)
+    // =========================
+    game.phase = "setup";              // 🔥 NEU (entscheidend)
     game.team = null;
     game.match = null;
-    game.league.current = null;
 
+    if(game.league){
+      game.league.current = null;
+      game.league.currentRound = 0;    // 🔥 wichtig für neuen Start
+    }
+
+    // optional sauber machen
+    if(game.events){
+      game.events.history = [];
+    }
+
+    // =========================
+    // 🤖 STOP ALLES
+    // =========================
+    matchLoopRunning = false;
+    stopBackgroundSimulation();
+
+    // =========================
+    // 🖥 UI RESET
+    // =========================
     handleAppVisibility();
     updateUI();
+    updateMainButtonText(); // 🔥 wichtig
+
   };
 }
 
