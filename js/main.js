@@ -621,13 +621,13 @@ function initPlzInput(){
     results.style.display = "block";
     requestAnimationFrame(() => {
       results.classList.add("show");
-      container?.classList.add("open");
+      if(container) container.classList.add("open");
     });
   }
 
   function close(){
     results.classList.remove("show");
-    container?.classList.remove("open");
+    if(container) container.classList.remove("open");
 
     setTimeout(() => {
       results.style.display = "none";
@@ -641,7 +641,6 @@ function initPlzInput(){
     debounce = setTimeout(() => {
 
       const plz = input.value.trim();
-      console.log("📍 PLZ INPUT:", plz);
 
       if(plz.length < 2){
         results.innerHTML = "";
@@ -649,8 +648,7 @@ function initPlzInput(){
         return;
       }
 
-      if(!game.leagues?.length){
-        console.warn("⏳ Ligen noch nicht geladen");
+      if(!game.leagues || !game.leagues.length){
         return;
       }
 
@@ -658,13 +656,13 @@ function initPlzInput(){
         .map(league => {
 
           if((league.level || 0) < 7) return null;
-          if(!league?.teams?.length) return null;
+          if(!league.teams || !league.teams.length) return null;
 
           let score = 0;
 
           for(const team of league.teams){
-            const city = game.cityMap?.[team.city_id];
-            if(!city?.plz) continue;
+            const city = game.cityMap && game.cityMap[team.city_id];
+            if(!city || !city.plz) continue;
 
             const cityPlz = String(city.plz);
 
@@ -676,38 +674,31 @@ function initPlzInput(){
           return score > 0 ? { league, score } : null;
         })
         .filter(Boolean)
-        .sort((a,b) => {
-          if(b.score !== a.score) return b.score - a.score;
-          return (a.league.level || 99) - (b.league.level || 99);
-        });
+        .sort((a,b) => b.score - a.score);
 
       const filtered = scored.map(s => s.league);
 
       if(filtered.length === 0){
-        results.innerHTML = `<div class="league-result empty">Keine Liga gefunden</div>`;
+        results.innerHTML = "<div class='league-result empty'>Keine Liga gefunden</div>";
         open();
         return;
       }
 
-      // ⚡ AUTO SELECT
       if(filtered.length === 1){
-
         const league = filtered[0];
 
         setLeagueById(league.id);
 
         const leagueSelect = document.getElementById("leagueSelect");
-        const selected = leagueSelect?.querySelector(".selected");
+        const selected = leagueSelect && leagueSelect.querySelector(".selected");
 
         if(selected){
-          selected.textContent = `${league.name} (${league.teams?.length || 0})`;
+          selected.textContent = league.name + " (" + (league.teams ? league.teams.length : 0) + ")";
         }
 
         initCustomTeamSelect(league);
 
-        results.innerHTML = `
-          <div class="league-result selected">✅ ${league.name}</div>
-        `;
+        results.innerHTML = "<div class='league-result selected'>✅ " + league.name + "</div>";
 
         open();
         setTimeout(close, 800);
@@ -721,11 +712,11 @@ function initPlzInput(){
 
       const top = filtered.slice(0,5);
 
-      results.innerHTML = top.map((l,i) => `
-        <div class="league-result ${i===0?'selected':''}" data-id="${l.id}">
-          ${l.name}
-        </div>
-      `).join("");
+      results.innerHTML = top.map((l,i) =>
+        "<div class='league-result " + (i===0?"selected":"") + "' data-id='" + l.id + "'>" +
+        l.name +
+        "</div>"
+      ).join("");
 
       open();
 
@@ -733,7 +724,7 @@ function initPlzInput(){
 
         el.onclick = (e) => {
 
-          e.stopPropagation(); // 🔥 FIX
+          e.stopPropagation();
 
           const id = el.dataset.id;
           const league = top.find(l => String(l.id) === String(id));
@@ -742,10 +733,10 @@ function initPlzInput(){
           setLeagueById(league.id);
 
           const leagueSelect = document.getElementById("leagueSelect");
-          const selected = leagueSelect?.querySelector(".selected");
+          const selected = leagueSelect && leagueSelect.querySelector(".selected");
 
           if(selected){
-            selected.textContent = `${league.name} (${league.teams?.length || 0})`;
+            selected.textContent = league.name + " (" + (league.teams ? league.teams.length : 0) + ")";
           }
 
           initCustomTeamSelect(league);
@@ -759,27 +750,15 @@ function initPlzInput(){
 
       });
 
-    },150);
+    }, 150);
   });
 
   document.addEventListener("click", (e) => {
-
     if(results.contains(e.target)) return;
     if(input.contains(e.target)) return;
-
     close();
   });
 }
-
-// =========================
-// OUTSIDE CLICK FIX
-// =========================
-document.addEventListener("click", (e) => {
-  if (results.contains(e.target)) return;
-  if (input.contains(e.target)) return;
-
-  close();
-});
 
 function initCustomLeagueSelect() {
   const container = document.getElementById("leagueSelect");
