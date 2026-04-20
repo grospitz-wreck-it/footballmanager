@@ -771,70 +771,64 @@ function initPlzInput(){
   });
 }
 
-      // =========================
-      // 📦 TOP 5
-      // =========================
-      const top = filtered.slice(0,5);
+// =========================
+// 📦 TOP 5
+// =========================
+const top = filtered.slice(0, 5);
 
-      results.innerHTML = top.map((l,i) => `
-        <div class="league-result ${i===0?'selected':''}" data-id="${l.id}">
-          ${l.name}
-        </div>
-      `).join("");
+results.innerHTML = top
+  .map(
+    (l, i) => `
+  <div class="league-result ${i === 0 ? "selected" : ""}" data-id="${l.id}">
+    ${l.name}
+  </div>
+`,
+  )
+  .join("");
 
-      open();
+open();
 
-      results.querySelectorAll(".league-result").forEach(el => {
+results.querySelectorAll(".league-result").forEach((el) => {
+  el.onclick = () => {
+    const id = el.dataset.id;
+    const league = top.find((l) => String(l.id) === String(id));
+    if (!league) return;
 
-      el.onclick = () => {
+    console.log("🏆 SELECTED:", league.name);
 
-  const id = el.dataset.id;
-  const league = top.find(l => String(l.id) === String(id));
-  if(!league) return;
+    setLeagueById(league.id);
 
-  console.log("🏆 SELECTED:", league.name);
+    const leagueSelect = document.getElementById("leagueSelect");
+    const selected = leagueSelect?.querySelector(".selected");
 
-  setLeagueById(league.id);
+    if (selected) {
+      selected.textContent = `${league.name} (${league.teams?.length || 0})`;
+    }
 
-  // 🔥 HIER IST DEIN FEHLENDER PART
-  const leagueSelect = document.getElementById("leagueSelect");
-  const selected = leagueSelect?.querySelector(".selected");
-
-  if(selected){
-    selected.textContent = `${league.name} (${league.teams?.length || 0})`;
-  }
-
-  // 🔥 TEAM SELECT AUFBAUEN
-  initCustomTeamSelect(league);
-
-  close();
-
-  handleAppVisibility();
-  updateUI();
-  updateMainButtonText();
-};
-        
-      });
-
-    },150);
-  
-
-  // =========================
-  // OUTSIDE CLICK FIX
-  // =========================
-  document.addEventListener("click", (e) => {
-
-    if(results.contains(e.target)) return;
-    if(input.contains(e.target)) return;
+    // 🔥 TEAM SELECT AUFBAUEN
+    initCustomTeamSelect(league);
 
     close();
-  });
 
+    handleAppVisibility();
+    updateUI();
+    updateMainButtonText();
+  };
+});
 
-function initCustomLeagueSelect(){
+// =========================
+// OUTSIDE CLICK FIX
+// =========================
+document.addEventListener("click", (e) => {
+  if (results.contains(e.target)) return;
+  if (input.contains(e.target)) return;
 
+  close();
+});
+
+function initCustomLeagueSelect() {
   const container = document.getElementById("leagueSelect");
-  if(!container) return;
+  if (!container) return;
 
   container.classList.remove("open"); // 🔥 FIX
   container.innerHTML = "";
@@ -849,27 +843,30 @@ function initCustomLeagueSelect(){
   const selected = container.querySelector(".selected");
   const options = container.querySelector(".options");
 
-  const filtered = leagues.filter(l => (l.level || 0) >= 7);
+  const filtered = leagues.filter((l) => (l.level || 0) >= 7);
 
-  options.innerHTML = filtered.map(l => `
+  options.innerHTML = filtered
+    .map(
+      (l) => `
     <div class="option" data-id="${l.id}">
       ${l.name} (${l.teams?.length || 0})
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 
   selected.onclick = (e) => {
     e.stopPropagation(); // 🔥 FIX
     container.classList.toggle("open");
   };
 
-  options.querySelectorAll(".option").forEach(el => {
+  options.querySelectorAll(".option").forEach((el) => {
     el.onclick = (e) => {
-
       e.stopPropagation(); // 🔥 FIX
 
       const id = el.dataset.id;
-      const league = filtered.find(l => String(l.id) === String(id));
-      if(!league) return;
+      const league = filtered.find((l) => String(l.id) === String(id));
+      if (!league) return;
 
       selected.textContent = `${league.name} (${league.teams.length})`;
 
@@ -884,10 +881,9 @@ function initCustomLeagueSelect(){
   });
 }
 
-function initCustomTeamSelect(league){
-
+function initCustomTeamSelect(league) {
   const container = document.getElementById("teamSelect");
-  if(!container) return;
+  if (!container) return;
 
   container.classList.remove("open"); // 🔥 FIX
   container.innerHTML = "";
@@ -902,25 +898,28 @@ function initCustomTeamSelect(league){
   const selected = container.querySelector(".selected");
   const options = container.querySelector(".options");
 
-  options.innerHTML = teams.map(t => `
+  options.innerHTML = teams
+    .map(
+      (t) => `
     <div class="option" data-id="${t.id}">
       ${t.name}
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 
   selected.onclick = (e) => {
     e.stopPropagation(); // 🔥 FIX
     container.classList.toggle("open");
   };
 
-  options.querySelectorAll(".option").forEach(el => {
+  options.querySelectorAll(".option").forEach((el) => {
     el.onclick = (e) => {
-
       e.stopPropagation(); // 🔥 FIX
 
       const id = el.dataset.id;
-      const team = teams.find(t => String(t.id) === String(id));
-      if(!team) return;
+      const team = teams.find((t) => String(t.id) === String(id));
+      if (!team) return;
 
       selected.textContent = team.name;
 
@@ -938,42 +937,36 @@ function initCustomTeamSelect(league){
 // =========================
 // 🔘 BUTTON TEXT
 // =========================
-function updateMainButtonText(){
-
+function updateMainButtonText() {
   const btn = document.getElementById("mainButton");
-  if(!btn) return;
+  if (!btn) return;
 
   // =========================
   // 🚀 SETUP STATE (NEU)
   // =========================
-  if(game.phase === "setup"){
+  if (game.phase === "setup") {
     btn.textContent = "Start Game";
     return;
   }
 
   const live = game.match?.live;
 
-  if(!live){
+  if (!live) {
     btn.textContent = "Start Match";
     return;
   }
 
-  if(live.phase === "bye"){
+  if (live.phase === "bye") {
     btn.textContent = "No Match";
-  }
-  else if(live.minute >= 90){
+  } else if (live.minute >= 90) {
     btn.textContent = "Next Match";
-  }
-  else if(live.phase === "halftime"){
+  } else if (live.phase === "halftime") {
     btn.textContent = "Start 2nd Half";
-  }
-  else if(live.running){
+  } else if (live.running) {
     btn.textContent = "Pause";
-  }
-  else if(live.minute > 0){
+  } else if (live.minute > 0) {
     btn.textContent = "Resume";
-  }
-  else{
+  } else {
     btn.textContent = "Start Match";
   }
 }
@@ -983,4 +976,4 @@ function updateMainButtonText(){
 // =========================
 document.addEventListener("DOMContentLoaded", async () => {
   await init();
-});
+});      
