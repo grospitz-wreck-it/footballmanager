@@ -20,6 +20,13 @@
   color: white;
 }
 
+#logo {
+  width: clamp(120px, 40vw, 200px);
+  margin-bottom: 10px;
+
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.8));
+}
+
 /* =========================
 📦 FORM CONTAINER
 ========================= */
