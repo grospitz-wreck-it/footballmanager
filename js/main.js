@@ -613,98 +613,158 @@ function initPlzInput(){
 
   console.log("✅ PLZ System ready");
 
+  let debounce;
+
   input.addEventListener("input", () => {
 
-    const plz = input.value.trim();
-    console.log("📍 PLZ INPUT:", plz);
+    clearTimeout(debounce);
 
-    // 🔥 erst ab 2 Zeichen
-    if(plz.length < 2){
-      results.style.display = "none";
-      results.innerHTML = "";
-      return;
-    }
+    debounce = setTimeout(() => {
 
-    if(!game.leagues || !game.leagues.length){
-      console.warn("⏳ Ligen noch nicht geladen");
-      return;
-    }
+      const plz = input.value.trim();
+      console.log("📍 PLZ INPUT:", plz);
 
-    // =========================
-    // 🔍 FILTER LOGIK (2 → 3 STELLEN)
-    // =========================
-    const filtered = game.leagues.filter(l => {
-
-      const name = l.name.toLowerCase();
-
-      // 🔹 2-stellig (grobe Auswahl)
-      if(plz.length === 2){
-
-        if(plz === "32") return name.includes("herford") || name.includes("bielefeld");
-        if(plz === "10") return name.includes("berlin");
-
-        return false;
+      // 🔥 erst ab 2 Zeichen
+      if(plz.length < 2){
+        results.style.display = "none";
+        results.innerHTML = "";
+        return;
       }
 
-      // 🔹 3-stellig (genauer)
-      if(plz.length === 3){
-
-        if(plz === "320") return name.includes("herford");
-        if(plz === "101") return name.includes("berlin");
-
-        return false;
+      if(!game.leagues || !game.leagues.length){
+        console.warn("⏳ Ligen noch nicht geladen");
+        return;
       }
 
-      return false;
-    });
+      // =========================
+      // 🔍 FILTER + SCORING
+      // =========================
+      const scored = game.leagues
+        .map(league => {
 
-    console.log("🔍 MATCHES:", filtered.length);
+          // 🔥 nur bis Tier 7
+          if((league.level || 99) > 7) return null;
 
-    // =========================
-    // ❌ KEINE TREFFER
-    // =========================
-    if(filtered.length === 0){
-      results.innerHTML = `<div class="league-result">Keine Liga gefunden</div>`;
-      results.style.display = "block";
-      return;
-    }
+          if(!league?.teams?.length) return null;
 
-    // =========================
-    // 📦 RENDER DROPDOWN
-    // =========================
-    results.innerHTML = filtered.map(l => `
-      <div class="league-result" data-id="${l.id}">
-        ${l.name}
-      </div>
-    `).join("");
+          let score = 0;
 
-    results.style.display = "block";
+          for(const team of league.teams){
 
-    // =========================
-    // 🖱 CLICK HANDLER
-    // =========================
-    results.querySelectorAll(".league-result").forEach(el => {
+            const city = game.cityMap?.[team.city_id];
+            if(!city || !city.plz) continue;
 
-      el.onclick = () => {
+            const cityPlz = String(city.plz);
 
-        const id = el.dataset.id;
-        const league = filtered.find(l => String(l.id) === String(id));
+            // 🎯 exakter Match
+            if(plz.length === 3 && cityPlz.startsWith(plz)){
+              score += 100;
+            }
 
-        if(!league) return;
+            // 🎯 2-stellig
+            else if(plz.length === 2 && cityPlz.startsWith(plz)){
+              score += 50;
+            }
 
-        console.log("🏆 SELECTED LEAGUE:", league.name);
+            // 🎯 fallback grob
+            else if(cityPlz.startsWith(plz[0])){
+              score += 10;
+            }
+          }
+
+          return score > 0
+            ? { league, score }
+            : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => {
+
+          // 🔥 nach Relevanz
+          if(b.score !== a.score) return b.score - a.score;
+
+          // 🔥 dann nach Level
+          return (a.league.level || 99) - (b.league.level || 99);
+        });
+
+      const filtered = scored.map(s => s.league);
+
+      console.log("🔍 MATCHES:", filtered.length);
+
+      // =========================
+      // ❌ KEINE TREFFER
+      // =========================
+      if(filtered.length === 0){
+        results.innerHTML = `<div class="league-result">Keine Liga gefunden</div>`;
+        results.style.display = "block";
+        return;
+      }
+
+      // =========================
+      // ⚡ AUTO SELECT (1 MATCH)
+      // =========================
+      if(filtered.length === 1){
+
+        const league = filtered[0];
+
+        console.log("⚡ AUTO SELECT:", league.name);
 
         setLeagueById(league.id);
 
-        results.style.display = "none";
+        results.innerHTML = `
+          <div class="league-result">✅ ${league.name}</div>
+        `;
 
-        // 🔥 UI UPDATE
+        results.style.display = "block";
+
+        setTimeout(() => {
+          results.style.display = "none";
+        }, 800);
+
         handleAppVisibility();
         updateUI();
         updateMainButtonText();
-      };
-    });
 
+        return;
+      }
+
+      // =========================
+      // 📦 TOP 5 RENDER
+      // =========================
+      const top = filtered.slice(0, 5);
+
+      results.innerHTML = top.map(l => `
+        <div class="league-result" data-id="${l.id}">
+          ${l.name}
+        </div>
+      `).join("");
+
+      results.style.display = "block";
+
+      // =========================
+      // 🖱 CLICK HANDLER
+      // =========================
+      results.querySelectorAll(".league-result").forEach(el => {
+
+        el.onclick = () => {
+
+          const id = el.dataset.id;
+          const league = top.find(l => String(l.id) === String(id));
+
+          if(!league) return;
+
+          console.log("🏆 SELECTED LEAGUE:", league.name);
+
+          setLeagueById(league.id);
+
+          results.style.display = "none";
+
+          handleAppVisibility();
+          updateUI();
+          updateMainButtonText();
+        };
+      });
+
+    }, 150); // debounce
   });
 }
 
