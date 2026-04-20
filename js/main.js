@@ -585,79 +585,82 @@ function initResetButton(){
 
 
 function initPlzInput(){
-  console.log("🔥 initPlzInput CALLED");
 
-  let tries = 0;
+  const input = document.getElementById("plzInput");
+  const results = document.getElementById("leagueResults");
 
-  const tryBind = () => {
+  if(!input || !results){
+    console.warn("❌ plzInput oder leagueResults fehlt");
+    return;
+  }
 
-    const input = document.getElementById("plzInput");
+  console.log("✅ PLZ System ready");
 
-    if(!input){
-      tries++;
+  input.addEventListener("input", () => {
 
-      if(tries < 15){
-        setTimeout(tryBind, 200);
-      } else {
-        console.warn("❌ plzInput nicht gefunden (nach retries)");
-      }
+    const plz = input.value.trim();
+    console.log("📍 PLZ INPUT:", plz);
+
+    // 🔥 erst ab 2 Zeichen starten
+    if(plz.length < 2){
+      results.style.display = "none";
+      results.innerHTML = "";
       return;
     }
 
-    console.log("✅ plzInput ready");
+    if(!game.leagues?.length){
+      console.warn("⏳ Ligen noch nicht geladen");
+      return;
+    }
 
-    // 🔥 WICHTIG: input + change (beides!)
-    const handler = () => {
+    // 🔥 FILTER LOGIK (simple Version)
+    const filtered = game.leagues.filter(l => {
 
-      const plz = input.value.trim();
-      console.log("📍 PLZ INPUT:", plz);
+      // Beispiel: du brauchst später echte PLZ-Mapping Daten
+      const name = l.name.toLowerCase();
 
-      if(plz.length < 2) return;
+      if(plz.startsWith("32")) return name.includes("herford");
+      if(plz.startsWith("10")) return name.includes("berlin");
 
-      if(!game.leagues || !game.leagues.length){
-        console.warn("⏳ Ligen noch nicht geladen");
-        return;
-      }
+      // fallback → zeig alle
+      return true;
+    });
 
-      let league = null;
+    console.log("🔍 MATCHES:", filtered.length);
 
-      // 🔥 PLZ LOGIK
-      if(plz.startsWith("32")){
-        league = game.leagues.find(l =>
-          l.name?.toLowerCase().includes("herford")
-        );
-      }
-      else if(plz.startsWith("10")){
-        league = game.leagues.find(l =>
-          l.name?.toLowerCase().includes("berlin")
-        );
-      }
-      else{
-        league = game.leagues[0]; // fallback
-      }
+    // 🔥 RENDER DROPDOWN
+    results.innerHTML = filtered.map(l => `
+      <div class="league-result" data-id="${l.id}">
+        ${l.name}
+      </div>
+    `).join("");
 
-      if(!league){
-        console.warn("❌ Keine passende Liga gefunden für PLZ:", plz);
-        return;
-      }
+    results.style.display = filtered.length ? "block" : "none";
 
-      console.log("🏆 SET LEAGUE BY PLZ:", league.name);
+    // 🔥 CLICK HANDLER
+    results.querySelectorAll(".league-result").forEach(el => {
 
-      // 🔥 SET LEAGUE
-      setLeagueById(league.id);
+      el.onclick = () => {
 
-      // 🔥 UI + VISIBILITY + BUTTON UPDATE
-      handleAppVisibility();
-      updateUI();
-      updateMainButtonText();
-    };
+        const id = el.dataset.id;
+        const league = filtered.find(l => String(l.id) === String(id));
 
-    // 🔥 doppelt absichern
-    input.addEventListener("input", handler);
-    input.addEventListener("change", handler);
-  };
+        if(!league) return;
 
-  tryBind();
+        console.log("🏆 SELECTED LEAGUE:", league.name);
+
+        setLeagueById(league.id);
+
+        results.style.display = "none";
+
+        // 🔥 UI UPDATE
+        handleAppVisibility();
+        updateUI();
+        updateMainButtonText();
+      };
+    });
+
+  });
 }
 
 // =========================
