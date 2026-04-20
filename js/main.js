@@ -817,7 +817,7 @@ function initPlzInput(){
       });
 
     },150);
-  });
+  
 
   // =========================
   // OUTSIDE CLICK FIX
@@ -829,7 +829,7 @@ function initPlzInput(){
 
     close();
   });
-}
+
 
 function initCustomLeagueSelect(){
 
