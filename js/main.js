@@ -304,7 +304,7 @@ initResetButton();
 // =========================
 function initMainButton(){
 
-  const btn = document.getElementById("startBtn");
+  const btn = document.getElementById("mainButton");
   if(!btn) return;
 
   btn.onclick = () => {
@@ -587,7 +587,7 @@ function initResetButton(){
 // =========================
 function updateMainButtonText(){
 
-  const btn = document.getElementById("startBtn");
+  const btn = document.getElementById("mainButton");
   if(!btn) return;
 
   // =========================
