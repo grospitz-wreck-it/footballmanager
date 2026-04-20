@@ -305,12 +305,30 @@ function initMainButton(){
   btn.onclick = () => {
 
     let live = game.match?.live;
-    const league = game.league?.current;
+const league = game.league?.current;
 
-    if(!league) return;
+if(!league) return;
 
-    // INIT
-    if(!live){
+// =========================
+// 🚀 FIRST START (GO STATE)
+// =========================
+if(game.phase === "setup"){
+
+  console.log("🚀 ENTER GAME");
+
+  game.phase = "go";
+
+  handleAppVisibility();
+  updateUI();
+  updateMainButtonText();
+
+  return;
+}
+
+// =========================
+// 🆕 INIT MATCH
+// =========================
+if(!live){
 
   const round = league.schedule?.[league.currentRound || 0];
   if(!round){
