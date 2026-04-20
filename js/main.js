@@ -798,7 +798,7 @@ function initCustomLeagueSelect(){
 
   const container = document.getElementById("leagueSelect");
   if(!container) return;
-
+  container.innerHTML = "";
   const leagues = game.leagues || [];
 
   container.innerHTML = `
