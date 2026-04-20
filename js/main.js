@@ -840,4 +840,9 @@ function updateMainButtonText() {
 // =========================
 document.addEventListener("DOMContentLoaded", async () => {
   await init();
-});      
+});     
+document.addEventListener("click", () => {
+  document.querySelectorAll(".custom-select").forEach(el => {
+    el.classList.remove("open");
+  });
+});
