@@ -583,37 +583,53 @@ function initResetButton(){
   };
 }
 
+
 function initPlzInput(){
 
-  const input = document.getElementById("plzInput");
-  if(!input){
-    console.warn("⚠️ plzInput nicht gefunden");
-    return;
-  }
+  let tries = 0;
 
-  input.addEventListener("change", () => {
+  const tryBind = () => {
 
-    const plz = input.value.trim();
-    console.log("📍 PLZ INPUT:", plz);
+    const input = document.getElementById("plzInput");
 
-    if(!plz) return;
+    if(!input){
+      tries++;
 
-    // 🔥 HIER DEINE LOGIK
-    // aktuell einfach: erste Liga nehmen (Test)
+      if(tries < 10){
+        setTimeout(tryBind, 200);
+      } else {
+        console.warn("❌ plzInput nicht gefunden (nach retries)");
+      }
 
-    const league = game.leagues?.[0];
-
-    if(!league){
-      console.warn("❌ Keine Liga gefunden");
       return;
     }
 
-    console.log("🏆 SET LEAGUE BY PLZ:", league.name);
+    console.log("✅ plzInput ready");
 
-    setLeagueById(league.id);
+    input.addEventListener("change", () => {
 
-    updateUI();
-  });
+      const plz = input.value.trim();
+      console.log("📍 PLZ INPUT:", plz);
+
+      if(!plz) return;
+
+      const league = game.leagues?.[0];
+
+      if(!league){
+        console.warn("❌ Keine Liga gefunden");
+        return;
+      }
+
+      console.log("🏆 SET LEAGUE BY PLZ:", league.name);
+
+      setLeagueById(league.id);
+
+      updateUI();
+    });
+
+  };
+
+  tryBind();
 }
 
 
