@@ -167,14 +167,14 @@ function handleAppVisibility(){
   const splash = document.getElementById("splash");
   const app = document.getElementById("app");
 
-  const hasTeam = !!game.team?.selectedId;
+  const isPlaying = game.phase === "playing";
 
   console.log("👁 VISIBILITY", {
-    hasTeam,
+    phase: game.phase,
     team: game.team
   });
 
-  if(hasTeam){
+  if(isPlaying){
 
     if(splash){
       splash.style.display = "none";
