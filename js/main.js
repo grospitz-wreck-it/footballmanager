@@ -341,9 +341,17 @@ game.phase = game.phase || "setup";
 if (game.phase === "setup") {
   console.log("🚀 FIRST START");
 
-  // ❗ WICHTIG: Team prüfen
-  if (!game.team?.selectedId) {
+  const hasTeam = !!game.team?.selectedId;
+
+  // ❗ OPTION: Verhalten steuerbar
+  const REQUIRE_TEAM = true; // ← HIER kannst du umschalten
+
+  if (REQUIRE_TEAM && !hasTeam) {
     console.warn("❌ Kein Team gewählt");
+
+    // UX Feedback (optional)
+    alert("Bitte zuerst ein Team auswählen");
+
     return;
   }
 
