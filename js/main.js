@@ -749,22 +749,34 @@ if(filtered.length === 1){
 
       results.querySelectorAll(".league-result").forEach(el => {
 
-        el.onclick = () => {
+      el.onclick = () => {
 
-          const id = el.dataset.id;
-          const league = top.find(l => String(l.id) === String(id));
-          if(!league) return;
+  const id = el.dataset.id;
+  const league = top.find(l => String(l.id) === String(id));
+  if(!league) return;
 
-          console.log("🏆 SELECTED:", league.name);
+  console.log("🏆 SELECTED:", league.name);
 
-          setLeagueById(league.id);
+  setLeagueById(league.id);
 
-          close();
+  // 🔥 HIER IST DEIN FEHLENDER PART
+  const leagueSelect = document.getElementById("leagueSelect");
+  const selected = leagueSelect?.querySelector(".selected");
 
-          handleAppVisibility();
-          updateUI();
-          updateMainButtonText();
-        };
+  if(selected){
+    selected.textContent = `${league.name} (${league.teams?.length || 0})`;
+  }
+
+  // 🔥 TEAM SELECT AUFBAUEN
+  initCustomTeamSelect(league);
+
+  close();
+
+  handleAppVisibility();
+  updateUI();
+  updateMainButtonText();
+};
+        
       });
 
     },150);
