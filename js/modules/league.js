@@ -381,9 +381,27 @@ initLeague(league);
   const round = league.schedule?.[0];
   if(round && round.length > 0){
     const ok = initMatch(round);
-    if(ok){
-      game.match.live.running = false;
-    }
+
+if(!ok){
+  console.error("❌ initMatch fehlgeschlagen in selectTeamById");
+  return false;
+}
+
+// 🔥 ABSICHERUNG
+if(!game.match){
+  game.match = {};
+}
+
+if(!game.match.live){
+  game.match.live = {
+    minute: 0,
+    running: false,
+    score: { home: 0, away: 0 },
+    phase: "first_half"
+  };
+}
+
+game.match.live.running = false;
   }
 
   console.log("✅ Liga extern gesetzt:", league.name);
