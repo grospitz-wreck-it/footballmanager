@@ -464,6 +464,11 @@ function selectTeamById(teamId){
     return false;
   }
 
+  // 🔥 FIX: GAME.TEAM INITIALISIEREN
+  if(!game.team){
+    game.team = {};
+  }
+
   const team = league.teams.find(
     t => normalizeId(t.id) === normalizeId(teamId)
   );
