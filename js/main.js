@@ -654,9 +654,6 @@ function initPlzInput(){
         return;
       }
 
-      // =========================
-      // 🔍 FILTER
-      // =========================
       const scored = game.leagues
         .map(league => {
 
@@ -686,52 +683,92 @@ function initPlzInput(){
 
       const filtered = scored.map(s => s.league);
 
-      console.log("🔍 MATCHES:", filtered.length);
-
-      // =========================
-      // ❌ KEINE
-      // =========================
       if(filtered.length === 0){
         results.innerHTML = `<div class="league-result empty">Keine Liga gefunden</div>`;
         open();
         return;
       }
 
-    // =========================
-// ⚡ AUTO SELECT
-// =========================
-if(filtered.length === 1){
+      // ⚡ AUTO SELECT
+      if(filtered.length === 1){
 
-  const league = filtered[0];
+        const league = filtered[0];
 
-  console.log("⚡ AUTO SELECT:", league.name);
+        setLeagueById(league.id);
 
-  setLeagueById(league.id);
+        const leagueSelect = document.getElementById("leagueSelect");
+        const selected = leagueSelect?.querySelector(".selected");
 
-  // 🔥 NUR TEXT UPDATEN (kein re-init!)
-  const leagueSelect = document.getElementById("leagueSelect");
-  const selected = leagueSelect?.querySelector(".selected");
+        if(selected){
+          selected.textContent = `${league.name} (${league.teams?.length || 0})`;
+        }
 
-  if(selected){
-    selected.textContent = `${league.name} (${league.teams?.length || 0})`;
-  }
+        initCustomTeamSelect(league);
 
-  // 🔥 TEAM SELECT NEU LADEN
-  initCustomTeamSelect(league);
+        results.innerHTML = `
+          <div class="league-result selected">✅ ${league.name}</div>
+        `;
 
-  results.innerHTML = `
-    <div class="league-result selected">✅ ${league.name}</div>
-  `;
+        open();
+        setTimeout(close, 800);
 
-  open();
+        handleAppVisibility();
+        updateUI();
+        updateMainButtonText();
 
-  setTimeout(close, 800);
+        return;
+      }
 
-  handleAppVisibility();
-  updateUI();
-  updateMainButtonText();
+      const top = filtered.slice(0,5);
 
-  return;
+      results.innerHTML = top.map((l,i) => `
+        <div class="league-result ${i===0?'selected':''}" data-id="${l.id}">
+          ${l.name}
+        </div>
+      `).join("");
+
+      open();
+
+      results.querySelectorAll(".league-result").forEach(el => {
+
+        el.onclick = (e) => {
+
+          e.stopPropagation(); // 🔥 FIX
+
+          const id = el.dataset.id;
+          const league = top.find(l => String(l.id) === String(id));
+          if(!league) return;
+
+          setLeagueById(league.id);
+
+          const leagueSelect = document.getElementById("leagueSelect");
+          const selected = leagueSelect?.querySelector(".selected");
+
+          if(selected){
+            selected.textContent = `${league.name} (${league.teams?.length || 0})`;
+          }
+
+          initCustomTeamSelect(league);
+
+          close();
+
+          handleAppVisibility();
+          updateUI();
+          updateMainButtonText();
+        };
+
+      });
+
+    },150);
+  });
+
+  document.addEventListener("click", (e) => {
+
+    if(results.contains(e.target)) return;
+    if(input.contains(e.target)) return;
+
+    close();
+  });
 }
 
       // =========================
@@ -798,7 +835,10 @@ function initCustomLeagueSelect(){
 
   const container = document.getElementById("leagueSelect");
   if(!container) return;
+
+  container.classList.remove("open"); // 🔥 FIX
   container.innerHTML = "";
+
   const leagues = game.leagues || [];
 
   container.innerHTML = `
@@ -809,7 +849,6 @@ function initCustomLeagueSelect(){
   const selected = container.querySelector(".selected");
   const options = container.querySelector(".options");
 
-  // 🔥 nur Tier 7+
   const filtered = leagues.filter(l => (l.level || 0) >= 7);
 
   options.innerHTML = filtered.map(l => `
@@ -818,14 +857,15 @@ function initCustomLeagueSelect(){
     </div>
   `).join("");
 
-  // open / close
-  selected.onclick = () => {
+  selected.onclick = (e) => {
+    e.stopPropagation(); // 🔥 FIX
     container.classList.toggle("open");
   };
 
-  // select
   options.querySelectorAll(".option").forEach(el => {
-    el.onclick = () => {
+    el.onclick = (e) => {
+
+      e.stopPropagation(); // 🔥 FIX
 
       const id = el.dataset.id;
       const league = filtered.find(l => String(l.id) === String(id));
@@ -837,7 +877,6 @@ function initCustomLeagueSelect(){
 
       container.classList.remove("open");
 
-      // 🔥 TEAM SELECT NEU LADEN
       initCustomTeamSelect(league);
 
       updateUI();
@@ -849,6 +888,9 @@ function initCustomTeamSelect(league){
 
   const container = document.getElementById("teamSelect");
   if(!container) return;
+
+  container.classList.remove("open"); // 🔥 FIX
+  container.innerHTML = "";
 
   const teams = league?.teams || [];
 
@@ -866,12 +908,15 @@ function initCustomTeamSelect(league){
     </div>
   `).join("");
 
-  selected.onclick = () => {
+  selected.onclick = (e) => {
+    e.stopPropagation(); // 🔥 FIX
     container.classList.toggle("open");
   };
 
   options.querySelectorAll(".option").forEach(el => {
-    el.onclick = () => {
+    el.onclick = (e) => {
+
+      e.stopPropagation(); // 🔥 FIX
 
       const id = el.dataset.id;
       const team = teams.find(t => String(t.id) === String(id));
