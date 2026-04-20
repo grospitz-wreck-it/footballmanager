@@ -270,9 +270,7 @@ async function init(){
 
   console.log("🎯 Auto-select Team (delayed)");
 
- setTimeout(() => {
-  selectTeamById(String(firstTeam.id));
-}, 50);
+ selectTeamById(String(firstTeam.id));
 
 } else {
   console.warn("⚠️ Kein Team in Liga gefunden");
