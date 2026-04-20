@@ -586,6 +586,7 @@ function initResetButton(){
 
 function initPlzInput(){
   console.log("🔥 initPlzInput CALLED");
+
   let tries = 0;
 
   const tryBind = () => {
@@ -595,54 +596,69 @@ function initPlzInput(){
     if(!input){
       tries++;
 
-      if(tries < 10){
+      if(tries < 15){
         setTimeout(tryBind, 200);
       } else {
         console.warn("❌ plzInput nicht gefunden (nach retries)");
       }
-
       return;
     }
 
     console.log("✅ plzInput ready");
 
-    input.addEventListener("change", () => {
+    // 🔥 WICHTIG: input + change (beides!)
+    const handler = () => {
 
       const plz = input.value.trim();
       console.log("📍 PLZ INPUT:", plz);
 
-      if(!plz) return;
+      if(plz.length < 2) return;
+
+      if(!game.leagues || !game.leagues.length){
+        console.warn("⏳ Ligen noch nicht geladen");
+        return;
+      }
 
       let league = null;
 
-// 🔥 einfache PLZ-Logik (Test)
-if(plz.startsWith("32")){
-  league = game.leagues.find(l => l.name.includes("Herford"));
-}
-else if(plz.startsWith("10")){
-  league = game.leagues.find(l => l.name.includes("Berlin"));
-}
-else{
-  league = game.leagues?.[0]; // fallback
-}
-      
+      // 🔥 PLZ LOGIK
+      if(plz.startsWith("32")){
+        league = game.leagues.find(l =>
+          l.name?.toLowerCase().includes("herford")
+        );
+      }
+      else if(plz.startsWith("10")){
+        league = game.leagues.find(l =>
+          l.name?.toLowerCase().includes("berlin")
+        );
+      }
+      else{
+        league = game.leagues[0]; // fallback
+      }
+
       if(!league){
-        console.warn("❌ Keine Liga gefunden");
+        console.warn("❌ Keine passende Liga gefunden für PLZ:", plz);
         return;
       }
 
       console.log("🏆 SET LEAGUE BY PLZ:", league.name);
 
+      // 🔥 SET LEAGUE
       setLeagueById(league.id);
 
+      // 🔥 UI + VISIBILITY + BUTTON UPDATE
+      handleAppVisibility();
       updateUI();
-    });
+      updateMainButtonText();
+    };
 
+    // 🔥 doppelt absichern
+    input.addEventListener("input", handler);
+    input.addEventListener("change", handler);
   };
 
   tryBind();
 }
-
 
 // =========================
 // 🔘 BUTTON TEXT
