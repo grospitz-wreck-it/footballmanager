@@ -310,8 +310,8 @@ if(!league) return;
 // =========================
 // 🚀 FIRST START (GO STATE)
 // =========================
-if(game.phase === "setup"){
-
+game.phase = game.phase || "setup";
+    
   console.log("🚀 FIRST START");
 
   game.phase = "playing"; // sauberer State
