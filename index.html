@@ -60,29 +60,13 @@
 <!-- =========================
 🟣 SPLASH SCREEN
 ========================= -->
-<div id="splash">
+<div class="select-group">
 
-  <img id="logo" src="./gfx/logo.webp">
+  <input id="plzInput" maxlength="3" placeholder="PLZ (z.B. 320)" />
 
-  <div class="input-group">
-    <input id="nameInput" placeholder="Manager-Name">
-  </div>
+  <div id="leagueSelect" class="custom-select"></div>
 
-  <div id="plzSearch">
-    <input id="plzInput" maxlength="3" placeholder="PLZ (z.B. 320)" />
-    <div id="leagueResults"></div>
-  </div>
-
-  <!-- 🔥 WRAPPER (WICHTIG) -->
-  <div class="select-group">
-
-    <div id="leagueSelect" class="custom-select"></div>
-
-    <div id="teamSelect" class="custom-select"></div>
-
-  </div>
-
-  <button id="mainButton">Spiel starten</button>
+  <div id="teamSelect" class="custom-select disabled"></div>
 
 </div>
 
