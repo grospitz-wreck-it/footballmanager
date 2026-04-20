@@ -587,7 +587,7 @@ function initResetButton(){
 // =========================
 function updateMainButtonText(){
 
-  const btn = document.getElementById("mainButton");
+  const btn = document.getElementById("startBtn");
   if(!btn) return;
 
   // =========================
