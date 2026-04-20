@@ -320,17 +320,17 @@ function initMainButton(){
     // =========================
     game.phase = game.phase || "setup";
 
-    if(game.phase === "setup"){
-      console.log("🚀 FIRST START");
+if(game.phase === "setup"){
+  console.log("🚀 FIRST START");
 
-      game.phase = "playing";
+  game.phase = "playing";
 
-      handleAppVisibility();
-      updateUI();
-      updateMainButtonText();
+  handleAppVisibility();
+  updateUI();
+  updateMainButtonText();
 
-      // ❗ KEIN RETURN → Flow geht weiter
-    }
+  // ❗ KEIN RETURN
+}
 
     // =========================
     // 🆕 INIT MATCH
