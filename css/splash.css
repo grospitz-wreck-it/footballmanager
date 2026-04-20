@@ -1,314 +1,89 @@
 /* =========================
-🌌 ULTRA SPLASH (FINAL FIXED)
+🌌 SPLASH BASE
 ========================= */
-
 #splash {
   position: fixed;
   inset: 0;
   z-index: 9999;
 
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 18px;
 
   padding: 20px;
-  overflow: visible;
-
-  color: white;
-  text-align: center;
 
   background:
-    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.25), transparent 40%),
-    radial-gradient(circle at 80% 30%, rgba(59,130,246,0.25), transparent 40%),
-    radial-gradient(circle at 50% 80%, rgba(168,85,247,0.2), transparent 40%),
+    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.15), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(59,130,246,0.15), transparent 40%),
     linear-gradient(180deg, #020617, #000);
-}
-
-/* =========================
-✨ BACKGROUND FX
-========================= */
-#splash::before {
-  content: "";
-  position: absolute;
-  inset: -50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 60%);
-  animation: splashFog 18s linear infinite;
-  pointer-events: none;
-}
-
-#splash::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    120deg,
-    rgba(255,255,255,0.04) 0px,
-    rgba(255,255,255,0.04) 2px,
-    transparent 2px,
-    transparent 80px
-  );
-  opacity: 0.2;
-  animation: rays 20s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes splashFog {
-  from { transform: translateY(0) rotate(0deg); }
-  to   { transform: translateY(-10%) rotate(360deg); }
-}
-
-@keyframes rays {
-  from { transform: translateX(0); }
-  to   { transform: translateX(200px); }
-}
-
-/* =========================
-📦 CONTENT LAYER
-========================= */
-#splash > * {
-  position: relative;
-}
-
-/* =========================
-🏆 LOGO
-========================= */
-#logo {
-  width: clamp(120px, 40vw, 220px);
-  filter:
-    drop-shadow(0 0 20px rgba(34,197,94,0.6))
-    drop-shadow(0 10px 40px rgba(0,0,0,0.9));
-}
-
-/* =========================
-🧱 FORM BASE (ALLE FELDER)
-========================= */
-input,
-select {
-  width: 100%;
-  max-width: 320px;
-
-  height: 48px;
-  padding: 0 16px;
-
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.08);
-
-  font-size: 15px;
-  font-weight: 500;
 
   color: white;
-
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.85)),
-    linear-gradient(120deg, rgba(255,255,255,0.08), transparent);
-
-  backdrop-filter: blur(10px);
-
-  box-shadow:
-    inset 0 0 10px rgba(255,255,255,0.05),
-    0 10px 30px rgba(0,0,0,0.5);
-
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-/* Focus */
-input:focus,
-select:focus {
-  border-color: #22c55e;
-  box-shadow:
-    0 0 0 2px rgba(34,197,94,0.25),
-    0 0 25px rgba(34,197,94,0.2);
 }
 
 /* =========================
-🎛 SELECT STYLE
+📦 FORM CONTAINER
 ========================= */
-select {
-  appearance: none;
-  cursor: pointer;
-
-  background-image:
-    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.85)),
-    linear-gradient(120deg, rgba(255,255,255,0.08), transparent),
-    url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 20 20' width='20'><path d='M5 7l5 5 5-5'/></svg>");
-
-  background-repeat: no-repeat;
-  background-position:
-    0 0,
-    0 0,
-    right 14px center;
-
-  background-size:
-    cover,
-    cover,
-    14px;
-}
-
-/* =========================
-📍 PLZ SEARCH
-========================= */
-#plzSearch {
-  position: relative;
-  width: 100%;
-  max-width: 320px;
-
-  padding: 6px;
-  border-radius: 16px;
-
-  background: linear-gradient(180deg, rgba(2,6,23,0.85), rgba(2,6,23,0.7));
-  backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(255,255,255,0.06);
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.5),
-    0 0 20px rgba(34,197,94,0.15);
-}
-
-/* =========================
-🔍 DROPDOWN (FIXED)
-========================= */
-#leagueResults {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-
-  border-radius: 14px;
-  padding: 4px;
-
-  background: linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.75));
-  backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  box-shadow:
-    0 15px 40px rgba(0,0,0,0.8),
-    0 0 20px rgba(34,197,94,0.2);
-
-  z-index: 10;
-
-  opacity: 0;
-  transform: translateY(10px) scale(0.98);
-  pointer-events: none;
-
-  transition: all 0.18s ease;
-}
-
-#leagueResults.show {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
-/* =========================
-📦 ITEMS
-========================= */
-.league-result {
-  padding: 12px 14px;
-  border-radius: 10px;
-
-  font-size: 14px;
-  font-weight: 600;
-
-  color: rgba(255,255,255,0.9);
-  cursor: pointer;
-
-  transition: all 0.18s ease;
-}
-
-.league-result:hover {
-  background: rgba(255,255,255,0.05);
-  transform: translateX(4px);
-  box-shadow: 0 0 15px rgba(34,197,94,0.25);
-}
-
-.league-result.selected {
-  color: #22c55e;
-}
-
-.league-result.empty {
-  opacity: 0.6;
-  cursor: default;
-}
-
-/* =========================
-🚀 BUTTON
-========================= */
-#splash button {
-  width: 100%;
-  max-width: 320px;
-  height: 50px;
-
-  border-radius: 16px;
-  border: none;
-
-  font-size: 16px;
-  font-weight: 800;
-
-  color: #022c22;
-
-  background: linear-gradient(135deg, #22c55e, #4ade80);
-
-  box-shadow:
-    0 10px 40px rgba(34,197,94,0.5),
-    0 0 20px rgba(34,197,94,0.4);
-
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-#splash button:hover {
-  transform: translateY(-2px) scale(1.02);
-}
-
-#splash button:active {
-  transform: scale(0.95);
-}
-/* =========================
-🎛 CUSTOM SELECT FIXED
-========================= */
-
 .select-group {
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
+
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* Container */
-.custom-select {
+/* =========================
+🧱 INPUT (NO GLASS!)
+========================= */
+#plzInput {
   width: 100%;
+  height: 48px;
+  padding: 0 14px;
+
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+
+  background: #020617;
+  color: white;
+
+  font-size: 14px;
+}
+
+#plzInput:focus {
+  border-color: #22c55e;
+  outline: none;
+}
+
+/* =========================
+🎛 CUSTOM SELECT
+========================= */
+.custom-select {
   position: relative;
-  z-index: 100;
+  width: 100%;
+}
+
+/* Disabled */
+.custom-select.disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* Selected */
 .custom-select .selected {
   height: 48px;
-  padding: 0 16px;
+  padding: 0 14px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  border-radius: 14px;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
 
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.85));
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.5),
-    0 0 20px rgba(34,197,94,0.2);
-
+  background: #020617;
   color: white;
-  font-weight: 600;
+
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -318,47 +93,72 @@ select {
   opacity: 0.6;
 }
 
-/* Dropdown */
+/* =========================
+📂 DROPDOWN LIST
+========================= */
 .custom-select .options {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
 
   display: none;
 
-  background:
-    linear-gradient(180deg, rgba(2,6,23,0.95), rgba(2,6,23,0.85));
+  background: #020617;
 
-  border-radius: 14px;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
 
-  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
 
-  box-shadow:
-    0 25px 60px rgba(0,0,0,0.9),
-    0 0 20px rgba(34,197,94,0.2);
-
-  z-index: 9999;
+  z-index: 500;
 }
 
-/* Open state */
+/* Open */
 .custom-select.open .options {
   display: block;
 }
 
 /* Option */
 .custom-select .option {
-  padding: 12px 14px;
-  color: white;
+  padding: 12px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  font-size: 14px;
 }
 
 .custom-select .option:hover {
   background: rgba(255,255,255,0.05);
-  transform: translateX(4px);
 }
-.custom-select .option:hover {
-  background: rgba(255,255,255,0.05);
-  transform: translateX(4px);
+
+/* =========================
+📍 PLZ FILTER MODE
+========================= */
+
+/* Wenn PLZ aktiv → Liga hervorheben */
+#splash.plz-active #leagueSelect {
+  z-index: 2000;
+}
+
+/* Team leicht dimmen */
+#splash.plz-active #teamSelect {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* =========================
+🚀 BUTTON
+========================= */
+#splash button {
+  width: 100%;
+  height: 50px;
+
+  border-radius: 10px;
+  border: none;
+
+  font-weight: 700;
+
+  background: #22c55e;
+  color: #022c22;
+
+  cursor: pointer;
 }
