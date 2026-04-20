@@ -613,8 +613,19 @@ function initPlzInput(){
 
       if(!plz) return;
 
-      const league = game.leagues?.[0];
+      let league = null;
 
+// 🔥 einfache PLZ-Logik (Test)
+if(plz.startsWith("32")){
+  league = game.leagues.find(l => l.name.includes("Herford"));
+}
+else if(plz.startsWith("10")){
+  league = game.leagues.find(l => l.name.includes("Berlin"));
+}
+else{
+  league = game.leagues?.[0]; // fallback
+}
+      
       if(!league){
         console.warn("❌ Keine Liga gefunden");
         return;
