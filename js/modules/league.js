@@ -512,11 +512,10 @@ if(!game.league?.current){
 };
 });
 
-  const firstTeam = league.teams[0];
-
+  // 🔥 KEIN AUTO-SELECT MEHR
 game.team = game.team || {};
-game.team.selected = firstTeam.name;
-game.team.selectedId = normalizeId(firstTeam.id);
+game.team.selected = null;
+game.team.selectedId = null;
 
 // 🔥 FIX: alle Teams vorbereiten (nicht nur eins)
 league.teams.forEach(t => {
