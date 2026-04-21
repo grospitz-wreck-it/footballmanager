@@ -198,28 +198,56 @@ export function enrichEvent(event){
   // =========================
   // 🔍 STRICT ID RESOLVE
   // =========================
-  const player = players.find(p =>
-    String(p.id) === String(event.playerId)
-  ) || null;
+  export function resolveEventContent(event){
 
-  const team = teams.find(t =>
-    String(t.id) === String(event.teamId)
-  ) || null;
+  if(!event) return null;
+
+  const player = event.player;
+  const team   = event.team;
+
+  const playerName =
+    player?.name ||
+    `${player?.first_name || ""} ${player?.last_name || ""}`.trim() ||
+    "Unbekannt";
+
+  const teamName =
+    team?.name ||
+    "Team";
 
   // =========================
-  // 🧪 DEBUG (WICHTIG!)
+  // 🎯 EVENT TYPES
   // =========================
-  if(event.playerId && !player){
-    console.warn("❌ PLAYER NOT FOUND:", event.playerId);
-  }
+  switch(event.type){
 
-  if(event.teamId && !team){
-    console.warn("❌ TEAM NOT FOUND:", event.teamId);
-  }
+    case "goal":
+      return {
+        text: `⚽ ${playerName} trifft für ${teamName}!`,
+        assets: [{ url: "/assets/events/goal.webp" }]
+      };
 
-  return {
-    ...event,
-    player,
-    team
-  };
+    case "shot":
+      return {
+        text: `🎯 ${playerName} kommt zum Abschluss`,
+      };
+
+    case "foul":
+      return {
+        text: `🟥 Foul von ${playerName}`,
+      };
+
+    case "pass":
+      return {
+        text: `➡️ Pass von ${playerName}`,
+      };
+
+    case "save":
+      return {
+        text: `🧤 Parade von ${playerName}`,
+      };
+
+    default:
+      return {
+        text: event.text || "Spielaktion",
+      };
+  }
 }
