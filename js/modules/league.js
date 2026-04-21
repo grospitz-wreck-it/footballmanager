@@ -278,10 +278,6 @@ function nextMatch(){
 // 🏆 INIT LEAGUE SELECT
 // =========================
 function initLeagueSelect(leaguesInput){
-  if(leagueSelectInitialized){
-    console.log("⚠️ initLeagueSelect already initialized → skip");
-    return;
-  }
 
   leagueSelectInitialized = true;
   
