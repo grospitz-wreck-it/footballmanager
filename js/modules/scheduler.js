@@ -130,78 +130,78 @@ function generateSchedule(league){
   // =========================
   for(let r = 0; r < totalRounds; r++){
 
-    const round = [];
+  const round = [];
 
-    for(let i = 0; i < half; i++){
+  for(let i = 0; i < half; i++){
 
-      const teamA = rotation[i];
-      const teamB = rotation[rotation.length - 1 - i];
+    const teamA = rotation[i];
+    const teamB = rotation[rotation.length - 1 - i];
 
-      const swap = r % 2 === 1;
+    const swap = r % 2 === 1;
 
-      const home = swap ? teamB : teamA;
-      const away = swap ? teamA : teamB;
+    const home = swap ? teamB : teamA;
+    const away = swap ? teamA : teamB;
 
-      if(home.id === "BYE" || away.id === "BYE") continue;
+    if(home.id === "BYE" || away.id === "BYE") continue;
 
-      round.push({
-        id: crypto.randomUUID(),
-        homeTeamId: String(home.id),
-        awayTeamId: String(away.id),
-        home,
-        away,
-        result: null,
-        _processed: false
-      });
-    }
+    round.push({
+      id: crypto.randomUUID(),
+      homeTeamId: String(home.id),
+      awayTeamId: String(away.id),
 
-    // Shuffle
-    for(let i = round.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [round[i], round[j]] = [round[j], round[i]];
-    }
+      // 🔥 FIX: KEINE TEAM OBJEKTE MEHR
+      home: null,
+      away: null,
 
-    rounds.push(round);
-
-    const fixed = rotation[0];
-    const rest = rotation.slice(1);
-
-    rest.unshift(rest.pop());
-    rotation = [fixed, ...rest];
+      result: null,
+      _processed: false
+    });
   }
+
+  // Shuffle
+  for(let i = round.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [round[i], round[j]] = [round[j], round[i]];
+  }
+
+  rounds.push(round);
+
+  const fixed = rotation[0];
+  const rest = rotation.slice(1);
+
+  rest.unshift(rest.pop());
+  rotation = [fixed, ...rest];
+}
 
   // =========================
   // 🔁 RÜCKRUNDE
   // =========================
   const returnRounds = rounds.map(round => {
 
-    const newRound = round.map(match => {
+  const newRound = round.map(match => {
 
-      return {
-        id: crypto.randomUUID(),
-        homeTeamId: String(match.awayTeamId),
-        awayTeamId: String(match.homeTeamId),
-        home: {
-          id: String(match.awayTeamId),
-          name: match.away.name
-        },
-        away: {
-          id: String(match.homeTeamId),
-          name: match.home.name
-        },
-        result: null,
-        _processed: false
-      };
-    });
+    return {
+      id: crypto.randomUUID(),
+      homeTeamId: String(match.awayTeamId),
+      awayTeamId: String(match.homeTeamId),
 
-    // Shuffle
-    for(let i = newRound.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [newRound[i], newRound[j]] = [newRound[j], newRound[i]];
-    }
+      // 🔥 FIX: KEINE FAKE TEAMS
+      home: null,
+      away: null,
 
-    return newRound;
+      result: null,
+      _processed: false
+    };
   });
+
+  // Shuffle
+  for(let i = newRound.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [newRound[i], newRound[j]] = [newRound[j], newRound[i]];
+  }
+
+  return newRound;
+});
 
   // =========================
   // 📊 FINAL
