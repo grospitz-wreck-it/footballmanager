@@ -255,13 +255,27 @@ game.cityMap = Object.fromEntries(
 const loadedPlayers = await loadPlayers();
 
 // =========================
-// 🧠 TEAM SOURCE (NUR LIGA)
+// 🧠 TEAM SOURCE (SAFE)
 // =========================
-const leagueTeams =
-  game.league?.current?.teams || [];
+let leagueTeams = game.league?.current?.teams || [];
 
+// 🔥 FALLBACK: erste Liga nehmen (WICHTIG!)
+if(!leagueTeams.length && game.leagues?.length){
+  console.warn("⚠️ League noch nicht gesetzt → fallback auf erste Liga");
+
+  leagueTeams = game.leagues[0]?.teams || [];
+}
+// =========================
+// ⚠️ SAFETY: LEAGUE TEAMS
+// =========================
 if(!leagueTeams.length){
-  console.warn("⚠️ Keine Liga-Teams beim Player-Mapping");
+
+  console.warn("⚠️ Keine Liga-Teams → fallback wird verwendet");
+
+  // 🔥 WICHTIG: harter fallback statt nur warnen
+  if(game.leagues?.length){
+    leagueTeams = game.leagues[0]?.teams || [];
+  }
 }
 
 // =========================
