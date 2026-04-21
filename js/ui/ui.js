@@ -1,8 +1,6 @@
-
 // =========================
 // 🖥 UI ENGINE (FULL + LIVE TABLE SAFE)
 // =========================
-
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
 import { track } from "../../tools/analytics.js";
@@ -10,21 +8,13 @@ import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
-import { openPlayerModal } from "../modal.js";
-import { FORMATIONS } from "../core/football/formation.js";
-import { mapPositionToRole } from "../core/football/position.js";
-function mapRoleForUI(role){
-  if(role === "ATT") return "ST";
-  return role;
-}
+
 // =========================
 // 🔒 INTERNAL
 // =========================
 let initialized = false;
 let lastRenderedEventId = null;
 let liveTableInterval = null;
-let scheduleViewIndex = null;
-let selectedPlayerId = null;
 
 
 // =========================
@@ -80,31 +70,24 @@ function updateUI(){
 
   updateTabs();
 
-// =========================
-// 📊 TABLE
-// =========================
-if(game.ui.tab === "table"){
+  // =========================
+  // 📊 TABLE
+  // =========================
+  if(game.ui.tab === "table"){
 
-  renderLiveTable();
+    renderLiveTable();
 
-  if(game.match?.live?.running){
-    ensureLiveTableLoop();
+    if(game.match?.live?.running){
+      ensureLiveTableLoop();
+    }
   }
-}
 
-// =========================
-// 📅 SCHEDULE
-// =========================
-if(game.ui.tab === "schedule"){
-  renderSchedule();
-}
-
-// =========================
-// 👥 TEAM
-// =========================
-if(game.ui.tab === "team"){
-  renderTeam();
-}
+  // =========================
+  // 👥 TEAM
+  // =========================
+  if(game.ui.tab === "team"){
+    renderTeam();
+  }
 
   // =========================
   // ⚙️ TACTICS
@@ -139,23 +122,15 @@ function initUI(){
 
   console.log("🧱 UI init");
 
- const burger  = document.getElementById("burgerBtn");
-const wrapper = document.getElementById("sidebarWrapper");
-const overlay = document.getElementById("sidebarOverlay");
-const sidebar = document.getElementById("sidebar");
+  const burger = document.getElementById("burgerBtn");
+  const wrapper = document.getElementById("sidebarWrapper");
+  const overlay = document.getElementById("sidebarOverlay");
 
-if(!burger || !wrapper || !sidebar){
-  console.error("❌ Sidebar DOM fehlt", {
-    burger,
-    wrapper,
-    sidebar
-  });
-  return;
-}
+  if(!burger || !wrapper){
+    console.error("❌ Sidebar DOM fehlt");
+    return;
+  }
 
-  // =========================
-  // 🍔 SIDEBAR
-  // =========================
   burger.addEventListener("click", () => {
     game.ui.sidebarOpen = !game.ui.sidebarOpen;
     applySidebar();
@@ -166,50 +141,12 @@ if(!burger || !wrapper || !sidebar){
     applySidebar();
   });
 
-  // =========================
   // 🔥 STATE LISTENER
-  // =========================
   on(EVENTS.STATE_CHANGED, () => {
-    if(game.events?.history?.length){
-      updateEvents();
-    }
-  });
-
-  // =========================
-  // ⚽ FORMATION SELECT
-  // =========================
-  const formationSelect = document.getElementById("formationSelect");
-
-  if(formationSelect){
-    formationSelect.value = game.team?.formation || "4-4-2";
-
-    formationSelect.addEventListener("change", (e) => {
-      const value = e.target.value;
-
-      console.log("⚽ Formation changed:", value);
-
-      game.team.formation = value;
-
-      renderTeam();     // 🔥 sofort neu zeichnen
-      renderTacticStats(); // optional sync
-    });
-  } else {
-    console.warn("⚠️ formationSelect nicht gefunden");
+  if(game.events?.history?.length){
+    updateEvents();
   }
-
-  // =========================
-  // 🎲 CHANCE BUTTON
-  // =========================
-  const chanceBtn = document.getElementById("chanceBtn");
-
-  if(chanceBtn){
-    chanceBtn.addEventListener("click", () => {
-      triggerChanceEvent();
-    });
-  } else {
-    console.warn("⚠️ chanceBtn nicht gefunden");
-  }
-}
+});
 
   // =========================
   // ⚙️ TACTICS BUTTON (OPEN)
@@ -299,6 +236,10 @@ if(!burger || !wrapper || !sidebar){
     };
 
   });
+
+  // initial sync
+  updateTacticsUI();
+}
 
 
 
@@ -588,44 +529,49 @@ function ensureLiveTableLoop(){
 }
 
 // =========================
+// ⚽ FORMATIONS
+// =========================
+const FORMATIONS = {
+  "4-4-2": [
+    { role: "GK", top: "50%", left: "10%" },
+    { role: "DEF", top: "20%", left: "25%" },
+    { role: "DEF", top: "40%", left: "25%" },
+    { role: "DEF", top: "60%", left: "25%" },
+    { role: "DEF", top: "80%", left: "25%" },
+    { role: "MID", top: "20%", left: "50%" },
+    { role: "MID", top: "40%", left: "50%" },
+    { role: "MID", top: "60%", left: "50%" },
+    { role: "MID", top: "80%", left: "50%" },
+    { role: "ST", top: "40%", left: "75%" },
+    { role: "ST", top: "60%", left: "75%" }
+  ],
+
+  "4-3-3": [
+    { role: "GK", top: "50%", left: "10%" },
+    { role: "DEF", top: "20%", left: "25%" },
+    { role: "DEF", top: "40%", left: "25%" },
+    { role: "DEF", top: "60%", left: "25%" },
+    { role: "DEF", top: "80%", left: "25%" },
+    { role: "MID", top: "30%", left: "50%" },
+    { role: "MID", top: "50%", left: "50%" },
+    { role: "MID", top: "70%", left: "50%" },
+    { role: "ST", top: "20%", left: "75%" },
+    { role: "ST", top: "50%", left: "75%" },
+    { role: "ST", top: "80%", left: "75%" }
+  ]
+};
+
+// =========================
 // 🧠 ROLE PICKER
 // =========================
-
 function pickPlayer(role, byType){
 
   if(!byType) return null;
 
-  // =========================
-  // 🎯 1. PRIMARY ROLE
-  // =========================
   if(byType[role]?.length){
     return byType[role].shift();
   }
 
-  // =========================
-  // 🔄 2. SMART FALLBACKS
-  // =========================
-  const fallbackMap = {
-    GK: [],
-
-    DEF: ["MID"],
-
-    MID: ["DEF", "ST"],
-
-    ST: ["MID"]
-  };
-
-  const fallbacks = fallbackMap[role] || [];
-
-  for(const fb of fallbacks){
-    if(byType[fb]?.length){
-      return byType[fb].shift();
-    }
-  }
-
-  // =========================
-  // 🆘 3. LAST RESORT
-  // =========================
   return (
     byType.GK?.shift() ||
     byType.DEF?.shift() ||
@@ -634,8 +580,6 @@ function pickPlayer(role, byType){
     null
   );
 }
-
-
 // =========================
 // ⚽ TEAM
 // =========================
@@ -647,271 +591,178 @@ function renderTeam(){
   const teamId = game.team?.selectedId;
 
   const pool =
-    (window.playerPool && window.playerPool.length)
-      ? window.playerPool
-      : (game.players || []);
+  (window.playerPool && window.playerPool.length)
+    ? window.playerPool
+    : (game.players || []);
 
-  const players = pool.filter(p =>
-    String(p.team_id) === String(teamId)
-  );
+const players = pool.filter(p => 
+  String(p.team_id) === String(teamId)
+);
 
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
 
-
-  
-  // =========================
-  // 🧠 SORT + GROUP
-  // =========================
   const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
-  // =========================
-  // 🧠 GROUP BY ROLE (CLEAN)
-  // =========================
   players.forEach(p => {
-
-    const role = mapPositionToRole(p.position_type);
-
-    if(!byType[role]){
-      console.warn("⚠️ Unknown role:", role, p);
-      return;
-    }
-
-    byType[role].push(p);
+    const type = p.position_type || "MID";
+    (byType[type] || byType.MID).push(p);
   });
 
-  // =========================
-  // 🔥 SORT (BEST FIRST)
-  // =========================
+  // Sortieren (safe)
   Object.values(byType).forEach(arr => {
     if(!Array.isArray(arr)) return;
     arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
   });
 
   // =========================
-  // ⚙️ FORMATION
+  // 🔥 LINEUP INTEGRATION
   // =========================
-  const formation = game.team?.formation || "4-4-2";
+
+  const lineup = game.team?.lineup;
+
+  let starters = [];
+
+  if(lineup?.slots){
+
+    const pool = window.playerPool || players;
+
+    const ids = Object.values(lineup.slots).filter(Boolean);
+
+    if(ids.length){
+      starters = pool.filter(p =>
+        ids.includes(String(p.id))
+      );
+    }
+  }
+
+  // 👉 FALLBACK (dein bestehendes System bleibt!)
+  if(!starters.length){
+    starters = [
+      ...byType.GK.slice(0,1),
+      ...byType.DEF.slice(0,4),
+      ...byType.MID.slice(0,4),
+      ...byType.ST.slice(0,2)
+    ];
+  }
+
+  const bench = players.filter(p => !starters.includes(p));
+
+  const formation = lineup?.formation || game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
+  // 🔥 Mapping Slot → Player (wichtig!)
+  const slotOrder = [
+    "GK",
+    "DEF_1","DEF_2","DEF_3","DEF_4",
+    "MID_1","MID_2","MID_3","MID_4",
+    "ST_1","ST_2"
+  ];
 
- // =========================
-// 🧠 SLOT → ROLE MAPPING
-// =========================
-function normalizeSlotRole(roleRaw){
+  const positionPool = {
+    GK: [...byType.GK],
+    DEF: [...byType.DEF],
+    MID: [...byType.MID],
+    ST: [...byType.ST]
+  };
 
-  const role = (roleRaw || "").toUpperCase();
-
-  if(["CB","LB","RB","DEF","WB","LWB","RWB"].includes(role)) return "DEF";
-  if(["CM","CDM","CAM","MID"].includes(role)) return "MID";
-  if(["ST","CF","FW","ATT","LW","RW"].includes(role)) return "ST";
-  if(role.includes("GK")) return "GK";
-
-  return "MID";
-}
-
-
-// =========================
-// 🧠 SLOT → PLAYER MATCH
-// =========================
-function pickPlayerForSlot(slotRole, pool){
-
-  // 🔥 1. exakter Match
-  let player = pool.find(p => {
-
-    if(p._used) return false;
-
-    const playerRole = mapPositionToRole(
-      p.position_type || p.position
-    );
-
-    return playerRole === slotRole;
-  });
-
-  if(player){
-    player._used = true;
-    return player;
-  }
-
-  // 🔁 2. fallback (nächster freier)
-  player = pool.find(p => !p._used);
-
-  if(player){
-    player._used = true;
-    return player;
-  }
-
-  return null;
-}
-
-
-// =========================
-// 🧠 STARTING XI
-// =========================
-function buildStartingXI({ layout, players, formation }){
-
-  const starters = [];
-
-  // 👉 saubere Kopie (für _used Flag)
-  const poolCopy = [...players];
-  
-  // =========================
-  // 🎯 STARTER PICK (ROBUST FIX)
-  // =========================
-  layout.forEach(slot => {
-
-    const role = normalizeSlotRole(slot.role);
-
-    // 👉 1. versuche passenden Spieler
-    let player = poolCopy.find(p => {
-      if(p._used) return false;
-
-      const r = mapPositionToRole(p.position_type || p.position);
-      return r === role;
-    });
-
-    // 👉 2. fallback: nimm BESTEN freien Spieler
-    if(!player){
-      player = poolCopy.find(p => !p._used);
-    }
-
-    // 👉 3. hard fallback: wenn immer noch nichts (sollte nie passieren)
-    if(!player && poolCopy.length){
-      player = poolCopy[0];
-    }
-
-    if(player){
-      player._used = true;
-      starters.push(player);
-    }
-  });
-
-  // =========================
-  // ⚽ RENDER
-  // =========================
   let html = `
-    <h3>Startelf (${formation})</h3>
+    <h3>Starting XI</h3>
     <div class="team-field">
   `;
 
   layout.forEach((slot, i) => {
 
-    const player = starters[i] || null;
+    if(!slot) return;
+
+    let player = null;
+
+    // 🔥 1. Versuche Lineup
+    if(lineup?.slots){
+      const slotKey = slotOrder[i];
+      const playerId = lineup.slots[slotKey];
+
+      if(playerId){
+        player = players.find(p => String(p.id) === String(playerId));
+      }
+    }
+
+    // 🔥 2. Fallback (dein altes System)
+    if(!player){
+      player = pickPlayer(slot.role, positionPool);
+    }
+
+    if(!player) return;
 
     html += `
-  <div class="player-pos" style="top:${slot.top}; left:${slot.left};">
-    ${player ? renderPlayerDot(player) : "—"}
-  </div>
-`;
+      <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
+        ${renderPlayerDot(player)}
+      </div>
+    `;
   });
 
   html += `</div>`;
 
-  // 👉 cleanup
-  poolCopy.forEach(p => delete p._used);
+  // =========================
+  // 🪑 BENCH (UNVERÄNDERT)
+  // =========================
 
-  return {
-    html,
-    starters
-  };
+  html += `<h3>Bench</h3>`;
+
+  const benchByType = { GK: [], DEF: [], MID: [], ST: [] };
+
+  bench.forEach(p => {
+    const type = p.position_type || "MID";
+    (benchByType[type] || benchByType.MID).push(p);
+  });
+
+  Object.values(benchByType).forEach(arr => {
+    if(!Array.isArray(arr)) return;
+    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
+  });
+
+  html += `<div class="bench-container">`;
+
+  Object.entries(benchByType).forEach(([role, players]) => {
+
+    if(!players || players.length === 0) return;
+
+    html += `
+      <div class="bench-group">
+        <div class="bench-title">${role}</div>
+        <div class="bench-row">
+    `;
+
+    players.forEach(p => {
+      html += renderPlayerDot(p);
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  container.innerHTML = html;
+
+  // =========================
+  // 🖱️ CLICKS (UNVERÄNDERT)
+  // =========================
+
+  document.querySelectorAll(".player-dot").forEach(el => {
+    el.onclick = () => {
+      const id = el.dataset.id;
+      if(!id) return;
+
+      const player = (game.players || []).find(p => String(p.id) === String(id));
+      if(player) openPlayerModal(player);
+    };
+  });
 }
-  
-const { html, starters } = buildStartingXI({
-  layout,
-  players,
-  formation
-});
-
-// =========================
-// 🪑 BENCH (CLEAN)
-// =========================
-const starterIds = new Set(starters.map(p => String(p.id)));
-
-const bench = players.filter(p =>
-  !starterIds.has(String(p.id))
-);
-
-// optional sort (best first)
-bench.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-  
-let finalHTML = html;
-
-finalHTML += `
-  <h3>Bank</h3>
-  <div class="bench-row">
-`;
-
-bench.forEach(p => {
-
-  const stats = getPlayerStats(p);
-
-  finalHTML += `
-    <div class="bench-card" data-id="${p.id}">
-
-      <div class="bench-top">
-        <div class="bench-name">${p.name}</div>
-        <div class="bench-ovr">${p.overall}</div>
-      </div>
-
-      <div class="bench-bars">
-
-        <div class="mini-bar">
-          <div class="mini-fill" style="width:${stats.attack}%"></div>
-        </div>
-
-        <div class="mini-bar">
-          <div class="mini-fill defense" style="width:${stats.defense}%"></div>
-        </div>
-
-        <div class="mini-bar">
-          <div class="mini-fill control" style="width:${stats.control}%"></div>
-        </div>
-
-      </div>
-
-    </div>
-  `;
-});
-
-finalHTML += `</div>`;
-
-// =========================
-// 🧱 IN DOM (NUR EINMAL!)
-// =========================
-container.innerHTML = finalHTML;
-  
-// =========================
-// 🖱 CLICK SYSTEM
-// =========================
-container.querySelectorAll(".player-dot, .bench-card").forEach(el => {
-  el.onclick = (e) => {
-    e.stopPropagation();
-
-    const id = el.dataset.id;
-    if(!id) return;
-
-    if(!selectedPlayerId){
-      selectedPlayerId = id;
-      highlightSelection(id);
-      return;
-    }
-
-    if(selectedPlayerId === id){
-      selectedPlayerId = null;
-      clearSelection();
-      return;
-    }
-
-    swapPlayers(selectedPlayerId, id);
-
-    selectedPlayerId = null;
-    clearSelection();
-
-    renderTeam();
-  };
-});
 
 // =========================
 // 🔵 PLAYER DOT
@@ -932,51 +783,6 @@ function renderPlayerDot(player){
   `;
 }
 
-function swapPlayers(id1, id2){
-
-  const lineup = game.team?.lineup;
-  if(!lineup?.slots) return;
-
-  let slotA = null;
-  let slotB = null;
-
-  // 👉 finde Slots
-  for(const key in lineup.slots){
-    if(lineup.slots[key] === id1) slotA = key;
-    if(lineup.slots[key] === id2) slotB = key;
-  }
-
-  // 👉 beide im Feld → einfach tauschen
-  if(slotA && slotB){
-    [lineup.slots[slotA], lineup.slots[slotB]] =
-    [lineup.slots[slotB], lineup.slots[slotA]];
-    return;
-  }
-
-  // 👉 einer ist auf Bench
-  if(slotA){
-    lineup.slots[slotA] = id2;
-    return;
-  }
-
-  if(slotB){
-    lineup.slots[slotB] = id1;
-    return;
-  }
-}
-
-  function highlightSelection(id){
-  document.querySelectorAll(".player-dot, .bench-card").forEach(el => {
-    el.classList.toggle("selected", el.dataset.id === id);
-  });
-}
-
-function clearSelection(){
-  document.querySelectorAll(".selected").forEach(el => {
-    el.classList.remove("selected");
-  });
-}
-  }
 // =========================
 // 📊 STATS
 // =========================
@@ -1053,69 +859,43 @@ function calculateTeamStats(){
   // =========================
   // 🧠 STATS BERECHNUNG
   // =========================
- let attack = 0;
-let defense = 0;
-let control = 0;
+  let attack = 0;
+  let defense = 0;
+  let control = 0;
 
-// =========================
-// 🧠 POSITION WEIGHTS
-// =========================
-const POSITION_WEIGHTS = {
+  players.forEach(p => {
 
-  // 🧤 GK
-  GK: { defense: 1.6 },
+    const rating = p.overall ?? 50;
+    const type = (p.position_type || "MID").toUpperCase();
 
-  // 🛡 DEFENSE
-  CB: { defense: 1.4 },
-  LB: { defense: 1.1, control: 0.3 },
-  RB: { defense: 1.1, control: 0.3 },
-  WB: { defense: 0.9, control: 0.5, attack: 0.3 },
-
-  // 🧠 MIDFIELD
-  CDM: { defense: 0.8, control: 1.2 },
-  CM:  { control: 1.2, attack: 0.4 },
-  CAM: { attack: 0.8, control: 1.0 },
-
-  // ⚔️ ATTACK
-  ST: { attack: 1.4 },
-  CF: { attack: 1.2, control: 0.3 },
-  FW: { attack: 1.3 }
-};
-
-// =========================
-// 🔁 LOOP
-// =========================
-players.forEach(p => {
-
-  const rating = p.overall ?? 50;
-
-  const raw =
-    (p.position_type ||
-     p.position ||
-     "MID")
-    .toUpperCase();
-
-  // 👉 passende Definition finden
-  let weights = null;
-
-  for(const key in POSITION_WEIGHTS){
-    if(raw.includes(key)){
-      weights = POSITION_WEIGHTS[key];
-      break;
+    // ⚔️ Attack
+    if(type.includes("ST")){
+      attack += rating * 1.2;
     }
-  }
 
-  // 👉 fallback
-  if(!weights){
-    weights = { control: 0.6 };
-  }
+    // 🧠 Midfield
+    else if(type.includes("MID")){
+      attack += rating * 0.6;
+      control += rating * 1.0;
+    }
 
-  // 👉 apply
-  attack  += rating * (weights.attack  || 0);
-  defense += rating * (weights.defense || 0);
-  control += rating * (weights.control || 0);
+    // 🛡 Defense
+    else if(type.includes("DEF")){
+      defense += rating * 1.2;
+    }
 
-});
+    // 🧤 Goalkeeper
+    else if(type.includes("GK")){
+      defense += rating * 1.5;
+    }
+
+    // 🔄 Unknown fallback
+    else{
+      control += rating * 0.5;
+    }
+
+  });
+
   // =========================
   // 📊 NORMALIZE
   // =========================
@@ -1144,72 +924,6 @@ players.forEach(p => {
   return result;
 }
 
-// =========================
-// ⚙️ TACTIC MODIFIERS ENGINE
-// =========================
-function applyTactics(base){
-
-  const t = game.tactics || {};
-
-  let attack = base.attack;
-  let defense = base.defense;
-  let control = base.control;
-
-  // =========================
-  // 🎮 TEMPO
-  // =========================
-  if(t.tempo === "fast"){
-    attack *= 1.2;
-    control *= 0.85;
-  }
-
-  if(t.tempo === "slow"){
-    defense *= 1.15;
-    attack *= 0.9;
-  }
-
-  // =========================
-  // 🔥 PRESSING
-  // =========================
-  if(t.pressing === "high"){
-    attack *= 1.15;
-    defense *= 0.85;
-  }
-
-  if(t.pressing === "low"){
-    defense *= 1.25;
-    attack *= 0.85;
-  }
-
-  // =========================
-  // 📏 LINE HEIGHT
-  // =========================
-  if(t.line === "high"){
-    attack *= 1.1;
-    defense *= 0.8;
-  }
-
-  if(t.line === "low"){
-    defense *= 1.3;
-    attack *= 0.9;
-  }
-
-// =========================
-// ⚖️ BALANCE NORMALIZATION
-// =========================
-const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
-
-return {
-  attack: clamp(attack),
-  defense: clamp(defense),
-  control: clamp(control)
-};
-}
-
-
-// =========================
-// 📊 RENDER TACTIC STATS
-// =========================
 function renderTacticStats(){
 
   const el = document.getElementById("tacticsStats");
@@ -1217,13 +931,10 @@ function renderTacticStats(){
 
   const base = calculateTeamStats();
 
-  // =========================
-  // ❌ NO DATA
-  // =========================
-  if(!base){
-    el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
-    return;
-  }
+if(!base){
+  el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
+  return;
+}
 
   const t = game.tactics || {};
 
@@ -1235,10 +946,9 @@ function renderTacticStats(){
   // ⚙️ TACTICS APPLY
   // =========================
 
-  // 🎮 TEMPO
   if(t.tempo === "fast"){
     attack *= 1.2;
-    control *= 0.85;
+    control *= 0.9;
   }
 
   if(t.tempo === "slow"){
@@ -1246,43 +956,27 @@ function renderTacticStats(){
     attack *= 0.9;
   }
 
-  // 🔥 PRESSING
   if(t.pressing === "high"){
     attack *= 1.15;
-    defense *= 0.85;
+    defense *= 0.9;
   }
 
   if(t.pressing === "low"){
-    defense *= 1.25;
-    attack *= 0.85;
-  }
-
-  // 📏 LINE HEIGHT
-  if(t.line === "high"){
-    attack *= 1.1;
-    defense *= 0.8;
-  }
-
-  if(t.line === "low"){
-    defense *= 1.3;
+    defense *= 1.2;
     attack *= 0.9;
   }
 
-  // =========================
-  // 🎲 CHANCE EFFECTS (NEU)
-  // =========================
-  const fx = game.tempEffects || {};
+  if(t.line === "high"){
+    attack *= 1.1;
+    defense *= 0.85;
+  }
 
-  attack  += fx.attack_boost  || 0;
-  defense += fx.defense_boost || 0;
-  control += fx.control_boost || 0;
+  if(t.line === "low"){
+    defense *= 1.2;
+    attack *= 0.95;
+  }
 
-  attack  += fx.attack_nerf  || 0;
-  defense += fx.defense_nerf || 0;
-
-  // =========================
-  // 🔒 CLAMP
-  // =========================
+  // Clamp
   const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
 
   attack = clamp(attack);
@@ -1290,60 +984,13 @@ function renderTacticStats(){
   control = clamp(control);
 
   // =========================
-  // 🎨 RENDER HTML
+  // 🎨 RENDER
   // =========================
   el.innerHTML = `
     ${renderTacticBar("Attack", attack)}
     ${renderTacticBar("Defense", defense)}
     ${renderTacticBar("Control", control)}
   `;
-
-  // =========================
-  // 🚀 ANIMATION TRIGGER
-  // =========================
-  requestAnimationFrame(() => {
-
-    el.querySelectorAll(".tactic-fill").forEach((bar, i) => {
-
-      const target = bar.dataset.value;
-
-      setTimeout(() => {
-        bar.style.width = target + "%";
-      }, i * 120);
-
-    });
-
-  });
-}
-
-// =========================
-// 🎲 CHANCE EVENT SYSTEM
-// =========================
-function triggerChanceEvent(){
-
-  const events = [
-    { type: "attack_boost", value: +15, text: "🔥 Offensivschub!" },
-    { type: "defense_boost", value: +15, text: "🛡 Defensiv stabil!" },
-    { type: "control_boost", value: +15, text: "🎯 Spielkontrolle erhöht!" },
-
-    { type: "attack_nerf", value: -10, text: "❌ Angriff schwächelt!" },
-    { type: "defense_nerf", value: -10, text: "⚠️ Abwehr unsicher!" }
-  ];
-
-  const event = events[Math.floor(Math.random() * events.length)];
-
-  game.tempEffects = game.tempEffects || {};
-
-  // 👉 Effekt setzen
-  game.tempEffects[event.type] = event.value;
-
-  console.log("🎲 Chance Event:", event);
-
-  // 👉 kleines Feedback
-  alert(event.text);
-
-  // 👉 UI aktualisieren
-  renderTacticStats();
 }
 
 function renderTacticBar(label, value){
@@ -1352,7 +999,7 @@ function renderTacticBar(label, value){
     <div class="tactic-row">
       <div class="tactic-label">${label} (${value})</div>
       <div class="tactic-bar">
-        <div class="tactic-fill" data-value="${value}"></div>
+        <div class="tactic-fill" style="width:${value}%"></div>
       </div>
     </div>
   `;
@@ -1366,136 +1013,9 @@ function renderCurrentMatch(){
 }
 
 function renderSchedule(){
-
-  const container = document.getElementById("scheduleView");
-  if(!container) return;
-
-  const schedule = game.league?.current?.schedule;
-  if(!schedule?.length){
-    container.innerHTML = "<p>Kein Spielplan vorhanden</p>";
-    return;
-  }
-
-  if(scheduleViewIndex === null){
-    scheduleViewIndex = game.league.currentRound || 0;
-  }
-
-  const round = schedule[scheduleViewIndex];
-  if(!round) return;
-
-  const myMatch = game.match?.current;
-
-  const nav = `
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:10px;
-    ">
-      <button id="prevRound">⬅</button>
-      <strong>Spieltag ${scheduleViewIndex + 1}</strong>
-      <button id="nextRound">➡</button>
-    </div>
-  `;
-
-  const list = round.map((match, mIndex) => {
-
-    const isActive =
-      (myMatch && match.id === myMatch.id) ||
-      (scheduleViewIndex === game.league.currentRound &&
-       mIndex === game.league.currentMatchIndex);
-
-    return `
-      <div style="
-        padding:8px;
-        margin:4px 0;
-        border-radius:6px;
-        background:${isActive ? "#111" : "#0b0b0b"};
-        color:${isActive ? "#00ff88" : "#ccc"};
-        font-weight:${isActive ? "bold" : "normal"};
-      ">
-        ${match.home?.name || "-"}
-        ${match.result ? match.result.home + ":" + match.result.away : "vs"}
-        ${match.away?.name || "-"}
-        ${match._processed ? " ✅" : ""}
-      </div>
-    `;
-  }).join("");
-
-  container.innerHTML = nav + list;
-
-  // NAV
-  document.getElementById("prevRound")?.addEventListener("click", () => {
-    scheduleViewIndex = Math.max(0, scheduleViewIndex - 1);
-    renderSchedule();
-  });
-
-  document.getElementById("nextRound")?.addEventListener("click", () => {
-    scheduleViewIndex = Math.min(schedule.length - 1, scheduleViewIndex + 1);
-    renderSchedule();
-  });
-
-  // SWIPE
-  let startX = null;
-
-  container.ontouchstart = (e) => {
-    startX = e.touches[0].clientX;
-  };
-
-  container.ontouchend = (e) => {
-
-    if(startX === null) return;
-
-    const diff = startX - e.changedTouches[0].clientX;
-
-    if(Math.abs(diff) < 50) return;
-
-    if(diff > 0){
-      scheduleViewIndex = Math.min(schedule.length - 1, scheduleViewIndex + 1);
-    } else {
-      scheduleViewIndex = Math.max(0, scheduleViewIndex - 1);
-    }
-
-    renderSchedule();
-    startX = null;
-  };
+  console.log("📅 renderSchedule");
 }
-function getPlayerStats(player){
 
-  const pos = (player.position || "").toUpperCase();
-
-  let attack  = player.shooting ?? 50;
-  let defense = player.defending ?? 50;
-  let control = player.passing ?? 50;
-
-  // 🧤 GK Spezial
-  if(pos === "GK"){
-    defense = player.goalkeeping ?? 50;
-    attack = 10;
-    control = 40;
-  }
-
-  // 🔥 Positionsgewichtung
-  if(["ST","CF","FW"].includes(pos)){
-    attack *= 1.1;
-  }
-
-  if(["CB","LB","RB"].includes(pos)){
-    defense *= 1.1;
-  }
-
-  if(["CM","CDM","CAM"].includes(pos)){
-    control *= 1.1;
-  }
-
-  const clamp = v => Math.max(0, Math.min(100, Math.round(v)));
-
-  return {
-    attack: clamp(attack),
-    defense: clamp(defense),
-    control: clamp(control)
-  };
-}
 export {
   updateUI,
   renderSchedule,
