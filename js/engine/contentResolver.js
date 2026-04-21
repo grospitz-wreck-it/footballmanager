@@ -198,8 +198,15 @@ function enrichEvent(event){
   };
 }
 
+
 // =========================
-// 🌍 GLOBAL (FIX)
+// 📦 EXPORTS (FIX)
 // =========================
-window.enrichEvent = enrichEvent;
+export {
+  resolveEventContent,
+  enrichEvent
+};
+
+// optional (für Debug / Legacy Zugriff)
 window.resolveEventContent = resolveEventContent;
+window.enrichEvent = enrichEvent;
