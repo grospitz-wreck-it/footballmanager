@@ -297,19 +297,18 @@ function initLeagueSelect(leaguesInput){
 
   const selects = [splashSelect, menuSelect].filter(Boolean);
 
-  // 🔥 FIX: NIMM PARAMETER!
+  // 🔥 Datenquelle
   const source = leaguesInput || game.league?.available || [];
 
   if (!source.length) {
-  console.log("ℹ️ LeagueSelect wartet auf Daten...");
-  
-  // 🔥 WICHTIG: Dropdown leeren
-  selects.forEach(select => {
-    select.innerHTML = "";
-  });
+    console.log("ℹ️ LeagueSelect wartet auf Daten...");
+    
+    selects.forEach(select => {
+      select.innerHTML = "";
+    });
 
-  return;
-}
+    return;
+  }
 
   console.log("🏆 LeagueSelect FINAL:", source.length);
 
@@ -325,6 +324,9 @@ function initLeagueSelect(leaguesInput){
 
   leagueIndexMap = leagues;
 
+  // =========================
+  // 🔽 DROPDOWNS FÜLLEN
+  // =========================
   selects.forEach(select => {
 
     select.innerHTML = "";
@@ -332,10 +334,7 @@ function initLeagueSelect(leaguesInput){
     leagues.forEach((league, i) => {
       const option = document.createElement("option");
       option.value = i;
-
-      // 🔥 BONUS: besserer Name
-      option.textContent = `${league.name} (${league.teams.length})`;
-
+      option.textContent = `${league.name} (${league.teams?.length || 0})`;
       select.appendChild(option);
     });
 
@@ -346,43 +345,46 @@ function initLeagueSelect(leaguesInput){
 
       if(!league) return;
 
-     game.league.current = league;
+      // =========================
+      // 🧠 LEAGUE SETZEN
+      // =========================
+      game.league.current = league;
 
-// 🔥 IMMER neu für neue Karriere
-league.schedule = generateSchedule(league);
-league.currentRound = 0;
+      // 🔥 Reset + Neuaufbau
+      league.schedule = generateSchedule(league);
+      league.currentRound = 0;
+      league.table = null;
 
-// 🔥 wichtig: reset alter state
-league.table = null;
+      initLeague(league);
 
-initLeague(league);
-      
+      // =========================
+      // ⚽ MATCH INIT
+      // =========================
+      const round = league.schedule?.[0];
 
-      const round = league.schedule?.[league.currentRound || 0];
+      if(!round){
+        console.error("❌ Kein Round nach Teamwahl");
+        return;
+      }
 
-if(!round){
-  console.error("❌ Kein Round nach Teamwahl");
-  return true;
-}
+      const ok = initMatch(round);
 
-const ok = initMatch(round);
+      if(!ok){
+        console.error("❌ initMatch fehlgeschlagen nach Teamwahl");
+        return;
+      }
 
-if(!ok){
-  console.error("❌ initMatch fehlgeschlagen nach Teamwahl");
-  return true;
-}
+      if(!game.match?.live){
+        console.error("❌ live fehlt nach initMatch");
+        return;
+      }
 
-// 🔥 ABSICHERUNG
-if(!game.match?.live){
-  console.error("❌ live fehlt nach initMatch");
-  return true;
-}
+      game.match.live.running = false;
+      game.match.live.phase = game.match.live.phase || "first_half";
 
-game.match.live.running = false;
-game.match.live.phase = game.match.live.phase || "first_half";
+      console.log("✅ Match ready nach Teamwahl:", game.match);
 
-console.log("✅ Match ready nach Teamwahl:", game.match);
-
+      // 🔄 Sync beide Selects
       selects.forEach(s => {
         if(s !== select) s.value = index;
       });
@@ -391,31 +393,42 @@ console.log("✅ Match ready nach Teamwahl:", game.match);
     });
   });
 
-  // 🔥 DEFAULT SELECT
+  // =========================
+  // 🔥 DEFAULT INIT
+  // =========================
   game.league = game.league || {};
   game.league.current = leagues[0];
 
-// 🔥 zuerst Schedule
-if(!game.league.current.schedule || !game.league.current.schedule.length){
-  generateSchedule(game.league.current);
-}
+  if(!game.league.current){
+    console.warn("❌ Keine Default Liga");
+    return;
+  }
 
-// dann init
-initLeague(game.league.current);
+  // Schedule zuerst
+  if(!game.league.current.schedule || !game.league.current.schedule.length){
+    game.league.current.schedule = generateSchedule(game.league.current);
+  }
+
+  // Dann init
+  initLeague(game.league.current);
 
   populateTeamSelect();
 
-  const round = game.league.current?.schedule?.[0];
+  // =========================
+  // ⚽ ERSTES MATCH
+  // =========================
+  const round = game.league.current.schedule?.[0];
 
   if(round && round.length > 0){
     const ok = initMatch(round);
-    if(ok){
+
+    if(ok && game.match?.live){
       game.match.live.running = false;
     }
   }
+
+  console.log("✅ LeagueSelect vollständig initialisiert");
 }
-
-
 
 // =========================
 // 🔥 SET LEAGUE (PLZ)
