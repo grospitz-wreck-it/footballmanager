@@ -317,7 +317,7 @@ async function findLeaguesByCode(input){
   console.log("🔍 INPUT:", input);
   console.log("📦 AVAILABLE LEAGUES:", game.league?.available);
 
-  if(!input || input.length < 3) return [];
+  if(!input || input.length < 2) return [];
 
   const leagues = game.league?.available || [];
 
