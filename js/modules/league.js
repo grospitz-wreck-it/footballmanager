@@ -414,13 +414,15 @@ console.log("🧪 TEAM COUNT:", league.teams?.length);
 function setLeagueById(leagueId){
 
   const league = leagueIndexMap.find(
-    l => String(l.id) === String(leagueId)
+    l => normalizeId(l.id) === normalizeId(leagueId)
   );
 
   if(!league){
     console.warn("❌ Liga nicht gefunden:", leagueId);
     return;
   }
+
+  const index = leagueIndexMap.indexOf(league);
 
   const selects = [
     document.getElementById("leagueSelect"),
@@ -430,55 +432,52 @@ function setLeagueById(leagueId){
   // =========================
   // 🧠 SET CURRENT LEAGUE
   // =========================
-  game.league = game.league || {};
   game.league.current = league;
 
   // =========================
-  // 🔥 HARD RESET (WICHTIG!)
+  // 📅 SCHEDULE FIX
   // =========================
-  league.currentRound = 0;
-  league.table = null;
-  league.schedule = null;
+  if(!league.schedule || !league.schedule.length){
 
-  // =========================
-  // 📅 NEUEN SCHEDULE ERZEUGEN
-  // =========================
-  const schedule = generateSchedule(league);
+    console.warn("📅 Generiere neuen Spielplan:", league.name);
 
-  if(!schedule || !schedule.length){
-    console.error("❌ Schedule konnte nicht erstellt werden");
-    return;
+    const schedule = generateSchedule(league); // ✅ jetzt safe
+
+    if(schedule && schedule.length){
+      league.schedule = schedule;
+    } else {
+      console.error("❌ Schedule konnte nicht erstellt werden");
+      return;
+    }
   }
 
-  league.schedule = schedule;
-
-  console.log("📅 NEW SCHEDULE:", schedule.length);
-
   // =========================
-  // 👥 INIT LEAGUE (Teams + Players)
+  // 🏗 INIT LEAGUE
   // =========================
   initLeague(league);
 
   // =========================
-  // 🔄 DROPDOWN SYNC
+  // 🔄 SELECT SYNC
   // =========================
-  const index = leagueIndexMap.indexOf(league);
-
   selects.forEach(select => {
     select.value = index;
   });
 
-  // =========================
-  // 👕 TEAMS LADEN (KEIN AUTO-SELECT!)
-  // =========================
   populateTeamSelect();
 
   // =========================
-  // 🚫 KEIN MATCH INIT HIER!
+  // ⚽ INIT MATCH
   // =========================
-  // Match startet erst nach Teamwahl
+  const round = league.schedule?.[0];
 
-  console.log("✅ Liga gesetzt (bereit für Teamwahl):", league.name);
+  if(round && round.length > 0){
+    const ok = initMatch(round);
+    if(ok){
+      game.match.live.running = false;
+    }
+  }
+
+  console.log("✅ Liga extern gesetzt:", league.name);
 }
 
 // =========================
