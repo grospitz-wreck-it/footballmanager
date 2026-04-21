@@ -490,8 +490,9 @@ function getCountryForPlayer(player, team, league){
 // =========================
 // 👥 LOAD PLAYERS (SAFE)
 // =========================
-const loadedPlayers = await loadPlayers();
+const teamIds = teams.map(t => String(t.id));
 
+const loadedPlayers = await loadPlayersForTeams(teamIds);
 // ⚠️ league kann hier noch null sein → fallback
 const league = game.league?.current || { level: 7 };
 
