@@ -1,5 +1,5 @@
 // =========================
-// 🧠 CONTENT RESOLVER (MINIMAL FIXED)
+// 🧠 CONTENT RESOLVER (FINAL FIXED)
 // =========================
 
 import { game } from "../core/state.js";
@@ -12,40 +12,54 @@ function normalize(val){
 }
 
 // =========================
-// 👤 PLAYER
+// 👤 PLAYER LOOKUP (FIXED)
 // =========================
+function findPlayerById(id){
+
+  if(!id) return null;
+
+  const league = game.league?.current;
+  if(!league) return null;
+
+  for(const team of league.teams || []){
+    const player = team.players?.find(
+      p => String(p.id) === String(id)
+    );
+    if(player) return player;
+  }
+
+  return null;
+}
+
 function getPlayerNameById(id){
 
-  if(!id) return "ein Spieler";
+  const player = findPlayerById(id);
 
-  const players = window.playerPool || [];
-
-  const p = players.find(p => String(p?.id) === String(id));
-
-  if(!p){
+  if(!player){
     console.warn("❌ Player not found:", id);
     return "ein Spieler";
   }
 
-  return p.name || "ein Spieler";
+  return player.name || player.Name || "ein Spieler";
 }
 
 // =========================
-// 🏆 TEAM
+// 🏆 TEAM LOOKUP (FIXED)
 // =========================
+function findTeamById(id){
+
+  if(!id) return null;
+
+  return game.league?.current?.teams?.find(
+    t => String(t.id) === String(id)
+  ) || null;
+}
+
 function getTeamNameById(id){
 
-  if(!id) return "ein Team";
+  const team = findTeamById(id);
 
-  const teams =
-    game?.league?.current?.teams ||
-    game?.leagues?.flatMap(l => l.teams) ||
-    window.teams ||
-    [];
-
-  const t = teams.find(t => String(t.id) === String(id));
-
-  return t?.name || "ein Team";
+  return team?.name || "ein Team";
 }
 
 // =========================
@@ -88,7 +102,7 @@ function getEventDefinitions(){
 }
 
 // =========================
-// 🎯 MAIN RESOLVER (UNVERÄNDERT)
+// 🎯 MAIN RESOLVER
 // =========================
 function resolveEventContent(event){
 
@@ -166,26 +180,15 @@ function emptyResult(){
 }
 
 // =========================
-// 🔥 ENRICH (MINIMAL FIX)
+// 🔥 ENRICH EVENT (FINAL FIX)
 // =========================
 function enrichEvent(event){
 
   if(!event) return event;
 
-  const players =
-    (window.playerPool && window.playerPool.length)
-      ? window.playerPool
-      : (game.players || []);
-
-  const teams = game.teams || [];
-
-  const player = players.find(p =>
-    String(p.id) === String(event.playerId)
-  ) || null;
-
-  const team = teams.find(t =>
-    String(t.id) === String(event.teamId)
-  ) || null;
+  const player = findPlayerById(event.playerId);
+  const related = findPlayerById(event.relatedPlayerId);
+  const team = findTeamById(event.teamId);
 
   if(event.playerId && !player){
     console.warn("❌ PLAYER NOT FOUND:", event.playerId);
@@ -193,20 +196,27 @@ function enrichEvent(event){
 
   return {
     ...event,
+
+    // 👉 echte Objekte
     player,
-    team
+    relatedPlayer: related,
+    team,
+
+    // 👉 direkt usable strings (für commentary)
+    playerName: player?.name || player?.Name || "ein Spieler",
+    relatedPlayerName: related?.name || related?.Name || null,
+    teamName: team?.name || "ein Team"
   };
 }
 
-
 // =========================
-// 📦 EXPORTS (FIX)
+// 📦 EXPORTS
 // =========================
 export {
   resolveEventContent,
   enrichEvent
 };
 
-// optional (für Debug / Legacy Zugriff)
+// optional debug
 window.resolveEventContent = resolveEventContent;
 window.enrichEvent = enrichEvent;
