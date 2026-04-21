@@ -6,7 +6,7 @@ import { game } from "../core/state.js";
 import { generateTeam } from "./teamLoader.js";
 import { initMatch } from "../matchEngine.js";
 import { generateSchedule } from "./scheduler.js"; // 🔥 FIX
-import { startGame } from "../layout/layout.js";
+import { startGame } from "../ui/layout.js";
 // =========================
 // 🧠 HELPERS
 // =========================
