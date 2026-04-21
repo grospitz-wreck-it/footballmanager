@@ -1,21 +1,50 @@
 import { supabase } from "../client.js"; // 🔥 du brauchst das!
 
 export async function loadPlayers(){
-  const { data, error } = await supabase
-   .from("players")
-.select("*")
-.range(0, 99999); // 🔥 mehr laden
-console.log("📦 RAW PLAYERS FROM DB:", data?.length, data?.[0]);
-  if(error){
-    console.error("❌ Player Load Error:", error);
-    return [];
+
+  let allPlayers = [];
+  let from = 0;
+  const step = 1000;
+
+  // 🔁 Pagination (wichtig!)
+  while(true){
+
+    const { data, error } = await supabase
+      .from("players")
+      .select("*")
+      .range(from, from + step - 1);
+
+    if(error){
+      console.error("❌ Player Load Error:", error);
+      return [];
+    }
+
+    if(!data || data.length === 0){
+      break;
+    }
+
+    allPlayers = allPlayers.concat(data);
+
+    console.log(`📦 geladen: ${allPlayers.length}`);
+
+    if(data.length < step){
+      break; // letzte Seite erreicht
+    }
+
+    from += step;
   }
 
-  const cleaned = (data || []).map(p => {
+  console.log("✅ TOTAL PLAYERS:", allPlayers.length);
+  console.log("📦 RAW PLAYERS SAMPLE:", allPlayers[0]);
 
-    // 🔥 TEAM FIX (KRITISCH)
+  // =========================
+  // 🧼 CLEANING
+  // =========================
+  const cleaned = allPlayers.map(p => {
+
+    // 🔥 TEAM FIX
     const teamId =
-      (p.team_id === "null" || p.team_id === undefined)
+      (p.team_id === "null" || p.team_id === undefined || p.team_id === "")
         ? null
         : p.team_id;
 
@@ -30,7 +59,6 @@ console.log("📦 RAW PLAYERS FROM DB:", data?.length, data?.[0]);
 
       name: p.name,
 
-      // 🔥 WICHTIG: NICHT String()!
       team_id: teamId,
 
       country: p.country || "DE",
