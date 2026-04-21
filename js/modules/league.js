@@ -39,9 +39,12 @@ function ensureTeamPlayers(team){
   );
 
   // ✅ genug echte Spieler → direkt verwenden
-  if(realPlayers.length >= 18){
-    team.players = realPlayers;
-  } else {
+ if(realPlayers.length >= 18){
+  team.players = realPlayers.map(p => {
+    p.team_id = team.id; // 🔥 Ownership setzen
+    return p;
+  });
+} else {
 
     console.warn(`⚠️ Team ${team.name} hat nur ${realPlayers.length} Spieler → wird ergänzt`);
 
@@ -103,7 +106,10 @@ function ensureTeamPlayers(team){
       }
     }
 
-    team.players = [...realPlayers, ...additions];
+team.players = [...realPlayers, ...additions].map(p => {
+  p.team_id = team.id; // 🔥 ownership setzen
+  return p;
+});
   }
 
   console.log(`✅ ${team.players.length} Spieler für ${team.name}`);
