@@ -444,6 +444,37 @@ function setLeagueById(leagueId){
   // =========================
   initLeague(league);
 
+// =========================
+// 👥 ENSURE TEAM PLAYERS (🔥 FIX)
+// =========================
+league.teams.forEach(team => {
+
+  if(!team.players || !team.players.length){
+
+    try {
+      const players = ensureTeamPlayers(team);
+
+      if(players && players.length){
+
+        // 👉 Team bekommt Spieler
+        team.players = players;
+
+        // 👉 WICHTIG: Binding für UI + Engine
+        players.forEach(p => {
+          p.team_id = team.id;
+        });
+
+      } else {
+        console.warn("⚠️ Keine Spieler generiert für:", team.name);
+      }
+
+    } catch(e){
+      console.error("❌ Player generation crashed:", team.name, e);
+    }
+  }
+
+});
+  
   // =========================
   // 🔥 HARD PLAYER SAFETY (NEU)
   // =========================
