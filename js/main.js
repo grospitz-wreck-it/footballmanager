@@ -351,7 +351,7 @@ async function findLeaguesByCode(input){
   competition_id: t.competition_id,
   city_id: t.city_id || null
 });
-
+});
   let leagues = Array.from(map.values());
 
   // =========================
