@@ -583,11 +583,9 @@ let leagueTeams = teams.filter(t =>
   String(t.competition_id) === String(c.id)
 );
 
-// 🔥 SAFETY FALLBACK
 if(!leagueTeams.length){
-  console.warn("⚠️ Keine Teams für Liga → fallback:", c.name);
-
-  leagueTeams = teams.slice(0, 10); // temporär fallback
+  console.warn("❌ Keine Teams für Liga:", c.name);
+  return; // 🔥 skip diese Liga komplett
 }
   // =========================
   // 🧠 DISPLAY NAME FIX
