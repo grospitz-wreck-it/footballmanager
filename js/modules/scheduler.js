@@ -293,7 +293,8 @@ function nextMatch(){
       ){
         game.league.currentRound = r;
         game.league.currentMatchIndex = m;
-        return match;
+        return hydrateMatchTeams(match); // 🔥 FIX
+
       }
     }
   }
