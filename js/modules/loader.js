@@ -1,54 +1,31 @@
 import { supabase } from "../client.js"; // 🔥 du brauchst das!
 
-export async function loadPlayers(){
+export async function loadPlayersForTeams(teamIds){
 
-  let allPlayers = [];
-  let from = 0;
-  const step = 1000;
-
-  // 🔁 Pagination (wichtig!)
-  while(true){
-
-    const { data, error } = await supabase
-      .from("players")
-      .select("*")
-      .range(from, from + step - 1);
-
-    if(error){
-      console.error("❌ Player Load Error:", error);
-      return [];
-    }
-
-    if(!data || data.length === 0){
-      break;
-    }
-
-    allPlayers = allPlayers.concat(data);
-
-    console.log(`📦 geladen: ${allPlayers.length}`);
-
-    if(data.length < step){
-      break; // letzte Seite erreicht
-    }
-
-    from += step;
+  if(!teamIds || !teamIds.length){
+    console.warn("⚠️ keine teamIds übergeben");
+    return [];
   }
 
-  console.log("✅ TOTAL PLAYERS:", allPlayers.length);
-  console.log("📦 RAW PLAYERS SAMPLE:", allPlayers[0]);
+  const { data, error } = await supabase
+    .from("players")
+    .select("*")
+    .in("team_id", teamIds); // 🔥 DAS IST DER KEY
 
-  // =========================
-  // 🧼 CLEANING
-  // =========================
-  const cleaned = allPlayers.map(p => {
+  if(error){
+    console.error("❌ Player Load Error:", error);
+    return [];
+  }
 
-    // 🔥 TEAM FIX
+  console.log("📦 PLAYERS FOR TEAMS:", data?.length);
+
+  const cleaned = (data || []).map(p => {
+
     const teamId =
       (p.team_id === "null" || p.team_id === undefined || p.team_id === "")
         ? null
         : p.team_id;
 
-    // 🔥 STABILE ID
     const id = String(
       p.id ||
       (p.name + "_" + (teamId || "no_team"))
@@ -56,14 +33,10 @@ export async function loadPlayers(){
 
     return {
       id,
-
       name: p.name,
-
       team_id: teamId,
-
       country: p.country || "DE",
       position: p.position || "CM",
-
       overall: Number(p.overall) || 50,
       shooting: Number(p.shooting) || 50,
       passing: Number(p.passing) || 50,
@@ -71,8 +44,6 @@ export async function loadPlayers(){
       goalkeeping: Number(p.goalkeeping) || 50
     };
   });
-
-  console.log("🧼 CLEAN PLAYERS SAMPLE:", cleaned.slice(0,5));
 
   return cleaned;
 }
