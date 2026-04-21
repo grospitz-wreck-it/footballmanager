@@ -324,15 +324,23 @@ const validTeamIds = new Set(
 );
 
 // =========================
-// 🔥 TEAM ASSIGN (FINAL FIX)
+// 🔥 TEAM ASSIGN (STRICT + NORMALIZED)
 // =========================
+
+// 🔥 IDs einmal sauber normalisieren
+const scheduleTeamIds = new Set(
+  scheduleTeams.map(t => String(t.id))
+);
+
 let pool = (loadedPlayers || []).map(p => {
 
-  // ✅ nur behalten wenn EXAKT im Schedule
-  if(p.team_id && scheduleTeamIds.has(p.team_id)){
+  const playerTeamId = p.team_id ? String(p.team_id) : null;
+
+  // ✅ wenn exakt im Schedule → behalten
+  if(playerTeamId && scheduleTeamIds.has(playerTeamId)){
     return {
       ...p,
-      team_id: p.team_id
+      team_id: playerTeamId
     };
   }
 
@@ -342,10 +350,9 @@ let pool = (loadedPlayers || []).map(p => {
 
   return {
     ...p,
-    team_id: randomTeam.id
+    team_id: String(randomTeam.id)
   };
 });
-
 // =========================
 // 📦 FINAL ASSIGN
 // =========================
@@ -381,7 +388,10 @@ function validateTeams(){
 }
 
 validateTeams();
-
+console.log("🧪 FINAL CROSS CHECK", {
+  scheduleTeams: game.league.current.teams.map(t => t.id),
+  playerTeams: [...new Set(window.playerPool.map(p => p.team_id))].slice(0,20)
+});
   
   initCustomTeamSelect(game.league.current);
   console.log("📅 SCHEDULE:", game.league.current?.schedule);
