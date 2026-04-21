@@ -1,5 +1,5 @@
 // =========================
-// 🧠 CONTENT RESOLVER (FINAL FIXED)
+// 🧠 CONTENT RESOLVER (MINIMAL FIXED)
 // =========================
 
 import { game } from "../core/state.js";
@@ -70,7 +70,7 @@ function isValidAsset(asset){
 }
 
 // =========================
-// 🧠 EVENTS SOURCE (FIX!!!)
+// 🧠 EVENTS SOURCE
 // =========================
 function getEventDefinitions(){
 
@@ -88,9 +88,9 @@ function getEventDefinitions(){
 }
 
 // =========================
-// 🎯 MAIN RESOLVER
+// 🎯 MAIN RESOLVER (UNVERÄNDERT)
 // =========================
-export function resolveEventContent(event){
+function resolveEventContent(event){
 
   if(!event){
     console.warn("⚠️ resolveEventContent: no event");
@@ -100,7 +100,6 @@ export function resolveEventContent(event){
   const definitions = getEventDefinitions();
   const type = normalize(event.type);
 
-  // 🔥 DEBUG
   console.log("🧠 RESOLVER INPUT:", {
     type,
     definitions: definitions.length
@@ -111,9 +110,6 @@ export function resolveEventContent(event){
     return emptyResult();
   }
 
-  // =========================
-  // 🔍 MATCH
-  // =========================
   const matches = definitions.filter(e => {
 
     const possible = [
@@ -131,16 +127,10 @@ export function resolveEventContent(event){
     return emptyResult();
   }
 
-  // =========================
-  // 🔥 PRIORITY
-  // =========================
   matches.sort((a,b) => (b.priority || 0) - (a.priority || 0));
 
   const selected = matches[0];
 
-  // =========================
-  // 🖼 ASSETS
-  // =========================
   let assets = [];
 
   if(Array.isArray(selected.assets)){
@@ -153,9 +143,6 @@ export function resolveEventContent(event){
       }));
   }
 
-  // =========================
-  // 🧾 RETURN
-  // =========================
   return {
     text: selected.title || null,
     assets,
@@ -179,15 +166,12 @@ function emptyResult(){
 }
 
 // =========================
-// 🔥 ENRICH (FIXED)
+// 🔥 ENRICH (MINIMAL FIX)
 // =========================
-export function enrichEvent(event){
+function enrichEvent(event){
 
   if(!event) return event;
 
-  // =========================
-  // 🧠 PLAYER POOL (SOURCE OF TRUTH)
-  // =========================
   const players =
     (window.playerPool && window.playerPool.length)
       ? window.playerPool
@@ -195,59 +179,27 @@ export function enrichEvent(event){
 
   const teams = game.teams || [];
 
-  // =========================
-  // 🔍 STRICT ID RESOLVE
-  // =========================
-  export function resolveEventContent(event){
+  const player = players.find(p =>
+    String(p.id) === String(event.playerId)
+  ) || null;
 
-  if(!event) return null;
+  const team = teams.find(t =>
+    String(t.id) === String(event.teamId)
+  ) || null;
 
-  const player = event.player;
-  const team   = event.team;
-
-  const playerName =
-    player?.name ||
-    `${player?.first_name || ""} ${player?.last_name || ""}`.trim() ||
-    "Unbekannt";
-
-  const teamName =
-    team?.name ||
-    "Team";
-
-  // =========================
-  // 🎯 EVENT TYPES
-  // =========================
-  switch(event.type){
-
-    case "goal":
-      return {
-        text: `⚽ ${playerName} trifft für ${teamName}!`,
-        assets: [{ url: "/assets/events/goal.webp" }]
-      };
-
-    case "shot":
-      return {
-        text: `🎯 ${playerName} kommt zum Abschluss`,
-      };
-
-    case "foul":
-      return {
-        text: `🟥 Foul von ${playerName}`,
-      };
-
-    case "pass":
-      return {
-        text: `➡️ Pass von ${playerName}`,
-      };
-
-    case "save":
-      return {
-        text: `🧤 Parade von ${playerName}`,
-      };
-
-    default:
-      return {
-        text: event.text || "Spielaktion",
-      };
+  if(event.playerId && !player){
+    console.warn("❌ PLAYER NOT FOUND:", event.playerId);
   }
+
+  return {
+    ...event,
+    player,
+    team
+  };
 }
+
+// =========================
+// 🌍 GLOBAL (FIX)
+// =========================
+window.enrichEvent = enrichEvent;
+window.resolveEventContent = resolveEventContent;
