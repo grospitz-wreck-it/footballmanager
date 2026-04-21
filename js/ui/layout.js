@@ -8,18 +8,20 @@ import { game } from "../core/state.js";
 // =========================
 function renderApp(){
 
-const splash = document.getElementById("splash");
-const app    = document.getElementById("app");
+  const splash = document.getElementById("splash");
+  const app    = document.getElementById("app");
 
-if(!splash || !app) return;
+  if(!splash || !app) return;
 
-if(game.phase === "setup"){
-splash.style.display = "flex";
-app.style.display = "none";
-} else {
-splash.style.display = "none";
-app.style.display = "block";
-}
+  console.log("PHASE:", game.phase); // 🔥 DEBUG
+
+  if(game.phase === "setup"){
+    splash.style.display = "flex";
+    app.style.display = "none";
+  } else {
+    splash.style.display = "none";
+    app.style.display = "block";
+  }
 }
 
 // =========================
