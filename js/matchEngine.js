@@ -183,15 +183,32 @@ function applyGameEventEffect(event, ctx){
 // =========================
 function getPlayersOfTeam(teamId){
 
-  const nid = normalizeId(teamId);
+  const nid = String(teamId);
   const pool = window.playerPool || [];
 
+  const matches = pool.filter(p =>
+    String(p.team_id) === nid
+  );
+
+  // =========================
+  // 🔥 DEBUG (ENTSCHEIDEND)
+  // =========================
   console.log("🔍 TEAM ID:", nid);
 
-  const matches = pool.filter(p => String(p.team_id) === String(nid));
+  console.log("🧪 TEAM IDS SAMPLE:", [
+    pool[0]?.team_id,
+    pool[1]?.team_id,
+    pool[2]?.team_id
+  ]);
 
   console.log("👥 MATCHING PLAYERS:", matches.length);
-  console.log("🧪 SAMPLE PLAYER:", pool[0]);
+
+  if(matches.length === 0){
+    console.error("❌ ID MISMATCH!", {
+      searched: nid,
+      examplePlayerTeamId: pool[0]?.team_id
+    });
+  }
 
   return matches;
 }
