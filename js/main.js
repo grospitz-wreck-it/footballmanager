@@ -1128,6 +1128,4 @@ document.getElementById("resetBtn")?.addEventListener("click", async () => {
 // =========================
 // ▶️ START
 // =========================
-document.addEventListener("DOMContentLoaded", () => {
-  init();
-});
+init();
