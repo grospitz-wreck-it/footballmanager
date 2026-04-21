@@ -253,12 +253,28 @@ game.cityMap = Object.fromEntries(
     // =========================
     const loadedPlayers = await loadPlayers();
 
-    window.playerPool = (loadedPlayers || []).map(p => ({
-      ...p,
-      team_id: p.team_id || null
-    }));
+// =========================
+// 🔥 TEAM ASSIGN FIX
+// =========================
+const teams = game.teams || [];
 
-    game.players = window.playerPool;
+window.playerPool = (loadedPlayers || []).map(p => {
+
+  // 👉 behalten wenn vorhanden
+  if(p.team_id){
+    return p;
+  }
+
+  // 👉 fallback: zufälliges Team
+  const randomTeam = teams[Math.floor(Math.random() * teams.length)];
+
+  return {
+    ...p,
+    team_id: randomTeam ? randomTeam.id : null
+  };
+});
+
+game.players = window.playerPool;
 
     // =========================
     // 🏟 COMPETITIONS
