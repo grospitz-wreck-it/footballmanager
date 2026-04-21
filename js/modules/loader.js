@@ -1,7 +1,7 @@
 import { supabase } from "../client.js"; // 🔥 du brauchst das!
 
 export async function loadPlayers(){
-
+console.log("📦 RAW PLAYERS FROM SOURCE:", data?.length, data?.[0]);
   const { data, error } = await supabase
     .from("players")
     .select("*");
