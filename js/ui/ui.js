@@ -596,9 +596,16 @@ function renderTeam(){
     ? window.playerPool
     : (game.players || []);
 
-const players = pool.filter(p => 
-  String(p.team_id) === String(teamId)
-);
+const players = pool.filter(p => {
+
+  const pid =
+    p.team_id ??
+    p.Team ??
+    p.teamId ??
+    null;
+
+  return String(pid) === String(teamId);
+});
 
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
@@ -824,9 +831,16 @@ function calculateTeamStats(){
       ? window.playerPool
       : (game.players || []);
 
-  const allPlayers = pool.filter(p =>
-    String(p.team_id) === String(teamId)
-  );
+ const allPlayers = pool.filter(p => {
+
+  const pid =
+    p.team_id ??
+    p.Team ??
+    p.teamId ??
+    null;
+
+  return String(pid) === String(teamId);
+});
 
   if(!allPlayers.length){
     console.warn("❌ Keine Spieler gefunden für Team:", teamId);
