@@ -487,73 +487,16 @@ function getCountryForPlayer(player, team, league){
   return countries[index];
 }
 
-// =========================
-// 👥 LOAD PLAYERS (SAFE)
-// =========================
-const teamIds = teams.map(t => String(t.id));
+     // =========================
+    // Players
+    // =========================
+const loadedPlayers = await loadPlayers();
 
-const loadedPlayers = await loadPlayersForTeams(teamIds);
-    game.players = loadedPlayers; // 🔥 Pflicht!
-// ⚠️ league kann hier noch null sein → fallback
-const league = game.league?.current || { level: 7 };
+game.players = loadedPlayers;
 
-// 🔥 Safety: falls teams noch nicht da
-if(!window.teams?.length){
-  console.error("❌ KEINE TEAMS beim Player-Build!");
-}
+console.log("🧠 GLOBAL PLAYER POOL:", game.players?.length);
 
-// =========================
-// 🔁 BUILD PLAYER POOL
-// =========================
-window.playerPool = (loadedPlayers || []).map(p => {
-
-  let teamId = p.team_id;
-
-  // 🔥 null / "null" sauber fixen
-  if(
-    teamId === "null" ||
-    teamId === undefined ||
-    teamId === null ||
-    teamId === ""
-  ){
-    teamId = assignTeamDeterministic(p, window.teams);
-  }
-
-  // 🔥 team lookup (safe)
-  const team = window.teams?.find(t =>
-    String(t.id) === String(teamId)
-  );
-
-  const country = getCountryForPlayer(p, team, league);
-
-  return {
-    ...p,
-    team_id: teamId ? String(teamId) : null,
-    country
-  };
-});
-
-// =========================
-// 🔥 GLOBAL SYNC (CRITICAL)
-// =========================
-game.players = window.playerPool;
-
-// =========================
-// 🧪 DEBUG
-// =========================
-console.log("🧠 READY PLAYERS:", window.playerPool.slice(0,5));
-
-// 🔥 REAL CHECK → funktioniert team filter?
-const testTeamId = window.teams?.[0]?.id;
-
-if(testTeamId){
-  const count = window.playerPool.filter(p =>
-    String(p.team_id) === String(testTeamId)
-  ).length;
-
-  console.log("🧪 TEST TEAM:", testTeamId);
-  console.log("🧪 PLAYERS IN TEAM:", count);
-}
+    
 
     // =========================
     // 🏟 COMPETITIONS
