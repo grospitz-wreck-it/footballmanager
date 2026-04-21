@@ -350,8 +350,8 @@ console.log("🧪 PLAYER MAPPING:", {
 // =========================
 // 🧪 VALIDATION (FINAL)
 // =========================
-(function validateTeams(){
-
+(function validateTeams(scheduleTeams){
+  
   const matchTeams = new Set(
     scheduleTeams.map(t => String(t.id))
   );
@@ -373,7 +373,7 @@ console.log("🧪 PLAYER MAPPING:", {
     playerTeams: [...playerTeams]
   });
 
-})();
+})(scheduleTeams);
 
 // 👉 BUTTONS (IMMER HIER, INNERHALB try)
 initMainButton();
