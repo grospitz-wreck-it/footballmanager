@@ -440,13 +440,48 @@ function setLeagueById(leagueId){
   game.league.current = league;
 
   // =========================
-  // 📅 SCHEDULE FIX
+  // 🏗 INIT LEAGUE FIRST (🔥 KRITISCH)
+  // =========================
+  initLeague(league);
+
+  // =========================
+  // 🔥 HARD PLAYER SAFETY (NEU)
+  // =========================
+  for(const team of league.teams){
+
+    if(!Array.isArray(team.players) || team.players.length < 11){
+
+      console.warn("⚽ Force Spieler für:", team.name);
+
+      const players = ensureTeamPlayers(team);
+
+      team.players = players || [];
+    }
+
+    // 👉 IDs absichern
+    team.players.forEach(p => {
+      if(!p.id){
+        p.id = crypto.randomUUID();
+      }
+    });
+  }
+
+  // 🧪 DEBUG (optional aber extrem hilfreich)
+  console.log("🧪 TEAM CHECK:",
+    league.teams.map(t => ({
+      name: t.name,
+      players: t.players?.length
+    }))
+  );
+
+  // =========================
+  // 📅 SCHEDULE (JETZT ERST!)
   // =========================
   if(!league.schedule || !league.schedule.length){
 
     console.warn("📅 Generiere neuen Spielplan:", league.name);
 
-    const schedule = generateSchedule(league); // ✅ jetzt safe
+    const schedule = generateSchedule(league);
 
     if(schedule && schedule.length){
       league.schedule = schedule;
@@ -455,11 +490,6 @@ function setLeagueById(leagueId){
       return;
     }
   }
-
-  // =========================
-  // 🏗 INIT LEAGUE
-  // =========================
-  initLeague(league);
 
   // =========================
   // 🔄 SELECT SYNC
@@ -471,13 +501,15 @@ function setLeagueById(leagueId){
   populateTeamSelect();
 
   // =========================
-  // ⚽ INIT MATCH
+  // ⚽ INIT MATCH (JETZT SAFE)
   // =========================
   const round = league.schedule?.[0];
 
   if(round && round.length > 0){
+
     const ok = initMatch(round);
-    if(ok){
+
+    if(ok && game.match?.live){
       game.match.live.running = false;
     }
   }
