@@ -23,7 +23,6 @@ let leagueSelectInitialized = false;
 
 function ensureTeamPlayers(team){
 
-  // ✅ bereits vorhanden → nichts ändern
   if(team.players && team.players.length > 0){
     return team.players;
   }
@@ -34,19 +33,16 @@ function ensureTeamPlayers(team){
 
   if(!pool.length){
     console.error("❌ Kein PlayerPool vorhanden");
-    team.players = [];
     return [];
   }
 
   const targetSize = 22;
 
-  // 🔥 einmal mischen (ok hier, alternativ global einmal machen)
+  // einmal mischen
   pool.sort(() => Math.random() - 0.5);
 
-  // 🔥 Spieler aus globalem Pool ENTNEHMEN
   const selected = pool.splice(0, targetSize);
 
-  // 🔥 Ownership setzen
   team.players = selected.map(p => {
     p.team_id = team.id;
     return p;
