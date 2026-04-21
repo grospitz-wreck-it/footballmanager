@@ -278,133 +278,89 @@ export function handleAppVisibility(){
 }
 
 
-
-// =========================
-// 📍 DISTRICT AUS PLZ₃ HOLEN
-// =========================
-async function getDistrictsByPLZPrefix(code){
-
-  if(!code) return [];
-
-  const { data, error } = await supabase
-    .from("cities")
-    .select("district_id")
-    .ilike("plz", `${code}%`)
-
-  if(error){
-    console.error("❌ cities lookup error:", error);
-    return [];
-  }
-
-  const districtIds = [...new Set(
-    (data || [])
-      .map(d => d.district_id)
-      .filter(Boolean)
-      .map(id => String(id).trim())
-  )];
-
-  console.log("🌍 DISTRICTS:", districtIds);
-
-  return districtIds;
-}
-
-
 // =========================
 // 🔎 LIGEN FINDEN (PLZ₃ FIX)
 // =========================
 async function findLeaguesByCode(input){
 
   console.log("🔍 INPUT:", input);
-  console.log("📦 AVAILABLE LEAGUES:", game.league?.available);
 
   if(!input || input.length < 2) return [];
 
-  const leagues = game.league?.available || [];
+  // =========================
+  // 🧠 TEAMS DIREKT ÜBER PLZ
+  // =========================
+  const { data: teams, error } = await supabase
+    .from("teams")
+    .select(`
+      id,
+      name,
+      competition_id,
+      competitions (
+        id,
+        name,
+        level
+      ),
+      cities (
+        plz
+      )
+    `)
+    .ilike("cities.plz", `${input}%`);
 
-  console.log("📦 AVAILABLE LEAGUES:", leagues.length);
+  if(error){
+    console.error("❌ Team-PLZ Query Fehler:", error);
+    return [];
+  }
+
+  if(!teams || !teams.length){
+    console.warn("⚠️ Keine Teams für PLZ gefunden");
+    return [];
+  }
+
+  console.log("🏆 Teams gefunden:", teams.length);
 
   // =========================
-  // ⏳ RETRY
+  // 🏆 LIGEN AUS TEAMS BAUEN
   // =========================
-  if(!leagues.length){
-    console.warn("⏳ Ligen noch nicht geladen → retry");
+  const map = new Map();
 
-    await new Promise(r => setTimeout(r, 200));
+  teams.forEach(t => {
 
-    const retryLeagues = game.league?.available || [];
+    const comp = t.competitions;
+    if(!comp) return;
 
-    if(!retryLeagues.length){
-      return [];
+    const id = String(comp.id);
+
+    if(!map.has(id)){
+      map.set(id, {
+        id,
+        name: comp.name,
+        level: comp.level,
+        teams: []
+      });
     }
 
-    return retryLeagues;
-  }
+    map.get(id).teams.push(t);
+  });
 
-  // 🔥 3-stellig (MASTERPROMPT)
-  const code = input.slice(0, 3);
-
-  let districtIds = [];
-
-  try {
-    districtIds = await getDistrictsByPLZPrefix(code);
-  } catch(e){
-    console.warn("⚠️ District lookup failed", e);
-  }
+  let leagues = Array.from(map.values());
 
   // =========================
-  // 🔥 FALLBACK
+  // 🎯 LEVEL FILTER
   // =========================
-  if(!districtIds || districtIds.length === 0){
-    console.warn("⚠️ KEIN DISTRICT → nehme ALLE Ligen");
-    return leagues;
-  }
-
-  console.log("🧠 DISTRICT IDS:", districtIds);
-
-  // =========================
-  // 🎯 FILTER
-  // =========================
-  const matches = leagues.filter(l => {
-
-    console.log("CHECK:", {
-      league: l.name,
-      leagueDistrict: l.district_id,
-      districtIds
-    });
-
-    // 👉 Ligen ohne district (z.B. Bezirksliga)
-    if(!l.district_id) return true;
-
-    const leagueDistrict = String(l.district_id).trim();
-
-    return districtIds.includes(leagueDistrict);
+  leagues = leagues.filter(l => {
+    const lvl = Number(l.level) || 7;
+    return lvl >= 5 && lvl <= 7;
   });
 
   // =========================
-  // 🔥 FALLBACK 2
+  // 🔥 SORT
   // =========================
-  if(!matches.length){
-    console.warn("⚠️ KEINE MATCHES → nehme ALLE Ligen");
-    return leagues;
-  }
-
-  return matches;
-}
-
-// 🔥 HAUPTFUNKTION → AUTO SELECT (optional)
-async function autoSelectLeagueByPLZ(input){
-
-  const leagues = await findLeaguesByCode(input);
-
-  if(!leagues.length) return;
-
-  console.log("🎯 PLZ MATCH:", leagues);
-
   leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
-  const best = leagues[0];
+  console.log("✅ Ligen aus PLZ:", leagues.length);
 
-  setLeagueById(best.id);
+  return leagues;
 }
 
 // =========================
