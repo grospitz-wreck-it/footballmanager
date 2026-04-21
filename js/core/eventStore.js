@@ -38,25 +38,30 @@ function getPriority(type) {
 // 🧠 LOOKUP
 // =========================
 
-function findPlayer(players, id){
+function findPlayer(_, id){
+
   if(!id) return null;
 
-  return players.find(p =>
-    p?.id == id ||
-    p?.Id == id ||
-    p?.player_id == id ||
-    p?.ID == id
-  );
+  const league = game.league?.current;
+  if(!league) return null;
+
+  for(const team of league.teams || []){
+    const player = team.players?.find(
+      p => String(p.id) === String(id)
+    );
+    if(player) return player;
+  }
+
+  return null;
 }
 
-function findTeam(teams, id){
+function findTeam(_, id){
+
   if(!id) return null;
 
-  return teams.find(t =>
-    t?.id == id ||
-    t?.Id == id ||
-    t?.team_id == id
-  );
+  return game.league?.current?.teams?.find(
+    t => String(t.id) === String(id)
+  ) || null;
 }
 
 function buildPlayerName(player){
@@ -75,8 +80,6 @@ function buildPlayerName(player){
 // =========================
 function generateText(event) {
 
-  const players = game.players || [];
-  const teams = game.data?.teams || [];
 
   const player = findPlayer(players, event?.playerId);
   const team = findTeam(teams, event?.teamId);
@@ -135,12 +138,13 @@ function processEvent(event){
     game.events.history = [];
   }
 
-  const players = game.players || [];
-  const teams = game.data?.teams || [];
-
-  const player = findPlayer(players, event.playerId);
-  const relatedPlayer = findPlayer(players, event.relatedPlayerId);
-  const team = findTeam(teams, event.teamId);
+ const player = findPlayer(null, event.playerId);
+const relatedPlayer = findPlayer(null, event.relatedPlayerId);
+const team = findTeam(null, event.teamId);
+  console.log("🧪 EVENT LOOKUP:", {
+  player: player?.name,
+  team: team?.name
+});
 
   const enrichedInput = {
     ...event,
