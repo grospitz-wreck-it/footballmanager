@@ -36,19 +36,84 @@ function ensureTeamPlayers(team){
     return [];
   }
 
-  const targetSize = 22;
+  // 🔥 Zielverteilung
+  const target = {
+    GK: 2,
+    DEF: 6,
+    MID: 8,
+    ST: 6
+  };
 
-  // einmal mischen
-  pool.sort(() => Math.random() - 0.5);
+  // 🔥 Pool nach Position aufteilen
+  const byPos = {
+    GK: [],
+    DEF: [],
+    MID: [],
+    ST: []
+  };
 
-  const selected = pool.splice(0, targetSize);
+  pool.forEach(p => {
+    const pos = (p.position_type || "").toUpperCase();
 
+    if(pos.includes("GK")) byPos.GK.push(p);
+    else if(pos.includes("DEF")) byPos.DEF.push(p);
+    else if(pos.includes("MID")) byPos.MID.push(p);
+    else if(pos.includes("ST")) byPos.ST.push(p);
+  });
+
+  // 🔥 Shuffle helper
+  function shuffle(arr){
+    return arr.sort(() => Math.random() - 0.5);
+  }
+
+  Object.keys(byPos).forEach(k => shuffle(byPos[k]));
+
+  const selected = [];
+
+  // 🔥 gezielte Auswahl
+  function take(posKey, amount){
+    for(let i = 0; i < amount; i++){
+      if(byPos[posKey].length){
+        selected.push(byPos[posKey].shift());
+      }
+    }
+  }
+
+  take("GK", target.GK);
+  take("DEF", target.DEF);
+  take("MID", target.MID);
+  take("ST", target.ST);
+
+  // 🔥 Fallback falls Position fehlt
+  const needed = 22 - selected.length;
+
+  if(needed > 0){
+    console.warn(`⚠️ Fallback für ${team.name}: ${needed} Spieler fehlen`);
+
+    const rest = pool.filter(p => !selected.includes(p));
+    shuffle(rest);
+
+    selected.push(...rest.slice(0, needed));
+  }
+
+  // 🔥 aus globalem Pool entfernen (WICHTIG!)
+  selected.forEach(p => {
+    const idx = pool.indexOf(p);
+    if(idx !== -1) pool.splice(idx, 1);
+  });
+
+  // 🔥 Team setzen
   team.players = selected.map(p => {
     p.team_id = team.id;
     return p;
   });
 
-  console.log(`✅ ${team.players.length} Spieler für ${team.name}`);
+  console.log(`✅ ${team.players.length} Spieler für ${team.name}`, {
+    GK: target.GK,
+    DEF: target.DEF,
+    MID: target.MID,
+    ST: target.ST
+  });
 
   return team.players;
 }
