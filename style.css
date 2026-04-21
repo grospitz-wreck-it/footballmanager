@@ -1305,7 +1305,10 @@ tr:hover {
 
   opacity: 0;
   pointer-events: none;
-
+  
+  #tacticsOverlay.open {
+  pointer-events: none; /* 🔥 bleibt klick-durchlässig */
+}
   transition: opacity 0.2s ease;
 }
 
