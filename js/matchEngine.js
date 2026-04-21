@@ -379,29 +379,32 @@ try {
 
   function getPlayersFromLineup(teamId){
 
-    const nid = normalizeId(teamId);
+  const nid = normalizeId(teamId);
 
-    const myTeamId =
-      normalizeId(game.team?.selectedId) ||
-      normalizeId(game.team?.id);
+  const myTeamId =
+    normalizeId(game.team?.selectedId) ||
+    normalizeId(game.team?.id);
 
-    if(nid !== myTeamId){
-      return getPlayersOfTeam(teamId);
-    }
-
-    const slots = game.team?.lineup?.slots || {};
-    const ids = Object.values(slots).filter(Boolean);
-
-    if(!ids.length){
-      return getPlayersOfTeam(teamId);
-    }
-
- const pool = game.players || [];
-    
-    return pool.filter(p =>
-      ids.includes(normalizeId(p.id))
-    );
+  // 👉 Gegner-Team
+  if(nid !== myTeamId){
+    return getPlayersOfTeam(teamId);
   }
+
+  const slots = game.team?.lineup?.slots || {};
+  const ids = Object.values(slots).filter(Boolean);
+
+  // 👉 kein Lineup gesetzt → alle Spieler
+  if(!ids.length){
+    return getPlayersOfTeam(teamId);
+  }
+
+  // 🔥 HIER IST FIX 3
+  const pool = game.players || [];
+
+  return pool.filter(p =>
+    ids.includes(normalizeId(p.id))
+  );
+}
 
   game.match.current.homePlayers = getPlayersFromLineup(homeId);
   game.match.current.awayPlayers = getPlayersFromLineup(awayId);
