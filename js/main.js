@@ -493,6 +493,7 @@ function getCountryForPlayer(player, team, league){
 const loadedPlayers = await loadPlayers();
 
 game.players = loadedPlayers;
+window.playerPool = loadedPlayers; // 🔥 DAS FEHLT!
 
 console.log("🧠 GLOBAL PLAYER POOL:", game.players?.length);
 
