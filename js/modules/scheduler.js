@@ -44,23 +44,21 @@ function shuffleArray(arr){
 // =========================
 // 📅 GENERATE SCHEDULE
 // =========================
-function generateSchedule(){
-
-  const league = game.league?.current;
+function generateSchedule(league){
 
   if(!league || !Array.isArray(league.teams) || league.teams.length < 2){
     console.error("❌ Ungültige Liga / zu wenig Teams");
-    return;
+    return null;
   }
 
-  // 🔥 FIX: Schedule nur behalten wenn Teamzahl gleich
+  // 🔥 Schedule behalten nur wenn Teamzahl identisch
   if(
     league.schedule &&
     league.schedule.length > 0 &&
     league._teamCount === league.teams.length
   ){
     console.log("ℹ️ Spielplan existiert bereits");
-    return;
+    return league.schedule;
   }
 
   // =========================
@@ -71,7 +69,7 @@ function generateSchedule(){
 
   league.teams.forEach(t => {
 
-    const id = resolveTeamId(t);
+    const id = t?.id ? String(t.id) : null;
 
     if(!id){
       console.error("❌ Team ohne ID:", t);
@@ -84,9 +82,13 @@ function generateSchedule(){
     }
 
     seen.add(id);
-
-   teams.push(t);
+    teams.push(t);
   });
+
+  if(teams.length < 2){
+    console.error("❌ Zu wenig gültige Teams");
+    return null;
+  }
 
   console.log("✅ Validierte Teams:", teams.length);
 
@@ -117,28 +119,30 @@ function generateSchedule(){
       const teamA = rotation[i];
       const teamB = rotation[rotation.length - 1 - i];
 
-      const isSwap = r % 2 === 1;
+      const swap = r % 2 === 1;
 
-      const home = isSwap ? teamB : teamA;
-      const away = isSwap ? teamA : teamB;
+      const home = swap ? teamB : teamA;
+      const away = swap ? teamA : teamB;
 
       if(home.id === "BYE" || away.id === "BYE") continue;
 
       round.push({
         id: crypto.randomUUID(),
-
-        homeTeamId: home.id,
-        awayTeamId: away.id,
-
-        home: home,
-        away: away,
-
+        homeTeamId: String(home.id),
+        awayTeamId: String(away.id),
+        home,
+        away,
         result: null,
         _processed: false
       });
     }
 
-    shuffleArray(round);
+    // Shuffle
+    for(let i = round.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [round[i], round[j]] = [round[j], round[i]];
+    }
+
     rounds.push(round);
 
     const fixed = rotation[0];
@@ -155,30 +159,29 @@ function generateSchedule(){
 
     const newRound = round.map(match => {
 
-      const homeId = String(match.awayTeamId);
-      const awayId = String(match.homeTeamId);
-
       return {
         id: crypto.randomUUID(),
-
-        homeTeamId: homeId,
-        awayTeamId: awayId,
-
+        homeTeamId: String(match.awayTeamId),
+        awayTeamId: String(match.homeTeamId),
         home: {
-          id: homeId,
+          id: String(match.awayTeamId),
           name: match.away.name
         },
         away: {
-          id: awayId,
+          id: String(match.homeTeamId),
           name: match.home.name
         },
-
         result: null,
         _processed: false
       };
     });
 
-    shuffleArray(newRound);
+    // Shuffle
+    for(let i = newRound.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [newRound[i], newRound[j]] = [newRound[j], newRound[i]];
+    }
+
     return newRound;
   });
 
@@ -187,19 +190,16 @@ function generateSchedule(){
   // =========================
   league.schedule = [...rounds, ...returnRounds];
 
-  league.schedule.forEach(round => {
-    round._simulated = false;
+  league.schedule.forEach(r => {
+    r._simulated = false;
   });
 
   league.currentRound = 0;
   league.currentMatchIndex = 0;
-
-  // 🔥 FIX: Team Count speichern
   league._teamCount = league.teams.length;
 
   console.log("✅ Spielplan erstellt:", league.schedule.length);
 
-  validateSchedule(effectiveTeamCount);
   return league.schedule;
 }
 
