@@ -119,8 +119,34 @@ function startBackgroundSimulation(){
 // =========================
 function initEventBindings(){
 
-  on(EVENTS.STATE_CHANGED, renderEvents);
+  // =========================
+  // 🔄 STATE CHANGES → UI UPDATE
+  // =========================
+  on(EVENTS.STATE_CHANGED, () => {
+    updateUI(); // 🔥 zentraler Trigger
+  });
 
+  // =========================
+  // 🔥 MATCH EVENTS → UI PIPELINE
+  // =========================
+  on(EVENTS.MATCH_EVENT, (event) => {
+
+    game.events = game.events || {};
+    game.events.history = game.events.history || [];
+
+    game.events.history.push(event);
+
+    // optional limit (Performance)
+    if(game.events.history.length > 50){
+      game.events.history.shift();
+    }
+
+    updateUI(); // 🔥 triggert updateEvents() in ui.js
+  });
+
+  // =========================
+  // 🏁 MATCH FINISHED
+  // =========================
   on(EVENTS.MATCH_FINISHED, () => {
 
     stopBackgroundSimulation();
@@ -136,9 +162,8 @@ function initEventBindings(){
 
     advanceSchedule();
 
-    updateUI();
-    renderEvents();
-    renderSchedule();
+    updateUI();      // 🔥 reicht komplett
+    renderSchedule(); // ok
   });
 }
 // =========================
