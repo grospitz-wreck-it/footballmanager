@@ -191,23 +191,30 @@ if(!league.schedule || !league.schedule.length){
   // =========================
   league.teams.forEach(team => {
 
-    if(!team.players || team.players.length === 0){
+  // 🔥 FIX: auch kaputte / zu kleine Kader neu bauen
+  if(!team.players || team.players.length < 18){
 
-      try {
-        const players = ensureTeamPlayers(team);
+    console.warn("🔧 Rebuild Team Players:", team.name);
 
-        if(players && players.length){
-          team.players = players;
-        } else {
-          console.warn("⚠️ Keine Spieler generiert für:", team.name);
-        }
+    try {
 
-      } catch(e){
-        console.error("❌ Player generation crashed:", team.name, e);
+      // 🔥 wichtig: alten Müll entfernen
+      team.players = [];
+
+      const players = ensureTeamPlayers(team);
+
+      if(players && players.length >= 18){
+        team.players = players;
+      } else {
+        console.error("❌ Zu wenige Spieler generiert für:", team.name, players?.length);
       }
-    }
 
-  });
+    } catch(e){
+      console.error("❌ Player generation crashed:", team.name, e);
+    }
+  }
+
+});
 
   console.log("👥 Spieler generiert für Liga:", league.name);
 
