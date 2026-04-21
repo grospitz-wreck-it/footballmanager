@@ -225,6 +225,8 @@ if(!pool.length){
 
   console.log("👥 Spieler korrekt verteilt");
 }
+}
+  
   
 
 // =========================
@@ -461,17 +463,20 @@ function setLeagueById(leagueId){
   // =========================
   initLeague(league);
   
-  // =========================
-  // 🔥 HARD PLAYER SAFETY (NEU)
-  // =========================
+ // 🔥 HARD PLAYER SAFETY (NEU)
+for(const team of league.teams){
 
-    // 👉 IDs absichern
-    team.players.forEach(p => {
-      if(!p.id){
-        p.id = crypto.randomUUID();
-      }
-    });
+  if(!Array.isArray(team.players) || team.players.length < 11){
+    const players = ensureTeamPlayers(team);
+    team.players = players || [];
   }
+
+  team.players.forEach(p => {
+    if(!p.id){
+      p.id = crypto.randomUUID();
+    }
+  });
+}
 
   // 🧪 DEBUG (optional aber extrem hilfreich)
   console.log("🧪 TEAM CHECK:",
