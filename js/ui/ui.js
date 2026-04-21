@@ -514,7 +514,7 @@ function updateEvents(){
       showOverlay(url, text);
     }
   }
-}
+
 
 // =========================
 // 🎮 OVERLAY TRIGGER
