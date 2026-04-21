@@ -344,13 +344,17 @@ function initLeagueSelect(leaguesInput){
 
       if(!league) return;
 
-      game.league.current = league;
+     game.league.current = league;
 
-     if(!league.schedule || !league.schedule.length){
-  generateSchedule(league);
-}
+// 🔥 IMMER neu für neue Karriere
+league.schedule = generateSchedule(league);
+league.currentRound = 0;
 
-      initLeague(league);
+// 🔥 wichtig: reset alter state
+league.table = null;
+
+initLeague(league);
+      
 
       const round = league.schedule?.[league.currentRound || 0];
 
