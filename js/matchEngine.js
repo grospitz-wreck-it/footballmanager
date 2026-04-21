@@ -113,8 +113,7 @@ function emitMatchEvent(type, payload = {}) {
   let playerName = null;
 
   if(payload.playerId){
-    const pool = window.playerPool || [];
-
+ const pool = game.players || [];
     const player = pool.find(p =>
       String(p.id) === String(payload.playerId)
     );
@@ -397,8 +396,8 @@ try {
       return getPlayersOfTeam(teamId);
     }
 
-    const pool = window.playerPool || [];
-
+ const pool = game.players || [];
+    
     return pool.filter(p =>
       ids.includes(normalizeId(p.id))
     );
@@ -564,8 +563,8 @@ function getTeamStrength(teamId){
 
     if(ids.length){
 
-      const pool = window.playerPool || [];
-
+ const pool = game.players || [];
+      
       players = pool.filter(p =>
         ids.includes(normalizeId(p.id))
       );
