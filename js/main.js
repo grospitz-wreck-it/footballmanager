@@ -493,6 +493,7 @@ function getCountryForPlayer(player, team, league){
 const teamIds = teams.map(t => String(t.id));
 
 const loadedPlayers = await loadPlayersForTeams(teamIds);
+    game.players = loadedPlayers; // 🔥 Pflicht!
 // ⚠️ league kann hier noch null sein → fallback
 const league = game.league?.current || { level: 7 };
 
