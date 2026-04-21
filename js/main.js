@@ -253,7 +253,13 @@ game.cityMap = Object.fromEntries(
 // 👥 PLAYERS LOAD
 // =========================
 const loadedPlayers = await loadPlayers();
-
+// =========================
+// 🧪 DEBUG: PLAYERS FROM DB
+// =========================
+console.log("🧪 DB PLAYERS RAW:", {
+  total: loadedPlayers?.length,
+  sample: loadedPlayers?.[0]
+});
 // =========================
 // 🧠 TEAM SOURCE (SAFE)
 // =========================
