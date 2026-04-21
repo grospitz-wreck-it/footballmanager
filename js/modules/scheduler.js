@@ -304,7 +304,7 @@ function nextMatch(){
     return null;
   }
 
-  return fallback;
+return hydrateMatchTeams(fallback); 
 }
 
 // =========================
