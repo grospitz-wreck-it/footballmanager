@@ -282,76 +282,71 @@ game.cityMap = Object.fromEntries(
 
     initLeagueSelect(leagues);
 
-if(leagues.length){
+if (leagues.length){
 
   setLeagueById(leagues[0].id);
   generateSchedule();
 
-// =========================
-// 🧠 SOURCE OF TRUTH (TEAMS)
-// =========================
-const scheduleTeams = game.league.current.teams;
+  // =========================
+  // 🧠 SOURCE OF TRUTH
+  // =========================
+  const scheduleTeams = game.league.current.teams;
 
-// 🔥 EINMAL definieren (kein zweites const irgendwo!)
-const scheduleTeamIds = new Set(
-  scheduleTeams.map(t => String(t.id))
-);
+  const scheduleTeamIds = new Set(
+    scheduleTeams.map(t => String(t.id))
+  );
 
-// =========================
-// 👥 PLAYERS LOAD
-// =========================
-const loadedPlayers = await loadPlayers();
+  // =========================
+  // 👥 PLAYERS LOAD
+  // =========================
+  const loadedPlayers = await loadPlayers();
 
-console.log("🧪 DB PLAYERS RAW:", {
-  total: loadedPlayers?.length,
-  sample: loadedPlayers?.[0]
-});
+  console.log("🧪 DB PLAYERS RAW:", {
+    total: loadedPlayers?.length,
+    sample: loadedPlayers?.[0]
+  });
 
-// =========================
-// 🔥 TEAM ASSIGN (CLEAN & SAFE)
-// =========================
-let pool = (loadedPlayers || []).map(p => {
+  // =========================
+  // 🔥 TEAM ASSIGN
+  // =========================
+  const pool = (loadedPlayers || []).map(p => {
 
-  const playerTeamId = p.team_id ? String(p.team_id) : null;
+    const playerTeamId = p.team_id ? String(p.team_id) : null;
 
-  // ✅ gültig → behalten
-  if(playerTeamId && scheduleTeamIds.has(playerTeamId)){
+    if(playerTeamId && scheduleTeamIds.has(playerTeamId)){
+      return {
+        ...p,
+        team_id: playerTeamId
+      };
+    }
+
+    const randomTeam =
+      scheduleTeams[Math.floor(Math.random() * scheduleTeams.length)];
+
     return {
       ...p,
-      team_id: playerTeamId
+      team_id: String(randomTeam.id)
     };
-  }
+  });
 
-  // 🔁 fallback → garantiert gültiges Team
-  const randomTeam =
-    scheduleTeams[Math.floor(Math.random() * scheduleTeams.length)];
+  // =========================
+  // 📦 FINAL ASSIGN
+  // =========================
+  window.playerPool = pool;
+  game.players = pool;
 
-  return {
-    ...p,
-    team_id: String(randomTeam.id)
-  };
-});
+  // =========================
+  // 🧪 DEBUG
+  // =========================
+  console.log("🧪 PLAYER MAPPING:", {
+    total: pool.length,
+    teamsUsed: [...new Set(pool.map(p => p.team_id))].length,
+    sample: pool[0]
+  });
 
-// =========================
-// 📦 FINAL ASSIGN
-// =========================
-window.playerPool = pool;
-game.players = pool;
-
-// =========================
-// 🧪 DEBUG
-// =========================
-console.log("🧪 PLAYER MAPPING:", {
-  total: pool.length,
-  teamsUsed: [...new Set(pool.map(p => p.team_id))].length,
-  sample: pool[0]
-});
-}
-// =========================
-// 🧪 VALIDATION (FINAL)
-// =========================
-(function validateTeams(scheduleTeams){
-  
+  // =========================
+  // ✅ VALIDATION (JETZT RICHTIG!)
+  // =========================
   const matchTeams = new Set(
     scheduleTeams.map(t => String(t.id))
   );
@@ -373,7 +368,7 @@ console.log("🧪 PLAYER MAPPING:", {
     playerTeams: [...playerTeams]
   });
 
-})(scheduleTeams);
+}
 
 // 👉 BUTTONS (IMMER HIER, INNERHALB try)
 initMainButton();
