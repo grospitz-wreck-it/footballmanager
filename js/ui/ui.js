@@ -5,12 +5,14 @@
 
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
+import { resolveEventContent, enrichEvent } from "../engine/contentResolver.js";
 import { track } from "../../tools/analytics.js";
 import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
 import { openPlayerModal } from "../modal.js";
+
 import { FORMATIONS } from "../core/football/formation.js";
 import { mapPositionToRole } from "../core/football/position.js";
 function mapRoleForUI(role){
@@ -169,11 +171,30 @@ if(!burger || !wrapper || !sidebar){
   // =========================
   // 🔥 STATE LISTENER
   // =========================
-  on(EVENTS.STATE_CHANGED, () => {
-    if(game.events?.history?.length){
-      updateEvents();
-    }
-  });
+  // =========================
+// 🔥 STATE UPDATE (für UI / Progress)
+// =========================
+on(EVENTS.STATE_CHANGED, () => {
+  updateUI(); // 🔥 sorgt dafür, dass Progress + Score laufen
+});
+
+// =========================
+// 🔥 MATCH EVENTS (ECHTZEIT)
+// =========================
+on(EVENTS.MATCH_EVENT, (event) => {
+
+  game.events = game.events || {};
+  game.events.history = game.events.history || [];
+
+  game.events.history.push(event);
+
+  // optional limit
+  if(game.events.history.length > 50){
+    game.events.history.shift();
+  }
+
+  updateEvents(); // 🔥 hier werden Events gerendert
+});
 
   // =========================
   // ⚽ FORMATION SELECT
@@ -382,26 +403,76 @@ function updateProgress(){
 // =========================
 function updateEvents(){
 
-  const container = document.getElementById("liveFeed");
-  if(!container) return;
+  const feed = document.getElementById("liveFeed");
+  const top = document.getElementById("eventText");
 
   const events = game.events?.history;
   if(!events?.length) return;
 
   const newest = events[events.length - 1];
-
   if(!newest) return;
 
-  console.log("🧪 EVENT DEBUG:", newest);
-
-  // 🔥 doppelte Render verhindern
+  // 🔥 doppelte Events verhindern
   if(newest.id === lastRenderedEventId) return;
   lastRenderedEventId = newest.id;
 
+  // =========================
+  // 🧠 EVENT RESOLVER (KERN)
+  // =========================
+  const enriched = enrichEvent(newest);
+  const resolved = resolveEventContent(enriched);
+
+  let text =
+    resolved?.text ||
+    enriched.text ||
+    buildCommentary(enriched) ||
+    "Aktion im Spiel";
+
+  // =========================
+  // 📊 TRACKING
+  // =========================
   track("game_event", {
-    minute: newest.minute,
-    text: newest.text || null
+    minute: enriched.minute,
+    text
   });
+
+  // =========================
+  // 📰 TOP BAR (🔥 FIX)
+  // =========================
+  if(top){
+    top.innerHTML = `${enriched.minute}' – ${text}`;
+  }
+
+  // =========================
+  // 📰 LIVE FEED
+  // =========================
+  if(feed){
+
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <span style="color:#888">${enriched.minute}'</span> 
+      <span>${text}</span>
+    `;
+
+    feed.appendChild(div);
+
+    // auto scroll
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  // =========================
+  // 🎬 OVERLAY
+  // =========================
+  if(resolved?.assets?.length){
+
+    const asset = resolved.assets[0];
+
+    if(asset?.url){
+      showOverlay(asset.url, text);
+    }
+  }
+}
 
   // =========================
   // 🧠 TEXT
