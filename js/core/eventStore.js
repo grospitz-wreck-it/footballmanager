@@ -150,12 +150,21 @@ const team = findTeam(null, event.teamId);
   team: team?.name
 });
 
-  const enrichedInput = {
-    ...event,
-    playerName: buildPlayerName(player),
-    relatedPlayerName: relatedPlayer ? buildPlayerName(relatedPlayer) : null,
-    teamName: team?.name || team?.Name || "ein Team"
-  };
+ const enrichedInput = {
+  ...event,
+
+  playerName: buildPlayerName(player),
+
+  relatedPlayerName: relatedPlayer
+    ? buildPlayerName(relatedPlayer)
+    : null,
+
+  teamName: (
+    team?.name ??
+    team?.Name ??
+    ""
+  ).trim() || "ein Team"
+};
 
   // =========================
   // 🧠 CONTENT RESOLVE
