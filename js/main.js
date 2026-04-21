@@ -651,14 +651,9 @@ if(plzInputEl){
   console.log("✅ PLZ ready");
 }
 // =========================
-// 🏆 LEAGUE SELECT
+// 🏆 LEAGUE SELECT (nur vorbereiten)
 // =========================
-initLeagueSelect(game.league.available);
-
-// 🔥 WICHTIG: Default Liga setzen
-if(game.league.available?.length){
-  setLeagueById(game.league.available[0].id);
-  generateSchedule();
+initLeagueSelect([]); // 🔥 leer starten!
 }
 // =========================
 // 🔎 PLZ BINDING (FIXED)
