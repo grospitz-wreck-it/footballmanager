@@ -189,24 +189,17 @@ if(!league.schedule || !league.schedule.length){
   // =========================
   // 👥 PLAYERS INIT (CRITICAL FIX)
   // =========================
-  league.teams.forEach(team => {
+ league.teams.forEach(team => {
 
-  // 🔥 FIX: auch kaputte / zu kleine Kader neu bauen
-  if(!team.players || team.players.length < 18){
-
-    console.warn("🔧 Rebuild Team Players:", team.name);
+  if(!team.players || team.players.length === 0){
 
     try {
-
-      // 🔥 wichtig: alten Müll entfernen
-      team.players = [];
-
       const players = ensureTeamPlayers(team);
 
-      if(players && players.length >= 18){
+      if(players && players.length){
         team.players = players;
       } else {
-        console.error("❌ Zu wenige Spieler generiert für:", team.name, players?.length);
+        console.warn("⚠️ Keine Spieler generiert für:", team.name);
       }
 
     } catch(e){
