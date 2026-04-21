@@ -29,8 +29,16 @@ function ensureTeamPlayers(team){
 
   console.log(`⚽ Generiere Kader für ${team.name}`);
 
-  team.players = generateTeam(team);
+const realPlayers = (game.players || []).filter(p =>
+  String(p.team_id) === String(team.id)
+);
 
+if(realPlayers.length){
+  team.players = realPlayers;
+} else {
+  console.warn("⚠️ Fallback: generiere Team für", team.name);
+  team.players = generateTeam(team);
+}
   console.log(`✅ ${team.players.length} Spieler für ${team.name}`);
 
   return team.players;
