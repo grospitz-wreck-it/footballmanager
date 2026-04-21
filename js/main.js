@@ -559,6 +559,16 @@ console.log("🔁 COMP:", c?.name, c?.id);
   const rawName = (c.name || "").trim();
   const name = rawName.toLowerCase();
 
+// =========================
+// 🎯 LEVEL FILTER (SPLASH)
+// =========================
+const level = Number(c.level) || 7;
+
+// nur Kreisliga + 2 drüber
+if(level < 5 || level > 7){
+  return;
+}
+  
   // =========================
   // 🎯 FILTER
   // =========================
