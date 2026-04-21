@@ -8,7 +8,7 @@ import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
-
+import { renderSchedule as renderScheduleModule } from "../modules/schedule.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -475,6 +475,7 @@ function updateTabs(){
 if(name === "schedule"){
   const el = document.getElementById("scheduleView");
   if(el) el.style.display = "block";
+  renderSchedule(); 
 }
 
 if(name === "team"){
@@ -1013,7 +1014,7 @@ function renderCurrentMatch(){
 }
 
 function renderSchedule(){
-  console.log("📅 renderSchedule");
+  renderScheduleModule();
 }
 
 export {
