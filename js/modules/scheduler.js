@@ -48,7 +48,21 @@ function getTeamName(teamOrId){
 
   return team?.name || "Unbekannt";
 }
+function hydrateMatchTeams(match){
 
+  const league = game.league?.current;
+  if(!league) return match;
+
+  match.home = league.teams.find(
+    t => String(t.id) === String(match.homeTeamId)
+  ) || null;
+
+  match.away = league.teams.find(
+    t => String(t.id) === String(match.awayTeamId)
+  ) || null;
+
+  return match;
+}
 // =========================
 // 🔀 SHUFFLE
 // =========================
