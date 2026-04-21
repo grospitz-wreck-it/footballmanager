@@ -2,8 +2,9 @@ import { supabase } from "../client.js"; // 🔥 du brauchst das!
 
 export async function loadPlayers(){
   const { data, error } = await supabase
-    .from("players")
-    .select("*");
+   .from("players")
+.select("*")
+.range(0, 99999); // 🔥 mehr laden
 console.log("📦 RAW PLAYERS FROM DB:", data?.length, data?.[0]);
   if(error){
     console.error("❌ Player Load Error:", error);
