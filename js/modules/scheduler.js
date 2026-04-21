@@ -374,7 +374,7 @@ function renderSchedule(){
           border-radius:4px;
           ${isActive ? "background:#1a1a1a;color:#00ff88;font-weight:bold;" : ""}
         ">
-${getTeamName(match.home)} ${match.result ? match.result.home + ":" + match.result.away : "vs"} ${getTeamName(match.away)}
+${getTeamName(match.homeTeamId)} ${match.result ? match.result.home + ":" + match.result.away : "vs"} ${getTeamName(match.awayTeamId)}
 ${match._processed ? " ✅" : ""}
         </li>
       `;
