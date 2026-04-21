@@ -339,7 +339,15 @@ pool = pool.filter(p => p.team_id);
 // =========================
 window.playerPool = pool;
 game.players = pool;
-
+// =========================
+// 🧪 DEBUG: AFTER MAPPING
+// =========================
+console.log("🧪 AFTER MAPPING:", {
+  total: window.playerPool?.length,
+  sample: window.playerPool?.[0],
+  sampleTeamId: window.playerPool?.[0]?.team_id,
+  nullCount: window.playerPool?.filter(p => !p.team_id).length
+});
 // =========================
 // 🧪 DEBUG
 // =========================
