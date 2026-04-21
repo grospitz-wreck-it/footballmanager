@@ -299,6 +299,7 @@ console.log("🧪 SCHEDULE TEAM IDS:", scheduleTeams.map(t => t.id));
 // 👥 PLAYERS LOAD
 // =========================
 const loadedPlayers = await loadPlayers();
+const scheduleTeamIds = new Set(scheduleTeams.map(t => t.id));
 
 console.log("🧪 DB PLAYERS RAW:", {
   total: loadedPlayers?.length,
@@ -325,8 +326,6 @@ const validTeamIds = new Set(
 // =========================
 // 🔥 TEAM ASSIGN (FINAL FIX)
 // =========================
-const scheduleTeamIds = new Set(scheduleTeams.map(t => t.id));
-
 let pool = (loadedPlayers || []).map(p => {
 
   // ✅ nur behalten wenn EXAKT im Schedule
