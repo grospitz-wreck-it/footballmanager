@@ -5,14 +5,12 @@
 
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
-import { resolveEventContent, enrichEvent } from "../engine/contentResolver.js";
 import { track } from "../../tools/analytics.js";
 import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
 import { openPlayerModal } from "../modal.js";
-
 import { FORMATIONS } from "../core/football/formation.js";
 import { mapPositionToRole } from "../core/football/position.js";
 function mapRoleForUI(role){
@@ -171,30 +169,11 @@ if(!burger || !wrapper || !sidebar){
   // =========================
   // 🔥 STATE LISTENER
   // =========================
-  // =========================
-// 🔥 STATE UPDATE (für UI / Progress)
-// =========================
-on(EVENTS.STATE_CHANGED, () => {
-  updateUI(); // 🔥 sorgt dafür, dass Progress + Score laufen
-});
-
-// =========================
-// 🔥 MATCH EVENTS (ECHTZEIT)
-// =========================
-on(EVENTS.MATCH_EVENT, (event) => {
-
-  game.events = game.events || {};
-  game.events.history = game.events.history || [];
-
-  game.events.history.push(event);
-
-  // optional limit
-  if(game.events.history.length > 50){
-    game.events.history.shift();
-  }
-
-  updateEvents(); // 🔥 hier werden Events gerendert
-});
+  on(EVENTS.STATE_CHANGED, () => {
+    if(game.events?.history?.length){
+      updateEvents();
+    }
+  });
 
   // =========================
   // ⚽ FORMATION SELECT
@@ -401,116 +380,71 @@ function updateProgress(){
 // =========================
 // 📰 EVENTS
 // =========================
-// =========================
-// 📰 EVENTS (FIXED CLEAN - STABLE)
-// =========================
 function updateEvents(){
 
-  try {
+  const container = document.getElementById("liveFeed");
+  if(!container) return;
 
-    const feed = document.getElementById("liveFeed");
-    const top  = document.getElementById("eventText");
+  const events = game.events?.history;
+  if(!events?.length) return;
 
-    const events = game.events?.history;
-    if(!events || !events.length) return;
+  const newest = events[events.length - 1];
 
-    const newest = events[events.length - 1];
-    if(!newest) return;
+  if(!newest) return;
 
-    // 🔥 doppelte Events verhindern
-    if(newest.id && newest.id === lastRenderedEventId) return;
-    lastRenderedEventId = newest.id;
+  console.log("🧪 EVENT DEBUG:", newest);
 
-    // =========================
-    // 🧠 RESOLVER PIPELINE
-    // =========================
-    let enriched = newest;
-    let resolved = null;
+  // 🔥 doppelte Render verhindern
+  if(newest.id === lastRenderedEventId) return;
+  lastRenderedEventId = newest.id;
 
+  track("game_event", {
+    minute: newest.minute,
+    text: newest.text || null
+  });
+
+  // =========================
+  // 🧠 TEXT
+  // =========================
+  let text = newest.text;
+
+  if(!text){
     try {
-      enriched = enrichEvent ? enrichEvent(newest) : newest;
-      resolved = resolveEventContent ? resolveEventContent(enriched) : null;
+      text = buildCommentary(newest);
     } catch(e){
-      console.warn("⚠️ Resolver failed", e);
+      console.warn("⚠️ Commentary failed", e);
     }
+  }
 
-    // =========================
-    // 🧠 TEXT FALLBACK CHAIN
-    // =========================
-    let text =
-      resolved?.text ||
-      enriched?.text;
+  if(!text) return;
 
-    if(!text){
-      try {
-        text = buildCommentary(enriched);
-      } catch(e){
-        console.warn("⚠️ Commentary failed", e);
-      }
+  // =========================
+  // 📰 FEED UPDATE
+  // =========================
+  const div = document.createElement("div");
+
+  div.innerHTML = `
+    <span style="color:#888">${newest.minute}'</span> 
+    <span>${text}</span>
+  `;
+
+  container.appendChild(div);
+
+  // =========================
+  // 🎬 OVERLAY (optional)
+  // =========================
+  if(newest.assets?.length){
+
+    const asset = newest.assets[0];
+    const url = asset?.url;
+
+    if(url){
+      console.log("🎬 CALL OVERLAY:", url);
+      showOverlay(url, text);
     }
-
-    if(!text){
-      text = "Aktion im Spiel";
-    }
-
-    const minute = enriched?.minute ?? newest?.minute ?? 0;
-
-    // =========================
-    // 📊 TRACKING
-    // =========================
-    try {
-      track("game_event", {
-        minute,
-        text
-      });
-    } catch(e){
-      console.warn("⚠️ Tracking failed", e);
-    }
-
-    // =========================
-    // 📰 TOP BAR
-    // =========================
-    if(top){
-      top.innerHTML = `${minute}' – ${text}`;
-    }
-
-    // =========================
-    // 📰 LIVE FEED
-    // =========================
-    if(feed){
-
-      const div = document.createElement("div");
-
-      div.innerHTML = `
-        <span style="color:#888">${minute}'</span> 
-        <span>${text}</span>
-      `;
-
-      feed.appendChild(div);
-
-      // 🔥 auto scroll safe
-      requestAnimationFrame(() => {
-        feed.scrollTop = feed.scrollHeight;
-      });
-    }
-
-    // =========================
-    // 🎬 OVERLAY
-    // =========================
-    const asset = resolved?.assets?.[0];
-
-    if(asset?.url){
-      try {
-        showOverlay(asset.url, text);
-      } catch(e){
-        console.warn("⚠️ Overlay failed", e);
-      }
-    }
-
-  } catch(e){
-    console.error("💥 updateEvents CRASH", e);
   }
 }
+
 // =========================
 // 🎮 OVERLAY TRIGGER
 // =========================
@@ -717,24 +651,9 @@ function renderTeam(){
       ? window.playerPool
       : (game.players || []);
 
-
-  // =========================
-// 🧪 DEBUG TEAM FILTER
-// =========================
-console.log("🧠 teamId:", teamId);
-console.log("📦 pool size:", pool.length);
-console.log("🧾 sample team_ids:", pool.slice(0, 10).map(p => p.team_id));
-
-const players = pool.filter(p => {
-
-  const match = String(p.team_id) === String(teamId);
-
-  if (!match) {
-    console.log("⛔ mismatch:", p.team_id, "!=", teamId);
-  }
-
-  return match;
-});
+  const players = pool.filter(p =>
+    String(p.team_id) === String(teamId)
+  );
 
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
