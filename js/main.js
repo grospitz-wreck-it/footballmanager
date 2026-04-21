@@ -289,7 +289,7 @@ async function getDistrictsByPLZPrefix(code){
   const { data, error } = await supabase
     .from("cities")
     .select("district_id")
-    .eq("plz", code); // 🔥 plz_3
+    .ilike("plz", `${code}%`)
 
   if(error){
     console.error("❌ cities lookup error:", error);
