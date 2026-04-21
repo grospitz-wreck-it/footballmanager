@@ -184,16 +184,17 @@ function applyGameEventEffect(event, ctx){
 function getPlayersOfTeam(teamId){
 
   const nid = normalizeId(teamId);
-  const pool = window.playerPool || [];
+
+  const team = game.league?.current?.teams.find(t =>
+    normalizeId(t.id) === nid
+  );
+
+  const players = team?.players || [];
 
   console.log("🔍 TEAM ID:", nid);
+  console.log("👥 TEAM PLAYERS:", players.length);
 
-  const matches = pool.filter(p => String(p.team_id) === String(nid));
-
-  console.log("👥 MATCHING PLAYERS:", matches.length);
-  console.log("🧪 SAMPLE PLAYER:", pool[0]);
-
-  return matches;
+  return players;
 }
 
 function autoFillLineup(teamId){
