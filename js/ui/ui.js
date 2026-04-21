@@ -442,6 +442,7 @@ function updateEvents(){
   if(top){
     top.innerHTML = `${enriched.minute}' – ${text}`;
   }
+  }
 
   // =========================
   // 📰 LIVE FEED
