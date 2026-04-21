@@ -7,6 +7,7 @@ import { generateTeam } from "./teamLoader.js";
 import { initMatch } from "../matchEngine.js";
 import { generateSchedule } from "./scheduler.js"; // 🔥 FIX
 import { startGame } from "../ui/layout.js";
+import { handleAppVisibility } from "../main.js";
 // =========================
 // 🧠 HELPERS
 // =========================
@@ -483,7 +484,7 @@ function selectTeamById(teamId){
   }
 
   renderCurrentMatch();
-  startGame(); 
+  handleAppVisibility(); 
   return true;
 }
 
