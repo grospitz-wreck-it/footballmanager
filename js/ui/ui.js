@@ -473,7 +473,7 @@ function updateEvents(){
       showOverlay(asset.url, text);
     }
   }
-}
+
 
   // =========================
   // 🧠 TEXT
