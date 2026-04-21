@@ -82,3 +82,44 @@ function getCountryForPlayer(player, team, league){
 
   return countries[index];
 }
+export async function loadPlayers(){
+
+  const { data, error } = await supabase
+    .from("players")
+    .select("*")
+    .range(0, 99999); // 🔥 erstmal alles
+
+  if(error){
+    console.error("❌ Player Load Error:", error);
+    return [];
+  }
+
+  console.log("📦 RAW PLAYERS FROM DB:", data?.length);
+
+  const cleaned = (data || []).map(p => {
+
+    const teamId =
+      (p.team_id === "null" || p.team_id === undefined || p.team_id === "")
+        ? null
+        : p.team_id;
+
+    return {
+      id: String(p.id),
+      name: p.name,
+      team_id: teamId,
+
+      country: p.country || "DE",
+
+      position: p.position || "CM",
+      position_type: p.position_type || "MID",
+
+      overall: Number(p.overall) || 50,
+      shooting: Number(p.shooting) || 50,
+      passing: Number(p.passing) || 50,
+      defending: Number(p.defending) || 50,
+      goalkeeping: Number(p.goalkeeping) || 50
+    };
+  });
+
+  return cleaned;
+}
