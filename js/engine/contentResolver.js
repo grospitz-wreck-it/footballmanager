@@ -185,10 +185,41 @@ export function enrichEvent(event){
 
   if(!event) return event;
 
+  // =========================
+  // 🧠 PLAYER POOL (SOURCE OF TRUTH)
+  // =========================
+  const players =
+    (window.playerPool && window.playerPool.length)
+      ? window.playerPool
+      : (game.players || []);
+
+  const teams = game.teams || [];
+
+  // =========================
+  // 🔍 STRICT ID RESOLVE
+  // =========================
+  const player = players.find(p =>
+    String(p.id) === String(event.playerId)
+  ) || null;
+
+  const team = teams.find(t =>
+    String(t.id) === String(event.teamId)
+  ) || null;
+
+  // =========================
+  // 🧪 DEBUG (WICHTIG!)
+  // =========================
+  if(event.playerId && !player){
+    console.warn("❌ PLAYER NOT FOUND:", event.playerId);
+  }
+
+  if(event.teamId && !team){
+    console.warn("❌ TEAM NOT FOUND:", event.teamId);
+  }
+
   return {
     ...event,
-    teamName: getTeamNameById(event.teamId),
-    playerName: getPlayerNameById(event.playerId),
-    relatedPlayerName: getPlayerNameById(event.relatedPlayerId)
+    player,
+    team
   };
 }
