@@ -260,8 +260,8 @@ function getMatchForMyTeam(round){
   return match || null;
 }
 
-function handleAppVisibility(){
-
+export function handleAppVisibility(){
+  
   const splash = document.getElementById("splash");
   const app = document.getElementById("app");
 
