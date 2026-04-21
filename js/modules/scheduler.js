@@ -200,6 +200,7 @@ function generateSchedule(){
   console.log("✅ Spielplan erstellt:", league.schedule.length);
 
   validateSchedule(effectiveTeamCount);
+  return league.schedule;
 }
 
 // =========================
