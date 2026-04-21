@@ -30,23 +30,20 @@ function getTeamName(teamOrId){
 
   if(!teamOrId) return "Unbekannt";
 
-  // 👉 wenn Objekt mit name → easy
-  if(typeof teamOrId === "object" && teamOrId.name){
-    return teamOrId.name;
-  }
-
-  // 👉 fallback: über ID auflösen
-  const id = typeof teamOrId === "object"
-    ? teamOrId.id
-    : teamOrId;
+  const id =
+    typeof teamOrId === "object"
+      ? teamOrId.id
+      : teamOrId;
 
   const league = game.league?.current;
 
-  const team = league?.teams?.find(
+  if(!league?.teams) return "Unbekannt";
+
+  const team = league.teams.find(
     t => String(t.id) === String(id)
   );
 
-  return team?.name || "Unbekannt";
+  return team?.name ?? team?.Name ?? "Unbekannt";
 }
 function hydrateMatchTeams(match){
 
