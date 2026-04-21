@@ -15,7 +15,7 @@ import { supabase } from "./client.js";
 
 // MODULES
 import { initLeagueSelect, setLeagueById } from "./modules/league.js";
-import { loadPlayers } from "./modules/loader.js";
+import { loadPlayersForTeams } from "./modules/loader.js";
 import { startAdEngine } from "./modules/ads.js";
 import { generateSchedule, advanceSchedule, renderSchedule, nextMatch } from "./modules/scheduler.js";
 import { initTable } from "./modules/table.js";
