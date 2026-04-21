@@ -359,7 +359,7 @@ async function findLeaguesByCode(input){
   // =========================
   leagues = leagues.filter(l => {
     const lvl = Number(l.level) || 7;
-    return lvl >= 5 && lvl <= 7;
+    return lvl >= 6 && lvl <= 8;
   });
 
   // =========================
