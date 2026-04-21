@@ -485,6 +485,7 @@ function selectTeamById(teamId){
 
   renderCurrentMatch();
   handleAppVisibility(); 
+  console.log("TEAM ID NACH SET:", game.team?.selectedId);
   return true;
 }
 
