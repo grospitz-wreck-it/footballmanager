@@ -198,6 +198,14 @@ function getPlayersOfTeam(teamId){
 
 function autoFillLineup(teamId){
 
+  if(!game.team.lineup){
+    game.team.lineup = { formation: "4-4-2", slots: {} };
+  }
+
+  if(!game.team.lineup.slots){
+    game.team.lineup.slots = {};
+  }
+
   const nid = normalizeId(teamId);
   const myTeamId =
     normalizeId(game.team?.selectedId) ||
