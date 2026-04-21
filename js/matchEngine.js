@@ -6,7 +6,7 @@ import { game } from "./core/state.js";
 import { emit } from "./core/events.js";
 import { EVENTS, EVENT_TYPES, EVENT_OUTCOMES } from "./core/events.constants.js";
 import { RULES } from "./core/rules.js";
-import { initOtherMatches, updateOtherMatches } from "./engine/otherMatchesEngine.js";
+
 import {
   updateEvents,
   rollRandomEvents
@@ -183,32 +183,15 @@ function applyGameEventEffect(event, ctx){
 // =========================
 function getPlayersOfTeam(teamId){
 
-  const nid = String(teamId);
+  const nid = normalizeId(teamId);
   const pool = window.playerPool || [];
 
-  const matches = pool.filter(p =>
-    String(p.team_id) === nid
-  );
-
-  // =========================
-  // 🔥 DEBUG (ENTSCHEIDEND)
-  // =========================
   console.log("🔍 TEAM ID:", nid);
 
-  console.log("🧪 TEAM IDS SAMPLE:", [
-    pool[0]?.team_id,
-    pool[1]?.team_id,
-    pool[2]?.team_id
-  ]);
+  const matches = pool.filter(p => String(p.team_id) === String(nid));
 
   console.log("👥 MATCHING PLAYERS:", matches.length);
-
-  if(matches.length === 0){
-    console.error("❌ ID MISMATCH!", {
-      searched: nid,
-      examplePlayerTeamId: pool[0]?.team_id
-    });
-  }
+  console.log("🧪 SAMPLE PLAYER:", pool[0]);
 
   return matches;
 }
@@ -225,15 +208,6 @@ function autoFillLineup(teamId){
   const pool = getPlayersOfTeam(teamId);
   if(!pool.length) return;
 
-  // 🔥 FIX: lineup sicherstellen (CRITICAL)
-  if(!game.team.lineup){
-    game.team.lineup = { slots: {} };
-  }
-
-  if(!game.team.lineup.slots){
-    game.team.lineup.slots = {};
-  }
-
   const lineup = game.team.lineup;
 
   const byPos = {
@@ -244,7 +218,7 @@ function autoFillLineup(teamId){
   };
 
   pool.forEach(p => {
-    const pos = (p.position_type || p.position || "").toUpperCase();
+    const pos = (p.position_type || "").toUpperCase();
 
     if(pos.includes("GK")) byPos.GK.push(p);
     else if(pos.includes("DEF")) byPos.DEF.push(p);
@@ -256,30 +230,9 @@ function autoFillLineup(teamId){
     return arr.shift()?.id || null;
   }
 
-  // 🔥 FIX: wenn slots leer → default slots erzeugen
-  if(Object.keys(lineup.slots).length === 0){
-
-    lineup.slots = {
-      GK: null,
-
-      DEF1: null,
-      DEF2: null,
-      DEF3: null,
-      DEF4: null,
-
-      MID1: null,
-      MID2: null,
-      MID3: null,
-      MID4: null,
-
-      ST1: null,
-      ST2: null
-    };
-  }
-
   Object.keys(lineup.slots).forEach(slot => {
 
-    if(lineup.slots[slot]) return;
+    if(lineup.slots[slot]) return; // schon gesetzt
 
     if(slot === "GK") lineup.slots[slot] = pick(byPos.GK);
 
@@ -359,7 +312,7 @@ const playerMatch = round.find(m => isMyMatch(m));
 if(!playerMatch){
   console.warn("⚽ BYE: Team hat spielfrei", round);
 
-  // 🔥 Match-State sauber setzen
+  // 🔥 Match-State sauber setzen (wichtig!)
   game.match._scheduleRef = null;
 
   game.match.current = null;
@@ -379,9 +332,6 @@ if(!playerMatch){
     home: 0,
     away: 0
   };
-
-  // 🔥 NEU: andere Matches trotzdem starten
-  initOtherMatches(round);
 
   return {
     isBye: true
@@ -479,7 +429,7 @@ try {
     home: game.match.home,
     away: game.match.away
   });
-initOtherMatches(round);
+
   return true;
 }
 
@@ -736,17 +686,9 @@ function runMatchLoop({ onTick, onEnd } = {}){
     const live = game.match?.live;
     const currentMatch = game.match?.current;
 
-
-  const round = game.league?.current?.schedule?.[game.league.currentRound];
-
-// 🔥 OTHER MATCHES IMMER UPDATEN
-updateOtherMatches(round);
-
-// 🔽 Dein Match nur wenn vorhanden
-if(!live || !currentMatch) return;
-if(live.phase === "bye") return;
-if(live.running === false) return;
-    
+    if(!live || !currentMatch) return;
+    if(live.phase === "bye") return;
+    if(live.running === false) return;
 
     const now = performance.now();
     const delta = now - lastTime;
