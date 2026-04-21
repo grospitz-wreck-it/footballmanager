@@ -85,10 +85,7 @@ function generateSchedule(){
 
     seen.add(id);
 
-    teams.push({
-      id: String(id),
-      name: t.name || "Unbekannt"
-    });
+   teams.push(t);
   });
 
   console.log("✅ Validierte Teams:", teams.length);
