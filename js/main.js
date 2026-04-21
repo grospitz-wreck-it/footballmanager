@@ -248,10 +248,8 @@ game.cityMap = Object.fromEntries(
   game.cities.map(c => [c.id, c])
 );
 
-    // =========================
-    // 👥 PLAYERS
-    // =========================
-   // =========================
+  
+ // =========================
 // 👥 PLAYERS LOAD
 // =========================
 const loadedPlayers = await loadPlayers();
@@ -260,8 +258,7 @@ const loadedPlayers = await loadPlayers();
 // 🧠 TEAM SOURCE (NUR LIGA)
 // =========================
 const leagueTeams =
-  game.league?.current?.teams ||
-  [];
+  game.league?.current?.teams || [];
 
 if(!leagueTeams.length){
   console.warn("⚠️ Keine Liga-Teams beim Player-Mapping");
@@ -270,9 +267,11 @@ if(!leagueTeams.length){
 // =========================
 // 🔥 TEAM ASSIGN (STRICT LIGA)
 // =========================
-window.playerPool = (loadedPlayers || []).map(p => {
+let pool = (loadedPlayers || []).map(p => {
 
-  // 👉 behalten wenn valide team_id UND in liga
+  // =========================
+  // ✅ 1. EXISTING TEAM (VALID)
+  // =========================
   if(p.team_id){
 
     const inLeague = leagueTeams.some(t =>
@@ -280,31 +279,69 @@ window.playerPool = (loadedPlayers || []).map(p => {
     );
 
     if(inLeague){
-      return p;
+      return {
+        ...p,
+        team_id: String(p.team_id) // 🔥 normalize
+      };
     }
   }
 
-  // 👉 fallback: zufälliges Team AUS DER LIGA
-  const randomTeam =
-    leagueTeams[Math.floor(Math.random() * leagueTeams.length)];
+  // =========================
+  // 🔁 2. FALLBACK → RANDOM TEAM
+  // =========================
+  if(leagueTeams.length){
 
+    const randomTeam =
+      leagueTeams[Math.floor(Math.random() * leagueTeams.length)];
+
+    return {
+      ...p,
+      team_id: randomTeam ? String(randomTeam.id) : null
+    };
+  }
+
+  // =========================
+  // ❌ 3. NO TEAM AVAILABLE
+  // =========================
   return {
     ...p,
-    team_id: randomTeam ? randomTeam.id : null
+    team_id: null
   };
 });
 
 // =========================
-// 🧠 GLOBAL STATE
+// 🔒 SAFETY FILTER (CRITICAL)
 // =========================
-game.players = window.playerPool;
+pool = pool.filter(p => p.team_id);
 
 // =========================
-// 🧪 DEBUG (WICHTIG)
+// 📦 FINAL ASSIGN
+// =========================
+window.playerPool = pool;
+game.players = pool;
+
+// =========================
+// 🧪 DEBUG
+// =========================
+console.log("👥 PLAYER POOL READY:", {
+  total: pool.length,
+  sample: pool[0],
+  teamsUsed: [...new Set(pool.map(p => p.team_id))].length
+});
+
+// =========================
+// 🧠 GLOBAL STATE SYNC
+// =========================
+if(window.playerPool && Array.isArray(window.playerPool)){
+  game.players = window.playerPool;
+}
+
+// =========================
+// 🧪 DEBUG (SAFE & CLEAN)
 // =========================
 console.log("👥 PLAYER TEAM ASSIGN DONE", {
-  total: window.playerPool.length,
-  sample: window.playerPool.slice(0,5).map(p => ({
+  total: window.playerPool?.length || 0,
+  sample: (window.playerPool || []).slice(0,5).map(p => ({
     id: p.id,
     team_id: p.team_id
   }))
