@@ -401,122 +401,116 @@ function updateProgress(){
 // =========================
 // 📰 EVENTS
 // =========================
+// =========================
+// 📰 EVENTS (FIXED CLEAN - STABLE)
+// =========================
 function updateEvents(){
 
-  const feed = document.getElementById("liveFeed");
-  const top = document.getElementById("eventText");
+  try {
 
-  const events = game.events?.history;
-  if(!events?.length) return;
+    const feed = document.getElementById("liveFeed");
+    const top  = document.getElementById("eventText");
 
-  const newest = events[events.length - 1];
-  if(!newest) return;
+    const events = game.events?.history;
+    if(!events || !events.length) return;
 
-  // 🔥 doppelte Events verhindern
-  if(newest.id === lastRenderedEventId) return;
-  lastRenderedEventId = newest.id;
+    const newest = events[events.length - 1];
+    if(!newest) return;
 
-  // =========================
-  // 🧠 EVENT RESOLVER (KERN)
-  // =========================
-  const enriched = enrichEvent(newest);
-  const resolved = resolveEventContent(enriched);
+    // 🔥 doppelte Events verhindern
+    if(newest.id && newest.id === lastRenderedEventId) return;
+    lastRenderedEventId = newest.id;
 
-  let text =
-    resolved?.text ||
-    enriched.text ||
-    buildCommentary(enriched) ||
-    "Aktion im Spiel";
+    // =========================
+    // 🧠 RESOLVER PIPELINE
+    // =========================
+    let enriched = newest;
+    let resolved = null;
 
-  // =========================
-  // 📊 TRACKING
-  // =========================
-  track("game_event", {
-    minute: enriched.minute,
-    text
-  });
+    try {
+      enriched = enrichEvent ? enrichEvent(newest) : newest;
+      resolved = resolveEventContent ? resolveEventContent(enriched) : null;
+    } catch(e){
+      console.warn("⚠️ Resolver failed", e);
+    }
 
-  // =========================
-  // 📰 TOP BAR (🔥 FIX)
-  // =========================
-  if(top){
-    top.innerHTML = `${enriched.minute}' – ${text}`;
-  }
-  }
+    // =========================
+    // 🧠 TEXT FALLBACK CHAIN
+    // =========================
+    let text =
+      resolved?.text ||
+      enriched?.text;
 
-  // =========================
-  // 📰 LIVE FEED
-  // =========================
-  if(feed){
+    if(!text){
+      try {
+        text = buildCommentary(enriched);
+      } catch(e){
+        console.warn("⚠️ Commentary failed", e);
+      }
+    }
 
-    const div = document.createElement("div");
+    if(!text){
+      text = "Aktion im Spiel";
+    }
 
-    div.innerHTML = `
-      <span style="color:#888">${enriched.minute}'</span> 
-      <span>${text}</span>
-    `;
+    const minute = enriched?.minute ?? newest?.minute ?? 0;
 
-    feed.appendChild(div);
+    // =========================
+    // 📊 TRACKING
+    // =========================
+    try {
+      track("game_event", {
+        minute,
+        text
+      });
+    } catch(e){
+      console.warn("⚠️ Tracking failed", e);
+    }
 
-    // auto scroll
-    feed.scrollTop = feed.scrollHeight;
-  }
+    // =========================
+    // 📰 TOP BAR
+    // =========================
+    if(top){
+      top.innerHTML = `${minute}' – ${text}`;
+    }
 
-  // =========================
-  // 🎬 OVERLAY
-  // =========================
-  if(resolved?.assets?.length){
+    // =========================
+    // 📰 LIVE FEED
+    // =========================
+    if(feed){
 
-    const asset = resolved.assets[0];
+      const div = document.createElement("div");
+
+      div.innerHTML = `
+        <span style="color:#888">${minute}'</span> 
+        <span>${text}</span>
+      `;
+
+      feed.appendChild(div);
+
+      // 🔥 auto scroll safe
+      requestAnimationFrame(() => {
+        feed.scrollTop = feed.scrollHeight;
+      });
+    }
+
+    // =========================
+    // 🎬 OVERLAY
+    // =========================
+    const asset = resolved?.assets?.[0];
 
     if(asset?.url){
-      showOverlay(asset.url, text);
+      try {
+        showOverlay(asset.url, text);
+      } catch(e){
+        console.warn("⚠️ Overlay failed", e);
+      }
     }
+
+  } catch(e){
+    console.error("💥 updateEvents CRASH", e);
   }
-
-
-  // =========================
-  // 🧠 TEXT
-  // =========================
-  let text = newest.text;
-
-  if(!text){
-    try {
-      text = buildCommentary(newest);
-    } catch(e){
-      console.warn("⚠️ Commentary failed", e);
-    }
-  }
-
-  if(!text) return;
-
-  // =========================
-  // 📰 FEED UPDATE
-  // =========================
-  const div = document.createElement("div");
-
-  div.innerHTML = `
-    <span style="color:#888">${newest.minute}'</span> 
-    <span>${text}</span>
-  `;
-
-  container.appendChild(div);
-
-  // =========================
-  // 🎬 OVERLAY (optional)
-  // =========================
-  if(newest.assets?.length){
-
-    const asset = newest.assets[0];
-    const url = asset?.url;
-
-    if(url){
-      console.log("🎬 CALL OVERLAY:", url);
-      showOverlay(url, text);
-    }
-  }
-
-
+}
 // =========================
 // 🎮 OVERLAY TRIGGER
 // =========================
