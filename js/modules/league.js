@@ -405,6 +405,9 @@ initLeague(game.league.current);
   }
 }
 
+
+console.log("🧪 LEAGUE TEAMS:", league.teams);
+console.log("🧪 TEAM COUNT:", league.teams?.length);
 // =========================
 // 🔥 SET LEAGUE (PLZ)
 // =========================
