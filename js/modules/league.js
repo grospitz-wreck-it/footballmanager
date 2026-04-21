@@ -29,6 +29,11 @@ function ensureTeamPlayers(team){
 
   console.log(`⚽ Generiere Kader für ${team.name}`);
 
+  console.log("🔍 TEAM CHECK:", {
+  teamId: team.id,
+  samplePlayers: (game.players || []).slice(0,5).map(p => p.team_id)
+});
+  
   const realPlayers = (game.players || []).filter(p =>
     String(p.team_id) === String(team.id)
   );
