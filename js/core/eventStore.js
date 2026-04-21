@@ -80,9 +80,8 @@ function buildPlayerName(player){
 // =========================
 function generateText(event) {
 
-
-  const player = findPlayer(players, event?.playerId);
-  const team = findTeam(teams, event?.teamId);
+  const player = findPlayer(null, event?.playerId);
+  const team = findTeam(null, event?.teamId);
 
   const playerName = buildPlayerName(player);
   const teamName = team?.name || "Ein Team";
@@ -107,7 +106,6 @@ function generateText(event) {
     case "DUEL":
       return `⚔️ Zweikampf im Mittelfeld`;
 
-    // 🔥 TAKTIK
     case "TACTIC_CHANGE":
       return `🔧 Taktik angepasst`;
 
