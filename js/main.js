@@ -287,7 +287,14 @@ if(leagues.length){
   setLeagueById(leagues[0].id);
   generateSchedule();
 
+// =========================
+// 🧠 SOURCE OF TRUTH (TEAMS)
+// =========================
+const scheduleTeams = game.league.current.teams;
 
+// 🧪 DEBUG
+console.log("🧪 SCHEDULE TEAM IDS:", scheduleTeams.map(t => t.id));
+  
 // =========================
 // 👥 PLAYERS LOAD
 // =========================
@@ -316,21 +323,24 @@ const validTeamIds = new Set(
 );
 
 // =========================
-// 🔥 TEAM ASSIGN (CLEAN)
+// 🔥 TEAM ASSIGN (FINAL FIX)
 // =========================
+const scheduleTeams = game.league.current.teams;
+const scheduleTeamIds = new Set(scheduleTeams.map(t => t.id));
+
 let pool = (loadedPlayers || []).map(p => {
 
-  // ✅ gültige team_id behalten
-  if(p.team_id && validTeamIds.has(p.team_id)){
+  // ✅ nur behalten wenn EXAKT im Schedule
+  if(p.team_id && scheduleTeamIds.has(p.team_id)){
     return {
       ...p,
       team_id: p.team_id
     };
   }
 
-  // 🔁 fallback → zufälliges Team aus DERSELBEN LIGA
+  // 🔁 fallback → garantiert gültiges Team
   const randomTeam =
-    leagueTeams[Math.floor(Math.random() * leagueTeams.length)];
+    scheduleTeams[Math.floor(Math.random() * scheduleTeams.length)];
 
   return {
     ...p,
