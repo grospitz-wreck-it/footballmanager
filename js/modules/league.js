@@ -299,9 +299,15 @@ function initLeagueSelect(leaguesInput){
   const source = leaguesInput || game.league?.available || [];
 
   if (!source.length) {
-    console.warn("⚠️ Keine Ligen geladen");
-    return;
-  }
+  console.log("ℹ️ LeagueSelect wartet auf Daten...");
+  
+  // 🔥 WICHTIG: Dropdown leeren
+  selects.forEach(select => {
+    select.innerHTML = "";
+  });
+
+  return;
+}
 
   console.log("🏆 LeagueSelect FINAL:", source.length);
 
