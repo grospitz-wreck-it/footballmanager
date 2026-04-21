@@ -171,19 +171,11 @@ function initLeague(league){
   // =========================
   // 📅 SCHEDULE FIX (CRITICAL)
   // =========================
-  if(!league.schedule || league.schedule.length === 0){
 
-    console.log("📅 Generiere Schedule für:", league.name);
-
-    const schedule = generateSchedule(league);
-
-    if(!schedule || !schedule.length){
-      console.error("❌ Schedule konnte nicht erstellt werden");
-      return;
-    }
-
-    league.schedule = schedule;
-  }
+  // 🔥 Schedule kommt jetzt von außen (setLeagueById)
+if(!league.schedule || !league.schedule.length){
+  console.warn("⚠️ Kein Schedule vorhanden (sollte nicht passieren)");
+}
 
   // =========================
   // 🔄 ROUND INIT
