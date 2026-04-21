@@ -84,6 +84,19 @@ function findTeam(_, id){
   ) || null;
 }
 
+
+function buildPlayerName(player){
+
+  if(!player) return "ein Spieler";
+
+  const name =
+    player.name ??
+    player.Name ??
+    `${player.firstName || player.first_name || ""} ${player.lastName || player.last_name || ""}`;
+
+  return name?.trim() || "ein Spieler";
+}
+
 // =========================
 // 🧠 FALLBACK TEXT
 // =========================
