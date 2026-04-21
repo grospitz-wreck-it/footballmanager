@@ -69,26 +69,19 @@ function findTeam(_, id){
 
   if(!id) return null;
 
-  return game.league?.current?.teams?.find(
+  const league = game.league?.current;
+
+  // 🔥 normal
+  const team = league?.teams?.find(
+    t => String(t.id) === String(id)
+  );
+
+  if(team) return team;
+
+  // 🔥 fallback
+  return (game.data?.teams || []).find(
     t => String(t.id) === String(id)
   ) || null;
-}
-
-function buildPlayerName(player){
-
-  if(!player) return "ein Spieler";
-
-  function buildPlayerName(player){
-
-  if(!player) return "ein Spieler";
-
-  const name =
-    player.name ??
-    player.Name ??
-    `${player.firstName ?? player.first_name ?? ""} ${player.lastName ?? player.last_name ?? ""}`.trim();
-
-  return name && name.length > 0 ? name : "ein Spieler";
-}
 }
 
 // =========================
