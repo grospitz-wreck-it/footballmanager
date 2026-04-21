@@ -325,7 +325,6 @@ const validTeamIds = new Set(
 // =========================
 // 🔥 TEAM ASSIGN (FINAL FIX)
 // =========================
-const scheduleTeams = game.league.current.teams;
 const scheduleTeamIds = new Set(scheduleTeams.map(t => t.id));
 
 let pool = (loadedPlayers || []).map(p => {
