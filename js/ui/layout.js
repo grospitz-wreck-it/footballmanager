@@ -2,7 +2,7 @@
 // 📦 STATE
 // =========================
 import { game } from "../core/state.js";
-
+import { handleAppVisibility } from "../main.js"; // 🔥 oben hinzufügen
 // =========================
 // 🎬 SCREEN SWITCH
 // =========================
