@@ -127,11 +127,11 @@ function generateSchedule(){
       round.push({
         id: crypto.randomUUID(),
 
-        homeTeamId: String(home.id),
-        awayTeamId: String(away.id),
+        homeTeamId: home.id,
+        awayTeamId: away.id,
 
-        home: { id: String(home.id), name: home.name },
-        away: { id: String(away.id), name: away.name },
+        home: home,
+        away: away,
 
         result: null,
         _processed: false
