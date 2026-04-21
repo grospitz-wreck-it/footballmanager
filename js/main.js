@@ -345,8 +345,12 @@ async function findLeaguesByCode(input){
 });
     }
 
-    map.get(id).teams.push(t);
-  });
+    map.get(id).teams.push({
+  id: String(t.id),
+  name: t.name,
+  competition_id: t.competition_id,
+  city_id: t.city_id || null
+});
 
   let leagues = Array.from(map.values());
 
