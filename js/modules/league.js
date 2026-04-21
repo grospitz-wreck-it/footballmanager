@@ -447,16 +447,6 @@ function setLeagueById(leagueId){
   // =========================
   // 🔥 HARD PLAYER SAFETY (NEU)
   // =========================
-  for(const team of league.teams){
-
-    if(!Array.isArray(team.players) || team.players.length < 11){
-
-      console.warn("⚽ Force Spieler für:", team.name);
-
-      const players = ensureTeamPlayers(team);
-
-      team.players = players || [];
-    }
 
     // 👉 IDs absichern
     team.players.forEach(p => {
@@ -581,50 +571,8 @@ game.team = game.team || {};
 game.team.selected = null;
 game.team.selectedId = null;
 
-// 🔥 FIX: alle Teams vorbereiten (nicht nur eins)
-league.teams.forEach(t => {
-  ensureTeamPlayers(t);
-});
 
   console.log("✅ Teams geladen:", league.teams.length);
-}
-
-// =========================
-// 👥 ENSURE TEAM PLAYERS (SAFE)
-// =========================
-const pool =
-  window.playerPool ||
-  game.players ||
-  [];
-
-if(pool.length){
-
-  teams.forEach(team => {
-
-    if(!team.players || !team.players.length){
-
-      try {
-        const players = ensureTeamPlayers(team);
-
-        if(players && players.length){
-
-          team.players = players;
-
-          players.forEach(p => {
-            p.team_id = team.id;
-          });
-
-        }
-
-      } catch(e){
-        console.error("❌ Player generation crashed:", team.name, e);
-      }
-    }
-
-  });
-
-} else {
-  console.warn("⏳ PlayerPool noch nicht geladen → skip team generation");
 }
 
 // =========================
