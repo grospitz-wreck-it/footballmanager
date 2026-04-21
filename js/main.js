@@ -346,7 +346,7 @@ console.log("🧪 PLAYER MAPPING:", {
   teamsUsed: [...new Set(pool.map(p => p.team_id))].length,
   sample: pool[0]
 });
-
+}
 // =========================
 // 🧪 VALIDATION (FINAL)
 // =========================
