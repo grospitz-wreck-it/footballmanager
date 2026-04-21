@@ -226,7 +226,12 @@ async function init(){
 const { data: teamsRaw } =
   await supabase.from("teams").select("*");
 
-const teams = teamsRaw || [];
+const teams = (teamsRaw || []).map(t => ({
+  ...t,
+  id: String(t.id),              // 🔥 CRITICAL
+  competition_id: String(t.competition_id)
+}));
+
 game.teams = teams;
 
 console.log("🏆 Teams:", teams.length);
