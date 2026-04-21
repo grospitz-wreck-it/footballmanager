@@ -8,7 +8,7 @@ import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
-import { renderSchedule as renderScheduleModule } from "../modules/schedule.js";
+import { renderSchedule as renderScheduleModule } from "../modules/scheduler.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
