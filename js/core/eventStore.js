@@ -68,11 +68,17 @@ function buildPlayerName(player){
 
   if(!player) return "ein Spieler";
 
-  return (
-    player.name ||
-    `${player.firstName || player.first_name || ""} ${player.lastName || player.last_name || ""}`.trim() ||
-    "ein Spieler"
-  );
+  function buildPlayerName(player){
+
+  if(!player) return "ein Spieler";
+
+  const name =
+    player.name ??
+    player.Name ??
+    `${player.firstName ?? player.first_name ?? ""} ${player.lastName ?? player.last_name ?? ""}`.trim();
+
+  return name && name.length > 0 ? name : "ein Spieler";
+}
 }
 
 // =========================
@@ -140,7 +146,7 @@ function processEvent(event){
 const relatedPlayer = findPlayer(null, event.relatedPlayerId);
 const team = findTeam(null, event.teamId);
   console.log("🧪 EVENT LOOKUP:", {
-  player: player?.name,
+  player: player?.name || player?.Name,
   team: team?.name
 });
 
@@ -156,7 +162,7 @@ const team = findTeam(null, event.teamId);
   // =========================
   let resolved = {};
   try {
-    resolved = resolveEventContent(event) || {};
+    resolved = resolveEventContent(enrichedInput) || {};
   } catch(e){
     console.warn("⚠️ resolveEventContent failed", e);
   }
@@ -169,7 +175,12 @@ const team = findTeam(null, event.teamId);
   try {
     text =
       resolved.text ||
-      generateCommentary(enrichedInput) ||
+      generateCommentary({
+  ...enrichedInput,
+  player,
+  relatedPlayer,
+  team
+}) ||
       generateText(enrichedInput);
   } catch(e){
     console.error("❌ Commentary Crash:", e);
