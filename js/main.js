@@ -333,11 +333,16 @@ async function findLeaguesByCode(input){
 
     if(!map.has(id)){
       map.set(id, {
-        id,
-        name: comp.name,
-        level: comp.level,
-        teams: []
-      });
+  id,
+  name: comp.name,
+  level: comp.level,
+
+  // 🔥 WICHTIG: kompatibel mit deinem System
+  teams: [],
+
+  // optional (für Debug)
+  _fromPLZ: true
+});
     }
 
     map.get(id).teams.push(t);
