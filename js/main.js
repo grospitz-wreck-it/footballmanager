@@ -692,7 +692,8 @@ function bindPLZInput(){
     }
 
     const leagues = await findLeaguesByCode(value);
-
+    // 🔥 DROPDOWN AKTUALISIEREN (CRITICAL FIX)
+    initLeagueSelect(leagues);
     console.log("🏆 FOUND LEAGUES:", leagues);
 
     if(!leagues || !leagues.length){
