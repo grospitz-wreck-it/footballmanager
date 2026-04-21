@@ -2,7 +2,7 @@
 // 📦 STATE
 // =========================
 import { game } from "../core/state.js";
-import { handleAppVisibility } from "../main.js"; // 🔥 oben hinzufügen
+
 // =========================
 // 🎬 SCREEN SWITCH
 // =========================
@@ -12,8 +12,6 @@ function renderApp(){
   const app    = document.getElementById("app");
 
   if(!splash || !app) return;
-
-  console.log("PHASE:", game.phase); // 🔥 DEBUG
 
   if(game.phase === "setup"){
     splash.style.display = "flex";
@@ -29,19 +27,19 @@ function renderApp(){
 // =========================
 function startGame(){
 
-if(!game.player.name){
-console.warn("❌ Kein Name gesetzt");
-return;
-}
+  if(!game.player.name){
+    console.warn("❌ Kein Name gesetzt");
+    return;
+  }
 
-game.phase = "idle";
-renderApp();
+  game.phase = "idle";
+  renderApp();
 }
 
 // =========================
 // 📦 EXPORTS
 // =========================
 export {
-renderApp,
-startGame
+  renderApp,
+  startGame
 };
