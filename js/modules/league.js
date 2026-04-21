@@ -23,94 +23,34 @@ let leagueSelectInitialized = false;
 
 function ensureTeamPlayers(team){
 
+  // ✅ bereits vorhanden → nichts ändern
   if(team.players && team.players.length > 0){
     return team.players;
   }
 
-  console.log(`⚽ Generiere Kader für ${team.name}`);
+  console.log(`⚽ Baue Kader für ${team.name}`);
 
-  console.log("🔍 TEAM CHECK:", {
-  teamId: team.id,
-  samplePlayers: (game.players || []).slice(0,5).map(p => p.team_id)
-});
-  
-  const realPlayers = (game.players || []).filter(p =>
-    String(p.team_id) === String(team.id)
-  );
+  const pool = game.players || [];
 
-  // ✅ genug echte Spieler → direkt verwenden
- if(realPlayers.length >= 18){
-  team.players = realPlayers.map(p => {
-    p.team_id = team.id; // 🔥 Ownership setzen
+  if(!pool.length){
+    console.error("❌ Kein PlayerPool vorhanden");
+    team.players = [];
+    return [];
+  }
+
+  const targetSize = 22;
+
+  // 🔥 einmal mischen (ok hier, alternativ global einmal machen)
+  pool.sort(() => Math.random() - 0.5);
+
+  // 🔥 Spieler aus globalem Pool ENTNEHMEN
+  const selected = pool.splice(0, targetSize);
+
+  // 🔥 Ownership setzen
+  team.players = selected.map(p => {
+    p.team_id = team.id;
     return p;
   });
-} else {
-
-    console.warn(`⚠️ Team ${team.name} hat nur ${realPlayers.length} Spieler → wird ergänzt`);
-
-    const needed = 22 - realPlayers.length;
-
-    const generatedPool = generateTeam(team);
-
-    // 🔥 Zielverteilung
-    const target = {
-      GK: 2,
-      DEF: 6,
-      MID: 8,
-      ST: 6
-    };
-
-    // 🔥 aktuelle Verteilung
-    const current = { GK: 0, DEF: 0, MID: 0, ST: 0 };
-
-    realPlayers.forEach(p => {
-      const pos = (p.position_type || "").toUpperCase();
-      if(pos.includes("GK")) current.GK++;
-      else if(pos.includes("DEF")) current.DEF++;
-      else if(pos.includes("MID")) current.MID++;
-      else if(pos.includes("ST")) current.ST++;
-    });
-
-    const additions = [];
-
-    function take(posKey){
-      const idx = generatedPool.findIndex(p =>
-        (p.position_type || "").toUpperCase().includes(posKey)
-      );
-      if(idx !== -1){
-        additions.push(generatedPool.splice(idx,1)[0]);
-      }
-    }
-
-    // 🔥 gezielt auffüllen
-    while(additions.length < needed){
-
-      if(current.GK < target.GK){
-        take("GK"); current.GK++; continue;
-      }
-      if(current.DEF < target.DEF){
-        take("DEF"); current.DEF++; continue;
-      }
-      if(current.MID < target.MID){
-        take("MID"); current.MID++; continue;
-      }
-      if(current.ST < target.ST){
-        take("ST"); current.ST++; continue;
-      }
-
-      // fallback
-      if(generatedPool.length){
-        additions.push(generatedPool.shift());
-      } else {
-        break;
-      }
-    }
-
-team.players = [...realPlayers, ...additions].map(p => {
-  p.team_id = team.id; // 🔥 ownership setzen
-  return p;
-});
-  }
 
   console.log(`✅ ${team.players.length} Spieler für ${team.name}`);
 
