@@ -43,16 +43,26 @@ function findPlayer(_, id){
   if(!id) return null;
 
   const league = game.league?.current;
-  if(!league) return null;
 
-  for(const team of league.teams || []){
-    const player = team.players?.find(
-      p => String(p.id) === String(id)
-    );
-    if(player) return player;
+  // 🔥 1. Teams durchsuchen
+  if(league?.teams){
+    for(const team of league.teams){
+      const player = team.players?.find(
+        p => String(p.id) === String(id)
+      );
+      if(player) return player;
+    }
   }
 
-  return null;
+  // 🔥 2. GLOBALER FALLBACK (WICHTIG)
+  const globalPlayers =
+    window.playerPool ||
+    game.players ||
+    [];
+
+  return globalPlayers.find(
+    p => String(p.id) === String(id)
+  ) || null;
 }
 
 function findTeam(_, id){
