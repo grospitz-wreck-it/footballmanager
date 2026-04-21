@@ -29,16 +29,78 @@ function ensureTeamPlayers(team){
 
   console.log(`⚽ Generiere Kader für ${team.name}`);
 
-const realPlayers = (game.players || []).filter(p =>
-  String(p.team_id) === String(team.id)
-);
+  const realPlayers = (game.players || []).filter(p =>
+    String(p.team_id) === String(team.id)
+  );
 
-if(realPlayers.length){
-  team.players = realPlayers;
-} else {
-  console.warn("⚠️ Fallback: generiere Team für", team.name);
-  team.players = generateTeam(team);
-}
+  // ✅ genug echte Spieler → direkt verwenden
+  if(realPlayers.length >= 18){
+    team.players = realPlayers;
+  } else {
+
+    console.warn(`⚠️ Team ${team.name} hat nur ${realPlayers.length} Spieler → wird ergänzt`);
+
+    const needed = 22 - realPlayers.length;
+
+    const generatedPool = generateTeam(team);
+
+    // 🔥 Zielverteilung
+    const target = {
+      GK: 2,
+      DEF: 6,
+      MID: 8,
+      ST: 6
+    };
+
+    // 🔥 aktuelle Verteilung
+    const current = { GK: 0, DEF: 0, MID: 0, ST: 0 };
+
+    realPlayers.forEach(p => {
+      const pos = (p.position_type || "").toUpperCase();
+      if(pos.includes("GK")) current.GK++;
+      else if(pos.includes("DEF")) current.DEF++;
+      else if(pos.includes("MID")) current.MID++;
+      else if(pos.includes("ST")) current.ST++;
+    });
+
+    const additions = [];
+
+    function take(posKey){
+      const idx = generatedPool.findIndex(p =>
+        (p.position_type || "").toUpperCase().includes(posKey)
+      );
+      if(idx !== -1){
+        additions.push(generatedPool.splice(idx,1)[0]);
+      }
+    }
+
+    // 🔥 gezielt auffüllen
+    while(additions.length < needed){
+
+      if(current.GK < target.GK){
+        take("GK"); current.GK++; continue;
+      }
+      if(current.DEF < target.DEF){
+        take("DEF"); current.DEF++; continue;
+      }
+      if(current.MID < target.MID){
+        take("MID"); current.MID++; continue;
+      }
+      if(current.ST < target.ST){
+        take("ST"); current.ST++; continue;
+      }
+
+      // fallback
+      if(generatedPool.length){
+        additions.push(generatedPool.shift());
+      } else {
+        break;
+      }
+    }
+
+    team.players = [...realPlayers, ...additions];
+  }
+
   console.log(`✅ ${team.players.length} Spieler für ${team.name}`);
 
   return team.players;
