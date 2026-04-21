@@ -292,14 +292,15 @@ if(leagues.length){
 // =========================
 const scheduleTeams = game.league.current.teams;
 
-// 🧪 DEBUG
-console.log("🧪 SCHEDULE TEAM IDS:", scheduleTeams.map(t => t.id));
-  
+// 🔥 EINMAL definieren (kein zweites const irgendwo!)
+const scheduleTeamIds = new Set(
+  scheduleTeams.map(t => String(t.id))
+);
+
 // =========================
 // 👥 PLAYERS LOAD
 // =========================
 const loadedPlayers = await loadPlayers();
-const scheduleTeamIds = new Set(scheduleTeams.map(t => t.id));
 
 console.log("🧪 DB PLAYERS RAW:", {
   total: loadedPlayers?.length,
@@ -307,36 +308,13 @@ console.log("🧪 DB PLAYERS RAW:", {
 });
 
 // =========================
-// 🧠 TEAM SOURCE (MASTER)
+// 🔥 TEAM ASSIGN (CLEAN & SAFE)
 // =========================
-let leagueTeams = game.league?.current?.teams || [];
-
-if(!leagueTeams.length){
-  console.error("❌ Keine League Teams vorhanden → Player Mapping abgebrochen");
-  window.playerPool = [];
-  game.players = [];
-  return;
-}
-
-// 🔥 VALID TEAM IDS (SET)
-const validTeamIds = new Set(
-  leagueTeams.map(t => t.id)
-);
-
-// =========================
-// 🔥 TEAM ASSIGN (STRICT + NORMALIZED)
-// =========================
-
-// 🔥 IDs einmal sauber normalisieren
-const scheduleTeamIds = new Set(
-  scheduleTeams.map(t => String(t.id))
-);
-
 let pool = (loadedPlayers || []).map(p => {
 
   const playerTeamId = p.team_id ? String(p.team_id) : null;
 
-  // ✅ wenn exakt im Schedule → behalten
+  // ✅ gültig → behalten
   if(playerTeamId && scheduleTeamIds.has(playerTeamId)){
     return {
       ...p,
@@ -353,6 +331,7 @@ let pool = (loadedPlayers || []).map(p => {
     team_id: String(randomTeam.id)
   };
 });
+
 // =========================
 // 📦 FINAL ASSIGN
 // =========================
@@ -360,7 +339,7 @@ window.playerPool = pool;
 game.players = pool;
 
 // =========================
-// 🧪 DEBUG (WICHTIG)
+// 🧪 DEBUG
 // =========================
 console.log("🧪 PLAYER MAPPING:", {
   total: pool.length,
@@ -368,14 +347,17 @@ console.log("🧪 PLAYER MAPPING:", {
   sample: pool[0]
 });
 
-function validateTeams(){
+// =========================
+// 🧪 VALIDATION (FINAL)
+// =========================
+(function validateTeams(){
 
   const matchTeams = new Set(
-    game.league.current.teams.map(t => String(t.id))
+    scheduleTeams.map(t => String(t.id))
   );
 
   const playerTeams = new Set(
-    window.playerPool.map(p => String(p.team_id))
+    pool.map(p => String(p.team_id))
   );
 
   const missing = [...matchTeams].filter(id => !playerTeams.has(id));
@@ -385,43 +367,13 @@ function validateTeams(){
   } else {
     console.log("✅ TEAM MATCH OK");
   }
-}
 
-validateTeams();
-console.log("🧪 FINAL CROSS CHECK", {
-  scheduleTeams: game.league.current.teams.map(t => t.id),
-  playerTeams: [...new Set(window.playerPool.map(p => p.team_id))].slice(0,20)
-});
-  
-  initCustomTeamSelect(game.league.current);
-  console.log("📅 SCHEDULE:", game.league.current?.schedule);
+  console.log("🧪 FINAL CROSS CHECK", {
+    scheduleTeams: [...matchTeams],
+    playerTeams: [...playerTeams]
+  });
 
-  const firstTeam = leagues[0]?.teams?.[0];
-
-  if(firstTeam){
-
-    console.log("🎯 Auto-select Team (delayed)");
-
-    setTimeout(() => {
-
-      const ok = selectTeamById(String(firstTeam.id));
-
-      console.log("🧪 selectTeam result:", ok);
-
-      if(ok){
-        handleAppVisibility();
-        updateUI();
-        updateMainButtonText();
-      } else {
-        console.warn("❌ Team Select fehlgeschlagen");
-      }
-
-    }, 50);
-
-  } else {
-    console.warn("⚠️ Kein Team in Liga gefunden");
-  }
-}
+})();
 
 // 👉 BUTTONS (IMMER HIER, INNERHALB try)
 initMainButton();
