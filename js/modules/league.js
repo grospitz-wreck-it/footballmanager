@@ -443,37 +443,6 @@ function setLeagueById(leagueId){
   // 🏗 INIT LEAGUE FIRST (🔥 KRITISCH)
   // =========================
   initLeague(league);
-
-// =========================
-// 👥 ENSURE TEAM PLAYERS (🔥 FIX)
-// =========================
-league.teams.forEach(team => {
-
-  if(!team.players || !team.players.length){
-
-    try {
-      const players = ensureTeamPlayers(team);
-
-      if(players && players.length){
-
-        // 👉 Team bekommt Spieler
-        team.players = players;
-
-        // 👉 WICHTIG: Binding für UI + Engine
-        players.forEach(p => {
-          p.team_id = team.id;
-        });
-
-      } else {
-        console.warn("⚠️ Keine Spieler generiert für:", team.name);
-      }
-
-    } catch(e){
-      console.error("❌ Player generation crashed:", team.name, e);
-    }
-  }
-
-});
   
   // =========================
   // 🔥 HARD PLAYER SAFETY (NEU)
@@ -618,6 +587,44 @@ league.teams.forEach(t => {
 });
 
   console.log("✅ Teams geladen:", league.teams.length);
+}
+
+// =========================
+// 👥 ENSURE TEAM PLAYERS (SAFE)
+// =========================
+const pool =
+  window.playerPool ||
+  game.players ||
+  [];
+
+if(pool.length){
+
+  teams.forEach(team => {
+
+    if(!team.players || !team.players.length){
+
+      try {
+        const players = ensureTeamPlayers(team);
+
+        if(players && players.length){
+
+          team.players = players;
+
+          players.forEach(p => {
+            p.team_id = team.id;
+          });
+
+        }
+
+      } catch(e){
+        console.error("❌ Player generation crashed:", team.name, e);
+      }
+    }
+
+  });
+
+} else {
+  console.warn("⏳ PlayerPool noch nicht geladen → skip team generation");
 }
 
 // =========================
