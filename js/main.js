@@ -145,20 +145,9 @@ function initEventBindings(){
 // 📺 EVENTS UI
 // =========================
 function renderEvents(){
-
-  const events = game.events?.history || [];
-  const feed = document.getElementById("liveFeed");
-
-  if(!feed) return;
-
-  feed.innerHTML = events.slice(-20).reverse().map(e => {
-    const safe = String(e.text)
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;");
-    return `<div>${e.minute}' - ${safe}</div>`;
-  }).join("");
+  // ❌ NICHT MEHR VERWENDEN
+  // Events werden jetzt komplett über UI Engine gesteuert
 }
-
 // =========================
 // 👁 APP VISIBILITY
 // =========================
