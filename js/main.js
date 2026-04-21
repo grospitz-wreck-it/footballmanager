@@ -251,22 +251,42 @@ game.cityMap = Object.fromEntries(
     // =========================
     // 👥 PLAYERS
     // =========================
-    const loadedPlayers = await loadPlayers();
+   // =========================
+// 👥 PLAYERS LOAD
+// =========================
+const loadedPlayers = await loadPlayers();
 
 // =========================
-// 🔥 TEAM ASSIGN FIX
+// 🧠 TEAM SOURCE (NUR LIGA)
 // =========================
-const teams = game.teams || [];
+const leagueTeams =
+  game.league?.current?.teams ||
+  [];
 
+if(!leagueTeams.length){
+  console.warn("⚠️ Keine Liga-Teams beim Player-Mapping");
+}
+
+// =========================
+// 🔥 TEAM ASSIGN (STRICT LIGA)
+// =========================
 window.playerPool = (loadedPlayers || []).map(p => {
 
-  // 👉 behalten wenn vorhanden
+  // 👉 behalten wenn valide team_id UND in liga
   if(p.team_id){
-    return p;
+
+    const inLeague = leagueTeams.some(t =>
+      String(t.id) === String(p.team_id)
+    );
+
+    if(inLeague){
+      return p;
+    }
   }
 
-  // 👉 fallback: zufälliges Team
-  const randomTeam = teams[Math.floor(Math.random() * teams.length)];
+  // 👉 fallback: zufälliges Team AUS DER LIGA
+  const randomTeam =
+    leagueTeams[Math.floor(Math.random() * leagueTeams.length)];
 
   return {
     ...p,
@@ -274,7 +294,21 @@ window.playerPool = (loadedPlayers || []).map(p => {
   };
 });
 
+// =========================
+// 🧠 GLOBAL STATE
+// =========================
 game.players = window.playerPool;
+
+// =========================
+// 🧪 DEBUG (WICHTIG)
+// =========================
+console.log("👥 PLAYER TEAM ASSIGN DONE", {
+  total: window.playerPool.length,
+  sample: window.playerPool.slice(0,5).map(p => ({
+    id: p.id,
+    team_id: p.team_id
+  }))
+});
 
     // =========================
     // 🏟 COMPETITIONS
