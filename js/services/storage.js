@@ -36,7 +36,7 @@ export function saveGame(){   // ✅ FIX
 // =========================
 // 📂 LOAD
 // =========================
-export function loadGame(){   // ✅ FIX
+export function loadGame(){
 
   try {
 
@@ -54,17 +54,34 @@ export function loadGame(){   // ✅ FIX
       return false;
     }
 
+    // =========================
+    // 🧠 STATE RESTORE
+    // =========================
     deepMerge(game, data.game);
     rebuildIds();
     ensureUI();
 
+    // =========================
+    // 🔥 SCHEDULE FIX (NEU)
+    // =========================
+    const league = game.league?.current;
+
     if(
-      (!game.league?.current?.schedule ||
-        game.league.current.schedule.length === 0) &&
-      game.league?.current?.teams?.length
+      league &&
+      Array.isArray(league.teams) &&
+      league.teams.length >= 2 &&
+      (!league.schedule || !league.schedule.length)
     ){
       console.warn("⚠️ Kein Spielplan → neu generieren");
-      generateSchedule();
+
+      const schedule = generateSchedule(league);
+
+      if(schedule && schedule.length){
+        league.schedule = schedule;
+        console.log("✅ Schedule rebuilt:", schedule.length);
+      } else {
+        console.error("❌ Schedule konnte nicht erzeugt werden (LoadGame)");
+      }
     }
 
     console.log("✅ Spiel geladen");
@@ -76,7 +93,6 @@ export function loadGame(){   // ✅ FIX
     return false;
   }
 }
-
 // =========================
 // 🗑 DELETE
 // =========================
