@@ -267,7 +267,86 @@ function validateSchedule(expectedTeamCount){
 }
 
 
+// =========================
+// 🎯 MATCHDAY SIMULATION (HIER EINFÜGEN)
+// =========================
 
+function simulateMatchFast(match){
+
+  const homeGoals = Math.floor(Math.random() * 5);
+  const awayGoals = Math.floor(Math.random() * 5);
+
+  match.result = {
+    home: homeGoals,
+    away: awayGoals
+  };
+
+  match._processed = true;
+
+  updateTable(match.homeTeamId, match.awayTeamId, homeGoals, awayGoals);
+}
+
+
+// =========================
+// 📊 TABLE UPDATE
+// =========================
+function updateTable(homeId, awayId, homeGoals, awayGoals){
+
+  const table = game.league?.current?.table;
+  if(!table) return;
+
+  const home = table.find(t => String(t.id) === String(homeId));
+  const away = table.find(t => String(t.id) === String(awayId));
+
+  if(!home || !away) return;
+
+  home.played++;
+  away.played++;
+
+  home.goalsFor += homeGoals;
+  home.goalsAgainst += awayGoals;
+
+  away.goalsFor += awayGoals;
+  away.goalsAgainst += homeGoals;
+
+  if(homeGoals > awayGoals){
+    home.points += 3;
+  } else if(awayGoals > homeGoals){
+    away.points += 3;
+  } else {
+    home.points += 1;
+    away.points += 1;
+  }
+}
+
+
+// =========================
+// 🎯 SIMULATE MATCHDAY
+// =========================
+function simulateMatchday(){
+
+  const league = game.league?.current;
+  if(!league) return;
+
+  const round = league.schedule?.[league.currentRound];
+  if(!round) return;
+
+  const myTeamId = String(game.team?.selectedId);
+
+  round.forEach(match => {
+
+    const isMyMatch =
+      String(match.homeTeamId) === myTeamId ||
+      String(match.awayTeamId) === myTeamId;
+
+    if(isMyMatch) return;
+    if(match._processed) return;
+
+    simulateMatchFast(match);
+  });
+
+  console.log("⚡ Spieltag simuliert (AI Matches)");
+}
 
 // =========================
 // ▶️ NEXT MATCH
