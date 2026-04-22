@@ -590,8 +590,8 @@ function renderTeam(){
   const container = document.getElementById("teamView");
   if(!container) return;
 
-if(!window.playerPool || window.playerPool.length === 0){
-  container.innerHTML = "<p>Lade Spieler...</p>";
+if(!game.team?.selectedId){
+  container.innerHTML = "<p>Kein Team gewählt</p>";
   return;
 }
   
