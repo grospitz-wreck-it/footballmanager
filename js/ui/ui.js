@@ -590,11 +590,7 @@ function renderTeam(){
   const container = document.getElementById("teamView");
   if(!container) return;
 
-  // 🔥 Warten bis Spieler existieren
-if(
-  (!window.playerPool || window.playerPool.length === 0) &&
-  (!game.players || game.players.length === 0)
-){
+if(!window.playerPool || window.playerPool.length === 0){
   container.innerHTML = "<p>Lade Spieler...</p>";
   return;
 }
