@@ -609,7 +609,7 @@ if(lineup?.slots){
 
   if(ids.length){
     starters = players.filter(p => ids.includes(String(p.id)));
-    bench = players.filter(p => !ids.includes(String(p.id)));
+    benchPlayers = players.filter(p => !ids.includes(String(p.id)));
   }
 }
 
