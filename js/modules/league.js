@@ -34,9 +34,18 @@ function ensureTeamPlayers(team){
 if(!pool.length){
   console.warn("⏳ PlayerPool noch leer – retry...");
 
-  setTimeout(() => {
-    ensureTeamPlayers(team);
-  }, 50);
+ setTimeout(() => {
+  const players = ensureTeamPlayers(team);
+
+  // 🔥 SYNC ins Game (WICHTIG!)
+  if(
+    game.team?.selectedId &&
+    String(game.team.selectedId) === String(team.id)
+  ){
+    game.team.players = players;
+  }
+
+}, 50);
 
   return [];
 }
