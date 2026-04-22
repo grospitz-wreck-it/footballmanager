@@ -224,7 +224,14 @@ if(!pool.length){
           p.id = crypto.randomUUID();
         }
       });
-
+// 🔥 FALLBACK BINDING (KRITISCH)
+if(Array.isArray(team.players) && team.players.length){
+  team.players.forEach(p => {
+    if(!p.team_id){
+      p.team_id = team.id;
+    }
+  });
+}
       if(team.players.length < 11){
         console.error("❌ TEAM HAT ZU WENIG SPIELER:", team.name);
       }
