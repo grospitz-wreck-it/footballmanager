@@ -589,7 +589,7 @@ function renderTeam(){
 
   const container = document.getElementById("teamView");
   if(!container) return;
-
+  const teamId = game.team?.selectedId;
   const players = getPlayersOfTeam(teamId);
 
   if(!players.length){
