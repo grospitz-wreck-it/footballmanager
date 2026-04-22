@@ -677,6 +677,26 @@ export function getPlayersOfTeam(teamId){
       ? window.playerPool
       : (game.players || []);
 
+// 🔥 1. DIREKT AUS TEAM (PRIMARY SOURCE)
+const league = game.league?.current;
+
+if(league?.teams?.length){
+
+  const team = league.teams.find(
+    t => String(t.id) === String(teamId)
+  );
+
+  if(team?.players?.length){
+    return team.players;
+  }
+}
+
+// 🔥 2. FALLBACK (alte Logik bleibt)
+const pool =
+  (window.playerPool && window.playerPool.length)
+    ? window.playerPool
+    : (game.players || []);
+
 const players = pool.filter(p => {
   const pid =
     p.team_id ??
@@ -686,6 +706,12 @@ const players = pool.filter(p => {
 
   return String(pid) === String(teamId);
 });
+
+if(!players.length){
+  console.warn("⚠️ Fallback greift – keine team_id gesetzt");
+}
+
+return players;
 
 // 🔥 FALLBACK: wenn keine Zuweisung existiert
 if(!players.length){
