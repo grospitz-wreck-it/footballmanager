@@ -703,8 +703,19 @@ const bench = players;
     `;
 
     players.forEach(p => {
-      html += renderPlayerDot(p);
-    });
+
+  const name = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
+  const pos = p.position || p.position_type || "-";
+  const overall = p.overall ?? "-";
+
+  html += `
+    <div class="player-row" data-id="${p.id}">
+      <span class="pos">${pos}</span>
+      <span class="name">${name}</span>
+      <span class="rating">${overall}</span>
+    </div>
+  `;
+});
 
     html += `
         </div>
