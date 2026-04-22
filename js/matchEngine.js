@@ -15,6 +15,7 @@ import {
 import { saveGame } from "../js/services/storage.js";
 import { getPositionWeights } from "./engine/positionEngine.js";
 import { getPlayerRating } from "./engine/playerEngine.js";
+import { simulateMatchday, updateTable } from "./scheduler.js";
 
 // =========================
 // 🎯 TACTICS SYSTEM (NEW)
@@ -675,24 +676,6 @@ function resumeMatch(){
   }
 }
 
-// =========================
-// 🤖 OTHER MATCHES
-// =========================
-function simulateOtherMatches(round){
- 
-  round.forEach(match => {
-
-    if(isMyMatch(match)) return;
-    if(match._processed) return;
-
-    match.result = {
-      home: Math.floor(Math.random() * 5),
-      away: Math.floor(Math.random() * 5)
-    };
-
-    match._processed = true;
-  });
-}
 
 // =========================
 // 🔁 LOOP
@@ -789,14 +772,31 @@ const gameEvents = game.data?.gameEvents;
 
       if(live.minute >= 90){
 
-        live.running = false;
+  live.running = false;
 
-        clearInterval(matchInterval);
-        matchInterval = null;
+  // =========================
+  // 🔥 TABLE UPDATE (DEIN MATCH)
+  // =========================
+  const league = game.league?.current;
+  const match = game.match?.current;
 
-        onEnd?.();
-        return;
-      }
+  if(league && match){
+
+    const home = league.teams.find(t => String(t.id) === match.homeTeamId);
+    const away = league.teams.find(t => String(t.id) === match.awayTeamId);
+
+    const hg = game.match.score.home;
+    const ag = game.match.score.away;
+
+    updateTable(home, away, hg, ag);
+  }
+
+  clearInterval(matchInterval);
+  matchInterval = null;
+
+  onEnd?.();
+  return;
+}
 
       accumulator -= STEP;
       safety++;
@@ -815,5 +815,5 @@ export {
   runMatchLoop,
   pauseMatch,
   resumeMatch,
-  simulateOtherMatches
+  
 };
