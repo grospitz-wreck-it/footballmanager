@@ -707,16 +707,24 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
     while(accumulator >= STEP && safety < 10){
 
-      live.minute++;
+  live.minute++;
 
-      const ctx = {
-        match: currentMatch,
-        requestGoal: (data = {}) => {
-          game.match.flags = game.match.flags || {};
-          game.match.flags.goalRequested = true;
-          game.match.flags.goalData = data;
-        }
-      };
+  // =========================
+  // ⚡ ANDERE MATCHES LIVE
+  // =========================
+  const league = game.league?.current;
+  const round = league?.schedule?.[league.currentRound];
+
+  simulateLiveMatchMinute(round, live.minute);
+
+  const ctx = {
+    match: currentMatch,
+    requestGoal: (data = {}) => {
+      game.match.flags = game.match.flags || {};
+      game.match.flags.goalRequested = true;
+      game.match.flags.goalData = data;
+    }
+  };
 
       try {
         rollRandomEvents(ctx);
