@@ -1397,3 +1397,6 @@ tr:hover {
 .rating.low {
   color: #f44336;
 }
+.bench .player-row {
+  opacity: 0.6;
+}
