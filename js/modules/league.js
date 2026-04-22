@@ -703,12 +703,12 @@ if(league?.teams?.length){
 }
 
 // 🔥 2. FALLBACK (alte Logik bleibt)
-const pool =
+const fallbackPool = 
   (window.playerPool && window.playerPool.length)
     ? window.playerPool
     : (game.players || []);
 
-const players = pool.filter(p => {
+const players = fallbackPool.filter(p => {
   const pid =
     p.team_id ??
     p.Team ??
