@@ -662,16 +662,25 @@ export function getPlayersOfTeam(teamId){
       ? window.playerPool
       : (game.players || []);
 
-  return pool.filter(p => {
+const players = pool.filter(p => {
+  const pid =
+    p.team_id ??
+    p.Team ??
+    p.teamId ??
+    null;
 
-    const pid =
-      p.team_id ??
-      p.Team ??
-      p.teamId ??
-      null;
+  return String(pid) === String(teamId);
+});
 
-    return String(pid) === String(teamId);
-  });
+// 🔥 FALLBACK: wenn keine Zuweisung existiert
+if(!players.length){
+  console.warn("⚠️ Fallback greift – keine team_id gesetzt");
+
+  // nimm einfach erste 18 Spieler (temporär)
+  return pool.slice(0, 18);
+}
+
+return players;
 }
 
 // =========================
