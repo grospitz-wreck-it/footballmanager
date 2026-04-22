@@ -328,16 +328,20 @@ function simulateMatchday(){
   const league = game.league?.current;
   if(!league) return;
 
-  const round = league.schedule?.[league.currentRound];
+  const roundIndex = league.currentRound ?? 0;
+  const round = league.schedule?.[roundIndex];
   if(!round) return;
 
-  const myTeamId = String(game.team?.selectedId);
+  const myTeamId = String(game.team?.selectedId || "");
 
   round.forEach(match => {
 
     const isMyMatch =
-      String(match.homeTeamId) === myTeamId ||
-      String(match.awayTeamId) === myTeamId;
+      myTeamId &&
+      (
+        String(match.homeTeamId) === myTeamId ||
+        String(match.awayTeamId) === myTeamId
+      );
 
     if(isMyMatch) return;
     if(match._processed) return;
