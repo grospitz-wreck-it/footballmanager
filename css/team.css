@@ -1,3 +1,7 @@
+.player-row {
+  background: red !important;
+}
+
 /* =========================
 👕 TEAM TAB (MATCH STYLE)
 ========================= */
@@ -237,3 +241,59 @@
 .mini-fill.control {
   background: linear-gradient(90deg, #a855f7, #ec4899);
 }
+/* =========================
+📋 PLAYER LIST (NEU)
+========================= */
+.player-row {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+
+  height: 32px;
+  padding: 4px 10px;
+  margin: 2px 0;
+
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.player-row:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.player-row.selected {
+  outline: 2px solid #22c55e;
+}
+
+.player-row .pos {
+  font-size: 10px;
+  opacity: 0.6;
+  text-align: center;
+}
+
+.player-row .name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.player-row .stars {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.player-row .rating {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.rating.high { color: #4caf50; }
+.rating.mid  { color: #ffc107; }
+.rating.low  { color: #f44336; }
