@@ -672,68 +672,83 @@ const bench = players;
 
   let html = "";
 
-  // =========================
-  // 🪑 BENCH (UNVERÄNDERT)
-  // =========================
+// =========================
+// 🧱 TEAM RENDER (FINAL)
+// =========================
 
- html += `<h3>Kader</h3>`;
-  html += `<div class="bench-container">`;
-   
-   players.forEach(p => {
+let html = `<h3>Kader</h3>`;
+html += `<div class="bench-container">`;
+
+players.forEach(p => {
+
+  // =========================
+  // 🔧 PLAYER DATA
+  // =========================
 
   const rawName = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
-const name = rawName.toUpperCase();
-const POS_MAP = {
-  GK: "TW",
-  DEF: "IV",
-  MID: "ZM",
-  ST: "ST"
-};
+  const name = rawName.toUpperCase();
 
-const rawPos = (p.position_type || "MID").toUpperCase();
-const pos = POS_MAP[rawPos] || rawPos;
-     const rating = p.overall ?? "-";
-      // ⭐ STARS (1–5)
-let stars = typeof p.stars === "number" ? p.stars : 1;
-stars = Math.max(1, Math.min(5, stars));
+  const POS_MAP = {
+    GK: "TW",
+    DEF: "IV",
+    MID: "ZM",
+    ST: "ST"
+  };
 
-// 🧬 TIER (string erwartet)
-const tier = (p.tier || "bronze").toLowerCase();
+  const rawPos = (p.position_type || "MID").toUpperCase();
+  const pos = POS_MAP[rawPos] || rawPos;
+
+  const rating = typeof p.overall === "number" ? p.overall : 0;
+
   let ratingClass = "low";
-
   if(rating >= 85){
     ratingClass = "high";
   } else if(rating >= 70){
     ratingClass = "mid";
   }
 
+  let stars = typeof p.stars === "number" ? p.stars : 1;
+  stars = Math.max(1, Math.min(5, stars));
+
+  const tier = (p.tier || "bronze").toLowerCase();
+
+  // =========================
+  // 🧱 RENDER
+  // =========================
+
   html += `
-    html += `
-  <div class="player-row" data-id="${p.id}">
-    <span class="pos">${pos}</span>
-    <span class="name ${tier}">${name}</span>
-    <span class="stars">${"★".repeat(stars)}</span>
-    <span class="rating ${ratingClass}">${rating}</span>
-  </div>
+    <div class="player-row" data-id="${p.id}">
+      <span class="pos">${pos}</span>
+      <span class="name ${tier}">${name}</span>
+      <span class="stars">${"★".repeat(stars)}</span>
+      <span class="rating ${ratingClass}">${rating}</span>
+    </div>
   `;
 });
 
-  html += `</div>`;
-  container.innerHTML = html;
+// =========================
+// 📦 INSERT DOM
+// =========================
 
-  // =========================
-  // 🖱️ CLICKS (UNVERÄNDERT)
-  // =========================
+html += `</div>`;
+container.innerHTML = html;
 
-  document.querySelectorAll(".player-row").forEach(el => {
+// =========================
+// 🖱️ CLICK HANDLER (Richtig platziert!)
+// =========================
+
+document.querySelectorAll(".player-row").forEach(el => {
   el.onclick = () => {
+
     const id = el.dataset.id;
     if(!id) return;
 
     const player =
       (game.team.players || []).find(p => String(p.id) === String(id));
 
-    if(player) openPlayerModal(player);
+    if(player){
+      openPlayerModal(player);
+    }
   };
 });
 
