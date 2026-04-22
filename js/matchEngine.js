@@ -315,13 +315,6 @@ function initMatch(round){
   // ❗ Erst prüfen
   if(!round?.length) return false;
 
-  // =========================
-  // 🔥 MATCHDAY SIMULATION (GENAU HIER!)
-  // =========================
-  if(!round._simulated){
-    simulateMatchday();
-    round._simulated = true;
-  }
 
   // =========================
   // 🧠 DANACH dein Spiel suchen
