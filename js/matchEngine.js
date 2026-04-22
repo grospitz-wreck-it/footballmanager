@@ -300,7 +300,7 @@ function isMyMatch(match){
 // =========================
 function initMatch(round){
 
-  // 🔥 FIX: game.match absichern (GANZ WICHTIG)
+  // 🔥 FIX: game.match absichern
   if(!game.match){
     game.match = {};
   }
@@ -310,9 +310,22 @@ function initMatch(round){
     clearInterval(matchInterval);
     matchInterval = null;
   }
+
+  // ❗ Erst prüfen
   if(!round?.length) return false;
 
-const playerMatch = round.find(m => isMyMatch(m));
+  // =========================
+  // 🔥 MATCHDAY SIMULATION (GENAU HIER!)
+  // =========================
+  if(!round._simulated){
+    simulateMatchday();
+    round._simulated = true;
+  }
+
+  // =========================
+  // 🧠 DANACH dein Spiel suchen
+  // =========================
+  const playerMatch = round.find(m => isMyMatch(m));
 
 // =========================
 // ⚽ BYE HANDLING (FIX)
