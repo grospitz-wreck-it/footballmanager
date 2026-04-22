@@ -697,30 +697,28 @@ const stats = calculateTeamStats();
 html = `
   <div class="team-stats">
 
-    <div class="stat">
-      <div class="donut attack" style="--val:${stats?.attack || 0}">
+    <div class="stat attack">
+      <div class="donut" style="--val:${stats?.attack || 0}">
         <span>${stats?.attack ?? "-"}</span>
       </div>
       <div class="label">ATT</div>
     </div>
 
-    <div class="stat">
-      <div class="donut defense" style="--val:${stats?.defense || 0}">
+    <div class="stat defense">
+      <div class="donut" style="--val:${stats?.defense || 0}">
         <span>${stats?.defense ?? "-"}</span>
       </div>
       <div class="label">DEF</div>
     </div>
 
-    <div class="stat">
-      <div class="donut control" style="--val:${stats?.control || 0}">
+    <div class="stat control">
+      <div class="donut" style="--val:${stats?.control || 0}">
         <span>${stats?.control ?? "-"}</span>
       </div>
       <div class="label">CTRL</div>
     </div>
 
   </div>
-
-  <h3>Startelf</h3>
 `;
 html += `<div class="bench-container">`;
 
