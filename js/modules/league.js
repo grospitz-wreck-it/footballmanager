@@ -94,11 +94,7 @@ return [];
     selected.push(...rest.slice(0, needed));
   }
 
-  // 🔥 aus globalem Pool entfernen (WICHTIG!)
-  selected.forEach(p => {
-    const idx = pool.indexOf(p);
-    if(idx !== -1) pool.splice(idx, 1);
-  });
+
 
   // 🔥 Team setzen
   team.players = selected.map(p => {
