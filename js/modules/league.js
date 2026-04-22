@@ -636,8 +636,19 @@ function selectTeamById(teamId){
   game.team.selected = team.name;
   game.team.selectedId = normalizeId(team.id);
 
-  const players = ensureTeamPlayers(team);
+ let players = ensureTeamPlayers(team);
+
+// 🔥 FALLBACK: wenn leer → nochmal versuchen (aber NUR hier!)
+if(!players || players.length === 0){
+  console.warn("⚠️ Team hatte keine Spieler → retry build");
+
+  players = ensureTeamPlayers(team);
+}
+
+// 🔥 FINAL GUARD (sehr wichtig)
+if(players && players.length){
   game.team.players = players;
+}
 
   console.log("✅ Team gewählt (ID):", team.id);
 
