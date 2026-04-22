@@ -60,15 +60,6 @@ function hydrateMatchTeams(match){
 
   return match;
 }
-// =========================
-// 🔀 SHUFFLE
-// =========================
-function shuffleArray(arr){
-  for(let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
 
 // =========================
 // 📅 GENERATE SCHEDULE
@@ -134,7 +125,21 @@ function generateSchedule(league){
   const half = teams.length / 2;
 
   const rounds = [];
-  let rotation = [...teams];
+let rotation = [...teams];
+
+// =========================
+// ⚖️ HOME/AWAY BALANCE (NEU)
+// =========================
+const homeAwayBalance = {};
+
+function getBalance(id){
+  return homeAwayBalance[id] || 0;
+}
+
+function updateBalance(home, away){
+  homeAwayBalance[home] = getBalance(home) + 1;
+  homeAwayBalance[away] = getBalance(away) - 1;
+}
 
   // =========================
   // 🔥 HINRUNDE
@@ -169,12 +174,6 @@ function generateSchedule(league){
     });
   }
 
-  // Shuffle
-  for(let i = round.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [round[i], round[j]] = [round[j], round[i]];
-  }
-
   rounds.push(round);
 
   const fixed = rotation[0];
@@ -205,11 +204,7 @@ function generateSchedule(league){
     };
   });
 
-  // Shuffle
-  for(let i = newRound.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [newRound[i], newRound[j]] = [newRound[j], newRound[i]];
-  }
+
 
   return newRound;
 });
