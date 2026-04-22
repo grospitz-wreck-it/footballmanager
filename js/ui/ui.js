@@ -819,7 +819,7 @@ document.querySelectorAll(".player-row").forEach(el => {
 
     const id = el.dataset.id;
     if(!id) return;
-
+    
     // =========================
     // 🧠 FIRST CLICK
     // =========================
