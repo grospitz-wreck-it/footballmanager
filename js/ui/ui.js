@@ -949,8 +949,9 @@ function calculateTeamStats(){
   }
 
 // 🔥 ensure lineup exists
-if(!game.team.lineup || !game.team.lineup.slots){
+const slotCount = Object.keys(game.team?.lineup?.slots || {}).length;
 
+if(!game.team.lineup || slotCount < 11){
   const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
   players.forEach(p => {
