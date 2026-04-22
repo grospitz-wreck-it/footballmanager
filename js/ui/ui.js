@@ -602,7 +602,7 @@ if(
   const teamId = game.team?.selectedId;
   const players = getPlayersOfTeam(teamId);
   console.log("🧪 teamId:", teamId);
-  console.log("🧪 players:", players);
+  console.log("🧪 sample player:", window.playerPool?.[0]);
   console.log("🧪 playerPool:", window.playerPool?.length);
   console.log("🧪 game.players:", game.players?.length);
   if(!players.length){
