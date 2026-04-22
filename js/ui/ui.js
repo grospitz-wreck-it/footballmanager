@@ -693,8 +693,15 @@ const bench = players;
 // =========================
 // 🧱 TEAM RENDER (FINAL)
 // =========================
-
-html = `<h3>Startelf</h3>`;
+const stats = calculateTeamStats();
+html = `
+  <div class="team-stats">
+    <div class="stat">⚔️ ${stats?.attack ?? "-"}</div>
+    <div class="stat">🛡 ${stats?.defense ?? "-"}</div>
+    <div class="stat">🎯 ${stats?.control ?? "-"}</div>
+  </div>
+  <h3>Startelf</h3>
+`;
 html += `<div class="bench-container">`;
 
 starters.forEach(p => {
