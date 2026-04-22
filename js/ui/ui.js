@@ -682,11 +682,23 @@ const bench = players;
    players.forEach(p => {
 
   const rawName = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
-  const shortName = rawName.split(" ").pop().slice(0,3).toUpperCase();
+const name = rawName.toUpperCase();
+const POS_MAP = {
+  GK: "TW",
+  DEF: "IV",
+  MID: "ZM",
+  ST: "ST"
+};
 
-  const pos = (p.position || p.position_type || "-").toUpperCase();
-  const rating = p.overall ?? "-";
+const rawPos = (p.position_type || "MID").toUpperCase();
+const pos = POS_MAP[rawPos] || rawPos;
+     const rating = p.overall ?? "-";
+      // ⭐ STARS (1–5)
+let stars = typeof p.stars === "number" ? p.stars : 1;
+stars = Math.max(1, Math.min(5, stars));
 
+// 🧬 TIER (string erwartet)
+const tier = (p.tier || "bronze").toLowerCase();
   let ratingClass = "low";
 
   if(rating >= 85){
@@ -696,11 +708,13 @@ const bench = players;
   }
 
   html += `
-    <div class="player-row" data-id="${p.id}">
-      <span class="pos">${pos}</span>
-      <span class="name">${shortName}</span>
-      <span class="rating ${ratingClass}">${rating}</span>
-    </div>
+    html += `
+  <div class="player-row" data-id="${p.id}">
+    <span class="pos">${pos}</span>
+    <span class="name ${tier}">${name}</span>
+    <span class="stars">${"★".repeat(stars)}</span>
+    <span class="rating ${ratingClass}">${rating}</span>
+  </div>
   `;
 });
 
