@@ -31,10 +31,15 @@ function ensureTeamPlayers(team){
 
   const pool = game.players || [];
 
-  if(!pool.length){
-    console.error("❌ Kein PlayerPool vorhanden");
-    return [];
-  }
+if(!pool.length){
+  console.warn("⏳ PlayerPool noch leer – retry...");
+
+  setTimeout(() => {
+    ensureTeamPlayers(team);
+  }, 50);
+
+  return [];
+}
 
   // 🔥 Zielverteilung
   const target = {
