@@ -704,12 +704,6 @@ const bench = players;
   `;
 });
 
-    html += `
-        </div>
-      </div>
-    `;
-  });
-
   html += `</div>`;
   container.innerHTML = html;
 
