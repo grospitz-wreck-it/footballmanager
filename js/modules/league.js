@@ -195,8 +195,16 @@ const pool =
   [];
 
 if(!pool.length){
-  console.warn("⏳ PlayerPool noch nicht geladen → skip player init");
-} else {
+  console.warn("⏳ PlayerPool noch nicht geladen → retry initLeague");
+
+  setTimeout(() => {
+    initLeague(league);
+  }, 50);
+
+  return;
+}
+
+{
 
   for(const team of league.teams){
 
