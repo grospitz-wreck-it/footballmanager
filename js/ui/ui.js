@@ -731,16 +731,17 @@ const bench = players;
   // 🖱️ CLICKS (UNVERÄNDERT)
   // =========================
 
-  document.querySelectorAll(".player-dot").forEach(el => {
-    el.onclick = () => {
-      const id = el.dataset.id;
-      if(!id) return;
+  document.querySelectorAll(".player-row").forEach(el => {
+  el.onclick = () => {
+    const id = el.dataset.id;
+    if(!id) return;
 
-      const player = (game.players || []).find(p => String(p.id) === String(id));
-      if(player) openPlayerModal(player);
-    };
-  });
-}
+    const player =
+      (game.team.players || []).find(p => String(p.id) === String(id));
+
+    if(player) openPlayerModal(player);
+  };
+});
 
 // =========================
 // 🔵 PLAYER DOT
