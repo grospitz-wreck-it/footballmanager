@@ -948,6 +948,34 @@ function calculateTeamStats(){
     return null;
   }
 
+// 🔥 ensure lineup exists
+if(!game.team.lineup || !game.team.lineup.slots){
+
+  const startersDefault = players.slice(0, 11);
+
+  game.team.lineup = {
+    formation: "4-4-2",
+    slots: {}
+  };
+
+  const slotKeys = [
+    "GK",
+    "DEF_1","DEF_2","DEF_3","DEF_4",
+    "MID_1","MID_2","MID_3","MID_4",
+    "ST_1","ST_2"
+  ];
+
+  startersDefault.forEach((p, i) => {
+    const key = slotKeys[i];
+    if(key){
+      game.team.lineup.slots[key] = String(p.id);
+    }
+  });
+
+  console.log("🧠 Lineup auto-created");
+}
+
+  
   // =========================
   // 🔥 DATENQUELLE
   // =========================
