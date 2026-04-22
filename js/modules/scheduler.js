@@ -564,5 +564,5 @@ export {
   renderSchedule,
   simulateMatchday,
   updateTable,
-  simulateLiveMatchMinut
+  simulateLiveMatchMinute
 };
