@@ -457,10 +457,17 @@ function getCountryForPlayer(player, team, league){
     // =========================
 const loadedPlayers = await loadPlayers();
 
-game.players = loadedPlayers;
-window.playerPool = loadedPlayers; // 🔥 DAS FEHLT!
+// 🔥 RESET: alle Spieler sind frei (wichtig!)
+const cleanPlayers = (loadedPlayers || []).map(p => ({
+  ...p,
+  team_id: null
+}));
 
-console.log("🧠 GLOBAL PLAYER POOL:", game.players?.length);
+game.players = cleanPlayers;
+window.playerPool = cleanPlayers;
+
+console.log("🧠 CLEAN PLAYER POOL:", cleanPlayers.length);
+
 
     
 
