@@ -650,8 +650,8 @@ if(!window.playerPool || window.playerPool.length === 0){
     ];
   }
 
-  const bench = players.filter(p => !starters.includes(p));
-
+const bench = players;
+  
   const formation = lineup?.formation || game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
 
