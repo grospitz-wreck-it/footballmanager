@@ -1377,7 +1377,9 @@ tr:hover {
 .player-row:hover {
   background: rgba(255,255,255,0.05);
 }
-
+.player-row.selected {
+  background: rgba(255,255,255,0.12);
+}
 .pos {
   opacity: 0.6;
 }
@@ -1415,3 +1417,4 @@ tr:hover {
   text-align: center;
   font-weight: 600;
 }
+
