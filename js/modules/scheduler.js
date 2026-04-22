@@ -380,9 +380,8 @@ function renderSchedule(){
     round.forEach((match, mIndex) => {
 
       const isActive =
-        (myMatch && match.id === myMatch.id) ||
-        (rIndex === game.league.currentRound &&
-         mIndex === game.league.currentMatchIndex);
+  rIndex === game.league.currentRound &&
+  mIndex === game.league.currentMatchIndex;
 
       html += `
         <li style="
