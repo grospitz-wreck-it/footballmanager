@@ -600,8 +600,8 @@ if(!game.team?.selectedId){
   const lineup = game.team?.lineup;
 
 let starters = [];
-let bench = [...players];
-
+let benchPlayers = [...players];
+  
 // 🔥 Lineup vorhanden → echte Startelf
 if(lineup?.slots){
 
@@ -755,7 +755,7 @@ html += `</div>`;
 html += `<div class="divider">BANK</div>`;
 html += `<div class="bench-container bench">`;
 
-bench.forEach(p => {
+benchPlayers.forEach(p => {
  // =========================
   // 🔧 Bench DATA
   // =========================
