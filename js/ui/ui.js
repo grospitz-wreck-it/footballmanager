@@ -645,8 +645,6 @@ if(!starters.length){
   // =========================
 
 
-  let starters = [];
-
   if(lineup?.slots){
 
     const pool = window.playerPool || players;
