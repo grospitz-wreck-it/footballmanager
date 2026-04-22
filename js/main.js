@@ -28,7 +28,7 @@ window.importPlayers = importPlayers;
 window.buildAllTeams = buildAllTeams;
 
 // ENGINE
-import { runMatchLoop, initMatch, simulateOtherMatches } from "./matchEngine.js";
+import { runMatchLoop, initMatch } from "./matchEngine.js";
 import { initMatchEventSlides } from "./engine/matchEventSlideSystem.js";
 
 // SERVICES
