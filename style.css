@@ -537,12 +537,10 @@ tr:hover {
   gap: 10px;
 }
 
-/* BENCH */
 .bench-row {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
+  flex-direction: column;  /* 🔥 DAS IST DER KEY */
+  gap: 2px;
 }
 
 
