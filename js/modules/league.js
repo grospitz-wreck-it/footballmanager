@@ -32,8 +32,7 @@ function ensureTeamPlayers(team){
   const pool = game.players || [];
 
 if(!pool.length){
-  console.warn("⏳ PlayerPool noch nicht bereit – skip");
-  return [];
+  throw new Error("⛔ PlayerPool nicht geladen – Abbruch");
 }
 
   // 🔥 Zielverteilung
@@ -195,12 +194,7 @@ const pool =
   [];
 
 if(!pool.length){
-  console.warn("⏳ PlayerPool noch nicht geladen → retry initLeague");
-
-  setTimeout(() => {
-    initLeague(league);
-  }, 50);
-
+  console.warn("⏳ PlayerPool noch nicht geladen → skip initLeague");
   return;
 }
 
