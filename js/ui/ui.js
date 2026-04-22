@@ -670,42 +670,7 @@ if(!window.playerPool || window.playerPool.length === 0){
     ST: [...byType.ST]
   };
 
-  let html = `
-    <h3>Starting XI</h3>
-    <div class="team-field">
-  `;
-
-  layout.forEach((slot, i) => {
-
-    if(!slot) return;
-
-    let player = null;
-
-    // 🔥 1. Versuche Lineup
-    if(lineup?.slots){
-      const slotKey = slotOrder[i];
-      const playerId = lineup.slots[slotKey];
-
-      if(playerId){
-        player = players.find(p => String(p.id) === String(playerId));
-      }
-    }
-
-    // 🔥 2. Fallback (dein altes System)
-    if(!player){
-      player = pickPlayer(slot.role, positionPool);
-    }
-
-    if(!player) return;
-
-    html += `
-      <div class="player-pos" style="top:${slot.top}; left:${slot.left}">
-        ${renderPlayerDot(player)}
-      </div>
-    `;
-  });
-
-  html += `</div>`;
+  let html = `<h3>Kader</h3>`;
 
   // =========================
   // 🪑 BENCH (UNVERÄNDERT)
