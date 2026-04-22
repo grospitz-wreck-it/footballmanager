@@ -814,72 +814,14 @@ container.innerHTML = html;
 // 🖱️ CLICK HANDLER (Richtig platziert!)
 // =========================
 
+let selectedPlayerId = null;
+
 document.querySelectorAll(".player-row").forEach(el => {
+
   el.onclick = () => {
 
     const id = el.dataset.id;
     if(!id) return;
-    
-    // =========================
-    // 🧠 FIRST CLICK
-    // =========================
-   if(!selectedPlayerId){
-
-  // 🔥 erst alles zurücksetzen
-  document.querySelectorAll(".player-row")
-    .forEach(el => el.classList.remove("selected"));
-
-  // 🔥 dann neuen setzen
-  selectedPlayerId = id;
-  el.classList.add("selected");
-
-  return;
-}
-
-    // =========================
-    // 🔁 SECOND CLICK → SWAP
-    // =========================
-    
-    if(selectedPlayerId && selectedPlayerId !== id){
-
-      const lineup = game.team?.lineup;
-
-      if(lineup?.slots){
-
-        const slots = lineup.slots;
-
-        let slotA = null;
-        let slotB = null;
-
-        // finde Slots
-        Object.entries(slots).forEach(([key, value]) => {
-          if(String(value) === String(selectedPlayerId)) slotA = key;
-          if(String(value) === String(id)) slotB = key;
-        });
-
-        // 🔥 SWAP nur wenn beide in lineup sind
-        if(slotA && slotB){
-          const temp = slots[slotA];
-          slots[slotA] = slots[slotB];
-          slots[slotB] = temp;
-        }
-
-        // 🔥 optional: Bank → Starter
-        if(slotA && !slotB){
-          slots[slotA] = id;
-        }
-
-        if(!slotA && slotB){
-          slots[slotB] = selectedPlayerId;
-        }
-      }
-
-      // reset
-      selectedPlayerId = null;
-
-      // 🔄 UI refresh
-      updateUI();
-    }
 
     // =========================
     // 🔁 SAME CLICK → RESET
@@ -887,14 +829,63 @@ document.querySelectorAll(".player-row").forEach(el => {
     if(selectedPlayerId === id){
       selectedPlayerId = null;
       el.classList.remove("selected");
+      return;
     }
+
+    // =========================
+    // 🧠 FIRST CLICK
+    // =========================
+    if(!selectedPlayerId){
+
+      document.querySelectorAll(".player-row")
+        .forEach(el => el.classList.remove("selected"));
+
+      selectedPlayerId = id;
+      el.classList.add("selected");
+
+      return;
+    }
+
+    // =========================
+    // 🔁 SECOND CLICK → SWAP
+    // =========================
+    const lineup = game.team?.lineup;
+
+    if(lineup?.slots){
+
+      const slots = lineup.slots;
+
+      let slotA = null;
+      let slotB = null;
+
+      Object.entries(slots).forEach(([key, value]) => {
+        if(String(value) === String(selectedPlayerId)) slotA = key;
+        if(String(value) === String(id)) slotB = key;
+      });
+
+      // 🔄 Starter ↔ Starter
+      if(slotA && slotB){
+        const temp = slots[slotA];
+        slots[slotA] = slots[slotB];
+        slots[slotB] = temp;
+      }
+
+      // 🔄 Starter → Bank
+      if(slotA && !slotB){
+        slots[slotA] = id;
+      }
+
+      // 🔄 Bank → Starter
+      if(!slotA && slotB){
+        slots[slotB] = selectedPlayerId;
+      }
+    }
+
+    // 🔄 Reset + UI refresh
+    selectedPlayerId = null;
+    updateUI();
   };
 });
-
- //   if(player){
-   //   openPlayerModal(player);
-    //}
-
 
 
 // =========================
@@ -959,12 +950,20 @@ if(!game.team.lineup || slotCount < 11){
     (byType[type] || byType.MID).push(p);
   });
 
-  const startersDefault = [
-    ...byType.GK.slice(0,1),
-    ...byType.DEF.slice(0,4),
-    ...byType.MID.slice(0,4),
-    ...byType.ST.slice(0,2)
-  ];
+let startersDefault = [
+  ...byType.GK.slice(0,1),
+  ...byType.DEF.slice(0,4),
+  ...byType.MID.slice(0,4),
+  ...byType.ST.slice(0,2)
+];
+
+// 🔥 Fallback: auffüllen bis 11 Spieler
+if(startersDefault.length < 11){
+
+  const rest = players.filter(p => !startersDefault.includes(p));
+
+  startersDefault.push(...rest.slice(0, 11 - startersDefault.length));
+}
 
   const slotKeys = [
     "GK",
