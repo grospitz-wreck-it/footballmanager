@@ -990,7 +990,7 @@ function renderTacticBar(label, value){
     </div>
   `;
 }
-
+}
 // =========================
 // 📦 EXPORTS
 // =========================
