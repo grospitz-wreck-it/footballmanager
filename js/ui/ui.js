@@ -676,7 +676,7 @@ const bench = players;
   // 🪑 BENCH (UNVERÄNDERT)
   // =========================
 
-  html += `<h3>Bench</h3>`;
+  html += `<h3>Kader</h3>`;
 
   const benchByType = { GK: [], DEF: [], MID: [], ST: [] };
 
