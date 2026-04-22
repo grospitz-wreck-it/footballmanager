@@ -670,7 +670,7 @@ const bench = players;
     ST: [...byType.ST]
   };
 
-  let html = `<h3>Kader</h3>`;
+  let html = "";
 
   // =========================
   // 🪑 BENCH (UNVERÄNDERT)
