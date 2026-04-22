@@ -951,16 +951,15 @@ function calculateTeamStats(){
   // =========================
   // 🔥 DATENQUELLE
   // =========================
-  const team = game.league?.current?.teams
+const team = game.league?.current?.teams
   ?.find(t => String(t.id) === String(teamId));
 
 const allPlayers = team?.players || [];
 
-
-  if(!allPlayers.length){
-    console.warn("❌ Keine Spieler gefunden für Team:", teamId);
-    return null;
-  }
+if(!allPlayers.length){
+  console.warn("❌ Keine Spieler gefunden für Team:", teamId);
+  return null;
+}
 
   // =========================
   // 🔥 LINEUP → STARTERS
