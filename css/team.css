@@ -303,3 +303,154 @@
 .rating.high { color: #4caf50; }
 .rating.mid  { color: #ffc107; }
 .rating.low  { color: #f44336; }
+
+/* =========================
+🍩 DONUT WOW EDITION
+========================= */
+
+.team-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+/* Card */
+.stat {
+  flex: 1;
+  text-align: center;
+}
+
+/* DONUT */
+.donut {
+  --val: 50;
+
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 6px;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  position: relative;
+
+  animation: donutPop 0.4s ease;
+}
+
+/* 🔥 Gradient Wheel */
+.stat.attack .donut {
+  background: conic-gradient(
+    #ff7043,
+    #ffca28,
+    #66bb6a,
+    #ff7043
+  );
+}
+
+.stat.defense .donut {
+  background: conic-gradient(
+    #42a5f5,
+    #26c6da,
+    #7e57c2,
+    #42a5f5
+  );
+}
+
+.stat.control .donut {
+  background: conic-gradient(
+    #ab47bc,
+    #ec407a,
+    #ff7043,
+    #ab47bc
+  );
+}
+
+/* 🔥 Progress Mask */
+.donut::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  border-radius: 50%;
+
+  background: conic-gradient(
+    rgba(0,0,0,0.75) calc((100 - var(--val)) * 1%),
+    transparent 0
+  );
+
+  transition: all 0.4s ease;
+}
+
+/* Inner circle */
+.donut::before {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  background: #0f172a;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* Value */
+.donut span {
+  position: relative;
+  z-index: 3;
+
+  font-size: 18px;
+  font-weight: 900;
+
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.2);
+}
+
+/* Glow */
+.stat.attack .donut {
+  box-shadow: 0 0 12px rgba(255,112,67,0.4);
+}
+
+.stat.defense .donut {
+  box-shadow: 0 0 12px rgba(66,165,245,0.4);
+}
+
+.stat.control .donut {
+  box-shadow: 0 0 12px rgba(171,71,188,0.4);
+}
+
+/* Label */
+.label {
+  font-size: 11px;
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+/* =========================
+✨ ANIMATIONS
+========================= */
+
+@keyframes donutPop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 🔥 subtle pulse for high values */
+.donut[style*="--val:9"],
+.donut[style*="--val:8"] {
+  animation: pulseGlow 1.5s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from {
+    filter: brightness(1);
+  }
+  to {
+    filter: brightness(1.3);
+  }
+}
