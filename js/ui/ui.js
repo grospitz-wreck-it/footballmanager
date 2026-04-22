@@ -589,6 +589,16 @@ function renderTeam(){
 
   const container = document.getElementById("teamView");
   if(!container) return;
+
+  // 🔥 Warten bis Spieler existieren
+if(
+  (!window.playerPool || window.playerPool.length === 0) &&
+  (!game.players || game.players.length === 0)
+){
+  container.innerHTML = "<p>Lade Spieler...</p>";
+  return;
+}
+  
   const teamId = game.team?.selectedId;
   const players = getPlayersOfTeam(teamId);
   console.log("🧪 teamId:", teamId);
