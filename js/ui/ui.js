@@ -702,17 +702,27 @@ const bench = players;
         <div class="bench-row">
     `;
 
-    players.forEach(p => {
+   players.forEach(p => {
 
-  const name = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
-  const pos = p.position || p.position_type || "-";
-  const overall = p.overall ?? "-";
+  const rawName = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
+  const shortName = rawName.split(" ").pop().slice(0,3).toUpperCase();
+
+  const pos = (p.position || p.position_type || "-").toUpperCase();
+  const rating = p.overall ?? "-";
+
+  let ratingClass = "low";
+
+  if(rating >= 85){
+    ratingClass = "high";
+  } else if(rating >= 70){
+    ratingClass = "mid";
+  }
 
   html += `
     <div class="player-row" data-id="${p.id}">
       <span class="pos">${pos}</span>
-      <span class="name">${name}</span>
-      <span class="rating">${overall}</span>
+      <span class="name">${shortName}</span>
+      <span class="rating ${ratingClass}">${rating}</span>
     </div>
   `;
 });
@@ -742,7 +752,7 @@ const bench = players;
     if(player) openPlayerModal(player);
   };
 });
-
+}
 // =========================
 // 🔵 PLAYER DOT
 // =========================
