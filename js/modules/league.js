@@ -31,9 +31,8 @@ function ensureTeamPlayers(team){
 
   const pool = game.players || [];
 
-if(!pool.length){
-  throw new Error("⛔ PlayerPool nicht geladen – Abbruch");
-}
+console.warn("⏳ PlayerPool nicht bereit → skip team build");
+return [];
 
   // 🔥 Zielverteilung
   const target = {
@@ -185,6 +184,35 @@ if(!league.schedule || !league.schedule.length){
 
   league.playerRound = 0;
 
+// =========================
+// 🧠 ENSURE PLAYER POOL SIZE
+// =========================
+
+const pool =
+  window.playerPool ||
+  game.players ||
+  [];
+
+const neededPlayers = league.teams.length * 22;
+
+console.log("🧪 POOL CHECK:", {
+  current: pool.length,
+  needed: neededPlayers
+});
+
+// 🔥 Spieler nachgenerieren
+while(pool.length < neededPlayers){
+
+  const newPlayer = generateRandomPlayer(); // ⚠️ wichtig
+
+  // safety
+  if(!newPlayer) break;
+
+  pool.push(newPlayer);
+}
+
+console.log("✅ Pool nachgefüllt:", pool.length);
+  
 // =========================
 // 👥 TEAM PLAYERS INIT (FINAL FIX)
 // =========================
