@@ -644,7 +644,6 @@ if(!starters.length){
   // 🔥 LINEUP INTEGRATION
   // =========================
 
-  const lineup = game.team?.lineup;
 
   let starters = [];
 
@@ -903,7 +902,7 @@ function calculateTeamStats(){
   // =========================
   // 🔥 LINEUP → STARTERS
   // =========================
-  const lineup = game.team?.lineup;
+
   let players = [];
 
   if(lineup?.slots){
