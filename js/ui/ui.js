@@ -16,7 +16,7 @@ import { getPlayersOfTeam } from "../modules/league.js";
 let initialized = false;
 let lastRenderedEventId = null;
 let liveTableInterval = null;
-
+let selectedPlayerId = null;
 
 // =========================
 // 📂 SIDEBAR APPLY
@@ -820,14 +820,82 @@ document.querySelectorAll(".player-row").forEach(el => {
     const id = el.dataset.id;
     if(!id) return;
 
-    const player =
-      (game.team.players || []).find(p => String(p.id) === String(id));
+    // =========================
+    // 🧠 FIRST CLICK
+    // =========================
+   if(!selectedPlayerId){
 
-    if(player){
-      openPlayerModal(player);
+  // 🔥 erst alles zurücksetzen
+  document.querySelectorAll(".player-row")
+    .forEach(el => el.classList.remove("selected"));
+
+  // 🔥 dann neuen setzen
+  selectedPlayerId = id;
+  el.classList.add("selected");
+
+  return;
+}
+
+    // =========================
+    // 🔁 SECOND CLICK → SWAP
+    // =========================
+    
+    if(selectedPlayerId && selectedPlayerId !== id){
+
+      const lineup = game.team?.lineup;
+
+      if(lineup?.slots){
+
+        const slots = lineup.slots;
+
+        let slotA = null;
+        let slotB = null;
+
+        // finde Slots
+        Object.entries(slots).forEach(([key, value]) => {
+          if(String(value) === String(selectedPlayerId)) slotA = key;
+          if(String(value) === String(id)) slotB = key;
+        });
+
+        // 🔥 SWAP nur wenn beide in lineup sind
+        if(slotA && slotB){
+          const temp = slots[slotA];
+          slots[slotA] = slots[slotB];
+          slots[slotB] = temp;
+        }
+
+        // 🔥 optional: Bank → Starter
+        if(slotA && !slotB){
+          slots[slotA] = id;
+        }
+
+        if(!slotA && slotB){
+          slots[slotB] = selectedPlayerId;
+        }
+      }
+
+      // reset
+      selectedPlayerId = null;
+
+      // 🔄 UI refresh
+      updateUI();
+    }
+
+    // =========================
+    // 🔁 SAME CLICK → RESET
+    // =========================
+    if(selectedPlayerId === id){
+      selectedPlayerId = null;
+      el.classList.remove("selected");
     }
   };
 });
+
+ //   if(player){
+   //   openPlayerModal(player);
+    //}
+
+
 
 // =========================
 // 🔵 PLAYER DOT
