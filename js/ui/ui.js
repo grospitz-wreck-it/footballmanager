@@ -591,7 +591,10 @@ function renderTeam(){
   if(!container) return;
   const teamId = game.team?.selectedId;
   const players = getPlayersOfTeam(teamId);
-
+  console.log("🧪 teamId:", teamId);
+  console.log("🧪 players:", players);
+  console.log("🧪 playerPool:", window.playerPool?.length);
+  console.log("🧪 game.players:", game.players?.length);
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
