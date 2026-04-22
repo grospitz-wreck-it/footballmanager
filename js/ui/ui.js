@@ -9,6 +9,7 @@ import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js"
 import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
 import { renderSchedule as renderScheduleModule } from "../modules/scheduler.js";
+import { getPlayersOfTeam } from "../modules/league.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -589,23 +590,7 @@ function renderTeam(){
   const container = document.getElementById("teamView");
   if(!container) return;
 
-  const teamId = game.team?.selectedId;
-
-  const pool =
-  (window.playerPool && window.playerPool.length)
-    ? window.playerPool
-    : (game.players || []);
-
-const players = pool.filter(p => {
-
-  const pid =
-    p.team_id ??
-    p.Team ??
-    p.teamId ??
-    null;
-
-  return String(pid) === String(teamId);
-});
+  const players = getPlayersOfTeam(teamId);
 
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
