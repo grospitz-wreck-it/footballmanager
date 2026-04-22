@@ -300,8 +300,15 @@ function updateTable(homeId, awayId, homeGoals, awayGoals){
 
   if(!home || !away) return;
 
+  if(!home._counted){
   home.played++;
+  home._counted = true;
+}
+
+if(!away._counted){
   away.played++;
+  away._counted = true;
+}
 
   home.goalsFor += homeGoals;
   home.goalsAgainst += awayGoals;
@@ -384,18 +391,15 @@ function simulateLiveMatchMinute(round, currentMinute){
       const isHome = Math.random() < 0.5;
 
       if(isHome){
-        match.result.home++;
-      } else {
-        match.result.away++;
-      }
+  match.result.home++;
 
-      // 👉 Tabelle live updaten
-      updateTable(
-        match.homeTeamId,
-        match.awayTeamId,
-        match.result.home,
-        match.result.away
-      );
+  updateTable(match.homeTeamId, match.awayTeamId, 1, 0);
+
+} else {
+  match.result.away++;
+
+  updateTable(match.homeTeamId, match.awayTeamId, 0, 1);
+}
 
       console.log("⚡ Live Tor:", match.homeTeamId, match.result.home, "-", match.result.away, match.awayTeamId);
     }
