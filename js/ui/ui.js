@@ -752,7 +752,7 @@ const bench = players;
     if(player) openPlayerModal(player);
   };
 });
-}
+
 // =========================
 // 🔵 PLAYER DOT
 // =========================
