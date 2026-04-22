@@ -352,6 +352,62 @@ function simulateMatchday(){
   console.log("⚡ Spieltag simuliert (AI Matches)");
 }
 
+
+// =========================
+// ⚡ LIVE SIMULATION ANDERE MATCHES
+// =========================
+function simulateLiveMatchMinute(round, currentMinute){
+
+  if(!round) return;
+
+  const myTeamId = String(game.team?.selectedId || "");
+
+  round.forEach(match => {
+
+    const isMyMatch =
+      myTeamId &&
+      (
+        String(match.homeTeamId) === myTeamId ||
+        String(match.awayTeamId) === myTeamId
+      );
+
+    if(isMyMatch) return;
+    if(match._processed) return;
+
+    // 👉 einfache Torchance pro Minute
+    if(Math.random() < 0.03){
+
+      if(!match.result){
+        match.result = { home: 0, away: 0 };
+      }
+
+      const isHome = Math.random() < 0.5;
+
+      if(isHome){
+        match.result.home++;
+      } else {
+        match.result.away++;
+      }
+
+      // 👉 Tabelle live updaten
+      updateTable(
+        match.homeTeamId,
+        match.awayTeamId,
+        match.result.home,
+        match.result.away
+      );
+
+      console.log("⚡ Live Tor:", match.homeTeamId, match.result.home, "-", match.result.away, match.awayTeamId);
+    }
+
+    // 👉 am Ende abschließen
+    if(currentMinute >= 90){
+      match._processed = true;
+    }
+  });
+}
+
+
 // =========================
 // ▶️ NEXT MATCH
 // =========================
@@ -507,5 +563,6 @@ export {
   advanceSchedule,
   renderSchedule,
   simulateMatchday,
-  updateTable
+  updateTable,
+  simulateLiveMatchMinut
 };
