@@ -153,10 +153,20 @@ function updateBalance(home, away){
     const teamA = rotation[i];
     const teamB = rotation[rotation.length - 1 - i];
 
-    const swap = r % 2 === 1;
+    let home = teamA;
+let away = teamB;
 
-    const home = swap ? teamB : teamA;
-    const away = swap ? teamA : teamB;
+// 🔥 Balance prüfen
+const balanceA = getBalance(teamA.id);
+const balanceB = getBalance(teamB.id);
+
+// 👉 Team mit mehr Heimspielen wird Auswärts
+if(balanceA > balanceB){
+  home = teamB;
+  away = teamA;
+}
+
+updateBalance(home.id, away.id);
 
     if(home.id === "BYE" || away.id === "BYE") continue;
 
