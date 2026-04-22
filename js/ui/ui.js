@@ -951,10 +951,10 @@ function calculateTeamStats(){
   // =========================
   // 🔥 DATENQUELLE
   // =========================
-  const pool =
-    (window.playerPool && window.playerPool.length)
-      ? window.playerPool
-      : (game.players || []);
+  const team = game.league?.current?.teams
+  ?.find(t => String(t.id) === String(teamId));
+
+const allPlayers = team?.players || [];
 
  const allPlayers = pool.filter(p => {
 
