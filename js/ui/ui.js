@@ -619,9 +619,9 @@ if(!starters.length){
   bench = players.slice(11);
 }
   console.log("🧪 teamId:", teamId);
-  console.log("🧪 sample player:", window.playerPool?.[0]);
-  console.log("🧪 playerPool:", window.playerPool?.length);
-  console.log("🧪 game.players:", game.players?.length);
+ console.log("🧪 team players:", players.length);
+console.log("🧪 starters:", starters.length);
+console.log("🧪 bench:", benchPlayers.length);
   if(!players.length){
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
@@ -958,7 +958,12 @@ const allPlayers = team?.players || [];
 
 if(!allPlayers.length){
   console.warn("❌ Keine Spieler gefunden für Team:", teamId);
-  return null;
+
+  return {
+    attack: 0,
+    defense: 0,
+    control: 0
+  };
 }
 
   // =========================
