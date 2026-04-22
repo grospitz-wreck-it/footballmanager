@@ -1368,3 +1368,23 @@ tr:hover {
 
   transition: width 0.3s ease;
 }
+.player-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 50px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #222;
+  cursor: pointer;
+}
+
+.player-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.pos {
+  opacity: 0.6;
+}
+
+.rating {
+  text-align: right;
+  font-weight: bold;
+}
