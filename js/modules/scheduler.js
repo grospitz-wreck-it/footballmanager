@@ -404,10 +404,19 @@ function simulateLiveMatchMinute(round, currentMinute){
       console.log("⚡ Live Tor:", match.homeTeamId, match.result.home, "-", match.result.away, match.awayTeamId);
     }
 
-    // 👉 am Ende abschließen
-    if(currentMinute >= 90){
-      match._processed = true;
-    }
+if(currentMinute >= 90){
+
+  match._processed = true;
+
+  const table = game.league?.current?.table;
+  if(!table) return;
+
+  const home = table.find(t => String(t.id) === String(match.homeTeamId));
+  const away = table.find(t => String(t.id) === String(match.awayTeamId));
+
+  if(home) delete home._counted;
+  if(away) delete away._counted;
+}
   });
 }
 
