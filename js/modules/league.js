@@ -29,8 +29,8 @@ function ensureTeamPlayers(team){
 
   console.log(`⚽ Baue Kader für ${team.name}`);
 
-  const pool = game.players || [];
-
+const pool = window.playerPool || game.players || [];
+  
 console.warn("⏳ PlayerPool nicht bereit → skip team build");
 return [];
 
