@@ -379,7 +379,11 @@ function renderSchedule(){
 
     round.forEach((match, mIndex) => {
 
-      const isActive =
+      const isUserMatch =
+  game.match?.current &&
+  match.id === game.match.current.id;
+
+const isCurrent =
   rIndex === game.league.currentRound &&
   mIndex === game.league.currentMatchIndex;
 
@@ -388,7 +392,13 @@ function renderSchedule(){
           padding:6px;
           margin:2px 0;
           border-radius:4px;
-          ${isActive ? "background:#1a1a1a;color:#00ff88;font-weight:bold;" : ""}
+          ${
+  isUserMatch
+    ? "background:#1a1a1a;color:#00ff88;font-weight:bold;"
+    : isCurrent
+      ? "background:#111;color:#aaa;"
+      : ""
+}
         ">
 ${getTeamName(match.homeTeamId)} ${match.result ? match.result.home + ":" + match.result.away : "vs"} ${getTeamName(match.awayTeamId)}
 ${match._processed ? " ✅" : ""}
