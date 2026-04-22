@@ -956,16 +956,6 @@ function calculateTeamStats(){
 
 const allPlayers = team?.players || [];
 
- const allPlayers = pool.filter(p => {
-
-  const pid =
-    p.team_id ??
-    p.Team ??
-    p.teamId ??
-    null;
-
-  return String(pid) === String(teamId);
-});
 
   if(!allPlayers.length){
     console.warn("❌ Keine Spieler gefunden für Team:", teamId);
