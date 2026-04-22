@@ -30,9 +30,11 @@ function ensureTeamPlayers(team){
   console.log(`⚽ Baue Kader für ${team.name}`);
 
 const pool = window.playerPool || game.players || [];
-  
-console.warn("⏳ PlayerPool nicht bereit → skip team build");
-return [];
+
+if(!pool.length){
+  console.warn("⏳ PlayerPool nicht bereit → skip team build");
+  return [];
+}
 
   // 🔥 Zielverteilung
   const target = {
@@ -196,26 +198,11 @@ console.log("🧪 POOL CHECK:", {
   needed: neededPlayers
 });
 
-// 🔥 Spieler nachgenerieren
-while(pool.length < neededPlayers){
-
-  const newPlayer = generateRandomPlayer(); // ⚠️ wichtig
-
-  // safety
-  if(!newPlayer) break;
-
-  pool.push(newPlayer);
-}
-
-console.log("✅ Pool nachgefüllt:", pool.length);
   
 // =========================
 // 👥 TEAM PLAYERS INIT (FINAL FIX)
 // =========================
-const pool =
-  window.playerPool ||
-  game.players ||
-  [];
+
 
 if(!pool.length){
   console.warn("⏳ PlayerPool leer → abbrechen");
@@ -740,13 +727,8 @@ if(!players.length){
   console.warn("⚠️ Fallback greift – keine team_id gesetzt");
 }
 
-return players;
-
-// 🔥 FALLBACK: wenn keine Zuweisung existiert
 if(!players.length){
   console.warn("⚠️ Fallback greift – keine team_id gesetzt");
-
-  // nimm einfach erste 18 Spieler (temporär)
   return pool.slice(0, 18);
 }
 
