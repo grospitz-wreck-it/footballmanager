@@ -422,5 +422,7 @@ export {
   generateSchedule,
   nextMatch,
   advanceSchedule,
-  renderSchedule
+  renderSchedule,
+  simulateMatchday,
+  updateTable
 };
