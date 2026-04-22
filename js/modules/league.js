@@ -653,6 +653,27 @@ function getSelectedTeam(){
   );
 }
 
+export function getPlayersOfTeam(teamId){
+
+  if(!teamId) return [];
+
+  const pool =
+    (window.playerPool && window.playerPool.length)
+      ? window.playerPool
+      : (game.players || []);
+
+  return pool.filter(p => {
+
+    const pid =
+      p.team_id ??
+      p.Team ??
+      p.teamId ??
+      null;
+
+    return String(pid) === String(teamId);
+  });
+}
+
 // =========================
 // 📦 EXPORTS
 // =========================
