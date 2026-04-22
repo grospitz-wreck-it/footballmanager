@@ -696,10 +696,33 @@ const bench = players;
 const stats = calculateTeamStats();
 html = `
   <div class="team-stats">
-    <div class="stat">⚔️ ${stats?.attack ?? "-"}</div>
-    <div class="stat">🛡 ${stats?.defense ?? "-"}</div>
-    <div class="stat">🎯 ${stats?.control ?? "-"}</div>
+
+    <div class="stat attack">
+      <div class="label">ATT</div>
+      <div class="value">${stats?.attack ?? "-"}</div>
+      <div class="bar">
+        <div style="width:${stats?.attack || 0}%"></div>
+      </div>
+    </div>
+
+    <div class="stat defense">
+      <div class="label">DEF</div>
+      <div class="value">${stats?.defense ?? "-"}</div>
+      <div class="bar">
+        <div style="width:${stats?.defense || 0}%"></div>
+      </div>
+    </div>
+
+    <div class="stat control">
+      <div class="label">CTRL</div>
+      <div class="value">${stats?.control ?? "-"}</div>
+      <div class="bar">
+        <div style="width:${stats?.control || 0}%"></div>
+      </div>
+    </div>
+
   </div>
+
   <h3>Startelf</h3>
 `;
 html += `<div class="bench-container">`;
