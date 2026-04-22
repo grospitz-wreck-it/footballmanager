@@ -222,7 +222,7 @@ const pool =
   [];
 
 if(!pool.length){
-  console.warn("⏳ PlayerPool noch nicht geladen → skip initLeague");
+  console.warn("⏳ PlayerPool leer → abbrechen");
   return;
 }
 
