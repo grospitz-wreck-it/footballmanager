@@ -697,28 +697,25 @@ const stats = calculateTeamStats();
 html = `
   <div class="team-stats">
 
-    <div class="stat attack">
+    <div class="stat">
+      <div class="donut attack" style="--val:${stats?.attack || 0}">
+        <span>${stats?.attack ?? "-"}</span>
+      </div>
       <div class="label">ATT</div>
-      <div class="value">${stats?.attack ?? "-"}</div>
-      <div class="bar">
-        <div style="width:${stats?.attack || 0}%"></div>
-      </div>
     </div>
 
-    <div class="stat defense">
+    <div class="stat">
+      <div class="donut defense" style="--val:${stats?.defense || 0}">
+        <span>${stats?.defense ?? "-"}</span>
+      </div>
       <div class="label">DEF</div>
-      <div class="value">${stats?.defense ?? "-"}</div>
-      <div class="bar">
-        <div style="width:${stats?.defense || 0}%"></div>
-      </div>
     </div>
 
-    <div class="stat control">
-      <div class="label">CTRL</div>
-      <div class="value">${stats?.control ?? "-"}</div>
-      <div class="bar">
-        <div style="width:${stats?.control || 0}%"></div>
+    <div class="stat">
+      <div class="donut control" style="--val:${stats?.control || 0}">
+        <span>${stats?.control ?? "-"}</span>
       </div>
+      <div class="label">CTRL</div>
     </div>
 
   </div>
