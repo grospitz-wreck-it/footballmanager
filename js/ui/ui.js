@@ -742,12 +742,16 @@ starters.forEach(p => {
   // =========================
 
   html += `
-    <div class="player-row" data-id="${p.id}">
-      <span class="pos">${pos}</span>
-      <span class="name ${tier}">${name}</span>
+     <div class="player-row" data-id="${p.id}">
+    <span class="pos">${pos}</span>
+
+    <span class="name ${tier}">
+      ${name}
       <span class="stars">${"★".repeat(stars)}</span>
-      <span class="rating ${ratingClass}">${rating}</span>
-    </div>
+    </span>
+
+    <span class="rating ${ratingClass}">${rating}</span>
+  </div>
   `;
 });
 
