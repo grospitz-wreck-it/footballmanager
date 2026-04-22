@@ -258,6 +258,7 @@
 
   font-size: 13px;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .player-row:hover {
@@ -268,12 +269,14 @@
   outline: 2px solid #22c55e;
 }
 
+/* POS */
 .player-row .pos {
   font-size: 10px;
   opacity: 0.6;
   text-align: center;
 }
 
+/* NAME */
 .player-row .name {
   display: flex;
   align-items: center;
@@ -284,16 +287,19 @@
   text-overflow: ellipsis;
 }
 
+/* STARS */
 .player-row .stars {
   font-size: 10px;
   opacity: 0.7;
 }
 
+/* RATING */
 .player-row .rating {
   font-size: 16px;
   font-weight: 800;
 }
 
+/* COLORS */
 .rating.high { color: #4caf50; }
 .rating.mid  { color: #ffc107; }
 .rating.low  { color: #f44336; }
