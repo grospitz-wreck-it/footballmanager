@@ -676,7 +676,7 @@ const bench = players;
 // 🧱 TEAM RENDER (FINAL)
 // =========================
 
-let html = `<h3>Kader</h3>`;
+html = `<h3>Kader</h3>`;
 html += `<div class="bench-container">`;
 
 players.forEach(p => {
