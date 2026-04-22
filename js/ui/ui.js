@@ -951,12 +951,19 @@ function calculateTeamStats(){
 // 🔥 ensure lineup exists
 if(!game.team.lineup || !game.team.lineup.slots){
 
-  const startersDefault = players.slice(0, 11);
+  const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
-  game.team.lineup = {
-    formation: "4-4-2",
-    slots: {}
-  };
+  players.forEach(p => {
+    const type = (p.position_type || "MID").toUpperCase();
+    (byType[type] || byType.MID).push(p);
+  });
+
+  const startersDefault = [
+    ...byType.GK.slice(0,1),
+    ...byType.DEF.slice(0,4),
+    ...byType.MID.slice(0,4),
+    ...byType.ST.slice(0,2)
+  ];
 
   const slotKeys = [
     "GK",
@@ -965,14 +972,19 @@ if(!game.team.lineup || !game.team.lineup.slots){
     "ST_1","ST_2"
   ];
 
+  game.team.lineup = {
+    formation: "4-4-2",
+    slots: {}
+  };
+
   startersDefault.forEach((p, i) => {
     const key = slotKeys[i];
-    if(key){
+    if(key && p){
       game.team.lineup.slots[key] = String(p.id);
     }
   });
 
-  console.log("🧠 Lineup auto-created");
+  console.log("🧠 Lineup FIXED:", game.team.lineup);
 }
 
   
