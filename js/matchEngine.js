@@ -15,7 +15,7 @@ import {
 import { saveGame } from "../js/services/storage.js";
 import { getPositionWeights } from "./engine/positionEngine.js";
 import { getPlayerRating } from "./engine/playerEngine.js";
-import { simulateMatchday, updateTable } from "./scheduler.js";
+import { simulateMatchday, updateTable } from "./modules/scheduler.js";
 
 // =========================
 // 🎯 TACTICS SYSTEM (NEW)
