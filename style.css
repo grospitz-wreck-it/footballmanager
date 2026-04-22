@@ -1388,3 +1388,14 @@ tr:hover {
   text-align: right;
   font-weight: bold;
 }
+.rating.high {
+  color: #4caf50;
+}
+
+.rating.mid {
+  color: #ffc107;
+}
+
+.rating.low {
+  color: #f44336;
+}
