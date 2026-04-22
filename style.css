@@ -1400,3 +1400,18 @@ tr:hover {
 .bench .player-row {
   opacity: 0.6;
 }
+.team-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 4px;
+  font-size: 12px;
+  opacity: 0.9;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 6px;
+}
+
+.team-stats .stat {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+}
