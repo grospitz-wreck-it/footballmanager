@@ -676,32 +676,9 @@ const bench = players;
   // 🪑 BENCH (UNVERÄNDERT)
   // =========================
 
-  html += `<h3>Kader</h3>`;
-
-  const benchByType = { GK: [], DEF: [], MID: [], ST: [] };
-
-  bench.forEach(p => {
-    const type = p.position_type || "MID";
-    (benchByType[type] || benchByType.MID).push(p);
-  });
-
-  Object.values(benchByType).forEach(arr => {
-    if(!Array.isArray(arr)) return;
-    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-  });
-
+ html += `<h3>Kader</h3>`;
   html += `<div class="bench-container">`;
-
-  Object.entries(benchByType).forEach(([role, players]) => {
-
-    if(!players || players.length === 0) return;
-
-    html += `
-      <div class="bench-group">
-        <div class="bench-title">${role}</div>
-        <div class="bench-row">
-    `;
-
+   
    players.forEach(p => {
 
   const rawName = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
@@ -734,7 +711,6 @@ const bench = players;
   });
 
   html += `</div>`;
-
   container.innerHTML = html;
 
   // =========================
