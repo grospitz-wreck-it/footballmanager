@@ -631,6 +631,7 @@ function renderTeam() {
 
   let starters = [];
   let benchPlayers = [...players];
+  let activePlayers = [];
 
   // 🔥 Lineup vorhanden → echte Startelf
   if (lineup?.slots) {
@@ -1068,7 +1069,7 @@ function renderTeam() {
   // 🔥 LINEUP → STARTERS
   // =========================
 
-  let activePlayers = [];
+
 
   if (lineup?.slots) {
     const ids = Object.values(lineup.slots).filter(Boolean);
