@@ -1,6 +1,6 @@
-// =========================
+// ========================
 // 🖥 UI ENGINE (FULL + LIVE TABLE SAFE)
-// =========================
+// ========================
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
 import { track } from "../../tools/analytics.js";
