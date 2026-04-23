@@ -621,6 +621,111 @@ function renderPlayerRow(p) {
   `;
 }
 
+function calculateTeamStats() {
+
+  const lineup = game.team?.lineup;
+  const teamId = game.team?.selectedId || game.team?.id;
+
+  if (!teamId) {
+    console.warn("❌ Kein teamId");
+    return null;
+  }
+
+  // =========================
+  // 🔥 TEAM + SPIELER LADEN
+  // =========================
+  const team = game.league?.current?.teams
+    ?.find(t => String(t.id) === String(teamId));
+
+  const allPlayers = team?.players || [];
+
+  if (!allPlayers.length) {
+    console.warn("❌ Keine Spieler gefunden für Team:", teamId);
+    return {
+      attack: 0,
+      defense: 0,
+      control: 0
+    };
+  }
+
+  // =========================
+  // 🔥 LINEUP → AKTIVE SPIELER
+  // =========================
+  let players = [];
+
+  if (lineup?.slots) {
+    const ids = Object.values(lineup.slots).filter(Boolean);
+
+    if (ids.length) {
+      players = allPlayers.filter(p =>
+        ids.includes(String(p.id))
+      );
+    }
+  }
+
+  // 🔄 FALLBACK
+  if (!players.length) {
+    players = allPlayers;
+  }
+
+  // =========================
+  // 🧠 STATS BERECHNUNG
+  // =========================
+  let attack = 0;
+  let defense = 0;
+  let control = 0;
+
+  players.forEach(p => {
+
+    const rating = p.overall ?? 50;
+    const type = (p.position_type || "MID").toUpperCase();
+
+    // ⚔️ Attack
+    if (type.includes("ST")) {
+      attack += rating * 1.2;
+    }
+
+    // 🧠 Midfield
+    else if (type.includes("MID")) {
+      attack += rating * 0.6;
+      control += rating * 1.0;
+    }
+
+    // 🛡 Defense
+    else if (type.includes("DEF")) {
+      defense += rating * 1.2;
+    }
+
+    // 🧤 Goalkeeper
+    else if (type.includes("GK")) {
+      defense += rating * 1.5;
+    }
+
+    // 🔄 Fallback
+    else {
+      control += rating * 0.5;
+    }
+
+  });
+
+  // =========================
+  // 📊 NORMALIZE
+  // =========================
+  const count = players.length || 1;
+
+  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+
+  const result = {
+    attack: clamp(attack / count),
+    defense: clamp(defense / count),
+    control: clamp(control / count)
+  };
+
+  console.log("📊 TeamStats:", result);
+
+  return result;
+}
+
 function renderTeam() {
   const container = document.getElementById("teamView");
   if (!container) return;
@@ -636,7 +741,6 @@ function renderTeam() {
 
   let starters = [];
   let benchPlayers = [...players];
-  let activePlayers = [];
 
   // 🔥 Lineup vorhanden → echte Startelf
   if (lineup?.slots) {
@@ -664,10 +768,11 @@ function renderTeam() {
 
   const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
-  activePlayers.forEach((p) => {
-    const type = p.position_type || "MID";
-    (byType[type] || byType.MID).push(p);
-  });
+  players.forEach(p => {
+  const type = (p.position_type || "MID").toUpperCase();
+  (byType[type] || byType.MID).push(p);
+});
+  
 
   // Sortieren (safe)
   Object.values(byType).forEach((arr) => {
@@ -700,29 +805,6 @@ function renderTeam() {
   }
 
   const formation = lineup?.formation || game.team?.formation || "4-4-2";
-  const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
-
-  // 🔥 Mapping Slot → Player (wichtig!)
-  const slotOrder = [
-    "GK",
-    "DEF_1",
-    "DEF_2",
-    "DEF_3",
-    "DEF_4",
-    "MID_1",
-    "MID_2",
-    "MID_3",
-    "MID_4",
-    "ST_1",
-    "ST_2",
-  ];
-
-  const positionPool = {
-    GK: [...byType.GK],
-    DEF: [...byType.DEF],
-    MID: [...byType.MID],
-    ST: [...byType.ST],
-  };
 
   let html = "";
 
@@ -981,127 +1063,8 @@ function renderTeam() {
   `;
   }
 
-  function calculateTeamStats() {
+  
 
-  const lineup = game.team?.lineup;
-  const teamId = game.team?.selectedId || game.team?.id;
-
-  if (!teamId) {
-    console.warn("❌ Kein teamId");
-    return null;
-  }
-
-  // =========================
-  // 🔥 TEAM + SPIELER LADEN
-  // =========================
-  const team = game.league?.current?.teams
-    ?.find(t => String(t.id) === String(teamId));
-
-  const allPlayers = team?.players || [];
-
-  if (!allPlayers.length) {
-    console.warn("❌ Keine Spieler gefunden für Team:", teamId);
-    return {
-      attack: 0,
-      defense: 0,
-      control: 0
-    };
-  }
-
-  // =========================
-  // 🔥 LINEUP → AKTIVE SPIELER
-  // =========================
-  let players = [];
-
-  if (lineup?.slots) {
-    const ids = Object.values(lineup.slots).filter(Boolean);
-
-    if (ids.length) {
-      players = allPlayers.filter(p =>
-        ids.includes(String(p.id))
-      );
-    }
-  }
-
-  // 🔄 FALLBACK
-  if (!players.length) {
-    players = allPlayers;
-  }
-
-  // =========================
-  // 🧠 STATS BERECHNUNG
-  // =========================
-  let attack = 0;
-  let defense = 0;
-  let control = 0;
-
-  players.forEach(p => {
-
-    const rating = p.overall ?? 50;
-    const type = (p.position_type || "MID").toUpperCase();
-
-    // ⚔️ Attack
-    if (type.includes("ST")) {
-      attack += rating * 1.2;
-    }
-
-    // 🧠 Midfield
-    else if (type.includes("MID")) {
-      attack += rating * 0.6;
-      control += rating * 1.0;
-    }
-
-    // 🛡 Defense
-    else if (type.includes("DEF")) {
-      defense += rating * 1.2;
-    }
-
-    // 🧤 Goalkeeper
-    else if (type.includes("GK")) {
-      defense += rating * 1.5;
-    }
-
-    // 🔄 Fallback
-    else {
-      control += rating * 0.5;
-    }
-
-  });
-
-  // =========================
-  // 📊 NORMALIZE
-  // =========================
-  const count = players.length || 1;
-
-  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
-
-  const result = {
-    attack: clamp(attack / count),
-    defense: clamp(defense / count),
-    control: clamp(control / count)
-  };
-
-  console.log("📊 TeamStats:", result);
-
-  return result;
-}
-
-  // =========================
-  // 🔒 SAFETY CLAMP
-  // =========================
-  const clamp = (v) => Math.max(0, Math.min(150, v));
-
-  result.attack = clamp(result.attack);
-  result.defense = clamp(result.defense);
-  result.control = clamp(result.control);
-
-  // =========================
-  // 🧪 DEBUG (optional)
-  // =========================
-  console.log("📊 TeamStats:", result);
-
-  return result;
-}
 
 function renderTacticStats() {
   const el = document.getElementById("tacticsStats");
