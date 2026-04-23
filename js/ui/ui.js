@@ -862,46 +862,110 @@ document.querySelectorAll(".player-row").forEach(el => {
       return;
     }
 
-    // =========================
-    // 🔁 SECOND CLICK → SWAP
-    // =========================
-    const lineup = game.team?.lineup;
+ // =========================
+// ⚽ LINEUP SWAP SYSTEM (FINAL)
+// =========================
 
-    if(lineup?.slots){
+const lineup = game.team?.lineup;
 
-      const slots = lineup.slots;
+if(lineup?.slots){
 
-      let slotA = null;
-      let slotB = null;
+  const slots = lineup.slots;
 
-      Object.entries(slots).forEach(([key, value]) => {
-        if(String(value) === String(selectedPlayerId)) slotA = key;
-        if(String(value) === String(id)) slotB = key;
-      });
+  let slotA = null;
+  let slotB = null;
 
-      // 🔄 Starter ↔ Starter
-      if(slotA && slotB){
-        const temp = slots[slotA];
-        slots[slotA] = slots[slotB];
-        slots[slotB] = temp;
-      }
+  // =========================
+  // 🔍 SLOT FINDEN
+  // =========================
+  Object.entries(slots).forEach(([key, value]) => {
+    if(String(value) === String(selectedPlayerId)) slotA = key;
+    if(String(value) === String(id)) slotB = key;
+  });
 
-      // 🔄 Starter → Bank
-      if(slotA && !slotB){
-        slots[slotA] = id;
-      }
-
-      // 🔄 Bank → Starter
-      if(!slotA && slotB){
-        slots[slotB] = selectedPlayerId;
-      }
-    }
-
-    // 🔄 Reset + UI refresh
-    selectedPlayerId = null;
-    updateUI();
+  // =========================
+  // 🧠 HELPERS
+  // =========================
+  const getType = (pid) => {
+    const p = players.find(pl => String(pl.id) === String(pid));
+    return (p?.position_type || "MID").toUpperCase();
   };
-});
+
+  const getSlotType = (slot) => {
+    return slot.split("_")[0]; // GK / DEF / MID / ST
+  };
+
+  const typeA = getType(selectedPlayerId);
+  const typeB = getType(id);
+
+  // =========================
+  // 🔄 STARTER ↔ STARTER
+  // =========================
+  if(slotA && slotB){
+
+    // 👉 nur tauschen wenn gleiche Rolle
+    if(getSlotType(slotA) === typeB && getSlotType(slotB) === typeA){
+
+      const temp = slots[slotA];
+      slots[slotA] = slots[slotB];
+      slots[slotB] = temp;
+
+    } else {
+      console.warn("⛔ Swap nicht erlaubt (Position mismatch)");
+      return;
+    }
+  }
+
+  // =========================
+  // 🔄 STARTER → BANK
+  // =========================
+  else if(slotA && !slotB){
+
+    const slotType = getSlotType(slotA);
+
+    if(typeB === slotType){
+      slots[slotA] = id;
+    } else {
+      console.warn("⛔ falsche Position für Slot:", typeB, "→", slotType);
+
+      // 🔥 UX Feedback
+      document.querySelector(`[data-id="${id}"]`)?.classList.add("error");
+      setTimeout(() => {
+        document.querySelector(`[data-id="${id}"]`)?.classList.remove("error");
+      }, 300);
+
+      return;
+    }
+  }
+
+  // =========================
+  // 🔄 BANK → STARTER
+  // =========================
+  else if(!slotA && slotB){
+
+    const slotType = getSlotType(slotB);
+
+    if(typeA === slotType){
+      slots[slotB] = selectedPlayerId;
+    } else {
+      console.warn("⛔ falsche Position für Slot:", typeA, "→", slotType);
+
+      // 🔥 UX Feedback
+      document.querySelector(`[data-id="${selectedPlayerId}"]`)?.classList.add("error");
+      setTimeout(() => {
+        document.querySelector(`[data-id="${selectedPlayerId}"]`)?.classList.remove("error");
+      }, 300);
+
+      return;
+    }
+  }
+}
+
+// =========================
+// 🔄 RESET + UI
+// =========================
+selectedPlayerId = null;
+updateUI();
 
 
 // =========================
