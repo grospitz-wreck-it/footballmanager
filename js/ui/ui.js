@@ -609,6 +609,44 @@ function groupPlayers(players){
 }
 
 
+function renderPlayerRow(p){
+
+  const rawName = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
+  const name = rawName.toUpperCase();
+
+  const POS_MAP = {
+    GK: "TW",
+    DEF: "IV",
+    MID: "ZM",
+    ST: "ST"
+  };
+
+  const rawPos = (p.position_type || "MID").toUpperCase();
+  const pos = POS_MAP[rawPos] || rawPos;
+
+  const rating = p.overall ?? 0;
+
+  let ratingClass = "low";
+  if(rating >= 85) ratingClass = "high";
+  else if(rating >= 70) ratingClass = "mid";
+
+  let stars = Math.max(1, Math.min(5, p.stars || 1));
+  const tier = (p.tier || "bronze").toLowerCase();
+
+  return `
+    <div class="player-row" data-id="${p.id}">
+      <span class="pos">${pos}</span>
+
+      <span class="name ${tier}">
+        ${name}
+        <span class="stars">${"★".repeat(stars)}</span>
+      </span>
+
+      <span class="rating ${ratingClass}">${rating}</span>
+    </div>
+  `;
+}
+
 function renderTeam(){
 
   const container = document.getElementById("teamView");
