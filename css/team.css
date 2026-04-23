@@ -319,10 +319,19 @@
   align-items: center;
   gap: 4px;
 }
-.player-row .rating {
-  text-align: right;
-  font-weight: 800;
-  font-size: 13px;
+.rating.high {
+  color: #4ade80;
+  text-shadow: 0 0 6px rgba(74,222,128,0.6);
+}
+
+.rating.mid {
+  color: #facc15;
+  text-shadow: 0 0 6px rgba(250,204,21,0.5);
+}
+
+.rating.low {
+  color: #f87171;
+  text-shadow: 0 0 6px rgba(248,113,113,0.5);
 }
 .player-row .pos {
   font-size: 10px;
