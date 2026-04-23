@@ -585,6 +585,30 @@ function pickPlayer(role, byType){
 // =========================
 // ⚽ TEAM
 // =========================
+
+function groupPlayers(players){
+
+  const groups = {
+    ST: [],
+    MID: [],
+    DEF: [],
+    GK: []
+  };
+
+  players.forEach(p => {
+    const type = (p.position_type || "MID").toUpperCase();
+
+    if(type.includes("ST")) groups.ST.push(p);
+    else if(type.includes("MID")) groups.MID.push(p);
+    else if(type.includes("DEF")) groups.DEF.push(p);
+    else if(type.includes("GK")) groups.GK.push(p);
+    else groups.MID.push(p);
+  });
+
+  return groups;
+}
+
+
 function renderTeam(){
 
   const container = document.getElementById("teamView");
