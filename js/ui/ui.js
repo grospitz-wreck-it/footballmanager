@@ -982,114 +982,51 @@ function renderTeam() {
   }
 
   function calculateTeamStats() {
-    const lineup = game.team?.lineup;
-    // =========================
-    // 🔥 TEAM ID
-    // =========================
-    const teamId = game.team?.selectedId || game.team?.id;
 
-    if (!teamId) {
-      console.warn("❌ Kein teamId");
-      return null;
-    }
+  const lineup = game.team?.lineup;
+  const teamId = game.team?.selectedId || game.team?.id;
 
-    // 🔥 ensure lineup exists
-    const slotCount = Object.keys(game.team?.lineup?.slots || {}).length;
-
-    if (!game.team.lineup || slotCount < 11) {
-      const allPlayers =
-        game.league?.current?.teams?.find(
-          (t) => String(t.id) === String(teamId),
-        )?.players || [];
-
-      const byType = { GK: [], DEF: [], MID: [], ST: [] };
-
-      allPlayers.forEach((p) => {
-        const type = (p.position_type || "MID").toUpperCase();
-        (byType[type] || byType.MID).push(p);
-      });
-
-      let startersDefault = [
-        ...byType.GK.slice(0, 1),
-        ...byType.DEF.slice(0, 4),
-        ...byType.MID.slice(0, 4),
-        ...byType.ST.slice(0, 2),
-      ];
-
-      if (startersDefault.length < 11) {
-        const rest = allPlayers.filter((p) => !startersDefault.includes(p));
-        startersDefault.push(...rest.slice(0, 11 - startersDefault.length));
-      }
-
-      const slotKeys = [
-        "GK",
-        "DEF_1",
-        "DEF_2",
-        "DEF_3",
-        "DEF_4",
-        "MID_1",
-        "MID_2",
-        "MID_3",
-        "MID_4",
-        "ST_1",
-        "ST_2",
-      ];
-
-      game.team.lineup = {
-        formation: "4-4-2",
-        slots: {},
-      };
-
-      startersDefault.forEach((p, i) => {
-        const key = slotKeys[i];
-        if (key && p) {
-          game.team.lineup.slots[key] = String(p.id);
-        }
-      });
-    }
-
-    console.log("🧠 Lineup FIXED:", game.team.lineup);
+  if (!teamId) {
+    console.warn("❌ Kein teamId");
+    return null;
   }
 
   // =========================
-  // 🔥 DATENQUELLE
+  // 🔥 TEAM + SPIELER LADEN
   // =========================
-  const team = game.league?.current?.teams?.find(
-    (t) => String(t.id) === String(teamId),
-  );
+  const team = game.league?.current?.teams
+    ?.find(t => String(t.id) === String(teamId));
 
   const allPlayers = team?.players || [];
 
   if (!allPlayers.length) {
     console.warn("❌ Keine Spieler gefunden für Team:", teamId);
-
     return {
       attack: 0,
       defense: 0,
-      control: 0,
+      control: 0
     };
   }
 
   // =========================
-  // 🔥 LINEUP → STARTERS
+  // 🔥 LINEUP → AKTIVE SPIELER
   // =========================
-
-
+  let players = [];
 
   if (lineup?.slots) {
     const ids = Object.values(lineup.slots).filter(Boolean);
 
     if (ids.length) {
-      activePlayers = allPlayers.filter((p) => ids.includes(String(p.id)));
+      players = allPlayers.filter(p =>
+        ids.includes(String(p.id))
+      );
     }
   }
 
-  // =========================
-  // 🔄 FALLBACK (alle Spieler)
-  // =========================
-if(!activePlayers.length){
-  activePlayers = allPlayers;
-}
+  // 🔄 FALLBACK
+  if (!players.length) {
+    players = allPlayers;
+  }
 
   // =========================
   // 🧠 STATS BERECHNUNG
@@ -1098,7 +1035,8 @@ if(!activePlayers.length){
   let defense = 0;
   let control = 0;
 
-  activePlayers.forEach((p) => {
+  players.forEach(p => {
+
     const rating = p.overall ?? 50;
     const type = (p.position_type || "MID").toUpperCase();
 
@@ -1123,22 +1061,30 @@ if(!activePlayers.length){
       defense += rating * 1.5;
     }
 
-    // 🔄 Unknown fallback
+    // 🔄 Fallback
     else {
       control += rating * 0.5;
     }
+
   });
 
   // =========================
   // 📊 NORMALIZE
   // =========================
-  const count = activePlayers.length || 1;
+  const count = players.length || 1;
 
-  let result = {
-    attack: Math.round(attack / count),
-    defense: Math.round(defense / count),
-    control: Math.round(control / count),
+  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+
+  const result = {
+    attack: clamp(attack / count),
+    defense: clamp(defense / count),
+    control: clamp(control / count)
   };
+
+  console.log("📊 TeamStats:", result);
+
+  return result;
+}
 
   // =========================
   // 🔒 SAFETY CLAMP
