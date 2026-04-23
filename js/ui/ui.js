@@ -566,7 +566,7 @@ function groupPlayers(players) {
     GK: [],
   };
 
-  players.forEach((p) => {
+  activePlayers.forEach((p) => {
     const type = (p.position_type || "MID").toUpperCase();
 
     if (type.includes("ST")) groups.ST.push(p);
@@ -658,7 +658,7 @@ function renderTeam() {
 
   const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
-  players.forEach((p) => {
+  activePlayers.forEach((p) => {
     const type = p.position_type || "MID";
     (byType[type] || byType.MID).push(p);
   });
@@ -1068,22 +1068,22 @@ function renderTeam() {
   // 🔥 LINEUP → STARTERS
   // =========================
 
-  let players = [];
+  let activePlayers = [];
 
   if (lineup?.slots) {
     const ids = Object.values(lineup.slots).filter(Boolean);
 
     if (ids.length) {
-      players = allPlayers.filter((p) => ids.includes(String(p.id)));
+      activePlayers = allPlayers.filter((p) => ids.includes(String(p.id)));
     }
   }
 
   // =========================
   // 🔄 FALLBACK (alle Spieler)
   // =========================
-  if (!players.length) {
-    players = allPlayers;
-  }
+if(!activePlayers.length){
+  activePlayers = allPlayers;
+}
 
   // =========================
   // 🧠 STATS BERECHNUNG
@@ -1092,7 +1092,7 @@ function renderTeam() {
   let defense = 0;
   let control = 0;
 
-  players.forEach((p) => {
+  activePlayers.forEach((p) => {
     const rating = p.overall ?? 50;
     const type = (p.position_type || "MID").toUpperCase();
 
@@ -1126,7 +1126,7 @@ function renderTeam() {
   // =========================
   // 📊 NORMALIZE
   // =========================
-  const count = players.length || 1;
+  const count = activePlayers.length || 1;
 
   let result = {
     attack: Math.round(attack / count),
