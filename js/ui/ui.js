@@ -17,7 +17,7 @@ let initialized = false;
 let lastRenderedEventId = null;
 let liveTableInterval = null;
 let selectedPlayerId = null;
-
+let lastTacticHash = null;
 // =========================
 // 📂 SIDEBAR APPLY
 // =========================
@@ -101,7 +101,7 @@ if(game.match?.live?.running && game.ui.tacticsOpen){
 }
 
 // 🔥 FIX: NUR WENN OVERLAY OFFEN
-if(game.ui.tacticsOpen){
+if(game.ui.tacticsOpen && !game.match?.live?.running){
   renderTacticStats();
 }
 
@@ -1176,11 +1176,21 @@ if(!base){
   // =========================
   // 🎨 RENDER
   // =========================
-  el.innerHTML = `
-    ${renderTacticBar("Attack", attack)}
-    ${renderTacticBar("Defense", defense)}
-    ${renderTacticBar("Control", control)}
-  `;
+ const dataHash = `${attack}-${defense}-${control}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
+
+// 🔥 verhindert unnötiges Rendern
+if(dataHash === lastTacticHash){
+  return;
+}
+
+lastTacticHash = dataHash;
+
+// 🔥 nur wenn sich was geändert hat
+el.innerHTML = `
+  ${renderTacticBar("Attack", attack)}
+  ${renderTacticBar("Defense", defense)}
+  ${renderTacticBar("Control", control)}
+`;
 }
 
 function renderTacticBar(label, value){
