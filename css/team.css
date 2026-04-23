@@ -258,49 +258,78 @@
   cursor: pointer;
   transition: all 0.15s ease;
 }
+.player-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 42px; /* 🔥 sauber ausgerichtet */
 
-.player-row:hover {
-  background: rgba(255,255,255,0.08);
-}
-
-.player-row.selected {
-  outline: 2px solid #22c55e;
-}
-
-/* POS */
-.player-row .pos {
-  font-size: 10px;
-  opacity: 0.6;
-  text-align: center;
-}
-
-/* NAME */
-.player-row .name {
-  display: flex;
   align-items: center;
-  gap: 6px;
 
+  height: 30px;
+  padding: 2px 8px;
+  margin: 2px 0;
+
+  border-radius: 8px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+
+  border: 1px solid rgba(255,255,255,0.05);
+
+  font-size: 12px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease,
+    border 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.player-row:hover {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.12);
+
+  transform: translateX(3px);
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.player-row.selected {
+  background: linear-gradient(
+    90deg,
+    rgba(34,197,94,0.25),
+    rgba(34,197,94,0.05)
+  );
+
+  border: 1px solid rgba(34,197,94,0.5);
+
+  box-shadow:
+    0 0 8px rgba(34,197,94,0.4),
+    inset 0 0 6px rgba(34,197,94,0.2);
+}
+.player-row .name {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
 
-/* STARS */
-.player-row .stars {
-  font-size: 10px;
-  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-
-/* RATING */
 .player-row .rating {
-  font-size: 16px;
+  text-align: right;
   font-weight: 800;
+  font-size: 13px;
 }
-
-/* COLORS */
-.rating.high { color: #4caf50; }
-.rating.mid  { color: #ffc107; }
-.rating.low  { color: #f44336; }
+.player-row .pos {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.5;
+  text-align: center;
+}
 
 /* =========================
 🍩 DONUT WOW EDITION
@@ -451,4 +480,28 @@
   to {
     filter: brightness(1.3);
   }
+}
+/* =========================
+🧠 POSITION GROUPS (NEU)
+========================= */
+
+.position-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 6px 8px;
+  margin-bottom: 10px;
+
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
+
+.group-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  opacity: 0.5;
+  margin-bottom: 2px;
 }
