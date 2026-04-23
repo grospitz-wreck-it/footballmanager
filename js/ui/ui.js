@@ -744,110 +744,43 @@ html = `
 
   </div>
 `;
-html += `<div class="bench-container">`;
+// =========================
+// 🧠 GROUPED STARTERS
+// =========================
+const starterGroups = groupPlayers(starters);
 
-starters.forEach(p => {
-  
-  // =========================
-  // 🔧 PLAYER DATA
-  // =========================
+function renderGroup(title, list){
+  if(!list.length) return "";
 
-  const rawName = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
-  const name = rawName.toUpperCase();
-
-  const POS_MAP = {
-    GK: "TW",
-    DEF: "IV",
-    MID: "ZM",
-    ST: "ST"
-  };
-
-  const rawPos = (p.position_type || "MID").toUpperCase();
-  const pos = POS_MAP[rawPos] || rawPos;
-
-  const rating = typeof p.overall === "number" ? p.overall : 0;
-
-  let ratingClass = "low";
-  if(rating >= 85){
-    ratingClass = "high";
-  } else if(rating >= 70){
-    ratingClass = "mid";
-  }
-
-  let stars = typeof p.stars === "number" ? p.stars : 1;
-  stars = Math.max(1, Math.min(5, stars));
-
-  const tier = (p.tier || "bronze").toLowerCase();
-
-  // =========================
-  // 🧱 RENDER
-  // =========================
-
-  html += `
-     <div class="player-row" data-id="${p.id}">
-    <span class="pos">${pos}</span>
-
-    <span class="name ${tier}">
-      ${name}
-      <span class="stars">${"★".repeat(stars)}</span>
-    </span>
-
-    <span class="rating ${ratingClass}">${rating}</span>
-  </div>
-  `;
-});
-
-html += `</div>`;
-html += `<div class="divider">BANK</div>`;
-html += `<div class="bench-container bench">`;
-
-benchPlayers.forEach(p => {
- // =========================
-  // 🔧 Bench DATA
-  // =========================
-
-  const rawName = p.name || `${p.first_name || ""} ${p.last_name || ""}`;
-  const name = rawName.toUpperCase();
-
-  const POS_MAP = {
-    GK: "TW",
-    DEF: "IV",
-    MID: "ZM",
-    ST: "ST"
-  };
-
-  const rawPos = (p.position_type || "MID").toUpperCase();
-  const pos = POS_MAP[rawPos] || rawPos;
-
-  const rating = typeof p.overall === "number" ? p.overall : 0;
-
-  let ratingClass = "low";
-  if(rating >= 85){
-    ratingClass = "high";
-  } else if(rating >= 70){
-    ratingClass = "mid";
-  }
-
-  let stars = typeof p.stars === "number" ? p.stars : 1;
-  stars = Math.max(1, Math.min(5, stars));
-
-  const tier = (p.tier || "bronze").toLowerCase();
-
-  // =========================
-  // 🧱 RENDER
-  // =========================
-
-  html += `
-    <div class="player-row" data-id="${p.id}">
-      <span class="pos">${pos}</span>
-      <span class="name ${tier}">${name}</span>
-      <span class="stars">${"★".repeat(stars)}</span>
-      <span class="rating ${ratingClass}">${rating}</span>
+  return `
+    <div class="position-group">
+      <div class="group-title">${title}</div>
+      ${list.map(p => renderPlayerRow(p)).join("")}
     </div>
   `;
-});
+}
 
+html += `
+  <h3>Startelf</h3>
+  ${renderGroup("STURM", starterGroups.ST)}
+  ${renderGroup("MITTELFELD", starterGroups.MID)}
+  ${renderGroup("ABWEHR", starterGroups.DEF)}
+  ${renderGroup("TOR", starterGroups.GK)}
+`;
 
+// =========================
+// 🪑 BANK
+// =========================
+const benchGroups = groupPlayers(benchPlayers);
+
+html += `
+  <div class="divider">BANK</div>
+
+  ${renderGroup("STURM", benchGroups.ST)}
+  ${renderGroup("MITTELFELD", benchGroups.MID)}
+  ${renderGroup("ABWEHR", benchGroups.DEF)}
+  ${renderGroup("TOR", benchGroups.GK)}
+`;
   
 // =========================
 // 📦 INSERT DOM
