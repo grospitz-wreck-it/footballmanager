@@ -505,3 +505,44 @@
   opacity: 0.5;
   margin-bottom: 2px;
 }
+/* =========================
+🟢 STARTELF vs BANK
+========================= */
+
+/* Startelf Container */
+#teamView h3 {
+  margin-top: 10px;
+  padding-left: 6px;
+  border-left: 3px solid #22c55e;
+}
+
+/* Bank Divider */
+.divider {
+  margin: 14px 0 6px;
+  padding: 6px 10px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.02)
+  );
+
+  border-radius: 6px;
+  opacity: 0.8;
+}
+
+/* Bank Bereich */
+.bench .player-row {
+  opacity: 0.55;
+  filter: saturate(0.7);
+}
+
+/* Startelf stärker */
+.position-group {
+  border-left: 2px solid rgba(34,197,94,0.25);
+  padding-left: 6px;
+}
