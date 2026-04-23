@@ -838,7 +838,7 @@ function renderTeam() {
 
   </div>
 `;
-  }
+  
   // =========================
   // 🧠 GROUPED STARTERS
   // =========================
@@ -1064,7 +1064,7 @@ function renderTeam() {
   `;
   }
 
-  
+  }
 
 
 function renderTacticStats() {
