@@ -678,7 +678,7 @@ if(lineup?.slots){
 // 🔥 Fallback (dein bestehendes System bleibt)
 if(!starters.length){
   starters = players.slice(0, 11);
-  bench = players.slice(11);
+benchPlayers = players.slice(11);
 }
   console.log("🧪 teamId:", teamId);
  console.log("🧪 team players:", players.length);
@@ -730,7 +730,6 @@ console.log("🧪 bench:", benchPlayers.length);
     ];
   }
 
-const bench = players;
   
   const formation = lineup?.formation || game.team?.formation || "4-4-2";
   const layout = FORMATIONS[formation] || FORMATIONS["4-4-2"];
