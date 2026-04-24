@@ -17,53 +17,54 @@
 
     <h3>Taktik</h3>
 
-    <!-- 📊 LIVE STATS -->
-    <div id="tacticsStats"></div>
-
-    <!-- 🎯 PRESETS -->
-    <div class="tactics-row">
-      <button data-preset="offensive">Offensiv</button>
-      <button data-preset="balanced">Balanced</button>
-      <button data-preset="defensive">Defensiv</button>
-    </div>
-
-    <!-- ⚡ TEMPO -->
-    <div class="tactics-row">
-      <button data-tempo="slow">Langsam</button>
-      <button data-tempo="normal">Normal</button>
-      <button data-tempo="fast">Schnell</button>
-    </div>
-
-    <!-- 🧠 PRESSING -->
-    <div class="tactics-row">
-      <button data-pressing="low">Tief</button>
-      <button data-pressing="medium">Mittel</button>
-      <button data-pressing="high">Hoch</button>
-    </div>
-
-    <!-- 🧱 DEFENSIVE LINE -->
-    <div class="tactics-row">
-      <button data-line="low">Tiefe Linie</button>
-      <button data-line="medium">Standard</button>
-      <button data-line="high">Hohe Linie</button>
-    </div>
-
-    <!-- 📐 FORMATION -->
+    <!-- =========================
+    📐 FORMATION (TOP)
+    ========================= -->
     <div class="tactics-formation">
       <label>Formation</label>
+
       <select id="formationSelect">
         <option value="4-4-2">4-4-2</option>
         <option value="4-3-3">4-3-3</option>
       </select>
+
+      <div id="formationPreview" class="formation-preview"></div>
     </div>
 
-    <!-- 🎲 CHANCE BUTTON -->
+    <!-- =========================
+    📊 DONUT STATS
+    ========================= -->
+    <div id="tacticsStats" class="tactics-donuts"></div>
+
+    <!-- =========================
+    🎯 PRESETS
+    ========================= -->
+    <div class="tactics-presets">
+      <button data-preset="offensive">⚡ Offensiv</button>
+      <button data-preset="balanced">⚖️ Balanced</button>
+      <button data-preset="defensive">🛡 Defensiv</button>
+    </div>
+
+    <!-- =========================
+    🔥 INTENSITY
+    ========================= -->
+    <div class="tactics-intensity">
+      <button data-intensity="low">Low</button>
+      <button data-intensity="medium">Normal</button>
+      <button data-intensity="high">High</button>
+    </div>
+
+    <!-- =========================
+    🎲 CHANCE BUTTON
+    ========================= -->
     <button id="chanceBtn" class="chance-btn">
       🎲 Chance erzwingen
     </button>
 
   </div>
 </div>
+
+  
 
 <!-- =========================
 🟡 SPLASH
@@ -91,11 +92,9 @@
 
     <div>Kreisliga Manager</div>
 
-    <img 
-      id="tacticsBtn" 
-      src="./gfx/tacticsettings.webp" 
-      class="tactics-btn"
-    />
+    <button id="tacticsBtn" class="tactics-btn">
+  <img src="./gfx/tacticsettings.webp" alt="Tactics" />
+</button>
   </div>
 
   <!-- 🍔 SIDEBAR -->
