@@ -25,32 +25,6 @@ import {
   simulateLiveMatchMinute
 } from "./modules/scheduler.js";
 
-// =========================
-// 🎯 TACTICS SYSTEM (NEW)
-// =========================
-function getTacticModifiers(){
-
-  const t = game.tactics || {};
-
-  const tempo =
-    t.tempo === "fast" ? 1.4 :
-    t.tempo === "slow" ? 0.7 : 1;
-
-  const pressing =
-    t.pressing === "high" ? 1.3 :
-    t.pressing === "low" ? 0.8 : 1;
-
-  const line =
-    t.line === "high" ? 1.2 :
-    t.line === "low" ? 0.85 : 1;
-
-  return {
-    tempo,
-    pressing,
-    line
-  };
-}
-
 
 // =========================
 // 🧠 INTERNAL
@@ -622,12 +596,14 @@ function simulateLiveEvent(ctx){
   const homeBias = homeStrength / total;
   const adjustedHomeChance = homeBias + momentum * 0.2;
 
-  const tactics = getTacticModifiers();
+  const mod = getTacticModifier();
 
-  let attackingTeam =
-    Math.random() < adjustedHomeChance
-      ? homeId
-      : awayId;
+  const bias = mod.attackBias;
+
+let attackingTeam =
+  Math.random() < (adjustedHomeChance + bias)
+    ? homeId
+    : awayId;
 
   // =========================
   // 🔥 HIGH LINE RISIKO
@@ -639,11 +615,11 @@ function simulateLiveEvent(ctx){
   // =========================
   // ⚙️ TAKTIK EINFLUSS
   // =========================
-  const shotChance   = 0.06 * intensity * tactics.tempo;
-  const foulChance   = 0.12 * tactics.pressing;
-  const cornerChance = 0.08 * tactics.tempo;
-  const duelChance   = 0.15 * tactics.pressing;
-
+  const shotChance   = 0.06 * intensity * mod.eventRate;
+const foulChance   = 0.12 * (1 + mod.controlBonus);
+const cornerChance = 0.08 * mod.eventRate;
+const duelChance   = 0.15 * (1 + mod.attackBias);
+  
   const r = Math.random();
 
   if(r < shotChance){
