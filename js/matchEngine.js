@@ -15,6 +15,7 @@ import {
 import { saveGame } from "../js/services/storage.js";
 import { getPositionWeights } from "./engine/positionEngine.js";
 import { getPlayerRating } from "./engine/playerEngine.js";
+import { getTacticModifier } from "./engine/tacticsEngine.js";
 import { simulateMatchday, updateTable, simulateLiveMatchMinute } from "./modules/scheduler.js";
 
 // =========================
