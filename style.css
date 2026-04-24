@@ -1694,7 +1694,7 @@ tr:hover {
   border-radius: 16px;
   overflow: hidden;
 
-  background: url("../gfx/field.svg") center/cover no-repeat;
+  background: url("./gfx/field.svg") center/cover no-repeat;
 
   box-shadow:
     inset 0 0 40px rgba(0,0,0,0.6),
