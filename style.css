@@ -259,9 +259,6 @@ body {
 .fp-dot.ST { background: #22c55e; }
 
 
-/* =========================
-🍩 DONUT CHART (FIXED)
-========================= */
 .donut {
   --size: 54px;
   --thickness: 6px;
@@ -283,16 +280,14 @@ body {
   position: relative;
 
   background:
-    conic-gradient(
-      from -90deg,
-      #22c55e 0%,
-      #4ade80 calc(var(--val) * 0.5),
-      #facc15 var(--val),
-      #1e293b var(--val) 100%
-    );
+  conic-gradient(
+    from -90deg,
+    #22c55e 0%,
+    #4ade80 calc(var(--val) * 0.5),
+    #facc15 var(--val),
+    #1e293b var(--val)
+  );
 
-  transition: --val 0.6s ease;
-}
 
 /* 🔥 wichtig für animierbare CSS variable */
 @property --val {
@@ -315,7 +310,7 @@ body {
 .donut span {
   position: relative;
   z-index: 2;
-}
+
 
 /* =========================
 ⚽ MATCH TOP BAR
