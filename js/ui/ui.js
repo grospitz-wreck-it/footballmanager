@@ -1275,13 +1275,16 @@ el.innerHTML = `
 
   </div>
 `;
-  }
+
   const donuts = el.querySelectorAll(".donut");
 
 donuts.forEach((d, i) => {
   const values = [attackVal, defenseVal, controlVal];
   setDonut(d, values[i] ?? 0);
 });
+  
+  }
+  
 function renderTacticBar(label, value) {
   return `
     <div class="tactic-row">
