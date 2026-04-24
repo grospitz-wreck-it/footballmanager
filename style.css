@@ -91,30 +91,11 @@ body {
 
 
 /* =========================
-🧷 HEADER SYSTEM (FINAL CLEAN)
-========================= */
-
-#headerWrap {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-
-  background: #020617;
-
-  display: flex;
-  flex-direction: column;
-
-  /* 🔥 verhindert "durchscrollen" */
-  backdrop-filter: blur(6px);
-}
-
-/* =========================
-🔝 TOP HEADER (BURGER)
+🔝 TOP HEADER (BURGER + TACTICS)
 ========================= */
 #header {
   display: flex;
   align-items: center;
-  gap: 12px;
 
   padding: 12px 16px;
 
@@ -122,6 +103,53 @@ body {
   font-size: 16px;
 
   border-bottom: 1px solid #1e293b;
+
+  position: relative; /* 🔥 wichtig für center hack */
+}
+
+/* =========================
+📛 TITLE (CENTER FIX)
+========================= */
+#header > div {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  white-space: nowrap;
+  pointer-events: none; /* 🔥 verhindert click-block */
+}
+
+/* =========================
+🍔 BURGER (LINKS)
+========================= */
+#burgerBtn {
+  z-index: 2;
+}
+
+/* =========================
+⚙️ TACTICS BUTTON (RECHTS)
+========================= */
+.tactics-btn {
+  margin-left: auto; /* 🔥 schiebt nach rechts */
+
+  width: 42px;       /* 🔥 größer */
+  height: 42px;
+
+  object-fit: contain;
+  cursor: pointer;
+
+  z-index: 2;
+
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.tactics-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.tactics-btn:active {
+  transform: scale(0.95);
 }
 
 /* =========================
