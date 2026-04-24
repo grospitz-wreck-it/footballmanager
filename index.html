@@ -13,55 +13,58 @@
 🎮 TACTICS OVERLAY
 ========================= -->
 <div id="tacticsOverlay" class="tactics-overlay">
-  <div class="tactics-sheet">
+  <<div class="tactics-sheet">
 
-    <h3>Taktik</h3>
+  <h3>Taktik</h3>
 
-    <!-- =========================
-    📐 FORMATION (TOP)
-    ========================= -->
-    <div class="tactics-formation">
-      <label>Formation</label>
+  <!-- 📐 FORMATION -->
+  <div class="tactics-block">
+    <label>Formation</label>
 
-   <div class="formation-switch">
-  <button data-formation="4-4-2">4-4-2</button>
-  <button data-formation="4-3-3">4-3-3</button>
-</div>
-
-      <div id="formationPreview" class="formation-preview"></div>
+    <div class="formation-select" id="formationDropdown">
+      <div class="selected">4-4-2</div>
+      <div class="options">
+        <div data-formation="4-4-2">4-4-2</div>
+        <div data-formation="4-3-3">4-3-3</div>
+        <div data-formation="3-5-2">3-5-2</div>
+      </div>
     </div>
-
-    <!-- =========================
-    📊 DONUT STATS
-    ========================= -->
-    <div id="tacticsStats" class="tactics-donuts"></div>
-
-    <!-- =========================
-    🎯 PRESETS
-    ========================= -->
-    <div class="tactics-presets">
-      <button data-preset="offensive">⚡ Offensiv</button>
-      <button data-preset="balanced">⚖️ Balanced</button>
-      <button data-preset="defensive">🛡 Defensiv</button>
-    </div>
-
-    <!-- =========================
-    🔥 INTENSITY
-    ========================= -->
-    <div class="tactics-intensity">
-      <button data-intensity="low">Low</button>
-      <button data-intensity="medium">Normal</button>
-      <button data-intensity="high">High</button>
-    </div>
-
-    <!-- =========================
-    🎲 CHANCE BUTTON
-    ========================= -->
-    <button id="chanceBtn" class="chance-btn">
-      🎲 Chance erzwingen
-    </button>
-
   </div>
+
+  <!-- ⚽ FIELD -->
+  <div class="tactics-field" id="formationPreview"></div>
+
+  <!-- 📊 STATS (LOGISCH AUSGERICHTET) -->
+  <div class="tactics-stats-row">
+    <div class="stat defense">
+      <div class="donut"><span>0</span></div>
+      <div class="label">DEF</div>
+    </div>
+
+    <div class="stat control">
+      <div class="donut"><span>0</span></div>
+      <div class="label">MID</div>
+    </div>
+
+    <div class="stat attack">
+      <div class="donut"><span>0</span></div>
+      <div class="label">ATT</div>
+    </div>
+  </div>
+
+  <!-- 🎯 PRESETS -->
+  <div class="tactics-segment">
+    <button data-preset="offensive">⚡ Offensiv</button>
+    <button data-preset="balanced">⚖️ Balanced</button>
+    <button data-preset="defensive">🛡 Defensiv</button>
+  </div>
+
+  <!-- 🎲 CTA -->
+  <button id="chanceBtn" class="chance-btn">
+    🎲 Chance erzwingen
+  </button>
+
+</div>
 </div>
 
   
