@@ -1275,6 +1275,7 @@ el.innerHTML = `
 
   </div>
 `;
+  }
   const donuts = el.querySelectorAll(".donut");
 
 donuts.forEach((d, i) => {
