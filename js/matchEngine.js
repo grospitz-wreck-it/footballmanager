@@ -740,8 +740,32 @@ switch(eventType){
     createDuel(ctx);
     break;
 }
+  // =========================
+// 🔁 POSSESSION FLOW  ✅ HIER!
+// =========================
+const live = game.match?.live;
+
+if(live){
+
+  live.lastEvent = eventType;
+
+  if(eventType === "shot"){
+    switchPossession(ctx);
+  }
+  else if(eventType === "duel"){
+    if(Math.random() < 0.5){
+      switchPossession(ctx);
+    }
+  }
+  else if(eventType === "foul"){
+    // bleibt
+  }
+  else if(eventType === "corner"){
+    // bleibt
+  }
+
 }
-  
+}  
 
   const bias = mod.attackBias;
 
