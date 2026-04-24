@@ -164,6 +164,9 @@ function initUI() {
     return;
   }
 
+  // =========================
+  // 🍔 SIDEBAR
+  // =========================
   burger.addEventListener("click", () => {
     game.ui.sidebarOpen = !game.ui.sidebarOpen;
     applySidebar();
@@ -174,29 +177,29 @@ function initUI() {
     applySidebar();
   });
 
+  // =========================
   // 🔥 STATE LISTENER
+  // =========================
   on(EVENTS.STATE_CHANGED, () => {
     if (game.events?.history?.length) {
       updateEvents();
     }
   });
 
-  
   // =========================
-  // ⚙️ TACTICS BUTTON (OPEN)
+  // ⚙️ TACTICS BUTTON
   // =========================
   const tacticsBtn = document.getElementById("tacticsBtn");
 
   if (tacticsBtn) {
     tacticsBtn.onclick = () => {
-  game.ui.tacticsOpen = !game.ui.tacticsOpen;
-
-  updateUI(); // 🔥 wichtig!
-};
+      game.ui.tacticsOpen = !game.ui.tacticsOpen;
+      updateUI();
+    };
   }
 
   // =========================
-  // 🎮 TACTICS OVERLAY CLOSE
+  // 🎮 OVERLAY CLOSE
   // =========================
   const tacticsOverlay = document.getElementById("tacticsOverlay");
 
@@ -210,17 +213,15 @@ function initUI() {
   }
 
   // =========================
-  // 🎮 TACTICS SYSTEM (PRESETS)
+  // ⚙️ TACTICS STATE INIT
   // =========================
-
-  // safety init
   game.tactics = game.tactics || {
     preset: "balanced",
     tempo: "normal",
     pressing: "medium",
     line: "medium",
-    formation: "4-4-2",   // 🔥 NEU
-    focus: "mixed"        // 🔥 NEU (für später)
+    formation: "4-4-2",
+    focus: "mixed"
   };
 
   const PRESETS = {
@@ -241,26 +242,91 @@ function initUI() {
     },
   };
 
-const chanceBtn = document.getElementById("chanceBtn");
+  // =========================
+  // 🎯 PRESET BUTTONS
+  // =========================
+  document.querySelectorAll("[data-preset]").forEach(btn => {
+    btn.onclick = () => {
+      const preset = btn.dataset.preset;
 
-if (chanceBtn) {
-  chanceBtn.onclick = () => {
+      game.tactics.preset = preset;
+      Object.assign(game.tactics, PRESETS[preset]);
 
-    if (!game.match?.live?.running) {
-      console.warn("⛔ kein laufendes Spiel");
-      return;
+      // UI ACTIVE STATE
+      document.querySelectorAll("[data-preset]").forEach(b =>
+        b.classList.remove("active")
+      );
+      btn.classList.add("active");
+
+      updateUI();
+    };
+  });
+
+  // =========================
+  // 📐 FORMATION DROPDOWN (NEU)
+  // =========================
+  const dropdown = document.getElementById("formationDropdown");
+
+  if (dropdown) {
+    const selected = dropdown.querySelector(".selected");
+
+    // initial value
+    if (selected) {
+      selected.textContent = game.tactics.formation;
     }
 
-    console.log("🎲 FORCED CHANCE");
-
-    // 🔥 Fake Event push (minimal safe)
-    game.events.history.push({
-      id: Date.now(),
-      minute: game.match.live.minute,
-      type: "chance",
-      text: "🔥 Große Chance durch taktische Umstellung!"
+    selected?.addEventListener("click", () => {
+      dropdown.classList.toggle("open");
     });
-  };
+
+    dropdown.querySelectorAll("[data-formation]").forEach(opt => {
+      opt.onclick = () => {
+        const value = opt.dataset.formation;
+
+        game.tactics.formation = value;
+
+        if (game.team?.lineup) {
+          game.team.lineup.formation = value;
+        }
+
+        if (selected) {
+          selected.textContent = value;
+        }
+
+        dropdown.classList.remove("open");
+
+        console.log("⚙️ formation:", value);
+
+        updateUI();
+      };
+    });
+  }
+
+  // =========================
+  // 🎲 CHANCE BUTTON
+  // =========================
+  const chanceBtn = document.getElementById("chanceBtn");
+
+  if (chanceBtn) {
+    chanceBtn.onclick = () => {
+
+      if (!game.match?.live?.running) {
+        console.warn("⛔ kein laufendes Spiel");
+        return;
+      }
+
+      console.log("🎲 FORCED CHANCE");
+
+      game.events.history.push({
+        id: Date.now(),
+        minute: game.match.live.minute,
+        type: "chance",
+        text: "🔥 Große Chance durch taktische Umstellung!"
+      });
+
+      updateUI();
+    };
+  }
 }
   
   // =========================
