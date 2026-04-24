@@ -41,21 +41,17 @@ function applySidebar() {
 function updateUI() {
   initUI();
 
-  // 🔥 OVERLAY PRIORITY SYSTEM (FIX)
   const matchOverlay = document.getElementById("matchOverlay");
 
   if (matchOverlay) {
-    // 👉 wenn hidden → darf NIE blockieren
     if (matchOverlay.classList.contains("hidden")) {
       matchOverlay.style.pointerEvents = "none";
     }
 
-    // 👉 wenn sichtbar → nur dann klickbar
     if (matchOverlay.classList.contains("show")) {
       matchOverlay.style.pointerEvents = "auto";
     }
 
-    // 👉 safety: wenn match läuft und overlay NICHT aktiv → kill
     if (game.match?.live?.running && !matchOverlay.classList.contains("show")) {
       matchOverlay.classList.add("hidden");
       matchOverlay.style.pointerEvents = "none";
@@ -68,6 +64,21 @@ function updateUI() {
   updateTacticsUI();
   renderFormationPreview();
   updateTabs();
+
+  // =========================
+  // 🔥 HIER REIN (GANZ UNTEN!)
+  // =========================
+  const leagueSelect = document.getElementById("leagueSelect");
+  const teamSelect   = document.getElementById("teamSelect");
+
+  if (leagueSelect && game.league?.selectedId) {
+    leagueSelect.value = game.league.selectedId;
+  }
+
+  if (teamSelect && game.team?.selectedId) {
+    teamSelect.value = game.team.selectedId;
+  }
+}
 
   // =========================
   // 📊 TABLE
@@ -244,8 +255,6 @@ if (chanceBtn) {
       type: "chance",
       text: "🔥 Große Chance durch taktische Umstellung!"
     });
-
-    updateUI();
   };
 }
   
