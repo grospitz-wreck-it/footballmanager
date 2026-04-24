@@ -85,7 +85,7 @@ function updateUI() {
   renderFormationPreview();
   updateTabs();
 
-// 🔥 SELECT RESTORE
+  // ✅ SELECT RESTORE
   const leagueSelect = document.getElementById("leagueSelect");
   const teamSelect   = document.getElementById("teamSelect");
 
@@ -131,63 +131,6 @@ function updateUI() {
     tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
   }
 }
-  
-  // =========================
-  // 🔥 HIER REIN (GANZ UNTEN!)
-  // =========================
-  const leagueSelect = document.getElementById("leagueSelect");
-  const teamSelect   = document.getElementById("teamSelect");
-
-  if (leagueSelect && game.league?.selectedId) {
-    leagueSelect.value = game.league.selectedId;
-  }
-
-  if (teamSelect && game.team?.selectedId) {
-    teamSelect.value = game.team.selectedId;
-  }
-}
-
-  // =========================
-  // 📊 TABLE
-  // =========================
-  if (game.ui.tab === "table") {
-    renderLiveTable();
-
-    if (game.match?.live?.running) {
-      ensureLiveTableLoop();
-    }
-  }
-
-  // =========================
-  // 👥 TEAM
-  // =========================
-  if (game.ui.tab === "team") {
-    renderTeam();
-  }
-
-  // =========================
-  // ⚙️ TACTICS
-  // =========================
-  updateTacticsUI();
-
-  // 🔥 AUTO CLOSE OVERLAY BEI MATCH START
-  if (game.match?.live?.running && game.ui.tacticsOpen) {
-    game.ui.tacticsOpen = false;
-  }
-
-  // 🔥 FIX: NUR WENN OVERLAY OFFEN
-  if (game.ui.tacticsOpen && !game.match?.live?.running) {
-    renderTacticStats();
-  }
-
-  // =========================
-  // 🪟 OVERLAY
-  // =========================
-  const tacticsOverlay = document.getElementById("tacticsOverlay");
-
-  if (tacticsOverlay) {
-    tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
-  }
 
 
 function initUI() {
