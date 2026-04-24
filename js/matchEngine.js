@@ -206,6 +206,8 @@ function switchPossession(ctx){
 
   return weights;
 }
+
+
 function pickEventByWeight(weights){
 
   const r = Math.random();
@@ -827,7 +829,7 @@ if(live){
     // bleibt
   }
 
-}
+
 }  
 
   const bias = mod.attackBias;
