@@ -245,25 +245,22 @@ body {
 /* Player Dot */
 .fp-dot {
   position: absolute;
-
-  width: 10px;
-  height: 10px;
-
-  border-radius: 50%;
-
-  background: white;
-
   transform: translate(-50%, -50%);
 
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+
   box-shadow:
-    0 0 6px rgba(255,255,255,0.6);
+    0 0 6px rgba(255,255,255,0.6),
+    0 0 12px currentColor;
 }
 
-/* Role Colors */
-.fp-dot.GK { background: #facc15; }
-.fp-dot.DEF { background: #38bdf8; }
-.fp-dot.MID { background: #a855f7; }
-.fp-dot.ST { background: #22c55e; }
+/* Rollenfarben cleaner */
+.fp-dot.GK  { color: #facc15; background: #facc15; }
+.fp-dot.DEF { color: #38bdf8; background: #38bdf8; }
+.fp-dot.MID { color: #a855f7; background: #a855f7; }
+.fp-dot.ST  { color: #22c55e; background: #22c55e; }
 
 
 .donut {
@@ -1659,4 +1656,18 @@ tr:hover {
   justify-content: center;
 
   min-height: 100px;     /* optional für gleiche Boxgröße */
+}
+.formation-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: url("../gfx/field.svg") center/cover no-repeat;
+
+  box-shadow:
+    inset 0 0 40px rgba(0,0,0,0.6),
+    0 10px 30px rgba(0,0,0,0.5);
 }
