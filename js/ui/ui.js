@@ -1210,41 +1210,34 @@ function renderTacticStats() {
   return Math.max(0, Math.min(100, Math.round(Number(val))));
 }
 
-// 🔥 Werte fixen
 const attackVal  = normalize(attack);
 const defenseVal = normalize(defense);
 const controlVal = normalize(control);
 
-// 🔥 HASH mit FIXED VALUES
 const dataHash = `${attackVal}-${defenseVal}-${controlVal}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
 
-// 🔥 verhindert unnötiges Rendern
-if (dataHash === lastTacticHash) {
-  return;
-}
-
+if (dataHash === lastTacticHash) return;
 lastTacticHash = dataHash;
 
-// 🔥 Rendering
 el.innerHTML = `
   <div class="tactics-donuts">
 
     <div class="stat attack">
-      <div class="donut" style="--val:${attackVal}">
+      <div class="donut" style="--val:${attackVal}%">
         <span>${attackVal}</span>
       </div>
       <div class="label">ATT</div>
     </div>
 
     <div class="stat defense">
-      <div class="donut" style="--val:${defenseVal}">
+      <div class="donut" style="--val:${defenseVal}%">
         <span>${defenseVal}</span>
       </div>
       <div class="label">DEF</div>
     </div>
 
     <div class="stat control">
-      <div class="donut" style="--val:${controlVal}">
+      <div class="donut" style="--val:${controlVal}%">
         <span>${controlVal}</span>
       </div>
       <div class="label">CTRL</div>
