@@ -183,6 +183,8 @@ function initUI() {
     tempo: "normal",
     pressing: "medium",
     line: "medium",
+    formation: "4-4-2",   // 🔥 NEU
+    focus: "mixed"        // 🔥 NEU (für später)
   };
 
   const PRESETS = {
@@ -804,7 +806,9 @@ function renderTeam() {
     ];
   }
 
-  const formation = lineup?.formation || game.team?.formation || "4-4-2";
+  const formation = game.tactics?.formation 
+  || lineup?.formation 
+  || "4-4-2";
 
   let html = "";
 
