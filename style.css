@@ -1671,3 +1671,25 @@ tr:hover {
     inset 0 0 40px rgba(0,0,0,0.6),
     0 10px 30px rgba(0,0,0,0.5);
 }
+.formation-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.formation-switch button {
+  flex: 1;
+
+  padding: 10px;
+  border-radius: 12px;
+
+  background: #020617;
+  color: #94a3b8;
+
+  border: 1px solid #1e293b;
+}
+
+.formation-switch button.active {
+  background: #22c55e;
+  color: #022c22;
+  font-weight: 600;
+}
