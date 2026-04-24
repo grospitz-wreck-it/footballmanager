@@ -121,7 +121,7 @@ function updateUI() {
   if (tacticsOverlay) {
     tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
   }
-}
+
 
 function initUI() {
   if (initialized) return;
