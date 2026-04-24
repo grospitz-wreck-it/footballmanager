@@ -68,7 +68,79 @@ function getTeamNameById(id){
   return getTeamById(id)?.name || "Unbekannt";
 }
 
+function getEventWeights(ctx, mod, attackingTeam){
 
+  const intensity = RULES?.match?.intensity ?? 1;
+
+  const homeId = ctx.match.homeTeamId;
+  const awayId = ctx.match.awayTeamId;
+
+  const isHomeAttack = attackingTeam === homeId;
+
+  const homeStrength = getTeamStrength(homeId);
+  const awayStrength = getTeamStrength(awayId);
+
+  const strengthDiff =
+    (homeStrength - awayStrength) / 100;
+
+  const attackStrength = isHomeAttack
+    ? strengthDiff
+    : -strengthDiff;
+
+  // =========================
+  // ⚙️ BASE WEIGHTS
+  // =========================
+  let weights = {
+    shot: 0.25,
+    foul: 0.20,
+    corner: 0.15,
+    duel: 0.40
+  };
+
+  // =========================
+  // 🔥 TACTICS INFLUENCE
+  // =========================
+  weights.shot   += mod.attackBias * 0.5;
+  weights.duel   += mod.attackBias * 0.3;
+
+  weights.foul   += mod.controlBonus * 0.4;
+  weights.corner += mod.eventRate * 0.2;
+
+  // =========================
+  // 💪 STRENGTH INFLUENCE
+  // =========================
+  weights.shot += attackStrength * 0.3;
+  weights.duel -= attackStrength * 0.2;
+
+  // =========================
+  // ⚡ MOMENTUM
+  // =========================
+  weights.shot += momentum * 0.2;
+  weights.foul += Math.abs(momentum) * 0.1;
+
+  // =========================
+  // 🔒 NORMALIZE
+  // =========================
+  const total = Object.values(weights).reduce((a,b)=>a+b,0);
+
+  Object.keys(weights).forEach(k => {
+    weights[k] = Math.max(0.01, weights[k] / total);
+  });
+
+  return weights;
+}
+function pickEventByWeight(weights){
+
+  const r = Math.random();
+  let sum = 0;
+
+  for(const key in weights){
+    sum += weights[key];
+    if(r < sum) return key;
+  }
+
+  return "duel";
+}
 // =========================
 // 🆕 EVENT EMITTER
 // =========================
@@ -621,20 +693,29 @@ function simulateLiveEvent(ctx){
   const cornerChance = 0.08 * mod.eventRate;
   const duelChance   = 0.15 * (1 + mod.attackBias);
 
-  const r = Math.random();
+  const weights = getEventWeights(ctx, mod, attackingTeam);
 
-  if(r < shotChance){
+const eventType = pickEventByWeight(weights);
+
+switch(eventType){
+
+  case "shot":
     createShot({ match: ctx.match, teamId: attackingTeam });
-  }
-  else if(r < shotChance + foulChance){
+    break;
+
+  case "foul":
     createFoul(ctx);
-  }
-  else if(r < shotChance + foulChance + cornerChance){
+    break;
+
+  case "corner":
     createCorner(ctx);
-  }
-  else if(r < shotChance + foulChance + cornerChance + duelChance){
+    break;
+
+  case "duel":
+  default:
     createDuel(ctx);
-  }
+    break;
+}
 }
   
 
