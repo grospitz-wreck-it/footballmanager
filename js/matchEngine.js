@@ -205,7 +205,7 @@ function switchPossession(ctx){
   });
 
   return weights;
-}
+
 
 
 function pickEventByWeight(weights){
