@@ -1035,6 +1035,24 @@ function renderTeam() {
         const typeA = getType(selectedPlayerId);
         const typeB = getType(id);
 
+        function setDonut(el, value){
+  const val = Math.max(0, Math.min(100, Math.round(value)));
+
+  // Start bei 0
+  el.style.setProperty("--val", "0%");
+
+  // dann animieren
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.setProperty("--val", val + "%");
+    });
+  });
+
+  // Text updaten
+  const span = el.querySelector("span");
+  if(span) span.textContent = val;
+}
+        
         // =========================
         // 🔄 STARTER ↔ STARTER
         // =========================
@@ -1245,7 +1263,12 @@ el.innerHTML = `
 
   </div>
 `;
-}
+  const donuts = el.querySelectorAll(".donut");
+
+donuts.forEach((d, i) => {
+  const values = [attackVal, defenseVal, controlVal];
+  setDonut(d, values[i] ?? 0);
+});
 function renderTacticBar(label, value) {
   return `
     <div class="tactic-row">
