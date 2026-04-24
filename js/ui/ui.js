@@ -63,10 +63,10 @@ function updateUI() {
   }
 
   applySidebar();
-
   updateScore();
   updateProgress();
-
+  updateTacticsUI();
+  renderFormationPreview();
   updateTabs();
 
   // =========================
