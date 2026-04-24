@@ -164,49 +164,7 @@ function switchPossession(ctx){
   live.possession =
     live.possession === home ? away : home;
 }
-  // =========================
-  // ⚙️ BASE WEIGHTS
-  // =========================
-  let weights = {
-    shot: 0.25,
-    foul: 0.20,
-    corner: 0.15,
-    duel: 0.40
-  };
-
-  // =========================
-  // 🔥 TACTICS INFLUENCE
-  // =========================
-  weights.shot   += mod.attackBias * 0.5;
-  weights.duel   += mod.attackBias * 0.3;
-
-  weights.foul   += mod.controlBonus * 0.4;
-  weights.corner += mod.eventRate * 0.2;
-
-  // =========================
-  // 💪 STRENGTH INFLUENCE
-  // =========================
-  weights.shot += attackStrength * 0.3;
-  weights.duel -= attackStrength * 0.2;
-
-  // =========================
-  // ⚡ MOMENTUM
-  // =========================
-  weights.shot += momentum * 0.2;
-  weights.foul += Math.abs(momentum) * 0.1;
-
-  // =========================
-  // 🔒 NORMALIZE
-  // =========================
-  const total = Object.values(weights).reduce((a,b)=>a+b,0);
-
-  Object.keys(weights).forEach(k => {
-    weights[k] = Math.max(0.01, weights[k] / total);
-  });
-
-  return weights;
-
-
+  
 
 function pickEventByWeight(weights){
 
@@ -736,7 +694,6 @@ function getTeamStrength(teamId){
   return avg;
 }
 
-
 function simulateLiveEvent(ctx){
 
   updateMomentum();
@@ -755,123 +712,83 @@ function simulateLiveEvent(ctx){
   const adjustedHomeChance = homeBias + momentum * 0.2;
 
   // =========================
-  // ⚙️ NEW TACTICS ENGINE
+  // ⚙️ TACTICS
   // =========================
   const mod = getTacticModifier();
 
-  let attackingTeam = getPossessionTeam(ctx);
-
-// fallback (falls undefined)
-if(!attackingTeam){
-  attackingTeam =
-    Math.random() < 0.5 ? homeId : awayId;
-}
-
   // =========================
-  // 🔥 HIGH LINE RISK (neu gedacht)
+  // 🎯 ATTACKING TEAM
   // =========================
-  if(mod.attackBias > 0.15 && Math.random() < 0.15){
-    attackingTeam = (attackingTeam === homeId) ? awayId : homeId;
-  }
-
-  // =========================
-  // ⚙️ EVENT CHANCES (CLEAN)
-  // =========================
-  const shotChance   = 0.06 * intensity * mod.eventRate;
-  const foulChance   = 0.12 * (1 + mod.controlBonus);
-  const cornerChance = 0.08 * mod.eventRate;
-  const duelChance   = 0.15 * (1 + mod.attackBias);
-
-  const weights = getEventWeights(ctx, mod, attackingTeam);
-
-const eventType = pickEventByWeight(weights);
-
-switch(eventType){
-
-  case "shot":
-    createShot({ match: ctx.match, teamId: attackingTeam });
-    break;
-
-  case "foul":
-    createFoul(ctx);
-    break;
-
-  case "corner":
-    createCorner(ctx);
-    break;
-
-  case "duel":
-  default:
-    createDuel(ctx);
-    break;
-}
-  // =========================
-// 🔁 POSSESSION FLOW  ✅ HIER!
-// =========================
-const live = game.match?.live;
-
-if(live){
-
-  live.lastEvent = eventType;
-
-  if(eventType === "shot"){
-    switchPossession(ctx);
-  }
-  else if(eventType === "duel"){
-    if(Math.random() < 0.5){
-      switchPossession(ctx);
-    }
-  }
-  else if(eventType === "foul"){
-    // bleibt
-  }
-  else if(eventType === "corner"){
-    // bleibt
-  }
-
-
-}  
-
   const bias = mod.attackBias;
 
-let attackingTeam =
-  Math.random() < (adjustedHomeChance + bias)
-    ? homeId
-    : awayId;
+  let attackingTeam = game.match?.live?.possession;
+
+// fallback
+if (!attackingTeam) {
+  attackingTeam =
+    Math.random() < (adjustedHomeChance + bias)
+      ? homeId
+      : awayId;
+}
 
   // =========================
   // 🔥 HIGH LINE RISIKO
   // =========================
-  if(mod.line > 1 && Math.random() < 0.15){
-    attackingTeam = (attackingTeam === homeId) ? awayId : homeId;
+  if (mod.line > 1 && Math.random() < 0.15) {
+    attackingTeam = attackingTeam === homeId ? awayId : homeId;
   }
 
   // =========================
-  // ⚙️ TAKTIK EINFLUSS
+  // ⚙️ EVENT SYSTEM
   // =========================
-  const shotChance   = 0.06 * intensity * mod.eventRate;
-const foulChance   = 0.12 * (1 + mod.controlBonus);
-const cornerChance = 0.08 * mod.eventRate;
-const duelChance   = 0.15 * (1 + mod.attackBias);
-  
-  const r = Math.random();
+  const weights = getEventWeights(ctx, mod, attackingTeam);
+  const eventType = pickEventByWeight(weights);
 
-  if(r < shotChance){
-    createShot({ match: ctx.match, teamId: attackingTeam });
+  // =========================
+  // 🎮 EXECUTE
+  // =========================
+  switch (eventType) {
+
+    case "shot":
+      createShot({ match: ctx.match, teamId: attackingTeam });
+      break;
+
+    case "foul":
+      createFoul(ctx);
+      break;
+
+    case "corner":
+      createCorner(ctx);
+      break;
+
+    case "duel":
+    default:
+      createDuel(ctx);
+      break;
   }
-  else if(r < shotChance + foulChance){
-    createFoul(ctx);
-  }
-  else if(r < shotChance + foulChance + cornerChance){
-    createCorner(ctx);
-  }
-  else if(r < shotChance + foulChance + cornerChance + duelChance){
-    createDuel(ctx);
+
+  // =========================
+  // 🔁 POSSESSION FLOW
+  // =========================
+  const live = game.match?.live;
+
+  if (live) {
+
+    live.lastEvent = eventType;
+
+    if (eventType === "shot") {
+      switchPossession(ctx);
+    }
+    else if (eventType === "duel") {
+      if (Math.random() < 0.5) {
+        switchPossession(ctx);
+      }
+    }
+
   }
 }
 
-
-
+  
 // =========================
 // ▶️ CONTROL
 // =========================
