@@ -1252,7 +1252,7 @@ el.innerHTML = `
 
   </div>
 `;
-
+}
 function renderTacticBar(label, value) {
   return `
     <div class="tactic-row">
