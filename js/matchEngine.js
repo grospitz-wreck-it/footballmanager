@@ -598,6 +598,14 @@ function simulateLiveEvent(ctx){
 
   const mod = getTacticModifier();
 
+// 🔥 compatibility layer (damit alter Code nicht crasht)
+const tactics = {
+  tempo: mod.eventRate,
+  pressing: 1 + mod.attackBias,
+  line: 1 + mod.controlBonus
+};
+  
+
   const bias = mod.attackBias;
 
 let attackingTeam =
