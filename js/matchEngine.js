@@ -694,10 +694,13 @@ function simulateLiveEvent(ctx){
   // =========================
   const mod = getTacticModifier();
 
-  let attackingTeam =
-    Math.random() < (adjustedHomeChance + mod.attackBias)
-      ? homeId
-      : awayId;
+  let attackingTeam = getPossessionTeam(ctx);
+
+// fallback (falls undefined)
+if(!attackingTeam){
+  attackingTeam =
+    Math.random() < 0.5 ? homeId : awayId;
+}
 
   // =========================
   // 🔥 HIGH LINE RISK (neu gedacht)
