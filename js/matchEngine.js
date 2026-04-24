@@ -596,14 +596,46 @@ function simulateLiveEvent(ctx){
   const homeBias = homeStrength / total;
   const adjustedHomeChance = homeBias + momentum * 0.2;
 
+  // =========================
+  // ⚙️ NEW TACTICS ENGINE
+  // =========================
   const mod = getTacticModifier();
 
-// 🔥 compatibility layer (damit alter Code nicht crasht)
-const tactics = {
-  tempo: mod.eventRate,
-  pressing: 1 + mod.attackBias,
-  line: 1 + mod.controlBonus
-};
+  let attackingTeam =
+    Math.random() < (adjustedHomeChance + mod.attackBias)
+      ? homeId
+      : awayId;
+
+  // =========================
+  // 🔥 HIGH LINE RISK (neu gedacht)
+  // =========================
+  if(mod.attackBias > 0.15 && Math.random() < 0.15){
+    attackingTeam = (attackingTeam === homeId) ? awayId : homeId;
+  }
+
+  // =========================
+  // ⚙️ EVENT CHANCES (CLEAN)
+  // =========================
+  const shotChance   = 0.06 * intensity * mod.eventRate;
+  const foulChance   = 0.12 * (1 + mod.controlBonus);
+  const cornerChance = 0.08 * mod.eventRate;
+  const duelChance   = 0.15 * (1 + mod.attackBias);
+
+  const r = Math.random();
+
+  if(r < shotChance){
+    createShot({ match: ctx.match, teamId: attackingTeam });
+  }
+  else if(r < shotChance + foulChance){
+    createFoul(ctx);
+  }
+  else if(r < shotChance + foulChance + cornerChance){
+    createCorner(ctx);
+  }
+  else if(r < shotChance + foulChance + cornerChance + duelChance){
+    createDuel(ctx);
+  }
+}
   
 
   const bias = mod.attackBias;
@@ -616,7 +648,7 @@ let attackingTeam =
   // =========================
   // 🔥 HIGH LINE RISIKO
   // =========================
-  if(tactics.line > 1 && Math.random() < 0.15){
+  if(mod.line > 1 && Math.random() < 0.15){
     attackingTeam = (attackingTeam === homeId) ? awayId : homeId;
   }
 
