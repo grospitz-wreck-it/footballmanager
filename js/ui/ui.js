@@ -1205,43 +1205,53 @@ function renderTacticStats() {
   // =========================
   // 🎨 RENDER
   // =========================
-  const dataHash = `${attack}-${defense}-${control}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
+ function normalize(val){
+  if (val == null || isNaN(val)) return 0;
+  return Math.max(0, Math.min(100, Math.round(Number(val))));
+}
 
-  // 🔥 verhindert unnötiges Rendern
-  if (dataHash === lastTacticHash) {
-    return;
-  }
+// 🔥 Werte fixen
+const attackVal  = normalize(attack);
+const defenseVal = normalize(defense);
+const controlVal = normalize(control);
 
-  lastTacticHash = dataHash;
+// 🔥 HASH mit FIXED VALUES
+const dataHash = `${attackVal}-${defenseVal}-${controlVal}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
 
-  // 🔥 nur wenn sich was geändert hat
-  el.innerHTML = `
+// 🔥 verhindert unnötiges Rendern
+if (dataHash === lastTacticHash) {
+  return;
+}
+
+lastTacticHash = dataHash;
+
+// 🔥 Rendering
+el.innerHTML = `
   <div class="tactics-donuts">
 
     <div class="stat attack">
-      <div class="donut" style="--val:${attack}">
-        <span>${attack}</span>
+      <div class="donut" style="--val:${attackVal}">
+        <span>${attackVal}</span>
       </div>
       <div class="label">ATT</div>
     </div>
 
     <div class="stat defense">
-      <div class="donut" style="--val:${defense}">
-        <span>${defense}</span>
+      <div class="donut" style="--val:${defenseVal}">
+        <span>${defenseVal}</span>
       </div>
       <div class="label">DEF</div>
     </div>
 
     <div class="stat control">
-      <div class="donut" style="--val:${control}">
-        <span>${control}</span>
+      <div class="donut" style="--val:${controlVal}">
+        <span>${controlVal}</span>
       </div>
       <div class="label">CTRL</div>
     </div>
 
   </div>
 `;
-}
 
 function renderTacticBar(label, value) {
   return `
