@@ -1628,3 +1628,35 @@ tr:hover {
   background: rgba(0,0,0,0.6);
   z-index: 2000;
 }
+.tactics-sheet {
+  width: 100%;
+  max-width: 420px;
+
+  max-height: 90vh; /* 🔥 wichtig */
+  overflow-y: auto;
+
+  border-radius: 16px;
+}
+.tactics-sheet::before {
+  content: "";
+  display: block;
+  height: 6px;
+  width: 40px;
+  margin: 8px auto;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.3);
+}
+.tactics-donuts {
+  display: flex;
+  gap: 10px;
+
+  align-items: center; /* 🔥 DAS IST DER FIX */
+}
+.tactics-donuts .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* 🔥 wichtig */
+  justify-content: center;
+
+  min-height: 100px;     /* optional für gleiche Boxgröße */
+}
