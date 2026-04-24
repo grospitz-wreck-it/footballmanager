@@ -384,7 +384,7 @@ body {
 /* =========================
 ▶️ BUTTONS
 ========================= */
-button {
+button:not(#burgerBtn) {
   font-size: 15px;
   border-radius: 10px;
   padding: 12px;
@@ -1311,131 +1311,6 @@ tr:hover {
     0 0 10px rgba(0,0,0,0.6);
 }
 
-.tactics-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-
-  width: 44px;
-  height: 44px;
-
-  object-fit: contain;
-
-  z-index: 20;
-
-  cursor: pointer;
-}
-/* =========================
-   ⚙️ TACTICS BUTTON (FINAL)
-========================= */
-
-#tacticsBtn {
-  position: fixed;          /* stabil für mobile */
-  top: 16px;
-  right: 60px;              /* Abstand zum Burger */
-
-  width: 44px;
-  height: 44px;
-
-  object-fit: contain;
-
-  z-index: 100;
-
-  /* 🔥 wichtige UX Fixes */
-  cursor: pointer;
-  touch-action: manipulation;
-
-  /* 🔥 größere Touch-Fläche */
-  padding: 6px;
-  box-sizing: content-box;
-
-  /* 🔥 smooth interaction */
-  transition: transform 0.1s ease;
-}
-
-/* 👉 Klick-Feedback */
-#tacticsBtn:active {
-  transform: scale(0.9);
-}
-/* =========================
-   🎮 TACTICS OVERLAY (REAL)
-========================= */
-
-#tacticsOverlay {
-  position: fixed;
-  inset: 0;
-
-  background: rgba(0,0,0,0.4);
-
-  display: flex;
-  align-items: flex-end;
-
-  z-index: 200;
-
-  opacity: 0;
-  pointer-events: none;
-  
-  #tacticsOverlay.open {
-  pointer-events: none; /* 🔥 bleibt klick-durchlässig */
-}
-  transition: opacity 0.2s ease;
-}
-
-#tacticsOverlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.tactics-sheet {
-  width: 100%;
-  background: #0f172a;
-
-  border-radius: 16px 16px 0 0;
-  padding: 16px;
-
-  transform: translateY(100%);
-  transition: transform 0.25s ease;
-}
-
-#tacticsOverlay.open .tactics-sheet {
-  transform: translateY(0);
-}
-.tactic-row{
-  margin-bottom: 10px;
-}
-
-.tactic-label{
-  font-size: 12px;
-  margin-bottom: 4px;
-  opacity: 0.8;
-}
-
-.tactic-bar{
-  width: 100%;
-  height: 10px;
-  background: #111;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.tactic-fill{
-  height: 100%;
-
-  /* 🔥 Verlauf */
-  background: linear-gradient(90deg, #00ff88, #ffee00, #ff3b3b);
-
-  /* 🔥 schräge Linien */
-  background-image:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(0,0,0,0.25) 0px,
-      rgba(0,0,0,0.25) 6px,
-      transparent 6px,
-      transparent 12px
-    ),
-    linear-gradient(90deg, #00ff88, #ffee00, #ff3b3b);
-
-  transition: width 0.3s ease;
 /* =========================
    PLAYER ROW (PRO LEVEL)
 ========================= */
