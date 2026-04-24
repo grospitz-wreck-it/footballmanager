@@ -1,43 +1,73 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- 🔥 CSS -->
 <link rel="stylesheet" href="./style.css">
-
 </head>
 
 <body>
 
-
-<!-- 🔥 TACTICS OVERLAY -->
+<!-- =========================
+🎮 TACTICS OVERLAY
+========================= -->
 <div id="tacticsOverlay" class="tactics-overlay">
   <div class="tactics-sheet">
 
     <h3>Taktik</h3>
 
-    <!-- 🔥 NEU: HIER REIN -->
+    <!-- 📊 LIVE STATS -->
     <div id="tacticsStats"></div>
 
+    <!-- 🎯 PRESETS -->
     <div class="tactics-row">
       <button data-preset="offensive">Offensiv</button>
       <button data-preset="balanced">Balanced</button>
       <button data-preset="defensive">Defensiv</button>
     </div>
 
+    <!-- ⚡ TEMPO -->
     <div class="tactics-row">
       <button data-tempo="slow">Langsam</button>
       <button data-tempo="normal">Normal</button>
       <button data-tempo="fast">Schnell</button>
     </div>
 
+    <!-- 🧠 PRESSING -->
+    <div class="tactics-row">
+      <button data-pressing="low">Tief</button>
+      <button data-pressing="medium">Mittel</button>
+      <button data-pressing="high">Hoch</button>
+    </div>
+
+    <!-- 🧱 DEFENSIVE LINE -->
+    <div class="tactics-row">
+      <button data-line="low">Tiefe Linie</button>
+      <button data-line="medium">Standard</button>
+      <button data-line="high">Hohe Linie</button>
+    </div>
+
+    <!-- 📐 FORMATION -->
+    <div class="tactics-formation">
+      <label>Formation</label>
+      <select id="formationSelect">
+        <option value="4-4-2">4-4-2</option>
+        <option value="4-3-3">4-3-3</option>
+      </select>
+    </div>
+
+    <!-- 🎲 CHANCE BUTTON -->
+    <button id="chanceBtn" class="chance-btn">
+      🎲 Chance erzwingen
+    </button>
+
   </div>
 </div>
 
-<!-- SPLASH -->
+<!-- =========================
+🟡 SPLASH
+========================= -->
 <div id="splash">
   <input id="nameInput" placeholder="Dein Name">
 
@@ -48,26 +78,27 @@
 
   <select id="leagueSelect"></select>
   <select id="teamSelect"></select>
-
 </div>
 
-<!-- APP -->
+<!-- =========================
+📱 APP
+========================= -->
 <div id="app">
 
-  <!-- HEADER -->
- <div id="header">
-  <button id="burgerBtn">☰</button>
+  <!-- 🔝 HEADER -->
+  <div id="header">
+    <button id="burgerBtn">☰</button>
 
-  <div>Kreisliga Manager</div>
+    <div>Kreisliga Manager</div>
 
-  <img 
-    id="tacticsBtn" 
-    src="./gfx/tacticsettings.webp" 
-    class="tactics-btn"
-  />
-</div>
+    <img 
+      id="tacticsBtn" 
+      src="./gfx/tacticsettings.webp" 
+      class="tactics-btn"
+    />
+  </div>
 
-  <!-- SIDEBAR -->
+  <!-- 🍔 SIDEBAR -->
   <div id="sidebarWrapper" class="sidebar-wrapper">
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
@@ -83,19 +114,22 @@
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- 📦 MAIN -->
   <div class="container">
 
+    <!-- ⚽ TOP BAR -->
     <div id="topBar">
       <div id="topTeams">- vs -</div>
       <div id="topScore">0 : 0</div>
       <div id="topMinute">0'</div>
     </div>
 
+    <!-- ⏱ PROGRESS -->
     <div id="progressBar">
       <div id="progressFill"></div>
     </div>
 
+    <!-- 🎮 GAME -->
     <div id="gameCanvas">
 
       <canvas id="gameCanvasInner"></canvas>
@@ -107,22 +141,24 @@
 
     </div>
 
+    <!-- 📰 EVENTS -->
     <div id="eventBar">
       <div id="eventText">Willkommen im Spiel</div>
     </div>
 
+    <!-- ▶️ MAIN BUTTON -->
     <button id="mainButton">Spiel starten</button>
 
     <div id="adContainer"></div>
 
-    <!-- TABS -->
+    <!-- 📊 TABS -->
     <div class="tabs">
       <button class="tab active" data-tab="table">Tabelle</button>
       <button class="tab" data-tab="schedule">Spieltage</button>
       <button class="tab" data-tab="team">Team</button>
     </div>
 
-    <!-- TAB CONTENT -->
+    <!-- 📊 CONTENT -->
     <div id="tabContent">
 
       <div id="tableView" class="tab-view">
@@ -152,7 +188,6 @@
     </div>
 
   </div>
-
 </div>
 
 <!-- SCRIPT -->
