@@ -272,9 +272,10 @@ body {
   --val: 0%;
 
   width: var(--size);
-  height: var(--size);
+  aspect-ratio: 1;
 
   border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -285,26 +286,26 @@ body {
 
   position: relative;
 
-  background:
-    conic-gradient(
-      from -90deg,
-      #22c55e 0%,
-      #4ade80 calc(var(--val) * 0.5),
-      #facc15 var(--val),
-      #1e293b var(--val)
-    );
+  background: conic-gradient(
+    from -90deg,
+    #22c55e 0%,
+    #4ade80 calc(var(--val) * 0.6),
+    #facc15 var(--val),
+    #1e293b var(--val)
+  );
 }
 
+/* Innenkreis (perfekt zentriert) */
 .donut::after {
   content: "";
   position: absolute;
-
-  inset: var(--thickness); /* 🔥 DAS ist der Fix */
+  inset: var(--thickness);
 
   background: #020617;
   border-radius: 50%;
 }
 
+/* Text */
 .donut span {
   position: relative;
   z-index: 2;
