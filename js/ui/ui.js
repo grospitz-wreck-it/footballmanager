@@ -358,9 +358,6 @@ function initUI() {
     };
   });
 
-  // initial sync
-  updateTacticsUI();
-}
 
 // =========================
 // 🎲 CHANCE BUTTON
