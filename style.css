@@ -272,7 +272,12 @@ body {
   --val: 0%;
 
   width: var(--size);
-  aspect-ratio: 1;
+  height: var(--size); /* 🔥 WICHTIG → kein aspect-ratio */
+
+  min-width: var(--size);
+  min-height: var(--size);
+
+  flex-shrink: 0; /* 🔥 verhindert Stretch */
 
   border-radius: 50%;
 
