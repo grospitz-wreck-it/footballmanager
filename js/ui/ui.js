@@ -1216,7 +1216,7 @@ function renderTacticStats() {
 
   // 🔥 nur wenn sich was geändert hat
   el.innerHTML = `
-  <div class="team-stats">
+  <div class="tactics-donuts">
 
     <div class="stat attack">
       <div class="donut" style="--val:${attack}">
