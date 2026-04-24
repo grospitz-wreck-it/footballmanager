@@ -776,9 +776,9 @@ if (!attackingTeam) {
 
     live.lastEvent = eventType;
 
-    if (eventType === "shot") {
-      switchPossession(ctx);
-    }
+   if (eventType === "shot" && Math.random() < 0.6) {
+  switchPossession(ctx);
+}
     else if (eventType === "duel") {
       if (Math.random() < 0.5) {
         switchPossession(ctx);
