@@ -281,11 +281,11 @@ body {
 
   position: relative;
 
-  /* 🔥 FIX: korrekter Gradient */
+  /* 🔥 FIX: KEIN calc, DIREKT % */
   background:
     conic-gradient(
-      #22c55e 0 calc(var(--val) * 1%),
-      #1e293b calc(var(--val) * 1%) 100%
+      #22c55e 0% var(--val),
+      #1e293b var(--val) 100%
     );
 }
 
