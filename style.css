@@ -265,12 +265,13 @@ body {
 .donut {
   --size: 54px;
   --thickness: 6px;
+  --val: 0%;
+  --target: 0%;
 
   width: var(--size);
   height: var(--size);
 
   border-radius: 50%;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,29 +282,36 @@ body {
 
   position: relative;
 
-  /* 🔥 FIX: KEIN calc, DIREKT % */
   background:
     conic-gradient(
-      #22c55e 0% var(--val),
+      from -90deg,
+      #22c55e 0%,
+      #4ade80 calc(var(--val) * 0.5),
+      #facc15 var(--val),
       #1e293b var(--val) 100%
     );
+
+  transition: --val 0.6s ease;
 }
 
-/* 🔥 innerer Kreis */
+/* 🔥 wichtig für animierbare CSS variable */
+@property --val {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
 .donut::after {
   content: "";
   position: absolute;
 
-  width: calc(var(--size) - var(--thickness) * 2);
-  height: calc(var(--size) - var(--thickness) * 2);
+  width: calc(var(--size) - var(--thickness) * 2.2);
+  height: calc(var(--size) - var(--thickness) * 2.2);
 
   background: #020617;
   border-radius: 50%;
-
-  z-index: 1;
 }
 
-/* 🔥 TEXT IMMER OBEN */
 .donut span {
   position: relative;
   z-index: 2;
