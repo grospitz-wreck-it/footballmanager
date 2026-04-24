@@ -62,23 +62,24 @@ function setDonut(el, value){
 function updateUI() {
   initUI();
 
+  // =========================
+  // 🎮 MATCH OVERLAY
+  // =========================
   const matchOverlay = document.getElementById("matchOverlay");
 
   if (matchOverlay) {
-    if (matchOverlay.classList.contains("hidden")) {
-      matchOverlay.style.pointerEvents = "none";
-    }
+    const isVisible = matchOverlay.classList.contains("show");
 
-    if (matchOverlay.classList.contains("show")) {
-      matchOverlay.style.pointerEvents = "auto";
-    }
+    matchOverlay.style.pointerEvents = isVisible ? "auto" : "none";
 
-    if (game.match?.live?.running && !matchOverlay.classList.contains("show")) {
+    if (game.match?.live?.running && !isVisible) {
       matchOverlay.classList.add("hidden");
-      matchOverlay.style.pointerEvents = "none";
     }
   }
 
+  // =========================
+  // 🧱 CORE UI
+  // =========================
   applySidebar();
   updateScore();
   updateProgress();
@@ -86,7 +87,21 @@ function updateUI() {
   renderFormationPreview();
   updateTabs();
 
-  // ✅ SELECT RESTORE
+  // =========================
+  // 📐 FORMATION BUTTON SYNC (🔥 NEU)
+  // =========================
+  const currentFormation = game.tactics?.formation || "4-4-2";
+
+  document.querySelectorAll("[data-formation]").forEach(btn => {
+    btn.classList.toggle(
+      "active",
+      btn.dataset.formation === currentFormation
+    );
+  });
+
+  // =========================
+  // 🔄 SELECT RESTORE
+  // =========================
   const leagueSelect = document.getElementById("leagueSelect");
   const teamSelect   = document.getElementById("teamSelect");
 
@@ -119,12 +134,12 @@ function updateUI() {
   // =========================
   // ⚙️ TACTICS
   // =========================
-  if (game.ui.tacticsOpen) {
-  renderTacticStats();
-}
+  if (game.ui.tacticsOpen && !game.match?.live?.running) {
+    renderTacticStats();
+  }
 
   // =========================
-  // 🪟 OVERLAY
+  // 🪟 TACTICS OVERLAY
   // =========================
   const tacticsOverlay = document.getElementById("tacticsOverlay");
 
@@ -279,29 +294,6 @@ if (chanceBtn) {
 
   // initial sync
   updateTacticsUI();
-}
-
-// =========================
-// 📐 FORMATION SELECT
-// =========================
-const formationSelect = document.getElementById("formationSelect");
-
-if (formationSelect) {
-  formationSelect.value = game.tactics.formation || "4-4-2";
-
-  formationSelect.onchange = (e) => {
-    const value = e.target.value;
-
-    game.tactics.formation = value;
-
-    if (game.team?.lineup) {
-      game.team.lineup.formation = value;
-    }
-
-    console.log("⚙️ formation:", value);
-
-    updateUI();
-  };
 }
 
 // =========================
