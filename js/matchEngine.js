@@ -86,7 +86,21 @@ function getEventWeights(ctx, mod, attackingTeam){
   const attackStrength = isHomeAttack
     ? strengthDiff
     : -strengthDiff;
+  
+function getPossessionTeam(ctx){
+  return game.match?.live?.possession;
+}
 
+function switchPossession(ctx){
+  const live = game.match?.live;
+  if(!live) return;
+
+  const home = ctx.match.homeTeamId;
+  const away = ctx.match.awayTeamId;
+
+  live.possession =
+    live.possession === home ? away : home;
+}
   // =========================
   // ⚙️ BASE WEIGHTS
   // =========================
@@ -475,12 +489,19 @@ try {
 }
 
   game.match.live = {
-    minute: 0,
-    running: true,
-    score: { home: 0, away: 0 },
-    events: [],
-    phase: "first_half"
-  };
+  minute: 0,
+  running: true,
+  score: { home: 0, away: 0 },
+  events: [],
+  phase: "first_half",
+
+  // 🔥 NEU
+  possession: Math.random() < 0.5
+    ? playerMatch.homeTeamId
+    : playerMatch.awayTeamId,
+
+  lastEvent: null
+};
 
   game.match.home = {
     id: homeId,
