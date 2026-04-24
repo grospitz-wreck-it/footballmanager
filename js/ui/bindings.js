@@ -10,7 +10,7 @@ import {
 
 import { setPlayerName } from "../modules/player.js";
 import { renderApp } from "./layout.js";
-import { updateUI } from "./ui.js";
+import { updateUI } from "../ui/ui.js";
 
 import { saveGame, loadGame, clearSave } from "../services/storage.js";
 import { game } from "../core/state.js";
