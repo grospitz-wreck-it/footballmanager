@@ -1,3 +1,4 @@
+console.log("UI LOADED");
 // =======================
 // 🖥 UI ENGINE (FULL + LIVE TABLE SAFE)
 // =======================
