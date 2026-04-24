@@ -1216,9 +1216,30 @@ function renderTacticStats() {
 
   // 🔥 nur wenn sich was geändert hat
   el.innerHTML = `
-  ${renderTacticBar("Attack", attack)}
-  ${renderTacticBar("Defense", defense)}
-  ${renderTacticBar("Control", control)}
+  <div class="team-stats">
+
+    <div class="stat attack">
+      <div class="donut" style="--val:${attack}">
+        <span>${attack}</span>
+      </div>
+      <div class="label">ATT</div>
+    </div>
+
+    <div class="stat defense">
+      <div class="donut" style="--val:${defense}">
+        <span>${defense}</span>
+      </div>
+      <div class="label">DEF</div>
+    </div>
+
+    <div class="stat control">
+      <div class="donut" style="--val:${control}">
+        <span>${control}</span>
+      </div>
+      <div class="label">CTRL</div>
+    </div>
+
+  </div>
 `;
 }
 
