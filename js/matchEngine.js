@@ -86,9 +86,72 @@ function getEventWeights(ctx, mod, attackingTeam){
   const attackStrength = isHomeAttack
     ? strengthDiff
     : -strengthDiff;
-  
-function getPossessionTeam(ctx){
-  return game.match?.live?.possession;
+
+  // =========================
+  // ⚙️ BASE WEIGHTS
+  // =========================
+  let weights = {
+    shot: 0.25,
+    foul: 0.20,
+    corner: 0.15,
+    duel: 0.40
+  };
+
+  // =========================
+  // 🔥 TACTICS INFLUENCE
+  // =========================
+  weights.shot   += mod.attackBias * 0.5;
+  weights.duel   += mod.attackBias * 0.3;
+
+  weights.foul   += mod.controlBonus * 0.4;
+  weights.corner += mod.eventRate * 0.2;
+
+  // =========================
+  // 💪 STRENGTH INFLUENCE
+  // =========================
+  weights.shot += attackStrength * 0.3;
+  weights.duel -= attackStrength * 0.2;
+
+  // =========================
+  // ⚡ MOMENTUM
+  // =========================
+  weights.shot += momentum * 0.2;
+  weights.foul += Math.abs(momentum) * 0.1;
+
+  // =========================
+  // 🔁 EVENT CHAINS (NEU)
+  // =========================
+  const last = game.match?.live?.lastEvent;
+
+  if(last === "duel"){
+    weights.shot += 0.1;
+  }
+
+  if(last === "corner"){
+    weights.shot += 0.2;
+  }
+
+  if(last === "shot"){
+    weights.duel += 0.2;
+  }
+
+  // =========================
+  // 🔒 SAFETY (kein negativer Müll)
+  // =========================
+  Object.keys(weights).forEach(k => {
+    weights[k] = Math.max(0.01, weights[k]);
+  });
+
+  // =========================
+  // 🔄 NORMALIZE (wichtig!)
+  // =========================
+  const total = Object.values(weights).reduce((a,b)=>a+b,0);
+
+  Object.keys(weights).forEach(k => {
+    weights[k] = weights[k] / total;
+  });
+
+  return weights;
 }
 
 function switchPossession(ctx){
