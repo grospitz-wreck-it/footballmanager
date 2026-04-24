@@ -1614,3 +1614,17 @@ tr:hover {
 .player-row:active {
   transform: scale(0.98);
 }
+.tactics-overlay {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: flex-start; /* 🔥 statt center */
+  justify-content: center;
+
+  padding-top: 60px; /* 🔥 Abstand nach oben */
+  padding-bottom: 20px;
+
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
+}
