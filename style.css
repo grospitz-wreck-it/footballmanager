@@ -1,4 +1,11 @@
+@import "./css/base.css";
+@import "./css/layout.css";
 @import "./css/main.css";
+@import "./css/modal.css";
+@import "./css/sidebar.css";
+@import "./css/splash.css";
+@import "./css/tactics.css";
+@import "./css/team.css";
 
 /* =========================
 🌍 GLOBAL RESET
