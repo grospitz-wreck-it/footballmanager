@@ -1232,7 +1232,27 @@ function renderTacticBar(label, value) {
     </div>
   `;
 }
+function renderFormationPreview() {
+  const el = document.getElementById("formationPreview");
+  if (!el) return;
 
+  const formation = game.tactics?.formation || "4-4-2";
+  const layout = FORMATIONS[formation];
+
+  if (!layout) return;
+
+  el.innerHTML = layout.map(p => {
+    return `
+      <div 
+        class="fp-dot ${p.role}"
+        style="
+          top:${p.top};
+          left:${p.left};
+        "
+      ></div>
+    `;
+  }).join("");
+}
 // =========================
 // 📦 EXPORTS
 // =========================
