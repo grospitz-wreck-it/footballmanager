@@ -299,8 +299,7 @@ body {
   content: "";
   position: absolute;
 
-  width: calc(var(--size) - var(--thickness) * 2.2);
-  height: calc(var(--size) - var(--thickness) * 2.2);
+  inset: var(--thickness); /* 🔥 DAS ist der Fix */
 
   background: #020617;
   border-radius: 50%;
