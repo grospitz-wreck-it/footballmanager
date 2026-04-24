@@ -182,12 +182,11 @@ function setDonut(el, value){
 
   if (tacticsBtn) {
     tacticsBtn.onclick = () => {
-      game.ui.tacticsOpen = !game.ui.tacticsOpen;
+  game.ui.tacticsOpen = !game.ui.tacticsOpen;
 
-      console.log("⚙️ tactics toggled:", game.ui.tacticsOpen);
-
-      updateUI();
-    };
+  updateTacticsUI();
+  renderTacticStats();
+};
   }
 
   // =========================
@@ -1142,7 +1141,8 @@ if (stats) {
       // 🔄 RESET + UI
       // =========================
       selectedPlayerId = null;
-      updateUI();
+      renderTeam();
+      renderTacticStats(); 
     }; // 🔥 schließt onclick
   }); // 🔥 schließt forEach
 
