@@ -119,9 +119,9 @@ function updateUI() {
   // =========================
   // ⚙️ TACTICS
   // =========================
-  if (game.ui.tacticsOpen && !game.match?.live?.running) {
-    renderTacticStats();
-  }
+  if (game.ui.tacticsOpen) {
+  renderTacticStats();
+}
 
   // =========================
   // 🪟 OVERLAY
@@ -176,8 +176,7 @@ function initUI() {
     tacticsBtn.onclick = () => {
   game.ui.tacticsOpen = !game.ui.tacticsOpen;
 
-  updateTacticsUI();
-  renderTacticStats();
+  updateUI(); // 🔥 wichtig!
 };
   }
 
@@ -1247,8 +1246,9 @@ const controlVal = normalize(control);
 
 const dataHash = `${attackVal}-${defenseVal}-${controlVal}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
 
-if (dataHash === lastTacticHash) return;
-lastTacticHash = dataHash;
+if (dataHash !== lastTacticHash) {
+  lastTacticHash = dataHash;
+}
 
 el.innerHTML = `
   <div class="tactics-donuts">
@@ -1277,10 +1277,18 @@ el.innerHTML = `
   </div>
 `;
 
- const donuts = el.querySelectorAll(".donut");
+ requestAnimationFrame(() => {
+  const donuts = el.querySelectorAll(".donut");
 
-[attackVal, defenseVal, controlVal].forEach((v, i) => {
-  setDonut(donuts[i], v);
+  console.log("🎯 tactics donuts:", donuts.length);
+
+  [attackVal, defenseVal, controlVal].forEach((v, i) => {
+    if (donuts[i]) {
+      setDonut(donuts[i], v);
+    } else {
+      console.warn("❌ donut fehlt index", i);
+    }
+  });
 });
   
   }
