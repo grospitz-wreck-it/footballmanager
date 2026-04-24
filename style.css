@@ -295,14 +295,6 @@ body {
     #1e293b var(--val)
   );
 
-
-/* 🔥 wichtig für animierbare CSS variable */
-@property --val {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 0%;
-}
-
 .donut::after {
   content: "";
   position: absolute;
