@@ -1722,3 +1722,82 @@ tr:hover {
   color: #022c22;
   font-weight: 600;
 }
+.tactics-field {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: url("../gfx/field.svg") center/cover no-repeat;
+
+  box-shadow:
+    inset 0 0 40px rgba(0,0,0,0.6),
+    0 10px 30px rgba(0,0,0,0.5);
+}
+.tactics-stats-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  text-align: center;
+}
+.formation-select {
+  position: relative;
+}
+
+.formation-select .selected {
+  padding: 12px;
+  border-radius: 12px;
+  background: #020617;
+  border: 1px solid #1e293b;
+  cursor: pointer;
+}
+
+.formation-select .options {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+
+  background: #020617;
+  border-radius: 12px;
+  overflow: hidden;
+
+  z-index: 10;
+}
+
+.formation-select.open .options {
+  display: block;
+}
+
+.formation-select .options div {
+  padding: 12px;
+  cursor: pointer;
+}
+
+.formation-select .options div:hover {
+  background: #1e293b;
+}
+.tactics-segment {
+  display: flex;
+  margin-top: 14px;
+  background: #020617;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tactics-segment button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+}
+
+.tactics-segment button.active {
+  background: #22c55e;
+  color: #022c22;
+  font-weight: 600;
+}
