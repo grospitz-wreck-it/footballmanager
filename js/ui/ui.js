@@ -205,6 +205,30 @@ function initUI() {
     },
   };
 
+const chanceBtn = document.getElementById("chanceBtn");
+
+if (chanceBtn) {
+  chanceBtn.onclick = () => {
+
+    if (!game.match?.live?.running) {
+      console.warn("⛔ kein laufendes Spiel");
+      return;
+    }
+
+    console.log("🎲 FORCED CHANCE");
+
+    // 🔥 Fake Event push (minimal safe)
+    game.events.history.push({
+      id: Date.now(),
+      minute: game.match.live.minute,
+      type: "chance",
+      text: "🔥 Große Chance durch taktische Umstellung!"
+    });
+
+    updateUI();
+  };
+}
+  
   // =========================
   // 🎯 PRESET BUTTONS
   // =========================
@@ -236,6 +260,55 @@ function initUI() {
 
   // initial sync
   updateTacticsUI();
+}
+
+// =========================
+// 📐 FORMATION SELECT
+// =========================
+const formationSelect = document.getElementById("formationSelect");
+
+if (formationSelect) {
+  formationSelect.value = game.tactics.formation || "4-4-2";
+
+  formationSelect.onchange = (e) => {
+    const value = e.target.value;
+
+    game.tactics.formation = value;
+
+    if (game.team?.lineup) {
+      game.team.lineup.formation = value;
+    }
+
+    console.log("⚙️ formation:", value);
+
+    updateUI();
+  };
+}
+
+// =========================
+// 🎲 CHANCE BUTTON
+// =========================
+const chanceBtn = document.getElementById("chanceBtn");
+
+if (chanceBtn) {
+  chanceBtn.onclick = () => {
+
+    if (!game.match?.live?.running) {
+      console.warn("⛔ kein laufendes Spiel");
+      return;
+    }
+
+    console.log("🎲 FORCED CHANCE");
+
+    game.events.history.push({
+      id: Date.now(),
+      minute: game.match.live.minute,
+      type: "chance",
+      text: "🔥 Große Chance durch taktische Umstellung!"
+    });
+
+    updateUI();
+  };
 }
 
 // =========================
