@@ -144,6 +144,26 @@ function initUI() {
     }
   });
 
+
+function setDonut(el, value){
+  const val = Math.max(0, Math.min(100, Math.round(value)));
+
+  // Start bei 0
+  el.style.setProperty("--val", "0%");
+
+  // dann animieren
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.style.setProperty("--val", val + "%");
+    });
+  });
+
+  // Text updaten
+  const span = el.querySelector("span");
+  if(span) span.textContent = val;
+}
+
+  
   // =========================
   // ⚙️ TACTICS BUTTON (OPEN)
   // =========================
@@ -967,7 +987,15 @@ function renderTeam() {
   container.dataset.renderHash = html;
 
   container.innerHTML = html;
+const donuts = container.querySelectorAll(".donut");
 
+if (stats) {
+  const values = [stats.attack, stats.defense, stats.control];
+
+  donuts.forEach((d, i) => {
+    setDonut(d, values[i] ?? 0);
+  });
+}
   // =========================
   // 🖱️ CLICK HANDLER (Richtig platziert!)
   // =========================
@@ -1035,23 +1063,7 @@ function renderTeam() {
         const typeA = getType(selectedPlayerId);
         const typeB = getType(id);
 
-        function setDonut(el, value){
-  const val = Math.max(0, Math.min(100, Math.round(value)));
-
-  // Start bei 0
-  el.style.setProperty("--val", "0%");
-
-  // dann animieren
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      el.style.setProperty("--val", val + "%");
-    });
-  });
-
-  // Text updaten
-  const span = el.querySelector("span");
-  if(span) span.textContent = val;
-}
+        
         
         // =========================
         // 🔄 STARTER ↔ STARTER
