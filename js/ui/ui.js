@@ -1253,21 +1253,21 @@ el.innerHTML = `
   <div class="tactics-donuts">
 
     <div class="stat attack">
-      <div class="donut" style="--val:${attackVal}%">
+      <div class="donut" style="--val:0%">
         <span>${attackVal}</span>
       </div>
       <div class="label">ATT</div>
     </div>
 
     <div class="stat defense">
-      <div class="donut" style="--val:${defenseVal}%">
+      <div class="donut" style="--val:0%">
         <span>${defenseVal}</span>
       </div>
       <div class="label">DEF</div>
     </div>
 
     <div class="stat control">
-      <div class="donut" style="--val:${controlVal}%">
+      <div class="donut" style="--val:0%">
         <span>${controlVal}</span>
       </div>
       <div class="label">CTRL</div>
@@ -1276,11 +1276,10 @@ el.innerHTML = `
   </div>
 `;
 
-  const donuts = el.querySelectorAll(".donut");
+ const donuts = el.querySelectorAll(".donut");
 
-donuts.forEach((d, i) => {
-  const values = [attackVal, defenseVal, controlVal];
-  setDonut(d, values[i] ?? 0);
+[attackVal, defenseVal, controlVal].forEach((v, i) => {
+  setDonut(donuts[i], v);
 });
   
   }
