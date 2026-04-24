@@ -270,7 +270,6 @@ body {
   --size: 54px;
   --thickness: 6px;
   --val: 0%;
-  --target: 0%;
 
   width: var(--size);
   height: var(--size);
@@ -287,13 +286,14 @@ body {
   position: relative;
 
   background:
-  conic-gradient(
-    from -90deg,
-    #22c55e 0%,
-    #4ade80 calc(var(--val) * 0.5),
-    #facc15 var(--val),
-    #1e293b var(--val)
-  );
+    conic-gradient(
+      from -90deg,
+      #22c55e 0%,
+      #4ade80 calc(var(--val) * 0.5),
+      #facc15 var(--val),
+      #1e293b var(--val)
+    );
+}
 
 .donut::after {
   content: "";
@@ -310,7 +310,6 @@ body {
   position: relative;
   z-index: 2;
 }
-
 /* =========================
 ⚽ MATCH TOP BAR
 ========================= */
