@@ -1714,7 +1714,7 @@ tr:hover {
 
 
 /* =========================
-⚽ PLAYER DOTS (ENHANCED)
+⚽ PLAYER DOTS (FIXED + CLEAR)
 ========================= */
 .fp-dot {
   position: absolute;
@@ -1724,18 +1724,32 @@ tr:hover {
   height: 12px;
   border-radius: 50%;
 
+  z-index: 2; /* 🔥 sicher über field */
+
   box-shadow:
     0 0 6px rgba(255,255,255,0.6),
     0 0 12px currentColor,
     0 0 20px currentColor;
 }
 
-/* Farben */
-.fp-dot.GK  { color: #facc15; background: #facc15; }
-.fp-dot.DEF { color: #38bdf8; background: #38bdf8; }
-.fp-dot.MID { color: #a855f7; background: #a855f7; }
-.fp-dot.ST  { color: #22c55e; background: #22c55e; }
+/* Farben klar getrennt */
+.fp-dot.GK  { background: #facc15; color: #facc15; }
+.fp-dot.DEF { background: #38bdf8; color: #38bdf8; }
+.fp-dot.MID { background: #a855f7; color: #a855f7; }
 
+/* 🔥 ST = ROT + größer + stärker */
+.fp-dot.ST  {
+  background: #ef4444;
+  color: #ef4444;
+
+  width: 14px;
+  height: 14px;
+
+  box-shadow:
+    0 0 8px rgba(239,68,68,0.9),
+    0 0 18px rgba(239,68,68,0.7),
+    0 0 28px rgba(239,68,68,0.5);
+}
 
 /* =========================
 📊 STATS CONTAINER (FINAL)
