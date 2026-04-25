@@ -568,24 +568,23 @@ function updateTabs() {
 function updateTacticsUI() {
   if (!game.tactics) return;
 
-  document.querySelectorAll("[data-preset]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.preset === game.tactics.preset);
-  });
+  // 🎯 FORMATION DROPDOWN SYNC
+  const formationDD = document.getElementById("formationDropdown");
+  if (formationDD) {
+    const selected = formationDD.querySelector(".dd-selected");
+    if (selected) {
+      selected.textContent = game.tactics.formation || "4-4-2";
+    }
+  }
 
-  document.querySelectorAll("[data-tempo]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.tempo === game.tactics.tempo);
-  });
-
-  document.querySelectorAll("[data-pressing]").forEach((btn) => {
-    btn.classList.toggle(
-      "active",
-      btn.dataset.pressing === game.tactics.pressing,
-    );
-  });
-
-  document.querySelectorAll("[data-line]").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.line === game.tactics.line);
-  });
+  // 🎯 PRESET DROPDOWN SYNC
+  const presetDD = document.getElementById("presetDropdown");
+  if (presetDD) {
+    const selected = presetDD.querySelector(".dd-selected");
+    if (selected) {
+      selected.textContent = game.tactics.preset || "balanced";
+    }
+  }
 }
 
 // =========================
