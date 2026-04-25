@@ -12,46 +12,41 @@
 <!-- =========================
 🎮 TACTICS OVERLAY
 ========================= -->
-<div id="tacticsOverlay" class="tactics-overlay">
-  <div class="tactics-sheet">
+<div class="tactics-controls advanced">
 
-    <!-- HEADER -->
-    <div class="tactics-header">
-      <img src="./gfx/taktik.webp" alt="Taktik" />
+  <!-- FORMATION -->
+  <div class="tactics-dropdown" id="formationDropdown">
+    <div class="dd-selected">4-4-2</div>
+    <div class="dd-options">
+      <div data-value="4-4-2">4-4-2</div>
+      <div data-value="4-3-3">4-3-3</div>
+      <div data-value="3-5-2">3-5-2</div>
+      <div data-value="4-2-3-1">4-2-3-1</div>
     </div>
-
-    <!-- FIELD -->
-    <div class="tactics-card field-card">
-      <div class="formation-preview" id="formationPreview"></div>
-    </div>
-
-    <!-- STATS GRID -->
-    <div class="tactics-stats-grid">
-
-      <!-- DONUTS -->
-      <div id="tacticsStats" class="tactics-donuts-card"></div>
-
-      <!-- TEAM BALANCE -->
-      <div class="tactics-balance-card" id="tacticsBalance"></div>
-
-    </div>
-
-    <!-- CONTROLS -->
-    <div class="tactics-controls advanced">
-
-      <div class="tactics-dropdown" id="formationDropdown"></div>
-      <div class="tactics-dropdown" id="presetDropdown"></div>
-      <div class="tactics-dropdown" id="styleDropdown"></div>
-
-    </div>
-
-    <!-- CTA -->
-    <button id="chanceBtn" class="chance-btn big">
-      🎲 Chance erzwingen
-      <span>Erhöhe deine Chance auf ein Tor</span>
-    </button>
-
   </div>
+
+  <!-- PRESET -->
+  <div class="tactics-dropdown" id="presetDropdown">
+    <div class="dd-selected">Balanced</div>
+    <div class="dd-options">
+      <div data-value="offensive">⚡ Offensiv</div>
+      <div data-value="balanced">⚖️ Balanced</div>
+      <div data-value="defensive">🛡 Defensiv</div>
+    </div>
+  </div>
+
+  <!-- STYLE -->
+  <div class="tactics-dropdown" id="styleDropdown">
+    <div class="dd-selected">⚖️ Ausgeglichen</div>
+    <div class="dd-options">
+      <div data-value="balanced">⚖️ Ausgeglichen</div>
+      <div data-value="possession">🧠 Ballbesitz</div>
+      <div data-value="counter">⚡ Konter</div>
+      <div data-value="longball">🎯 Lange Bälle</div>
+      <div data-value="wings">🏃 Flügelspiel</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- =========================
