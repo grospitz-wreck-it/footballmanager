@@ -1481,6 +1481,9 @@ tr:hover {
 /* =========================
 🎮 OVERLAY
 ========================= */
+/* =========================
+🎮 OVERLAY (PREMIUM AAA)
+========================= */
 .tactics-overlay {
   position: fixed;
   inset: 0;
@@ -1491,19 +1494,95 @@ tr:hover {
 
   padding: 0 10px;
 
-  background: rgba(2,6,23,0.75);
-  backdrop-filter: blur(10px);
+  /* 🔥 MULTI LAYER BACKGROUND */
+  background:
+    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.18), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(168,85,247,0.18), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(56,189,248,0.12), transparent 50%),
+    linear-gradient(
+      180deg,
+      rgba(2,6,23,0.7),
+      rgba(2,6,23,0.92)
+    );
+
+  backdrop-filter: blur(14px) saturate(120%);
 
   z-index: 5000;
 
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.25s ease;
+
+  transition:
+    opacity 0.35s ease,
+    backdrop-filter 0.35s ease;
 }
 
+/* =========================
+✨ OPEN STATE
+========================= */
 .tactics-overlay.open {
   pointer-events: auto;
   opacity: 1;
+}
+
+/* =========================
+🌟 GLOW LAYER (FLOATING LIGHT)
+========================= */
+.tactics-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 30% 40%, rgba(34,197,94,0.25), transparent 50%),
+    radial-gradient(circle at 70% 60%, rgba(168,85,247,0.25), transparent 55%);
+
+  filter: blur(80px);
+
+  opacity: 0.6;
+
+  animation: overlayGlowMove 16s ease-in-out infinite alternate;
+}
+
+/* =========================
+🌑 VIGNETTE (DEPTH)
+========================= */
+.tactics-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(0,0,0,0.6)
+  );
+
+  opacity: 0.8;
+}
+
+/* =========================
+🎬 ANIMATION
+========================= */
+@keyframes overlayGlowMove {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.1) translate(-20px, 10px);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scale(1.2) translate(20px, -10px);
+    opacity: 0.9;
+  }
 }
 
 /* =========================
@@ -1574,7 +1653,7 @@ tr:hover {
     drop-shadow(0 8px 20px rgba(0,0,0,0.8))
     brightness(1.05);
 
-  transform: translateY(2px);
+  transform: translateY(4px);
 }
 
 /* subtiler Glow */
