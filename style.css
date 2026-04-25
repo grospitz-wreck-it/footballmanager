@@ -1489,52 +1489,103 @@ tr:hover {
 }
 
 /* =========================
-🧠 HEADER
+🧠 HEADER (UPGRADED)
 ========================= */
 .tactics-header {
+  position: relative;
+
   display: flex;
   justify-content: center;
-  margin-top: -20px;
-  margin-bottom: 10px;
+  align-items: center;
+
+  margin-top: -24px;
+  margin-bottom: 12px;
+
+  z-index: 2;
 }
 
 .tactics-header img {
-  width: clamp(60px, 20vw, 100px);
+  width: clamp(70px, 22vw, 110px);
+
+  object-fit: contain;
+
   filter:
-    drop-shadow(0 6px 16px rgba(0,0,0,0.7))
+    drop-shadow(0 8px 20px rgba(0,0,0,0.8))
     brightness(1.05);
+
+  transform: translateY(2px);
 }
 
+/* subtiler Glow */
+.tactics-header::after {
+  content: "";
+  position: absolute;
+
+  width: 140px;
+  height: 70px;
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(34,197,94,0.25),
+    transparent 70%
+  );
+
+  filter: blur(20px);
+  z-index: -1;
+}
+
+
 /* =========================
-📐 FIELD
+📐 FIELD (UPGRADED)
 ========================= */
 .formation-preview {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
 
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
 
   background: url("./gfx/field.svg") center/cover no-repeat;
 
   box-shadow:
-    inset 0 0 40px rgba(0,0,0,0.6),
-    0 10px 30px rgba(0,0,0,0.5);
+    inset 0 0 50px rgba(0,0,0,0.7),
+    0 12px 40px rgba(0,0,0,0.6);
+
+  margin-bottom: 6px;
 }
 
+/* Mittellinie */
 .formation-preview::after {
   content: "";
   position: absolute;
+
   top: 0;
   bottom: 0;
   left: 50%;
+
   width: 1px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.15);
 }
 
+/* leichtes Vignette Overlay */
+.formation-preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(0,0,0,0.5)
+  );
+
+  pointer-events: none;
+}
+
+
 /* =========================
-⚽ PLAYER DOTS
+⚽ PLAYER DOTS (ENHANCED)
 ========================= */
 .fp-dot {
   position: absolute;
@@ -1546,88 +1597,125 @@ tr:hover {
 
   box-shadow:
     0 0 6px rgba(255,255,255,0.6),
-    0 0 12px currentColor;
+    0 0 12px currentColor,
+    0 0 20px currentColor;
 }
 
+/* Farben */
 .fp-dot.GK  { color: #facc15; background: #facc15; }
 .fp-dot.DEF { color: #38bdf8; background: #38bdf8; }
 .fp-dot.MID { color: #a855f7; background: #a855f7; }
 .fp-dot.ST  { color: #22c55e; background: #22c55e; }
 
+
 /* =========================
-📊 STATS LAYOUT (NEU)
+📊 STATS CONTAINER (FINAL)
 ========================= */
 .tactics-stats-row {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   margin-top: 14px;
-}
 
-.tactics-stats-row {
-  padding: 12px;
-  border-radius: 16px;
+  padding: 14px;
+  border-radius: 18px;
 
   background: linear-gradient(
     180deg,
-    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.06),
     rgba(255,255,255,0.02)
   );
 
   box-shadow:
-    inset 0 0 20px rgba(0,0,0,0.5),
-    0 10px 30px rgba(0,0,0,0.4);
+    inset 0 0 25px rgba(0,0,0,0.6),
+    0 12px 30px rgba(0,0,0,0.5);
+
+  position: relative;
+  z-index: 1;
 }
 
-/* LEFT SIDE */
+
+/* =========================
+🍩 DONUT SIDE
+========================= */
 .tactics-donuts {
   display: flex;
   gap: 12px;
-  flex: 0 0 auto;   /* 🔥 verhindert dass es alles frisst */
+  flex: 0 0 auto;
 }
 
-/* RIGHT SIDE */
+
+/* =========================
+📊 BARS SIDE
+========================= */
 .tactics-bars {
-  flex: 1;          /* 🔥 nimmt restlichen Platz */
+  flex: 1;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 12px;
+
+  pointer-events: none; /* 🔥 blockiert NIE dropdown */
 }
 
-/* einzelne Bar */
+
+/* =========================
+📊 SINGLE BAR
+========================= */
 .tactics-bar {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+/* Label */
 .tactics-bar span {
-  width: 60px;
-  font-size: 11px;
-  opacity: 0.7;
+  width: 50px;
+  font-size: 10px;
+  opacity: 0.6;
+  letter-spacing: 1px;
 }
 
-/* BAR BACKGROUND */
+/* Background */
 .tactics-bar .bar {
   flex: 1;
   height: 6px;
+
   background: rgba(255,255,255,0.08);
   border-radius: 6px;
+
   overflow: hidden;
+
+  box-shadow:
+    inset 0 0 6px rgba(0,0,0,0.6);
 }
 
-/* FILL */
+/* Fill */
 .tactics-bar .fill {
   height: 100%;
   border-radius: 6px;
-  transition: width 0.3s ease;
+
+  transition: width 0.35s ease;
+
+  box-shadow:
+    0 0 10px currentColor;
 }
 
-/* COLORS */
-.fill.att { background: linear-gradient(90deg, #22c55e, #4ade80); }
-.fill.def { background: linear-gradient(90deg, #38bdf8, #60a5fa); }
-.fill.ctrl { background: linear-gradient(90deg, #a855f7, #e879f9); }
+/* Farben */
+.fill.att {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+.fill.def {
+  background: linear-gradient(90deg, #38bdf8, #60a5fa);
+}
+.fill.ctrl {
+  background: linear-gradient(90deg, #a855f7, #e879f9);
+}
 
+
+/* =========================
+⚠️ SAFETY LAYER FIX
+========================= */
 #tacticsBars {
   pointer-events: none;
   position: relative;
@@ -1635,7 +1723,7 @@ tr:hover {
 }
 
 /* =========================
-🍩 DONUT (FIXED)
+🍩 DONUT
 ========================= */
 .donut {
   --size: 64px;
@@ -1679,10 +1767,6 @@ tr:hover {
   border-radius: 50%;
 }
 
-.donut span {
-  position: relative;
-  z-index: 2;
-}
 /* =========================
 🎛 CONTROLS
 ========================= */
@@ -1690,20 +1774,20 @@ tr:hover {
   display: flex;
   gap: 10px;
   margin-top: 16px;
-}
 
-.tactics-controls > * {
-  flex: 1;
+  position: relative;
+  z-index: 100; /* 🔥 über stats */
 }
 
 /* =========================
-⬇️ DROPDOWN
+⬇️ DROPDOWN (FINAL FIX)
 ========================= */
 .tactics-dropdown {
   position: relative;
-  z-index: 5;
+  z-index: 999; /* 🔥 wichtig */
 }
 
+/* SELECT */
 .dd-selected {
   padding: 12px;
   border-radius: 14px;
@@ -1725,15 +1809,23 @@ tr:hover {
     inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
+/* ARROW */
 .dd-selected::after {
   content: "▾";
   font-size: 12px;
   opacity: 0.6;
+  transition: transform 0.2s ease;
 }
 
+.tactics-dropdown.open .dd-selected::after {
+  transform: rotate(180deg);
+}
+
+/* OPTIONS */
 .dd-options {
   position: absolute;
-  bottom: 110%;
+
+  top: 110%;   /* 🔥 WICHTIG: NICHT bottom */
   left: 0;
   right: 0;
 
@@ -1745,28 +1837,30 @@ tr:hover {
   opacity: 0;
   pointer-events: none;
 
-  transform: translateY(6px);
+  transform: translateY(-6px);
   transition: all 0.2s ease;
 
-  z-index: 50;
+  z-index: 9999; /* 🔥 MAX */
 }
 
+/* OPEN */
 .tactics-dropdown.open .dd-options {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
 }
 
+/* ITEMS */
 .dd-options div {
   padding: 12px;
   font-size: 13px;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .dd-options div:hover {
   background: rgba(255,255,255,0.08);
 }
-
 /* =========================
 🎲 BUTTON
 ========================= */
