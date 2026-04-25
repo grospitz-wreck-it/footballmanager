@@ -212,153 +212,66 @@ function initUI() {
     };
   }
 
-  // =========================
-  // ⚙️ TACTICS STATE INIT
-  // =========================
-  game.tactics = game.tactics || {
-    preset: "balanced",
-    tempo: "normal",
-    pressing: "medium",
-    line: "medium",
-    formation: "4-4-2",
-    focus: "mixed"
+
+
+ // =========================
+// 🎛 DROPDOWN SYSTEM
+// =========================
+function setupDropdown(id, onSelect) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const selected = el.querySelector(".dd-selected");
+  const options = el.querySelector(".dd-options");
+
+  if (!selected || !options) return;
+
+  selected.onclick = () => {
+    el.classList.toggle("open");
   };
 
-  const PRESETS = {
-    offensive: {
-      tempo: "fast",
-      pressing: "high",
-      line: "high",
-    },
-    balanced: {
-      tempo: "normal",
-      pressing: "medium",
-      line: "medium",
-    },
-    defensive: {
-      tempo: "slow",
-      pressing: "low",
-      line: "low",
-    },
-  };
+  options.querySelectorAll("div").forEach(opt => {
+    opt.onclick = () => {
+      const value = opt.dataset.value;
 
-  // =========================
-  // 🎯 PRESET BUTTONS
-  // =========================
-  document.querySelectorAll("[data-preset]").forEach(btn => {
-    btn.onclick = () => {
-      const preset = btn.dataset.preset;
+      selected.textContent = opt.textContent;
+      el.classList.remove("open");
 
-      game.tactics.preset = preset;
-      Object.assign(game.tactics, PRESETS[preset]);
-
-      // UI ACTIVE STATE
-      document.querySelectorAll("[data-preset]").forEach(b =>
-        b.classList.remove("active")
-      );
-      btn.classList.add("active");
-
-      updateUI();
+      onSelect(value);
     };
   });
 
-  // =========================
-  // 📐 FORMATION DROPDOWN (NEU)
-  // =========================
-  const dropdown = document.getElementById("formationDropdown");
-
-  if (dropdown) {
-    const selected = dropdown.querySelector(".selected");
-
-    // initial value
-    if (selected) {
-      selected.textContent = game.tactics.formation;
+  document.addEventListener("click", (e) => {
+    if (!el.contains(e.target)) {
+      el.classList.remove("open");
     }
-
-    selected?.addEventListener("click", () => {
-      dropdown.classList.toggle("open");
-    });
-
-    dropdown.querySelectorAll("[data-formation]").forEach(opt => {
-      opt.onclick = () => {
-        const value = opt.dataset.formation;
-
-        game.tactics.formation = value;
-
-        if (game.team?.lineup) {
-          game.team.lineup.formation = value;
-        }
-
-        if (selected) {
-          selected.textContent = value;
-        }
-
-        dropdown.classList.remove("open");
-
-        console.log("⚙️ formation:", value);
-
-        updateUI();
-      };
-    });
-  }
-
-  // =========================
-  // 🎲 CHANCE BUTTON
-  // =========================
-  const chanceBtn = document.getElementById("chanceBtn");
-
-  if (chanceBtn) {
-    chanceBtn.onclick = () => {
-
-      if (!game.match?.live?.running) {
-        console.warn("⛔ kein laufendes Spiel");
-        return;
-      }
-
-      console.log("🎲 FORCED CHANCE");
-
-      game.events.history.push({
-        id: Date.now(),
-        minute: game.match.live.minute,
-        type: "chance",
-        text: "🔥 Große Chance durch taktische Umstellung!"
-      });
-
-      updateUI();
-    };
-  }
-}
-  
-  // =========================
-  // 🎯 PRESET BUTTONS
-  // =========================
-  document.querySelectorAll("[data-preset]").forEach((btn) => {
-    btn.onclick = () => {
-      const preset = btn.dataset.preset;
-      if (!preset) return;
-
-      const config = PRESETS[preset];
-      if (!config) return;
-
-      game.tactics.preset = preset;
-      game.tactics.tempo = config.tempo;
-      game.tactics.pressing = config.pressing;
-      game.tactics.line = config.line;
-
-      console.log("⚙️ preset applied:", preset, config);
-
-      // UI highlight
-      document
-        .querySelectorAll("[data-preset]")
-        .forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      updateTacticsUI();
-      renderTacticStats();
-    };
   });
+}
 
 
+// =========================
+// 📐 FORMATION DROPDOWN
+// =========================
+setupDropdown("formationDropdown", (value) => {
+  game.tactics.formation = value;
+
+  if (game.team?.lineup) {
+    game.team.lineup.formation = value;
+  }
+
+  updateUI();
+});
+
+
+// =========================
+// ⚙️ PRESET DROPDOWN
+// =========================
+setupDropdown("presetDropdown", (value) => {
+  game.tactics.preset = value;
+
+  updateTacticsUI();
+  renderTacticStats();
+});
 // =========================
 // 🎲 CHANCE BUTTON
 // =========================
