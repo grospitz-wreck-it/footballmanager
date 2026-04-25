@@ -1634,15 +1634,15 @@ tr:hover {
 }
 
 .tactics-header img {
-  width: clamp(70px, 22vw, 110px);
-
+  width: clamp(140px, 44vw, 220px); /* 🔥 exakt doppelt */
+  
   object-fit: contain;
 
   filter:
     drop-shadow(0 8px 20px rgba(0,0,0,0.8))
     brightness(1.05);
 
-  transform: translateY(4px);
+  transform: translateY(6px); /* leicht angepasst */
 }
 
 /* subtiler Glow */
