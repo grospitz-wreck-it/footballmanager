@@ -1463,7 +1463,7 @@ tr:hover {
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
 
   transform: translateY(100%);
   transition: transform 0.3s ease;
@@ -1562,11 +1562,22 @@ tr:hover {
 ========================= */
 
 .tactics-stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-
   margin-top: 12px;
+}
+
+/* Donut Wrapper */
+.tactics-donuts {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* einzelne Stats */
+.tactics-donuts .stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* =========================
@@ -1653,11 +1664,13 @@ tr:hover {
 ========================= */
 
 .tactics-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
   gap: 10px;
-
   margin-top: 14px;
+}
+
+.tactics-controls > * {
+  flex: 1;
 }
 
 /* =========================
@@ -1697,7 +1710,8 @@ tr:hover {
 
 .dd-options {
   position: absolute;
-  top: 110%;
+  bottom: 110%;
+  top: auto;
   left: 0;
   right: 0;
 
