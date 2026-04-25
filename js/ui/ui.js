@@ -1307,6 +1307,15 @@ function renderFormationPreview() {
     `;
   }).join("");
 }
+
+// =========================
+// 🚀 INITIAL UI RENDER (FIX)
+// =========================
+requestAnimationFrame(() => {
+  console.log("🚀 initial UI render");
+  updateUI();
+});
+
 // =========================
 // 📦 EXPORTS
 // =========================
