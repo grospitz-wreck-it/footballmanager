@@ -1243,7 +1243,32 @@ function renderTacticStats() {
 
   </div>
 `;
+const barsEl = document.getElementById("tacticsBars");
 
+if (barsEl) {
+  barsEl.innerHTML = `
+    <div class="tactics-bar">
+      <span>ATT</span>
+      <div class="bar">
+        <div class="fill att" style="width:${attackVal}%"></div>
+      </div>
+    </div>
+
+    <div class="tactics-bar">
+      <span>DEF</span>
+      <div class="bar">
+        <div class="fill def" style="width:${defenseVal}%"></div>
+      </div>
+    </div>
+
+    <div class="tactics-bar">
+      <span>CTRL</span>
+      <div class="bar">
+        <div class="fill ctrl" style="width:${controlVal}%"></div>
+      </div>
+    </div>
+  `;
+}
   requestAnimationFrame(() => {
     const donuts = el.querySelectorAll(".donut");
 
