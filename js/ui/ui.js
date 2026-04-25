@@ -872,72 +872,7 @@ function renderTeam() {
 
   let html = "";
 
-  // =========================
-  // 🧱 TEAM RENDER (FINAL)
-  // =========================
-  function calculateTeamStats() {
-    const lineup = game.team?.lineup;
-    const teamId = game.team?.selectedId || game.team?.id;
 
-    if (!teamId) return null;
-
-    const team = game.league?.current?.teams?.find(
-      (t) => String(t.id) === String(teamId),
-    );
-
-    const allPlayers = team?.players || [];
-
-    if (!allPlayers.length) {
-      return { attack: 0, defense: 0, control: 0 };
-    }
-
-    let players = [];
-
-    if (lineup?.slots) {
-      const ids = Object.values(lineup.slots).filter(Boolean);
-
-      if (ids.length) {
-        players = allPlayers.filter((p) => ids.includes(String(p.id)));
-      }
-    }
-
-    if (!players.length) {
-      players = allPlayers;
-    }
-
-    let attack = 0;
-    let defense = 0;
-    let control = 0;
-
-    players.forEach((p) => {
-      const rating = p.overall ?? 50;
-      const type = (p.position_type || "MID").toUpperCase();
-
-      if (type.includes("ST")) {
-        attack += rating * 1.2;
-        control += rating * 0.3;
-      } else if (type.includes("MID")) {
-        attack += rating * 0.6;
-        control += rating * 1.0;
-      } else if (type.includes("DEF")) {
-        defense += rating * 1.1;
-        control += rating * 0.4;
-      } else if (type.includes("GK")) {
-        defense += rating * 1.4;
-        control += rating * 0.2;
-      }
-    });
-
-    const count = players.length || 1;
-
-    const clamp = (v) => Math.max(0, Math.min(150, Math.round(v)));
-
-    return {
-      attack: clamp(attack / count),
-      defense: clamp(defense / count),
-      control: clamp(control / count),
-    };
-  }
 
   // =========================
   // 🧠 GROUPED STARTERS
