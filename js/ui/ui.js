@@ -982,18 +982,6 @@ function renderTeam() {
 
   let html = "";
 
-// =========================
-// 🧱 TEAM RENDER (FINAL)
-// =========================
-const stats = calculateTeamStats();
-
-if (!stats) {
-  console.warn("❌ stats fehlen");
-  return;
-}
-
-console.log("📊 TEAM STATS (renderTeam):", stats);
-
   // =========================
   // 🧠 GROUPED STARTERS
   // =========================
