@@ -720,34 +720,17 @@ function groupPlayers(players) {
     GK: [],
   };
 
-  if (!players?.length) return groups; // 🔒 safety
+  if (!players?.length) return groups;
 
   players.forEach((p) => {
-  const rating = p.overall ?? 50;
+    const type = mapPositionToRole(p.position_type);
 
-  // 🔥 EINHEITLICH!
-  const type = mapPosition(p.position_type);
-
-  if (type === "ATT") {
-    attack += rating * 1.2;
-    control += rating * 0.3;
-  }
-
-  else if (type === "MID") {
-    attack += rating * 0.6;
-    control += rating * 1.0;
-  }
-
-  else if (type === "DEF") {
-    defense += rating * 1.1;
-    control += rating * 0.4;
-  }
-
-  else if (type === "GK") {
-    defense += rating * 1.4;
-    control += rating * 0.2;
-  }
-});
+    if (type === "ST") groups.ST.push(p);
+    else if (type === "MID") groups.MID.push(p);
+    else if (type === "DEF") groups.DEF.push(p);
+    else if (type === "GK") groups.GK.push(p);
+    else groups.MID.push(p);
+  });
 
   return groups;
 }
