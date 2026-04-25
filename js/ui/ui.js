@@ -663,11 +663,11 @@ function updateTacticsUI() {
 
       // 🔥 nicer labels
       const labels = {
-        possession: "🧠 Ballbesitz",
-        counter: "⚡ Konter",
-        longball: "🎯 Lange Bälle",
-        wingplay: "🏃 Flügelspiel",
-        balanced: "⚖️ Ausgeglichen"
+        possession: "Ballbesitz",
+        counter: "Konter",
+        longball: "Lange Bälle",
+        wings: "Flügelspiel",
+        balanced: "Ausgeglichen"
       };
 
       selected.textContent = labels[style] || style;
