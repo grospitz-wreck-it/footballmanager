@@ -744,8 +744,8 @@ function calculateTeamStats() {
 
   players.forEach((p) => {
     const rating = p.overall ?? 50;
-    const type = (p.position_type || "MID").toUpperCase();
-
+    const type = (p.position_type || "").toUpperCase();
+    
     // ⚔️ Attack
     if (type.includes("ST")) {
       attack += rating * 1.2;
