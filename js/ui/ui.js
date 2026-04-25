@@ -41,7 +41,6 @@ const PRESETS = {
   },
 };
 
-
 // =========================
 // 📂 SIDEBAR APPLY
 // =========================
@@ -60,7 +59,7 @@ function applySidebar() {
 // =========================
 // 🍩 DONUT HELPER (GLOBAL)
 // =========================
-function setDonut(el, value){
+function setDonut(el, value) {
   const val = Math.max(0, Math.min(100, Math.round(value)));
 
   // Start bei 0
@@ -75,7 +74,7 @@ function setDonut(el, value){
 
   // Text updaten
   const span = el.querySelector("span");
-  if(span) span.textContent = val;
+  if (span) span.textContent = val;
 }
 
 // =========================
@@ -115,18 +114,15 @@ function updateUI() {
   // =========================
   const currentFormation = game.tactics?.formation || "4-4-2";
 
-  document.querySelectorAll("[data-formation]").forEach(btn => {
-    btn.classList.toggle(
-      "active",
-      btn.dataset.formation === currentFormation
-    );
+  document.querySelectorAll("[data-formation]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.formation === currentFormation);
   });
 
   // =========================
   // 🔄 SELECT RESTORE
   // =========================
   const leagueSelect = document.getElementById("leagueSelect");
-  const teamSelect   = document.getElementById("teamSelect");
+  const teamSelect = document.getElementById("teamSelect");
 
   if (leagueSelect && game.league?.selectedId) {
     leagueSelect.value = game.league.selectedId;
@@ -170,7 +166,6 @@ function updateUI() {
     tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
   }
 }
-
 
 function initUI() {
   if (initialized) return;
@@ -248,7 +243,7 @@ function initUI() {
       el.classList.toggle("open");
     };
 
-    options.querySelectorAll("div").forEach(opt => {
+    options.querySelectorAll("div").forEach((opt) => {
       opt.onclick = () => {
         const value = opt.dataset.value;
 
@@ -306,7 +301,7 @@ function initUI() {
         id: Date.now(),
         minute: game.match.live.minute,
         type: "chance",
-        text: "🔥 Große Chance durch taktische Umstellung!"
+        text: "🔥 Große Chance durch taktische Umstellung!",
       });
 
       updateUI();
@@ -636,18 +631,16 @@ function pickPlayer(role, byType) {
 // =========================
 
 function groupPlayers(players) {
-
   const groups = {
     ST: [],
     MID: [],
     DEF: [],
-    GK: []
+    GK: [],
   };
 
   if (!players?.length) return groups; // 🔒 safety
 
-  players.forEach(p => {
-
+  players.forEach((p) => {
     const type = (p.position_type || "MID").toUpperCase();
 
     if (type.includes("ST")) groups.ST.push(p);
@@ -655,7 +648,6 @@ function groupPlayers(players) {
     else if (type.includes("DEF")) groups.DEF.push(p);
     else if (type.includes("GK")) groups.GK.push(p);
     else groups.MID.push(p);
-
   });
 
   return groups;
@@ -699,7 +691,6 @@ function renderPlayerRow(p) {
 }
 
 function calculateTeamStats() {
-
   const lineup = game.team?.lineup;
   const teamId = game.team?.selectedId || game.team?.id;
 
@@ -711,8 +702,9 @@ function calculateTeamStats() {
   // =========================
   // 🔥 TEAM + SPIELER LADEN
   // =========================
-  const team = game.league?.current?.teams
-    ?.find(t => String(t.id) === String(teamId));
+  const team = game.league?.current?.teams?.find(
+    (t) => String(t.id) === String(teamId),
+  );
 
   const allPlayers = team?.players || [];
 
@@ -721,7 +713,7 @@ function calculateTeamStats() {
     return {
       attack: 0,
       defense: 0,
-      control: 0
+      control: 0,
     };
   }
 
@@ -734,9 +726,7 @@ function calculateTeamStats() {
     const ids = Object.values(lineup.slots).filter(Boolean);
 
     if (ids.length) {
-      players = allPlayers.filter(p =>
-        ids.includes(String(p.id))
-      );
+      players = allPlayers.filter((p) => ids.includes(String(p.id)));
     }
   }
 
@@ -752,8 +742,7 @@ function calculateTeamStats() {
   let defense = 0;
   let control = 0;
 
-  players.forEach(p => {
-
+  players.forEach((p) => {
     const rating = p.overall ?? 50;
     const type = (p.position_type || "MID").toUpperCase();
 
@@ -782,7 +771,6 @@ function calculateTeamStats() {
     else {
       control += rating * 0.5;
     }
-
   });
 
   // =========================
@@ -790,12 +778,12 @@ function calculateTeamStats() {
   // =========================
   const count = players.length || 1;
 
-  const clamp = v => Math.max(0, Math.min(150, Math.round(v)));
+  const clamp = (v) => Math.max(0, Math.min(150, Math.round(v)));
 
   const result = {
     attack: clamp(attack / count),
     defense: clamp(defense / count),
-    control: clamp(control / count)
+    control: clamp(control / count),
   };
 
   console.log("📊 TeamStats:", result);
@@ -845,11 +833,10 @@ function renderTeam() {
 
   const byType = { GK: [], DEF: [], MID: [], ST: [] };
 
-  players.forEach(p => {
-  const type = (p.position_type || "MID").toUpperCase();
-  (byType[type] || byType.MID).push(p);
-});
-  
+  players.forEach((p) => {
+    const type = (p.position_type || "MID").toUpperCase();
+    (byType[type] || byType.MID).push(p);
+  });
 
   // Sortieren (safe)
   Object.values(byType).forEach((arr) => {
@@ -881,43 +868,77 @@ function renderTeam() {
     ];
   }
 
-  const formation = game.tactics?.formation 
-  || lineup?.formation 
-  || "4-4-2";
+  const formation = game.tactics?.formation || lineup?.formation || "4-4-2";
 
   let html = "";
 
   // =========================
   // 🧱 TEAM RENDER (FINAL)
   // =========================
-  const stats = calculateTeamStats();
-  html = `
-  <div class="team-stats">
+  function calculateTeamStats() {
+    const lineup = game.team?.lineup;
+    const teamId = game.team?.selectedId || game.team?.id;
 
-    <div class="stat attack">
-      <div class="donut" style="--val:${stats?.attack || 0}">
-        <span>${stats?.attack ?? "-"}</span>
-      </div>
-      <div class="label">ATT</div>
-    </div>
+    if (!teamId) return null;
 
-    <div class="stat defense">
-      <div class="donut" style="--val:${stats?.defense || 0}">
-        <span>${stats?.defense ?? "-"}</span>
-      </div>
-      <div class="label">DEF</div>
-    </div>
+    const team = game.league?.current?.teams?.find(
+      (t) => String(t.id) === String(teamId),
+    );
 
-    <div class="stat control">
-      <div class="donut" style="--val:${stats?.control || 0}">
-        <span>${stats?.control ?? "-"}</span>
-      </div>
-      <div class="label">CTRL</div>
-    </div>
+    const allPlayers = team?.players || [];
 
-  </div>
-`;
-  
+    if (!allPlayers.length) {
+      return { attack: 0, defense: 0, control: 0 };
+    }
+
+    let players = [];
+
+    if (lineup?.slots) {
+      const ids = Object.values(lineup.slots).filter(Boolean);
+
+      if (ids.length) {
+        players = allPlayers.filter((p) => ids.includes(String(p.id)));
+      }
+    }
+
+    if (!players.length) {
+      players = allPlayers;
+    }
+
+    let attack = 0;
+    let defense = 0;
+    let control = 0;
+
+    players.forEach((p) => {
+      const rating = p.overall ?? 50;
+      const type = (p.position_type || "MID").toUpperCase();
+
+      if (type.includes("ST")) {
+        attack += rating * 1.2;
+        control += rating * 0.3;
+      } else if (type.includes("MID")) {
+        attack += rating * 0.6;
+        control += rating * 1.0;
+      } else if (type.includes("DEF")) {
+        defense += rating * 1.1;
+        control += rating * 0.4;
+      } else if (type.includes("GK")) {
+        defense += rating * 1.4;
+        control += rating * 0.2;
+      }
+    });
+
+    const count = players.length || 1;
+
+    const clamp = (v) => Math.max(0, Math.min(150, Math.round(v)));
+
+    return {
+      attack: clamp(attack / count),
+      defense: clamp(defense / count),
+      control: clamp(control / count),
+    };
+  }
+
   // =========================
   // 🧠 GROUPED STARTERS
   // =========================
@@ -969,15 +990,15 @@ function renderTeam() {
   container.dataset.renderHash = html;
 
   container.innerHTML = html;
-const donuts = container.querySelectorAll(".donut");
+  const donuts = container.querySelectorAll(".donut");
 
-if (stats) {
-  const values = [stats.attack, stats.defense, stats.control];
+  if (stats) {
+    const values = [stats.attack, stats.defense, stats.control];
 
-  donuts.forEach((d, i) => {
-    setDonut(d, values[i] ?? 0);
-  });
-}
+    donuts.forEach((d, i) => {
+      setDonut(d, values[i] ?? 0);
+    });
+  }
   // =========================
   // 🖱️ CLICK HANDLER (Richtig platziert!)
   // =========================
@@ -1045,8 +1066,6 @@ if (stats) {
         const typeA = getType(selectedPlayerId);
         const typeB = getType(id);
 
-        
-        
         // =========================
         // 🔄 STARTER ↔ STARTER
         // =========================
@@ -1116,7 +1135,7 @@ if (stats) {
       // =========================
       selectedPlayerId = null;
       renderTeam();
-      renderTacticStats(); 
+      renderTacticStats();
     }; // 🔥 schließt onclick
   }); // 🔥 schließt forEach
 
@@ -1153,9 +1172,7 @@ if (stats) {
     </div>
   `;
   }
-
-  }
-
+}
 
 function renderTacticStats() {
   const el = document.getElementById("tacticsStats");
@@ -1218,22 +1235,22 @@ function renderTacticStats() {
   // =========================
   // 🎨 RENDER
   // =========================
- function normalize(val){
-  if (val == null || isNaN(val)) return 0;
-  return Math.max(0, Math.min(100, Math.round(Number(val))));
-}
+  function normalize(val) {
+    if (val == null || isNaN(val)) return 0;
+    return Math.max(0, Math.min(100, Math.round(Number(val))));
+  }
 
-const attackVal  = normalize(attack);
-const defenseVal = normalize(defense);
-const controlVal = normalize(control);
+  const attackVal = normalize(attack);
+  const defenseVal = normalize(defense);
+  const controlVal = normalize(control);
 
-const dataHash = `${attackVal}-${defenseVal}-${controlVal}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
+  const dataHash = `${attackVal}-${defenseVal}-${controlVal}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
 
-if (dataHash !== lastTacticHash) {
-  lastTacticHash = dataHash;
-}
+  if (dataHash !== lastTacticHash) {
+    lastTacticHash = dataHash;
+  }
 
-el.innerHTML = `
+  el.innerHTML = `
   <div class="tactics-donuts">
 
     <div class="stat attack">
@@ -1260,22 +1277,21 @@ el.innerHTML = `
   </div>
 `;
 
- requestAnimationFrame(() => {
-  const donuts = el.querySelectorAll(".donut");
+  requestAnimationFrame(() => {
+    const donuts = el.querySelectorAll(".donut");
 
-  console.log("🎯 tactics donuts:", donuts.length);
+    console.log("🎯 tactics donuts:", donuts.length);
 
-  [attackVal, defenseVal, controlVal].forEach((v, i) => {
-    if (donuts[i]) {
-      setDonut(donuts[i], v);
-    } else {
-      console.warn("❌ donut fehlt index", i);
-    }
+    [attackVal, defenseVal, controlVal].forEach((v, i) => {
+      if (donuts[i]) {
+        setDonut(donuts[i], v);
+      } else {
+        console.warn("❌ donut fehlt index", i);
+      }
+    });
   });
-});
-  
-  }
-  
+}
+
 function renderTacticBar(label, value) {
   return `
     <div class="tactic-row">
@@ -1295,8 +1311,9 @@ function renderFormationPreview() {
 
   if (!layout) return;
 
-  el.innerHTML = layout.map(p => {
-    return `
+  el.innerHTML = layout
+    .map((p) => {
+      return `
       <div 
         class="fp-dot ${p.role}"
         style="
@@ -1305,7 +1322,8 @@ function renderFormationPreview() {
         "
       ></div>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 // =========================
