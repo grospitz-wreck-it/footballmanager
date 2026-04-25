@@ -1643,24 +1643,36 @@ tr:hover {
   inset: 0;
 
   display: flex;
-  align-items: flex-start; /* 🔥 statt center */
   justify-content: center;
-
-  padding-top: 60px; /* 🔥 Abstand nach oben */
-  padding-bottom: 20px;
+  align-items: flex-end; /* 🔥 von unten hoch */
 
   background: rgba(0,0,0,0.6);
-  z-index: 2000;
+  backdrop-filter: blur(6px);
+
+  z-index: 5000;
 }
 .tactics-sheet {
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
 
-  max-height: 90vh; /* 🔥 wichtig */
+  height: 90vh;
+  max-height: 90vh;
+
+  background: #020617;
+  border-radius: 20px 20px 0 0;
+
+  padding: 16px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+
   overflow-y: auto;
 
-  border-radius: 16px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
 }
+.tactics-overlay.open .tactics-sheet {
+  transform: translateY(0);
+}
+
 .tactics-sheet::before {
   content: "";
   width: 40px;
