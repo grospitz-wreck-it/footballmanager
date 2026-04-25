@@ -178,27 +178,24 @@ function initUI() {
 
   console.log("🧱 UI init");
 
+  // =========================
+  // 🍔 SIDEBAR
+  // =========================
   const burger = document.getElementById("burgerBtn");
   const wrapper = document.getElementById("sidebarWrapper");
   const overlay = document.getElementById("sidebarOverlay");
 
-  if (!burger || !wrapper) {
-    console.error("❌ Sidebar DOM fehlt");
-    return;
+  if (burger && wrapper) {
+    burger.onclick = () => {
+      game.ui.sidebarOpen = !game.ui.sidebarOpen;
+      applySidebar();
+    };
+
+    overlay?.addEventListener("click", () => {
+      game.ui.sidebarOpen = false;
+      applySidebar();
+    });
   }
-
-  // =========================
-  // 🍔 SIDEBAR
-  // =========================
-  burger.addEventListener("click", () => {
-    game.ui.sidebarOpen = !game.ui.sidebarOpen;
-    applySidebar();
-  });
-
-  overlay?.addEventListener("click", () => {
-    game.ui.sidebarOpen = false;
-    applySidebar();
-  });
 
   // =========================
   // 🔥 STATE LISTENER
@@ -235,105 +232,86 @@ function initUI() {
     };
   }
 
+  // =========================
+  // 🎛 DROPDOWNS
+  // =========================
+  function setupDropdown(id, onSelect) {
+    const el = document.getElementById(id);
+    if (!el) return;
 
+    const selected = el.querySelector(".dd-selected");
+    const options = el.querySelector(".dd-options");
 
- // =========================
-// 🎛 DROPDOWN SYSTEM
-// =========================
-function setupDropdown(id, onSelect) {
-  const el = document.getElementById(id);
-  if (!el) return;
+    if (!selected || !options) return;
 
-  const selected = el.querySelector(".dd-selected");
-  const options = el.querySelector(".dd-options");
-
-  if (!selected || !options) return;
-
-  selected.onclick = () => {
-    el.classList.toggle("open");
-  };
-
-  options.querySelectorAll("div").forEach(opt => {
-    opt.onclick = () => {
-      const value = opt.dataset.value;
-
-      selected.textContent = opt.textContent;
-      el.classList.remove("open");
-
-      onSelect(value);
+    selected.onclick = () => {
+      el.classList.toggle("open");
     };
-  });
 
-  document.addEventListener("click", (e) => {
-    if (!el.contains(e.target)) {
-      el.classList.remove("open");
-    }
-  });
-}
+    options.querySelectorAll("div").forEach(opt => {
+      opt.onclick = () => {
+        const value = opt.dataset.value;
 
+        selected.textContent = opt.textContent;
+        el.classList.remove("open");
 
-// =========================
-// 📐 FORMATION DROPDOWN
-// =========================
-setupDropdown("formationDropdown", (value) => {
-  game.tactics.formation = value;
-
-  if (game.team?.lineup) {
-    game.team.lineup.formation = value;
-  }
-
-  updateUI();
-});
-
-
-// =========================
-// ⚙️ PRESET DROPDOWN
-// =========================
-setupDropdown("presetDropdown", (value) => {
-  const config = PRESETS[value];
-
-  if (!config) {
-    console.warn("❌ unknown preset:", value);
-    return;
-  }
-
-  // 🎯 preset speichern
-  game.tactics.preset = value;
-
-  // 🔥 WICHTIG: echte Werte setzen
-  game.tactics.tempo = config.tempo;
-  game.tactics.pressing = config.pressing;
-  game.tactics.line = config.line;
-
-  console.log("⚙️ preset applied:", value, config);
-
-  updateUI(); // reicht komplett aus
-});
-   }
-// =========================
-// 🎲 CHANCE BUTTON
-// =========================
-const chanceBtn = document.getElementById("chanceBtn");
-
-if (chanceBtn) {
-  chanceBtn.onclick = () => {
-
-    if (!game.match?.live?.running) {
-      console.warn("⛔ kein laufendes Spiel");
-      return;
-    }
-
-    console.log("🎲 FORCED CHANCE");
-
-    game.events.history.push({
-      id: Date.now(),
-      minute: game.match.live.minute,
-      type: "chance",
-      text: "🔥 Große Chance durch taktische Umstellung!"
+        onSelect(value);
+      };
     });
 
+    document.addEventListener("click", (e) => {
+      if (!el.contains(e.target)) {
+        el.classList.remove("open");
+      }
+    });
+  }
+
+  // 📐 FORMATION
+  setupDropdown("formationDropdown", (value) => {
+    game.tactics.formation = value;
+
+    if (game.team?.lineup) {
+      game.team.lineup.formation = value;
+    }
+
     updateUI();
-  };
+  });
+
+  // ⚙️ PRESET
+  setupDropdown("presetDropdown", (value) => {
+    const config = PRESETS[value];
+    if (!config) return;
+
+    game.tactics.preset = value;
+    game.tactics.tempo = config.tempo;
+    game.tactics.pressing = config.pressing;
+    game.tactics.line = config.line;
+
+    updateUI();
+  });
+
+  // =========================
+  // 🎲 CHANCE BUTTON
+  // =========================
+  const chanceBtn = document.getElementById("chanceBtn");
+
+  if (chanceBtn) {
+    chanceBtn.onclick = () => {
+      if (!game.match?.live?.running) {
+        console.warn("⛔ kein laufendes Spiel");
+        return;
+      }
+
+      game.events.history.push({
+        id: Date.now(),
+        minute: game.match.live.minute,
+        type: "chance",
+        text: "🔥 Große Chance durch taktische Umstellung!"
+      });
+
+      updateUI();
+    };
+  }
 }
 
 // =========================
