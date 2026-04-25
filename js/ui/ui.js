@@ -11,7 +11,7 @@ import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
 import { renderSchedule as renderScheduleModule } from "../modules/scheduler.js";
 import { getPlayersOfTeam } from "../modules/league.js";
-import { mapPosition } from "../core/football/position.js";
+import { mapPosition, mapPositionToRole } from "../core/football/position.js";
 import { FORMATIONS, getFormationProfile } from "../core/football/formation.js";
 // =========================
 // 🔒 INTERNAL
