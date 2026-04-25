@@ -49,7 +49,7 @@ if (!game.tactics) {
   game.tactics = {};
 }
 
-game.tactics.style = game.tactics.style || "balanced";
+game.tactics.style = game.tactics.style || "Balanced";
 // =========================
 // 🎨 PLAY STYLES
 // =========================
