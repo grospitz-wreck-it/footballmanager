@@ -123,3 +123,46 @@ export const FORMATIONS = {
     { role: "ATT", top: "58%", left: "82%" }
   ]
 };
+// =========================
+// 🧠 FORMATION HELPERS (NEW)
+// =========================
+
+// 👉 zählt Rollen (für Stats, Engine etc.)
+export function getFormationProfile(formationName) {
+  const layout = FORMATIONS[formationName];
+  if (!layout) return null;
+
+  const profile = {
+    GK: 0,
+    DEF: 0,
+    MID: 0,
+    ATT: 0,
+  };
+
+  layout.forEach((p) => {
+    if (profile[p.role] !== undefined) {
+      profile[p.role]++;
+    }
+  });
+
+  return profile;
+}
+
+// 👉 liefert einfache Gewichte (optional nutzbar)
+export function getFormationWeights(formationName) {
+  const profile = getFormationProfile(formationName);
+  if (!profile) return null;
+
+  const total =
+    profile.DEF +
+    profile.MID +
+    profile.ATT;
+
+  if (!total) return null;
+
+  return {
+    attack: profile.ATT / total,
+    defense: profile.DEF / total,
+    control: profile.MID / total,
+  };
+}
