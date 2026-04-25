@@ -19,6 +19,29 @@ let lastRenderedEventId = null;
 let liveTableInterval = null;
 let selectedPlayerId = null;
 let lastTacticHash = null;
+
+// =========================
+// ⚙️ TACTICS PRESETS (GLOBAL)
+// =========================
+const PRESETS = {
+  offensive: {
+    tempo: "fast",
+    pressing: "high",
+    line: "high",
+  },
+  balanced: {
+    tempo: "normal",
+    pressing: "medium",
+    line: "medium",
+  },
+  defensive: {
+    tempo: "slow",
+    pressing: "low",
+    line: "low",
+  },
+};
+
+
 // =========================
 // 📂 SIDEBAR APPLY
 // =========================
