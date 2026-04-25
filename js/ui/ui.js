@@ -643,14 +643,31 @@ function groupPlayers(players) {
   if (!players?.length) return groups; // 🔒 safety
 
   players.forEach((p) => {
-    const type = (p.position_type || "MID").toUpperCase();
+  const rating = p.overall ?? 50;
 
-    if (type.includes("ST")) groups.ST.push(p);
-    else if (type.includes("MID")) groups.MID.push(p);
-    else if (type.includes("DEF")) groups.DEF.push(p);
-    else if (type.includes("GK")) groups.GK.push(p);
-    else groups.MID.push(p);
-  });
+  // 🔥 EINHEITLICH!
+  const type = mapPosition(p.position_type);
+
+  if (type === "ATT") {
+    attack += rating * 1.2;
+    control += rating * 0.3;
+  }
+
+  else if (type === "MID") {
+    attack += rating * 0.6;
+    control += rating * 1.0;
+  }
+
+  else if (type === "DEF") {
+    defense += rating * 1.1;
+    control += rating * 0.4;
+  }
+
+  else if (type === "GK") {
+    defense += rating * 1.4;
+    control += rating * 0.2;
+  }
+});
 
   return groups;
 }
@@ -741,39 +758,50 @@ function calculateTeamStats() {
   // 🧠 STATS BERECHNUNG
   // =========================
   let attack = 0;
-  let defense = 0;
-  let control = 0;
+let defense = 0;
+let control = 0;
 
-  players.forEach((p) => {
-    const rating = p.overall ?? 50;
-    const type = (p.position_type || "").toUpperCase();
-    
-    // ⚔️ Attack
-    if (type.includes("ST")) {
-      attack += rating * 1.2;
-    }
+players.forEach((p) => {
+  const rating = p.overall ?? 50;
+  const type = mapPosition(p.position_type);
 
-    // 🧠 Midfield
-    else if (type.includes("MID")) {
-      attack += rating * 0.6;
-      control += rating * 1.0;
-    }
+  if (type === "ATT") {
+    attack += rating * 1.2;
+    control += rating * 0.3;
+  }
 
-    // 🛡 Defense
-    else if (type.includes("DEF")) {
-      defense += rating * 1.2;
-    }
+  else if (type === "MID") {
+    attack += rating * 0.6;
+    control += rating * 1.0;
+  }
 
-    // 🧤 Goalkeeper
-    else if (type.includes("GK")) {
-      defense += rating * 1.5;
-    }
+  else if (type === "DEF") {
+    defense += rating * 1.1;
+    control += rating * 0.4;
+  }
 
-    // 🔄 Fallback
-    else {
-      control += rating * 0.5;
-    }
-  });
+  else if (type === "GK") {
+    defense += rating * 1.4;
+    control += rating * 0.2;
+  }
+});
+
+  const formation = game.tactics?.formation || "4-4-2";
+const profile = getFormationProfile(formation);
+
+if (profile) {
+  const total = profile.DEF + profile.MID + profile.ATT;
+
+  if (total > 0) {
+    const defRatio = profile.DEF / total;
+    const midRatio = profile.MID / total;
+    const attRatio = profile.ATT / total;
+
+    attack *= 0.8 + attRatio * 0.6;
+    defense *= 0.8 + defRatio * 0.6;
+    control *= 0.8 + midRatio * 0.6;
+  }
+}
 
   // =========================
   // 📊 NORMALIZE
