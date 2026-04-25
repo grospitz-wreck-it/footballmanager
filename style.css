@@ -1645,25 +1645,9 @@ tr:hover {
 }
 
 /* =========================
-🎮 TACTICS OVERLAY (MOBILE FIX)
+🎮 OVERLAY
 ========================= */
-.tactics-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
-  margin-bottom: 8px;
-}
-
-.tactics-header img {
-  width: clamp(120px, 40vw, 180px);
-
-  object-fit: contain;
-
-  filter:
-    drop-shadow(0 4px 12px rgba(0,0,0,0.6))
-    brightness(1.05);
-}
 .tactics-overlay {
   position: fixed;
   inset: 0;
@@ -1672,14 +1656,13 @@ tr:hover {
   justify-content: center;
   align-items: flex-end;
 
-  padding: 0 10px; /* 🔥 verhindert seitliches Abschneiden */
+  padding: 0 10px;
 
   background: rgba(0,0,0,0.6);
   backdrop-filter: blur(6px);
 
   z-index: 5000;
 
-  /* 🔥 wichtig für UX */
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.25s ease;
@@ -1688,6 +1671,86 @@ tr:hover {
 .tactics-overlay.open {
   pointer-events: auto;
   opacity: 1;
+}
+
+/* =========================
+📦 SHEET
+========================= */
+
+.tactics-sheet {
+  width: 100%;
+  max-width: 480px;
+
+  height: 90vh;
+  max-height: 90vh;
+
+  background: #020617;
+  border-radius: 20px 20px 0 0;
+
+  padding: 16px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* 🔥 WICHTIG: erlaubt Header rauszuragen */
+  overflow: visible;
+
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.8);
+}
+
+.tactics-overlay.open .tactics-sheet {
+  transform: translateY(0);
+}
+
+/* =========================
+🧠 HEADER (OVERHANG)
+========================= */
+
+.tactics-header {
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: -22px;   /* 🔥 ragt raus */
+  margin-bottom: 6px;
+
+  z-index: 2;
+}
+
+.tactics-header img {
+  width: clamp(60px, 20vw, 100px);
+
+  object-fit: contain;
+
+  filter:
+    drop-shadow(0 6px 16px rgba(0,0,0,0.7))
+    brightness(1.05);
+}
+
+/* optional glow */
+.tactics-header::after {
+  content: "";
+  position: absolute;
+
+  top: 50%;
+  width: 120px;
+  height: 60px;
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(34,197,94,0.25),
+    transparent
+  );
+
+  filter: blur(20px);
+
+  z-index: -1;
 }
 
 /* =========================
