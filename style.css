@@ -1750,15 +1750,13 @@ tr:hover {
   background: #ef4444;
   color: #ef4444;
 
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 
-  transform: translate(-50%, -50%) scale(1.1);
-
-  box-shadow:
-    0 0 8px rgba(239,68,68,0.9),
-    0 0 18px rgba(239,68,68,0.7),
-    0 0 28px rgba(239,68,68,0.5);
+   box-shadow:
+    0 0 6px rgba(255,255,255,0.6),
+    0 0 12px currentColor,
+    0 0 20px currentColor;
 }
 
 /* =========================
