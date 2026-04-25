@@ -1720,9 +1720,6 @@ tr:hover {
 
 
 /* =========================
-⚽ PLAYER DOTS (FIXED + CLEAR)
-========================= */
-/* =========================
 ⚽ PLAYER DOTS (FINAL FIX)
 ========================= */
 .fp-dot {
@@ -2092,7 +2089,10 @@ tr:hover {
 .dd-options div:active {
   background: rgba(255,255,255,0.15);
 }
-
+.dd-selected,
+.dd-options div {
+  text-transform: uppercase;
+}
 /* =========================
 📱 RESPONSIVE (MOBILE POLISH)
 ========================= */
