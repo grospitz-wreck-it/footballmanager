@@ -1716,6 +1716,9 @@ tr:hover {
 /* =========================
 ⚽ PLAYER DOTS (FIXED + CLEAR)
 ========================= */
+/* =========================
+⚽ PLAYER DOTS (FINAL FIX)
+========================= */
 .fp-dot {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -1724,7 +1727,7 @@ tr:hover {
   height: 12px;
   border-radius: 50%;
 
-  z-index: 2; /* 🔥 sicher über field */
+  z-index: 2; /* sicher über field */
 
   box-shadow:
     0 0 6px rgba(255,255,255,0.6),
@@ -1732,18 +1735,25 @@ tr:hover {
     0 0 20px currentColor;
 }
 
-/* Farben klar getrennt */
+/* =========================
+🎨 COLORS
+========================= */
 .fp-dot.GK  { background: #facc15; color: #facc15; }
 .fp-dot.DEF { background: #38bdf8; color: #38bdf8; }
 .fp-dot.MID { background: #a855f7; color: #a855f7; }
 
-/* 🔥 ST = ROT + größer + stärker */
-.fp-dot.ST  {
+/* =========================
+🔥 ST + ATT (FIX)
+========================= */
+.fp-dot.ST,
+.fp-dot.ATT {
   background: #ef4444;
   color: #ef4444;
 
   width: 14px;
   height: 14px;
+
+  transform: translate(-50%, -50%) scale(1.1);
 
   box-shadow:
     0 0 8px rgba(239,68,68,0.9),
