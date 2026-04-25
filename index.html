@@ -13,61 +13,37 @@
 🎮 TACTICS OVERLAY
 ========================= -->
 <div id="tacticsOverlay" class="tactics-overlay">
-  <<div class="tactics-sheet">
+  <div class="tactics-sheet">
 
-  <h3>Taktik</h3>
+    <h3>Taktik</h3>
 
-  <!-- 📐 FORMATION -->
-  <div class="tactics-block">
-    <label>Formation</label>
+    <!-- 📐 FORMATION -->
+    <div class="tactics-block">
+      <label>Formation</label>
 
-    <div class="formation-select" id="formationDropdown">
-      <div class="selected">4-4-2</div>
-      <div class="options">
-        <div data-formation="4-4-2">4-4-2</div>
-        <div data-formation="4-3-3">4-3-3</div>
-        <div data-formation="3-5-2">3-5-2</div>
+      <div class="formation-select" id="formationDropdown">
+        <div class="selected">4-4-2</div>
+        <div class="options">
+          <div data-formation="4-4-2">4-4-2</div>
+          <div data-formation="4-3-3">4-3-3</div>
+          <div data-formation="3-5-2">3-5-2</div>
+        </div>
       </div>
     </div>
+
+    <!-- ⚽ FIELD -->
+    <div class="tactics-field" id="formationPreview"></div>
+
+    <!-- 📊 STATS -->
+    <div id="tacticsStats" class="tactics-stats-row"></div>
+
+    <!-- 🎲 CTA -->
+    <button id="chanceBtn" class="chance-btn">
+      🎲 Chance erzwingen
+    </button>
+
   </div>
-
-  <!-- ⚽ FIELD -->
-  <div class="tactics-field" id="formationPreview"></div>
-
-  <!-- 📊 STATS (LOGISCH AUSGERICHTET) -->
-  <div id="tacticsStats" class="tactics-stats-row"></div>
-    <div class="stat defense">
-      <div class="donut"><span>0</span></div>
-      <div class="label">DEF</div>
-    </div>
-
-    <div class="stat control">
-      <div class="donut"><span>0</span></div>
-      <div class="label">MID</div>
-    </div>
-
-    <div class="stat attack">
-      <div class="donut"><span>0</span></div>
-      <div class="label">ATT</div>
-    </div>
-  </div>
-
-  <!-- 🎯 PRESETS -->
-  <div class="tactics-segment">
-    <button data-preset="offensive">⚡ Offensiv</button>
-    <button data-preset="balanced">⚖️ Balanced</button>
-    <button data-preset="defensive">🛡 Defensiv</button>
-  </div>
-
-  <!-- 🎲 CTA -->
-  <button id="chanceBtn" class="chance-btn">
-    🎲 Chance erzwingen
-  </button>
-
 </div>
-</div>
-
-  
 
 <!-- =========================
 🟡 SPLASH
