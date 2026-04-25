@@ -106,21 +106,24 @@ function applySidebar() {
 function setDonut(el, value) {
   const val = Math.max(0, Math.min(100, Math.round(value)));
 
-  // Start bei 0
-  el.style.setProperty("--val", "0%");
+  const current = parseFloat(el.style.getPropertyValue("--val")) || 0;
 
-  // dann animieren
+  // 👉 nur animieren wenn sich was ändert
+  if (current === val) return;
+
+  // 👉 smooth transition aktivieren
+  el.style.transition = "none";
+  el.style.setProperty("--val", current + "%");
+
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      el.style.setProperty("--val", val + "%");
-    });
+    el.style.transition = "all 0.6s ease";
+    el.style.setProperty("--val", val + "%");
   });
 
-  // Text updaten
+  // 👉 Text
   const span = el.querySelector("span");
   if (span) span.textContent = val;
 }
-
 // =========================
 // 🔄 GLOBAL UI UPDATE (FIX)
 // =========================
