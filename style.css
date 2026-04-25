@@ -1875,13 +1875,16 @@ tr:hover {
 
   position: relative;
 
-  background: conic-gradient(
-    from -90deg,
-    #22c55e 0%,
-    #4ade80 calc(var(--val) * 0.6),
-    #facc15 var(--val),
-    #1e293b var(--val)
-  );
+  .donut {
+  --val: 0%;
+
+  background:
+    conic-gradient(
+      from -90deg,
+      currentColor var(--val),
+      rgba(255,255,255,0.08) var(--val)
+    );
+}
 
   box-shadow:
     inset 0 0 20px rgba(0,0,0,0.7),
@@ -1898,52 +1901,97 @@ tr:hover {
 }
 
 /* =========================
-🎛 CONTROLS
+🎛 TACTICS CONTROLS (AAA FIX)
 ========================= */
 .tactics-controls {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+
+  margin-top: 22px;
 
   position: relative;
-  z-index: 100; /* 🔥 über stats */
+  z-index: 200; /* 🔥 über ALLEM */
+
+  width: 100%;
 }
 
 /* =========================
-⬇️ DROPDOWN (FINAL FIX)
+📦 EACH CONTROL WRAPPER
+========================= */
+.tactics-controls > * {
+  width: 100%;
+  min-width: 0; /* 🔥 verhindert overflow */
+}
+
+/* =========================
+🎯 DROPDOWN BASE UPGRADE
 ========================= */
 .tactics-dropdown {
   position: relative;
-  z-index: 999; /* 🔥 wichtig */
+  z-index: 999;
 }
 
-/* SELECT */
+/* =========================
+🎛 SELECT BUTTON (UPGRADED)
+========================= */
 .dd-selected {
-  padding: 12px;
-  border-radius: 14px;
+  width: 100%;
+  height: 52px;
 
-  background: linear-gradient(145deg, #111827, #1f2937);
-  color: white;
-
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: 18px;
 
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
 
   cursor: pointer;
 
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+
+  backdrop-filter: blur(10px);
+
   box-shadow:
-    0 6px 16px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.05);
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 8px 24px rgba(0,0,0,0.6);
+
+  transition: all 0.2s ease;
 }
 
-/* ARROW */
+/* Hover */
+.dd-selected:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.7);
+}
+
+/* Active */
+.dd-selected:active {
+  transform: scale(0.96);
+}
+
+/* =========================
+⬇️ ARROW
+========================= */
 .dd-selected::after {
   content: "▾";
+
+  position: absolute;
+  right: 12px;
+
   font-size: 12px;
   opacity: 0.6;
+
   transition: transform 0.2s ease;
 }
 
@@ -1951,45 +1999,82 @@ tr:hover {
   transform: rotate(180deg);
 }
 
-/* OPTIONS */
+/* =========================
+📜 OPTIONS PANEL (PREMIUM)
+========================= */
 .dd-options {
   position: absolute;
 
-  top: 110%;   /* 🔥 WICHTIG: NICHT bottom */
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
 
-  background: #020617;
-  border-radius: 12px;
+  border-radius: 14px;
+
+  background: rgba(2,6,23,0.95);
+  backdrop-filter: blur(14px);
 
   overflow: hidden;
 
   opacity: 0;
   pointer-events: none;
 
-  transform: translateY(-6px);
+  transform: translateY(-8px) scale(0.98);
+  transform-origin: top;
+
   transition: all 0.2s ease;
 
-  z-index: 9999; /* 🔥 MAX */
+  z-index: 9999;
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(255,255,255,0.05);
 }
 
-/* OPEN */
+/* OPEN STATE */
 .tactics-dropdown.open .dd-options {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0);
+
+  transform: translateY(0) scale(1);
 }
 
-/* ITEMS */
+/* =========================
+📄 OPTION ITEM
+========================= */
 .dd-options div {
-  padding: 12px;
+  padding: 14px;
+
   font-size: 13px;
+  text-align: center;
+
   cursor: pointer;
-  transition: background 0.15s ease;
+
+  transition: all 0.15s ease;
 }
 
+/* Hover */
 .dd-options div:hover {
   background: rgba(255,255,255,0.08);
+}
+
+/* Active */
+.dd-options div:active {
+  background: rgba(255,255,255,0.15);
+}
+
+/* =========================
+📱 RESPONSIVE (MOBILE POLISH)
+========================= */
+@media (max-width: 420px) {
+  .tactics-controls {
+    gap: 10px;
+  }
+
+  .dd-selected {
+    height: 48px;
+    font-size: 13px;
+  }
 }
 /* =========================
 🎲 BUTTON
