@@ -1707,6 +1707,97 @@ tr:hover {
 }
 
 /* =========================
+🎛 CONTROLS ROW
+========================= */
+
+.tactics-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* =========================
+⬇️ DROPDOWN BASE
+========================= */
+
+.tactics-dropdown {
+  position: relative;
+  flex: 1;
+}
+
+/* selected */
+.dd-selected {
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  background: linear-gradient(145deg, #111827, #1f2937);
+  color: white;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 6px 16px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* arrow */
+.dd-selected::after {
+  content: "▾";
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+/* =========================
+📂 OPTIONS
+========================= */
+
+.dd-options {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+
+  background: #020617;
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transform: translateY(-6px);
+  transition: all 0.2s ease;
+
+  z-index: 20;
+}
+
+.tactics-dropdown.open .dd-options {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* items */
+.dd-options div {
+  padding: 10px;
+  font-size: 13px;
+  cursor: pointer;
+
+  transition: background 0.15s ease;
+}
+
+.dd-options div:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* =========================
 🧠 HEADER (OVERHANG)
 ========================= */
 
