@@ -1647,7 +1647,23 @@ tr:hover {
 /* =========================
 🎮 TACTICS OVERLAY (MOBILE FIX)
 ========================= */
+.tactics-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
+  margin-bottom: 8px;
+}
+
+.tactics-header img {
+  width: clamp(120px, 40vw, 180px);
+
+  object-fit: contain;
+
+  filter:
+    drop-shadow(0 4px 12px rgba(0,0,0,0.6))
+    brightness(1.05);
+}
 .tactics-overlay {
   position: fixed;
   inset: 0;
