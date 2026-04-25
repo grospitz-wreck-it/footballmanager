@@ -1585,9 +1585,6 @@ tr:hover {
   height: 90vh;
   max-height: 90vh;
 
-  background: #020617;
-  border-radius: 20px 20px 0 0;
-
   padding: 16px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 
@@ -1605,6 +1602,11 @@ tr:hover {
 
 .tactics-overlay.open .tactics-sheet {
   transform: translateY(0);
+}
+
+.tactics-sheet {
+  background: rgba(2,6,23,0.85); /* 🔥 statt #020617 */
+  backdrop-filter: blur(20px);
 }
 
 /* Drag Handle */
