@@ -22,7 +22,12 @@ body {
   background: #0f172a;
   color: #e5e7eb;
 }
-
+html, body {
+  overflow-x: hidden;
+}
+* {
+  outline: 1px solid red;
+}
 /* =========================
 🟡 SPLASH SCREEN
 ========================= */
@@ -1806,9 +1811,16 @@ tr:hover {
 }
 .tactics-stats-row {
   display: flex;
+  gap: 10px;
+
   justify-content: space-between;
-  margin-top: 12px;
-  text-align: center;
+  align-items: center;
+
+  flex-wrap: wrap;        /* 🔥 CRITICAL */
+}
+.tactics-stats-row .stat {
+  flex: 1;
+  min-width: 0;           /* 🔥 verhindert Overflow */
 }
 .formation-select {
   position: relative;
