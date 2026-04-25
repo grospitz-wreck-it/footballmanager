@@ -42,6 +42,48 @@ const PRESETS = {
     line: "low",
   },
 };
+// =========================
+// 🧠 TACTICS DEFAULTS (SAFE)
+// =========================
+if (!game.tactics) {
+  game.tactics = {};
+}
+
+game.tactics.style = game.tactics.style || "balanced";
+// =========================
+// 🎨 PLAY STYLES
+// =========================
+const STYLES = {
+  balanced: {
+    attack: 1.0,
+    defense: 1.0,
+    control: 1.0,
+  },
+
+  possession: {
+    attack: 0.95,
+    defense: 1.0,
+    control: 1.2,
+  },
+
+  counter: {
+    attack: 1.25,
+    defense: 0.95,
+    control: 0.8,
+  },
+
+  wings: {
+    attack: 1.15,
+    defense: 1.0,
+    control: 0.95,
+  },
+
+  longball: {
+    attack: 1.2,
+    defense: 0.95,
+    control: 0.7,
+  }
+};
 
 // =========================
 // 📂 SIDEBAR APPLY
@@ -274,19 +316,62 @@ function initUI() {
     updateUI();
   });
 
-  // ⚙️ PRESET
   setupDropdown("presetDropdown", (value) => {
-    const config = PRESETS[value];
-    if (!config) return;
+  if (!game.tactics) game.tactics = {};
 
-    game.tactics.preset = value;
-    game.tactics.tempo = config.tempo;
-    game.tactics.pressing = config.pressing;
-    game.tactics.line = config.line;
+  const config = PRESETS[value];
 
-    updateUI();
+  if (!config) {
+    console.warn("❌ unknown preset:", value);
+    return;
+  }
+
+  // =========================
+  // 🎯 PRESET SETZEN
+  // =========================
+  game.tactics.preset = value;
+
+  // =========================
+  // 🔥 WERTE ÜBERNEHMEN (RESET SAFE)
+  // =========================
+  game.tactics.tempo = config.tempo || "normal";
+  game.tactics.pressing = config.pressing || "medium";
+  game.tactics.line = config.line || "medium";
+
+  // =========================
+  // 🎨 STYLE RESET (optional aber sinnvoll)
+  // =========================
+  if (!game.tactics.style) {
+    game.tactics.style = "balanced";
+  }
+
+  // =========================
+  // 🧪 DEBUG
+  // =========================
+  console.log("⚙️ preset applied:", value, {
+    tempo: game.tactics.tempo,
+    pressing: game.tactics.pressing,
+    line: game.tactics.line,
+    style: game.tactics.style
   });
 
+  // =========================
+  // 🔄 UI UPDATE
+  // =========================
+  updateUI();
+});
+
+  // =========================
+// 🎨 STYLE DROPDOWN
+// =========================
+setupDropdown("styleDropdown", (value) => {
+  if (!STYLES[value]) return;
+
+  game.tactics.style = value;
+
+  updateUI();
+});
+  
   // =========================
   // 🎲 CHANCE BUTTON
   // =========================
@@ -544,7 +629,9 @@ function updateTabs() {
 function updateTacticsUI() {
   if (!game.tactics) return;
 
-  // 🎯 FORMATION DROPDOWN SYNC
+  // =========================
+  // 📐 FORMATION DROPDOWN
+  // =========================
   const formationDD = document.getElementById("formationDropdown");
   if (formationDD) {
     const selected = formationDD.querySelector(".dd-selected");
@@ -553,12 +640,37 @@ function updateTacticsUI() {
     }
   }
 
-  // 🎯 PRESET DROPDOWN SYNC
+  // =========================
+  // ⚙️ PRESET DROPDOWN
+  // =========================
   const presetDD = document.getElementById("presetDropdown");
   if (presetDD) {
     const selected = presetDD.querySelector(".dd-selected");
     if (selected) {
       selected.textContent = game.tactics.preset || "balanced";
+    }
+  }
+
+  // =========================
+  // 🎨 STYLE DROPDOWN (NEU)
+  // =========================
+  const styleDD = document.getElementById("styleDropdown");
+  if (styleDD) {
+    const selected = styleDD.querySelector(".dd-selected");
+
+    if (selected) {
+      const style = game.tactics.style || "balanced";
+
+      // 🔥 nicer labels
+      const labels = {
+        possession: "🧠 Ballbesitz",
+        counter: "⚡ Konter",
+        longball: "🎯 Lange Bälle",
+        wingplay: "🏃 Flügelspiel",
+        balanced: "⚖️ Ausgeglichen"
+      };
+
+      selected.textContent = labels[style] || style;
     }
   }
 }
