@@ -1045,154 +1045,95 @@ console.log("📊 TEAM STATS (renderTeam):", stats);
   container.dataset.renderHash = html;
 
   container.innerHTML = html;
-  const donuts = container.querySelectorAll(".donut");
 
-  if (stats) {
-    const values = [stats.attack, stats.defense, stats.control];
+// =========================
+// 🍩 TEAM STATS DONUTS (FIX)
+// =========================
+const stats = calculateTeamStats();
 
-    donuts.forEach((d, i) => {
-      setDonut(d, values[i] ?? 0);
-    });
-  }
-  // =========================
-  // 🖱️ CLICK HANDLER (Richtig platziert!)
-  // =========================
+const donuts = container.querySelectorAll(".donut");
 
-  document.querySelectorAll(".player-row").forEach((el) => {
-    el.onclick = () => {
-      const id = el.dataset.id;
-      if (!id) return;
+if (stats && donuts.length) {
+  const values = [stats.attack, stats.defense, stats.control];
 
-      // =========================
-      // 🔁 SAME CLICK → RESET
-      // =========================
-      if (selectedPlayerId === id) {
-        selectedPlayerId = null;
-        el.classList.remove("selected");
-        return;
-      }
+  donuts.forEach((d, i) => {
+    setDonut(d, values[i] ?? 0);
+  });
+}
 
-      // =========================
-      // 🧠 FIRST CLICK
-      // =========================
-      if (!selectedPlayerId) {
-        document
-          .querySelectorAll(".player-row")
-          .forEach((el) => el.classList.remove("selected"));
+// =========================
+// 🖱️ CLICK HANDLER
+// =========================
+document.querySelectorAll(".player-row").forEach((el) => {
+  el.onclick = () => {
+    const id = el.dataset.id;
+    if (!id) return;
 
-        selectedPlayerId = id;
-        el.classList.add("selected");
-
-        return;
-      }
-
-      // =========================
-      // ⚽ LINEUP SWAP SYSTEM (FINAL)
-      // =========================
-
-      const lineup = game.team?.lineup;
-
-      if (lineup?.slots) {
-        const slots = lineup.slots;
-
-        let slotA = null;
-        let slotB = null;
-
-        // =========================
-        // 🔍 SLOT FINDEN
-        // =========================
-        Object.entries(slots).forEach(([key, value]) => {
-          if (String(value) === String(selectedPlayerId)) slotA = key;
-          if (String(value) === String(id)) slotB = key;
-        });
-
-        // =========================
-        // 🧠 HELPERS
-        // =========================
-        const getType = (pid) => {
-          const p = players.find((pl) => String(pl.id) === String(pid));
-          return (p?.position_type || "MID").toUpperCase();
-        };
-
-        const getSlotType = (slot) => {
-          return slot.split("_")[0]; // GK / DEF / MID / ST
-        };
-
-        const typeA = getType(selectedPlayerId);
-        const typeB = getType(id);
-
-        // =========================
-        // 🔄 STARTER ↔ STARTER
-        // =========================
-        if (slotA && slotB) {
-          // 👉 nur tauschen wenn gleiche Rolle
-          if (getSlotType(slotA) === typeB && getSlotType(slotB) === typeA) {
-            const temp = slots[slotA];
-            slots[slotA] = slots[slotB];
-            slots[slotB] = temp;
-          } else {
-            console.warn("⛔ Swap nicht erlaubt (Position mismatch)");
-            return;
-          }
-        }
-
-        // =========================
-        // 🔄 STARTER → BANK
-        // =========================
-        else if (slotA && !slotB) {
-          const slotType = getSlotType(slotA);
-
-          if (typeB === slotType) {
-            slots[slotA] = id;
-          } else {
-            console.warn("⛔ falsche Position für Slot:", typeB, "→", slotType);
-
-            // 🔥 UX Feedback
-            document.querySelector(`[data-id="${id}"]`)?.classList.add("error");
-            setTimeout(() => {
-              document
-                .querySelector(`[data-id="${id}"]`)
-                ?.classList.remove("error");
-            }, 300);
-
-            return;
-          }
-        }
-
-        // =========================
-        // 🔄 BANK → STARTER
-        // =========================
-        else if (!slotA && slotB) {
-          const slotType = getSlotType(slotB);
-
-          if (typeA === slotType) {
-            slots[slotB] = selectedPlayerId;
-          } else {
-            console.warn("⛔ falsche Position für Slot:", typeA, "→", slotType);
-
-            // 🔥 UX Feedback
-            document
-              .querySelector(`[data-id="${selectedPlayerId}"]`)
-              ?.classList.add("error");
-            setTimeout(() => {
-              document
-                .querySelector(`[data-id="${selectedPlayerId}"]`)
-                ?.classList.remove("error");
-            }, 300);
-
-            return;
-          }
-        }
-      }
-
-      // =========================
-      // 🔄 RESET + UI
-      // =========================
+    if (selectedPlayerId === id) {
       selectedPlayerId = null;
-      renderTeam();
-      renderTacticStats();
-    }; // 🔥 schließt onclick
-  }); // 🔥 schließt forEach
+      el.classList.remove("selected");
+      return;
+    }
+
+    if (!selectedPlayerId) {
+      document
+        .querySelectorAll(".player-row")
+        .forEach((el) => el.classList.remove("selected"));
+
+      selectedPlayerId = id;
+      el.classList.add("selected");
+      return;
+    }
+
+    const lineup = game.team?.lineup;
+
+    if (lineup?.slots) {
+      const slots = lineup.slots;
+
+      let slotA = null;
+      let slotB = null;
+
+      Object.entries(slots).forEach(([key, value]) => {
+        if (String(value) === String(selectedPlayerId)) slotA = key;
+        if (String(value) === String(id)) slotB = key;
+      });
+
+      const getType = (pid) => {
+        const p = players.find((pl) => String(pl.id) === String(pid));
+        return (p?.position_type || "MID").toUpperCase();
+      };
+
+      const getSlotType = (slot) => slot.split("_")[0];
+
+      const typeA = getType(selectedPlayerId);
+      const typeB = getType(id);
+
+      if (slotA && slotB) {
+        if (getSlotType(slotA) === typeB && getSlotType(slotB) === typeA) {
+          const temp = slots[slotA];
+          slots[slotA] = slots[slotB];
+          slots[slotB] = temp;
+        } else return;
+      }
+
+      else if (slotA && !slotB) {
+        if (typeB === getSlotType(slotA)) {
+          slots[slotA] = id;
+        } else return;
+      }
+
+      else if (!slotA && slotB) {
+        if (typeA === getSlotType(slotB)) {
+          slots[slotB] = selectedPlayerId;
+        } else return;
+      }
+    }
+
+    selectedPlayerId = null;
+    renderTeam();
+    renderTacticStats();
+  };
+});
 
   // =========================
   // 🔵 PLAYER DOT
