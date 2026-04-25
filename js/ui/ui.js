@@ -290,10 +290,24 @@ setupDropdown("formationDropdown", (value) => {
 // ⚙️ PRESET DROPDOWN
 // =========================
 setupDropdown("presetDropdown", (value) => {
+  const config = PRESETS[value];
+
+  if (!config) {
+    console.warn("❌ unknown preset:", value);
+    return;
+  }
+
+  // 🎯 preset speichern
   game.tactics.preset = value;
 
-  updateTacticsUI();
-  renderTacticStats();
+  // 🔥 WICHTIG: echte Werte setzen
+  game.tactics.tempo = config.tempo;
+  game.tactics.pressing = config.pressing;
+  game.tactics.line = config.line;
+
+  console.log("⚙️ preset applied:", value, config);
+
+  updateUI(); // reicht komplett aus
 });
 // =========================
 // 🎲 CHANCE BUTTON
