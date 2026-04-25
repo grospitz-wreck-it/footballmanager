@@ -1638,19 +1638,41 @@ tr:hover {
 .player-row:active {
   transform: scale(0.98);
 }
+
+/* =========================
+🎮 TACTICS OVERLAY (MOBILE FIX)
+========================= */
+
 .tactics-overlay {
   position: fixed;
   inset: 0;
 
   display: flex;
   justify-content: center;
-  align-items: flex-end; /* 🔥 von unten hoch */
+  align-items: flex-end;
+
+  padding: 0 10px; /* 🔥 verhindert seitliches Abschneiden */
 
   background: rgba(0,0,0,0.6);
   backdrop-filter: blur(6px);
 
   z-index: 5000;
+
+  /* 🔥 wichtig für UX */
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
+
+.tactics-overlay.open {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* =========================
+📦 SHEET (BOTTOM MODAL)
+========================= */
+
 .tactics-sheet {
   width: 100%;
   max-width: 480px;
@@ -1668,10 +1690,20 @@ tr:hover {
 
   transform: translateY(100%);
   transition: transform 0.3s ease;
+
+  /* 🔥 nicer feel */
+  box-shadow:
+    0 -20px 60px rgba(0,0,0,0.8);
 }
+
+/* OPEN STATE */
 .tactics-overlay.open .tactics-sheet {
   transform: translateY(0);
 }
+
+/* =========================
+🪝 DRAG HANDLE
+========================= */
 
 .tactics-sheet::before {
   content: "";
@@ -1684,6 +1716,30 @@ tr:hover {
   display: block;
   margin: 0 auto 10px;
 }
+
+/* =========================
+📱 SAFETY
+========================= */
+
+.tactics-sheet * {
+  max-width: 100%;
+}
+
+/* =========================
+⚽ FIELD FIX
+========================= */
+
+.tactics-field {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+
+  background: url("./gfx/field.svg") center/cover no-repeat;
+
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+
 .tactics-donuts {
   display: flex;
   gap: 10px;
