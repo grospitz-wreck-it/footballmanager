@@ -309,6 +309,7 @@ setupDropdown("presetDropdown", (value) => {
 
   updateUI(); // reicht komplett aus
 });
+   }
 // =========================
 // 🎲 CHANCE BUTTON
 // =========================
