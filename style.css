@@ -214,109 +214,7 @@ html, body {
   transform: translateY(1px);
 }
 
-/* =========================
-📐 FORMATION PREVIEW
-========================= */
-.formation-preview {
-  position: relative;
-  width: 100%;
-  height: 120px;
 
-  margin-top: 8px;
-
-  border-radius: 12px;
-
-  background:
-    linear-gradient(180deg, #14532D, #166534);
-
-  overflow: hidden;
-
-  box-shadow:
-    inset 0 0 20px rgba(0,0,0,0.5);
-}
-
-/* Center Line */
-.formation-preview::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-
-  width: 1px;
-  background: rgba(255,255,255,0.2);
-}
-
-/* Player Dot */
-.fp-dot {
-  position: absolute;
-  transform: translate(-50%, -50%);
-
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-
-  box-shadow:
-    0 0 6px rgba(255,255,255,0.6),
-    0 0 12px currentColor;
-}
-
-/* Rollenfarben cleaner */
-.fp-dot.GK  { color: #facc15; background: #facc15; }
-.fp-dot.DEF { color: #38bdf8; background: #38bdf8; }
-.fp-dot.MID { color: #a855f7; background: #a855f7; }
-.fp-dot.ST  { color: #22c55e; background: #22c55e; }
-
-
-.donut {
-  --size: 54px;
-  --thickness: 6px;
-  --val: 0%;
-
-  width: var(--size);
-  height: var(--size); /* 🔥 WICHTIG → kein aspect-ratio */
-
-  min-width: var(--size);
-  min-height: var(--size);
-
-  flex-shrink: 0; /* 🔥 verhindert Stretch */
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 12px;
-  font-weight: 700;
-  color: white;
-
-  position: relative;
-
-  background: conic-gradient(
-    from -90deg,
-    #22c55e 0%,
-    #4ade80 calc(var(--val) * 0.6),
-    #facc15 var(--val),
-    #1e293b var(--val)
-  );
-}
-
-/* Innenkreis (perfekt zentriert) */
-.donut::after {
-  content: "";
-  position: absolute;
-  inset: var(--thickness);
-
-  background: #020617;
-  border-radius: 50%;
-}
-
-/* Text */
-.donut span {
-  position: relative;
-  z-index: 2;
-}
 /* =========================
 ⚽ MATCH TOP BAR
 ========================= */
@@ -827,46 +725,6 @@ tr:hover {
   background-repeat: no-repeat;
 }
 
-/* =========================
-⚽ TEAM FORMATION FIELD
-========================= */
-
-.team-field {
-  position: relative;
-  width: 100%;
-
-  /* 🔥 stabiler als nur aspect-ratio */
-  aspect-ratio: 16/9;
-  max-height: 500px;
-
-  background: url("../gfx/field.svg") center/cover no-repeat;
-  border-radius: 14px;
-  margin-bottom: 12px;
-  overflow: hidden;
-
-  /* 🔥 wichtig für sauberes Positioning */
-  display: block;
-}
-
-/* =========================
-🎯 CENTER CIRCLE (optional)
-========================= */
-.team-field::after {
-  content: "";
-  position: absolute;
-
-  /* 🔥 sauber zentriert */
-  top: 50%;
-  left: 50%;
-  width: 30%;
-  aspect-ratio: 1;
-
-  transform: translate(-50%, -50%);
-
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 50%;
-  pointer-events: none;
-}
 
 /* =========================
 👤 PLAYER POSITION
@@ -1551,92 +1409,7 @@ tr:hover {
   opacity: 0.9;
 }
 
-/* =========================
-   TEAM STATS (GAME STYLE)
-========================= */
-.team-stats {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-}
 
-.team-stats .stat {
-  flex: 1;
-
-  padding: 8px;
-  border-radius: 10px;
-
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.06),
-    rgba(255,255,255,0.02)
-  );
-
-  text-align: center;
-  position: relative;
-}
-
-/* Label */
-.team-stats .label {
-  font-size: 9px;
-  opacity: 0.6;
-  letter-spacing: 1px;
-}
-
-/* Value */
-.team-stats .value {
-  font-size: 18px;
-  font-weight: 800;
-  margin: 4px 0;
-}
-
-/* Bar container */
-.team-stats .bar {
-  height: 5px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-/* Bar fill */
-.team-stats .bar div {
-  height: 100%;
-  border-radius: 5px;
-  transition: width 0.3s ease;
-}
-
-/* Colors */
-.stat.attack .donut {
-  background: conic-gradient(#22c55e var(--val), #1e293b 0);
-}
-.stat.defense .donut {
-  background: conic-gradient(#38bdf8 var(--val), #1e293b 0);
-}
-.stat.control .donut {
-  background: conic-gradient(#a855f7 var(--val), #1e293b 0);
-}
-.tactics-presets button,
-.tactics-intensity button {
-  width: 100%;
-  padding: 12px;
-
-  border-radius: 14px;
-  border: 1px solid #1e293b;
-
-  background: #020617;
-  color: #94a3b8;
-
-  transition: all 0.2s ease;
-}
-
-.tactics-presets button.active,
-.tactics-intensity button.active {
-  background: #22c55e;
-  color: #022c22;
-  font-weight: 600;
-
-  box-shadow: 0 0 0 2px rgba(34,197,94,0.25);
-}
 /* =========================
    MICRO INTERACTIONS
 ========================= */
@@ -1672,9 +1445,8 @@ tr:hover {
   pointer-events: auto;
   opacity: 1;
 }
-
 /* =========================
-📦 SHEET
+📦 BASE SHEET
 ========================= */
 
 .tactics-sheet {
@@ -1693,42 +1465,212 @@ tr:hover {
   overflow-y: auto;
   overflow-x: hidden;
 
-  /* 🔥 WICHTIG: erlaubt Header rauszuragen */
-  overflow: visible;
-
   transform: translateY(100%);
   transition: transform 0.3s ease;
 
-  box-shadow: 0 -20px 60px rgba(0,0,0,0.8);
+  box-shadow:
+    0 -20px 60px rgba(0,0,0,0.8);
 }
 
 .tactics-overlay.open .tactics-sheet {
   transform: translateY(0);
 }
 
-/* =========================
-🎛 CONTROLS ROW
-========================= */
-
-.tactics-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+/* Drag Handle */
+.tactics-sheet::before {
+  content: "";
+  width: 40px;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 999px;
+  display: block;
+  margin: 0 auto 10px;
 }
 
 /* =========================
-⬇️ DROPDOWN BASE
+🧠 HEADER
+========================= */
+
+.tactics-header {
+  display: flex;
+  justify-content: center;
+  margin-top: -20px;
+  margin-bottom: 10px;
+}
+
+.tactics-header img {
+  width: clamp(60px, 20vw, 100px);
+  filter:
+    drop-shadow(0 6px 16px rgba(0,0,0,0.7))
+    brightness(1.05);
+}
+
+/* =========================
+📐 FIELD (UPGRADED)
+========================= */
+
+.formation-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+
+  border-radius: 16px;
+  overflow: hidden;
+
+  background: url("./gfx/field.svg") center/cover no-repeat;
+
+  box-shadow:
+    inset 0 0 40px rgba(0,0,0,0.6),
+    0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Center Line */
+.formation-preview::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(255,255,255,0.2);
+}
+
+/* =========================
+⚽ PLAYER DOTS
+========================= */
+
+.fp-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 6px rgba(255,255,255,0.6),
+    0 0 12px currentColor;
+}
+
+.fp-dot.GK  { color: #facc15; background: #facc15; }
+.fp-dot.DEF { color: #38bdf8; background: #38bdf8; }
+.fp-dot.MID { color: #a855f7; background: #a855f7; }
+.fp-dot.ST  { color: #22c55e; background: #22c55e; }
+
+/* =========================
+📊 STATS GRID (BIG UPGRADE)
+========================= */
+
+.tactics-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  margin-top: 12px;
+}
+
+/* =========================
+🍩 DONUT
+========================= */
+
+.donut {
+  --size: 64px;
+  --thickness: 6px;
+  --val: 0%;
+
+  width: var(--size);
+  height: var(--size);
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+
+  position: relative;
+
+  background: conic-gradient(
+    from -90deg,
+    #22c55e 0%,
+    #4ade80 calc(var(--val) * 0.6),
+    #facc15 var(--val),
+    #1e293b var(--val)
+  );
+
+  box-shadow:
+    inset 0 0 20px rgba(0,0,0,0.6),
+    0 0 10px rgba(255,255,255,0.05);
+}
+
+.donut::after {
+  content: "";
+  position: absolute;
+  inset: var(--thickness);
+  background: #020617;
+  border-radius: 50%;
+}
+
+.donut span {
+  position: relative;
+  z-index: 2;
+}
+
+/* =========================
+📊 STAT BLOCK
+========================= */
+
+.tactics-stats-row .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  padding: 10px;
+  border-radius: 14px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.02)
+  );
+
+  box-shadow:
+    inset 0 0 20px rgba(0,0,0,0.4);
+}
+
+.tactics-stats-row .label {
+  font-size: 10px;
+  opacity: 0.6;
+  letter-spacing: 1px;
+}
+
+/* =========================
+🎛 CONTROLS (UPGRADED)
+========================= */
+
+.tactics-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+/* =========================
+⬇️ DROPDOWN
 ========================= */
 
 .tactics-dropdown {
   position: relative;
-  flex: 1;
 }
 
-/* selected */
 .dd-selected {
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 12px;
+  border-radius: 14px;
 
   background: linear-gradient(145deg, #111827, #1f2937);
   color: white;
@@ -1747,16 +1689,11 @@ tr:hover {
     inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
-/* arrow */
 .dd-selected::after {
   content: "▾";
   font-size: 12px;
   opacity: 0.6;
 }
-
-/* =========================
-📂 OPTIONS
-========================= */
 
 .dd-options {
   position: absolute;
@@ -1784,13 +1721,10 @@ tr:hover {
   transform: translateY(0);
 }
 
-/* items */
 .dd-options div {
-  padding: 10px;
+  padding: 12px;
   font-size: 13px;
   cursor: pointer;
-
-  transition: background 0.15s ease;
 }
 
 .dd-options div:hover {
@@ -1798,98 +1732,40 @@ tr:hover {
 }
 
 /* =========================
-🧠 HEADER (OVERHANG)
+🎲 BUTTON (UPGRADED)
 ========================= */
 
-.tactics-header {
-  position: relative;
+.chance-btn {
+  margin-top: 18px;
+  padding: 16px;
+
+  border-radius: 16px;
+
+  background: linear-gradient(90deg, #22c55e, #38bdf8, #a855f7);
+  color: #020617;
+
+  font-weight: 700;
+  font-size: 16px;
 
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
 
-  margin-top: -22px;   /* 🔥 ragt raus */
-  margin-bottom: 6px;
-
-  z-index: 2;
-}
-
-.tactics-header img {
-  width: clamp(60px, 20vw, 100px);
-
-  object-fit: contain;
-
-  filter:
-    drop-shadow(0 6px 16px rgba(0,0,0,0.7))
-    brightness(1.05);
-}
-
-/* optional glow */
-.tactics-header::after {
-  content: "";
-  position: absolute;
-
-  top: 50%;
-  width: 120px;
-  height: 60px;
-
-  background: radial-gradient(
-    ellipse at center,
-    rgba(34,197,94,0.25),
-    transparent
-  );
-
-  filter: blur(20px);
-
-  z-index: -1;
-}
-
-/* =========================
-📦 SHEET (BOTTOM MODAL)
-========================= */
-
-.tactics-sheet {
-  width: 100%;
-  max-width: 480px;
-
-  height: 90vh;
-  max-height: 90vh;
-
-  background: #020617;
-  border-radius: 20px 20px 0 0;
-
-  padding: 16px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
-
-  overflow-y: auto;
-
-  transform: translateY(100%);
-  transition: transform 0.3s ease;
-
-  /* 🔥 nicer feel */
   box-shadow:
-    0 -20px 60px rgba(0,0,0,0.8);
+    0 10px 40px rgba(34,197,94,0.3),
+    0 0 40px rgba(168,85,247,0.2);
+
+  transition: transform 0.15s ease;
 }
 
-/* OPEN STATE */
-.tactics-overlay.open .tactics-sheet {
-  transform: translateY(0);
+.chance-btn:active {
+  transform: scale(0.97);
 }
 
-/* =========================
-🪝 DRAG HANDLE
-========================= */
-
-.tactics-sheet::before {
-  content: "";
-  width: 40px;
-  height: 4px;
-
-  background: rgba(255,255,255,0.2);
-  border-radius: 999px;
-
-  display: block;
-  margin: 0 auto 10px;
+.chance-btn span {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
 }
 
 /* =========================
@@ -1900,154 +1776,3 @@ tr:hover {
   max-width: 100%;
 }
 
-/* =========================
-⚽ FIELD FIX
-========================= */
-
-.tactics-field {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-
-  background: url("./gfx/field.svg") center/cover no-repeat;
-
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-
-.tactics-donuts {
-  display: flex;
-  gap: 10px;
-
-  align-items: center; /* 🔥 DAS IST DER FIX */
-}
-.tactics-donuts .stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;   /* 🔥 wichtig */
-  justify-content: center;
-
-  min-height: 100px;     /* optional für gleiche Boxgröße */
-}
-.formation-preview {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-
-  border-radius: 16px;
-  overflow: hidden;
-
-  background: url("./gfx/field.svg") center/cover no-repeat;
-
-  box-shadow:
-    inset 0 0 40px rgba(0,0,0,0.6),
-    0 10px 30px rgba(0,0,0,0.5);
-}
-.formation-switch {
-  display: flex;
-  gap: 8px;
-}
-
-.formation-switch button {
-  flex: 1;
-
-  padding: 10px;
-  border-radius: 12px;
-
-  background: #020617;
-  color: #94a3b8;
-
-  border: 1px solid #1e293b;
-}
-
-.formation-switch button.active {
-  background: #22c55e;
-  color: #022c22;
-  font-weight: 600;
-}
-.tactics-field {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-
-  border-radius: 16px;
-  overflow: hidden;
-
-  background: url("../gfx/field.svg") center/cover no-repeat;
-
-  box-shadow:
-    inset 0 0 40px rgba(0,0,0,0.6),
-    0 10px 30px rgba(0,0,0,0.5);
-}
-.tactics-stats-row {
-  display: flex;
-  gap: 10px;
-
-  justify-content: space-between;
-  align-items: center;
-
-  flex-wrap: wrap;        /* 🔥 CRITICAL */
-}
-.tactics-stats-row .stat {
-  flex: 1;
-  min-width: 0;           /* 🔥 verhindert Overflow */
-}
-.formation-select {
-  position: relative;
-}
-
-.formation-select .selected {
-  padding: 12px;
-  border-radius: 12px;
-  background: #020617;
-  border: 1px solid #1e293b;
-  cursor: pointer;
-}
-
-.formation-select .options {
-  display: none;
-  position: absolute;
-  top: 110%;
-  left: 0;
-  right: 0;
-
-  background: #020617;
-  border-radius: 12px;
-  overflow: hidden;
-
-  z-index: 10;
-}
-
-.formation-select.open .options {
-  display: block;
-}
-
-.formation-select .options div {
-  padding: 12px;
-  cursor: pointer;
-}
-
-.formation-select .options div:hover {
-  background: #1e293b;
-}
-.tactics-segment {
-  display: flex;
-  margin-top: 14px;
-  background: #020617;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.tactics-segment button {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  background: transparent;
-  color: #94a3b8;
-}
-
-.tactics-segment button.active {
-  background: #22c55e;
-  color: #022c22;
-  font-weight: 600;
-}
