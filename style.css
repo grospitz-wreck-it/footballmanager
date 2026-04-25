@@ -1633,8 +1633,9 @@ tr:hover {
   position: relative;
   z-index: 1;
 }
+
 /* =========================
-🍩 DONUT
+🍩 DONUT (FIXED)
 ========================= */
 .donut {
   --size: 64px;
@@ -1664,7 +1665,6 @@ tr:hover {
     #1e293b var(--val)
   );
 
-.donut {
   box-shadow:
     inset 0 0 20px rgba(0,0,0,0.7),
     0 0 20px rgba(255,255,255,0.08),
@@ -1683,7 +1683,6 @@ tr:hover {
   position: relative;
   z-index: 2;
 }
-
 /* =========================
 🎛 CONTROLS
 ========================= */
