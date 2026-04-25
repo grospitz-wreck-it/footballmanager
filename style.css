@@ -1420,7 +1420,6 @@ tr:hover {
 /* =========================
 🎮 OVERLAY
 ========================= */
-
 .tactics-overlay {
   position: fixed;
   inset: 0;
@@ -1431,8 +1430,8 @@ tr:hover {
 
   padding: 0 10px;
 
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(6px);
+  background: rgba(2,6,23,0.75);
+  backdrop-filter: blur(10px);
 
   z-index: 5000;
 
@@ -1445,10 +1444,10 @@ tr:hover {
   pointer-events: auto;
   opacity: 1;
 }
-/* =========================
-📦 BASE SHEET
-========================= */
 
+/* =========================
+📦 SHEET
+========================= */
 .tactics-sheet {
   width: 100%;
   max-width: 480px;
@@ -1463,7 +1462,9 @@ tr:hover {
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
 
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
+
+  position: relative;
 
   transform: translateY(100%);
   transition: transform 0.3s ease;
@@ -1490,7 +1491,6 @@ tr:hover {
 /* =========================
 🧠 HEADER
 ========================= */
-
 .tactics-header {
   display: flex;
   justify-content: center;
@@ -1506,9 +1506,8 @@ tr:hover {
 }
 
 /* =========================
-📐 FIELD (UPGRADED)
+📐 FIELD
 ========================= */
-
 .formation-preview {
   position: relative;
   width: 100%;
@@ -1524,7 +1523,6 @@ tr:hover {
     0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* Center Line */
 .formation-preview::after {
   content: "";
   position: absolute;
@@ -1538,7 +1536,6 @@ tr:hover {
 /* =========================
 ⚽ PLAYER DOTS
 ========================= */
-
 .fp-dot {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -1558,32 +1555,68 @@ tr:hover {
 .fp-dot.ST  { color: #22c55e; background: #22c55e; }
 
 /* =========================
-📊 STATS GRID (BIG UPGRADE)
+📊 STATS LAYOUT (NEU)
 ========================= */
-
 .tactics-stats-row {
-  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
 }
 
-/* Donut Wrapper */
+/* LEFT DONUTS */
 .tactics-donuts {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
-/* einzelne Stats */
 .tactics-donuts .stat {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+/* RIGHT BARS (🔥 NEU WIE ENTWURF) */
+.tactics-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tactics-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tactics-bar span {
+  width: 40px;
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.tactics-bar .bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.tactics-bar .fill {
+  height: 100%;
+  border-radius: 6px;
+}
+
+/* Farben */
+.fill.att { background: #22c55e; }
+.fill.def { background: #38bdf8; }
+.fill.ctrl { background: #a855f7; }
+
 /* =========================
 🍩 DONUT
 ========================= */
-
 .donut {
   --size: 64px;
   --thickness: 6px;
@@ -1631,42 +1664,12 @@ tr:hover {
 }
 
 /* =========================
-📊 STAT BLOCK
+🎛 CONTROLS
 ========================= */
-
-.tactics-stats-row .stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-
-  padding: 10px;
-  border-radius: 14px;
-
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.05),
-    rgba(255,255,255,0.02)
-  );
-
-  box-shadow:
-    inset 0 0 20px rgba(0,0,0,0.4);
-}
-
-.tactics-stats-row .label {
-  font-size: 10px;
-  opacity: 0.6;
-  letter-spacing: 1px;
-}
-
-/* =========================
-🎛 CONTROLS (UPGRADED)
-========================= */
-
 .tactics-controls {
   display: flex;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .tactics-controls > * {
@@ -1676,9 +1679,9 @@ tr:hover {
 /* =========================
 ⬇️ DROPDOWN
 ========================= */
-
 .tactics-dropdown {
   position: relative;
+  z-index: 5;
 }
 
 .dd-selected {
@@ -1711,7 +1714,6 @@ tr:hover {
 .dd-options {
   position: absolute;
   bottom: 110%;
-  top: auto;
   left: 0;
   right: 0;
 
@@ -1723,10 +1725,10 @@ tr:hover {
   opacity: 0;
   pointer-events: none;
 
-  transform: translateY(-6px);
+  transform: translateY(6px);
   transition: all 0.2s ease;
 
-  z-index: 20;
+  z-index: 50;
 }
 
 .tactics-dropdown.open .dd-options {
@@ -1746,9 +1748,8 @@ tr:hover {
 }
 
 /* =========================
-🎲 BUTTON (UPGRADED)
+🎲 BUTTON
 ========================= */
-
 .chance-btn {
   margin-top: 18px;
   padding: 16px;
@@ -1781,12 +1782,3 @@ tr:hover {
   opacity: 0.7;
   margin-top: 4px;
 }
-
-/* =========================
-📱 SAFETY
-========================= */
-
-.tactics-sheet * {
-  max-width: 100%;
-}
-
