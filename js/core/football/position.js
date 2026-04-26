@@ -229,8 +229,11 @@ export function getBestXI(players, formationKey) {
   // =========================
   // 🧤 GK
   // =========================
-  pickBest(players, "GK");
-
+// GK zuerst versuchen
+if (!pickBest("GK")) {
+  // fallback → DEF darf rein
+  pickBest("DEF");
+}
   // =========================
   // 🛡 DEF
   // =========================
