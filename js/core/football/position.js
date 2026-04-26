@@ -39,9 +39,10 @@ export function mapPositionToRole(typeRaw){
 }
 
 export function applyFormation(players, formationKey) {
-  const f = FORMATIONS[formationKey];
 
-  // Pools erstellen
+  const f = getFormationProfile(formationKey);
+  if (!f) return players;
+
   const pools = {
     GK: players.filter(p => mapPosition(p.type) === "GK"),
     DEF: players.filter(p => mapPosition(p.type) === "DEF"),
@@ -51,19 +52,14 @@ export function applyFormation(players, formationKey) {
 
   const result = [];
 
-  // =========================
-  // 🥅 GK (nur echte GK oder DEF fallback)
-  // =========================
+  // GK (nur GK oder DEF)
   if (pools.GK.length > 0) {
     result.push({ ...pools.GK.shift(), role: "GK" });
   } else if (pools.DEF.length > 0) {
     result.push({ ...pools.DEF.shift(), role: "GK" });
   }
 
-  // =========================
-  // 🛡 DEF
-  // DEF kann: DEF + MID + (im Notfall GK)
-  // =========================
+  // DEF (DEF + MID + optional GK)
   for (let i = 0; i < f.DEF; i++) {
     if (pools.DEF.length > 0) {
       result.push({ ...pools.DEF.shift(), role: "DEF" });
@@ -74,10 +70,7 @@ export function applyFormation(players, formationKey) {
     }
   }
 
-  // =========================
-  // 🧠 MID
-  // MID kann: MID + DEF
-  // =========================
+  // MID (MID + DEF)
   for (let i = 0; i < f.MID; i++) {
     if (pools.MID.length > 0) {
       result.push({ ...pools.MID.shift(), role: "MID" });
@@ -86,10 +79,7 @@ export function applyFormation(players, formationKey) {
     }
   }
 
-  // =========================
-  // ⚡ ATT
-  // ATT kann: ATT + MID
-  // =========================
+  // ATT (ATT + MID)
   for (let i = 0; i < f.ATT; i++) {
     if (pools.ATT.length > 0) {
       result.push({ ...pools.ATT.shift(), role: "ATT" });
