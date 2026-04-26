@@ -70,6 +70,16 @@ export const EVENT_TYPES = {
 };
 
 // =========================
+// 🆕 MICRO EVENTS
+// =========================
+PASS: "PASS",
+DRIBBLE: "DRIBBLE",
+INTERCEPTION: "INTERCEPTION",
+BALL_LOSS: "BALL_LOSS",
+BALL_RECOVERY: "BALL_RECOVERY",
+CLEARANCE: "CLEARANCE",
+
+// =========================
 // 🎯 EVENT OUTCOMES
 // =========================
 export const EVENT_OUTCOMES = {
