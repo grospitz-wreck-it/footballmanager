@@ -514,7 +514,9 @@ console.log("🧪 DEBUG READY → window.debugData");
   .select("*");
 
     console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
-
+// 🔥🔥🔥 DAS HAT GEFEHLT
+game.data = game.data || {};
+game.data.eventDefinitions = gameEvents || [];
     // =========================
 // 🧠 LEAGUE BUILD (FINAL CLEAN)
 // =========================
