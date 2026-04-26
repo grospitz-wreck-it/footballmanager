@@ -71,11 +71,11 @@ export function applyFormation(players, formationKey) {
   // 📦 POOLS
   // =========================
   const pools = {
-    GK: players.filter(p => mapPosition(p.type) === "GK"),
-    DEF: players.filter(p => mapPosition(p.type) === "DEF"),
-    MID: players.filter(p => mapPosition(p.type) === "MID"),
-    ATT: players.filter(p => mapPosition(p.type) === "ATT")
-  };
+  GK: players.filter(p => mapPosition(p.position_type) === "GK"),
+  DEF: players.filter(p => mapPosition(p.position_type) === "DEF"),
+  MID: players.filter(p => mapPosition(p.position_type) === "MID"),
+  ATT: players.filter(p => mapPosition(p.position_type) === "ATT")
+};
 
   const result = [];
 
