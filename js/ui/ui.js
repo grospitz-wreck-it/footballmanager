@@ -726,9 +726,10 @@ function groupPlayers(players) {
   if (!players?.length) return groups;
 
   players.forEach((p) => {
-  const type = p.role || mapPositionToRole(p.position_type);
-    
-    if (type === "ST") groups.ST.push(p);
+    const type = p.role || mapPositionToRole(p.position_type);
+
+    // 🔥 FIX: ATT → ST mappen
+    if (type === "ST" || type === "ATT") groups.ST.push(p);
     else if (type === "MID") groups.MID.push(p);
     else if (type === "DEF") groups.DEF.push(p);
     else if (type === "GK") groups.GK.push(p);
