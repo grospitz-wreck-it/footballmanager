@@ -433,9 +433,7 @@ function initMatch(round){
 if(!playerMatch){
   console.warn("⚽ BYE: Team hat spielfrei", round);
 
-  // 🔥 Match-State sauber setzen (wichtig!)
   game.match._scheduleRef = null;
-
   game.match.current = null;
 
   game.match.live = {
@@ -443,7 +441,10 @@ if(!playerMatch){
     running: false,
     score: { home: 0, away: 0 },
     events: [],
-    phase: "bye"
+    phase: "bye",
+
+    // 🔥 WICHTIG (RESET)
+    _fulltimeEmitted: false
   };
 
   game.match.home = null;
