@@ -1,5 +1,5 @@
 /* =====================================================
-🎮 TACTICS OVERLAY (CLEAN AAA)
+🎮 OVERLAY
 ===================================================== */
 
 #tacticsOverlay {
@@ -13,13 +13,8 @@
 
   padding: 0 10px calc(10px + env(safe-area-inset-bottom));
 
-  background:
-    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.25), transparent 45%),
-    radial-gradient(circle at 80% 30%, rgba(168,85,247,0.25), transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(56,189,248,0.18), transparent 55%),
-    linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.9));
-
-  backdrop-filter: blur(14px);
+  background: rgba(2,6,23,0.75);
+  backdrop-filter: blur(12px);
 
   opacity: 0;
   pointer-events: none;
@@ -58,17 +53,17 @@
 }
 
 /* =====================================================
-🧲 DRAG HANDLE
+🧲 HANDLE
 ===================================================== */
 
 .tactics-sheet::before {
   content: "";
-  width: 42px;
+  width: 40px;
   height: 5px;
   border-radius: 999px;
   background: rgba(255,255,255,0.3);
   display: block;
-  margin: 0 auto 14px;
+  margin: 0 auto 12px;
 }
 
 /* =====================================================
@@ -80,61 +75,61 @@
   width: 100%;
   aspect-ratio: 16/9;
 
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
 
   background: url("../gfx/field.svg") center/cover no-repeat;
 
-  margin-top: 12px;
-  margin-bottom: 14px;
+  margin: 10px 0 14px;
 }
 
 /* =====================================================
-⚽ DOTS
+⚽ DOTS (CLICK FIX!)
 ===================================================== */
 
 .fp-dot {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
+
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
 
-  z-index: 5;
+  z-index: 50;              /* 🔥 wichtig */
+  pointer-events: auto;     /* 🔥 klick fix */
 
   box-shadow:
     0 0 6px rgba(255,255,255,0.7),
-    0 0 12px currentColor,
-    0 0 20px currentColor;
+    0 0 14px currentColor;
 }
 
-.fp-dot.GK  { background: #facc15; color: #facc15; }
-.fp-dot.DEF { background: #38bdf8; color: #38bdf8; }
-.fp-dot.MID { background: #a855f7; color: #a855f7; }
-.fp-dot.ATT { background: #ef4444; color: #ef4444; }
+.fp-dot.GK  { background:#facc15; color:#facc15; }
+.fp-dot.DEF { background:#38bdf8; color:#38bdf8; }
+.fp-dot.MID { background:#a855f7; color:#a855f7; }
+.fp-dot.ATT { background:#ef4444; color:#ef4444; }
 
 /* =====================================================
-📊 STATS LAYOUT (FIXED)
+📊 STATS ROW (FIXED LAYOUT)
 ===================================================== */
 
 .tactics-stats-row {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
 
   padding: 14px;
-  border-radius: 18px;
+  border-radius: 16px;
 
   background: rgba(255,255,255,0.04);
 }
 
-/* LEFT SIDE (DONUTS) */
+/* LEFT (DONUTS) */
 #tacticsStats {
   display: flex;
   gap: 12px;
 }
 
-/* RIGHT SIDE (BARS) */
+/* RIGHT (BARS) */
 #tacticsBars {
   flex: 1;
   display: flex;
@@ -143,14 +138,14 @@
 }
 
 /* =====================================================
-🍩 DONUT
+🍩 DONUT (FIX STACK BUG)
 ===================================================== */
 
 .donut {
-  --val: 0%;
+  position: relative;
 
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
 
   border-radius: 50%;
 
@@ -164,9 +159,14 @@
   background:
     conic-gradient(
       from -90deg,
-      currentColor var(--val),
-      rgba(255,255,255,0.08) var(--val)
+      currentColor var(--val, 0%),
+      rgba(255,255,255,0.1) var(--val, 0%)
     );
+}
+
+.donut span {
+  position: relative;
+  z-index: 2;
 }
 
 .donut::after {
@@ -178,13 +178,13 @@
 }
 
 /* =====================================================
-📊 BARS (FIXED)
+📊 BARS (FILL FIX)
 ===================================================== */
 
 .tactics-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .tactics-bar span {
@@ -196,28 +196,31 @@
 .tactics-bar .bar {
   flex: 1;
   height: 6px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.1);
   border-radius: 6px;
+  overflow: hidden;
 }
 
 .tactics-bar .fill {
   height: 100%;
+  width: 0%; /* JS setzt Wert */
   border-radius: 6px;
 }
 
+/* COLORS */
+.fill.att { background: #22c55e; }
+.fill.def { background: #38bdf8; }
+.fill.ctrl { background: #a855f7; }
+
 /* =====================================================
-🎛 DROPDOWNS (FIXED!)
+🎛 DROPDOWNS (FIX VISIBLE BUG)
 ===================================================== */
 
 .tactics-controls {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3,1fr);
   gap: 12px;
-
   margin-top: 18px;
-
-  position: relative;
-  z-index: 10;
 }
 
 .tactics-dropdown {
@@ -225,20 +228,21 @@
 }
 
 .dd-selected {
-  height: 50px;
+  height: 48px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 16px;
+  border-radius: 14px;
+
   background: rgba(255,255,255,0.06);
   color: white;
 
   cursor: pointer;
 }
 
-/* 👉 OPTIONS HIDDEN BY DEFAULT */
+/* 👉 HIDDEN DEFAULT */
 .dd-options {
   position: absolute;
   top: 100%;
@@ -253,12 +257,12 @@
   pointer-events: none;
 
   transform: translateY(-6px);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 
-  z-index: 100;
+  z-index: 1000;
 }
 
-/* 👉 ONLY SHOW WHEN OPEN */
+/* 👉 ONLY WHEN OPEN */
 .tactics-dropdown.open .dd-options {
   opacity: 1;
   pointer-events: auto;
@@ -270,23 +274,20 @@
 ===================================================== */
 
 .chance-btn {
-  margin: 24px auto 0;
-  width: 100%;
-
+  margin-top: 20px;
   padding: 16px;
 
-  border-radius: 18px;
+  border-radius: 16px;
 
   text-align: center;
 
   background: linear-gradient(90deg,#22c55e,#38bdf8,#a855f7);
   color: #020617;
-
   font-weight: bold;
 }
 
 /* =====================================================
-🪟 MODAL FIX (CENTERED)
+🪟 MODAL (CENTER FIX)
 ===================================================== */
 
 #playerModal {
@@ -314,4 +315,14 @@
 #playerModal.show .player-modal {
   transform: scale(1);
   opacity: 1;
+}
+
+/* =====================================================
+🖼 HEADER IMAGE FIX (TOO BIG BUG)
+===================================================== */
+
+.tactics-header img {
+  width: 140px;
+  max-width: 50%;
+  height: auto;
 }
