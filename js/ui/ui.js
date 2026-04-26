@@ -726,8 +726,8 @@ function groupPlayers(players) {
   if (!players?.length) return groups;
 
   players.forEach((p) => {
-    const type = mapPositionToRole(p.position_type);
-
+  const type = p.role || mapPositionToRole(p.position_type);
+    
     if (type === "ST") groups.ST.push(p);
     else if (type === "MID") groups.MID.push(p);
     else if (type === "DEF") groups.DEF.push(p);
@@ -955,14 +955,21 @@ function renderTeam() {
   }
 
   // 👉 FALLBACK (dein bestehendes System bleibt!)
-  if (!starters.length) {
-    starters = [
-      ...byType.GK.slice(0, 1),
-      ...byType.DEF.slice(0, 4),
-      ...byType.MID.slice(0, 4),
-      ...byType.ST.slice(0, 2),
-    ];
-  }
+ // =========================
+// ⚙️ APPLY FORMATION (🔥 KEY FIX)
+// =========================
+const formation = game.tactics?.formation || "4-4-2";
+
+try {
+  starters = applyFormation(players, formation);
+} catch (e) {
+  console.error("❌ applyFormation failed in team:", e);
+  starters = players.slice(0, 11); // fallback
+}
+
+// 👉 bench neu berechnen
+const starterIds = new Set(starters.map(p => String(p.id)));
+benchPlayers = players.filter(p => !starterIds.has(String(p.id)));
 
   const formation = game.tactics?.formation || lineup?.formation || "4-4-2";
 
