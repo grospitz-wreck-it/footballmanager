@@ -12,9 +12,10 @@
 <body>
 
 <!-- =========================
-🎮 TACTICS OVERLAY (FINAL)
+🎮 TACTICS OVERLAY (FINAL FIX)
 ========================= -->
-<div id="tacticsOverlay" class="tactics-overlay">
+<div id="tacticsOverlay">
+
   <div class="tactics-sheet">
 
     <!-- 🧠 HEADER -->
@@ -26,57 +27,57 @@
     <div class="formation-preview" id="formationPreview"></div>
 
     <!-- =========================
-    📊 STATS (DONUT + BARS)
+    📊 STATS (FIXED STRUCTURE)
     ========================= -->
     <div class="tactics-stats-row">
 
-  <!-- LEFT -->
-  <div id="tacticsStats" class="tactics-donuts"></div>
+      <!-- DONUTS (KEIN extra wrapper!) -->
+      <div id="tacticsStats"></div>
 
-  <!-- RIGHT -->
-  <div id="tacticsBars" class="tactics-bars"></div>
+      <!-- BARS -->
+      <div id="tacticsBars"></div>
 
-</div>
+    </div>
 
     <!-- =========================
     🎛 CONTROLS
     ========================= -->
-    <div class="tactics-controls advanced">
+    <div class="tactics-controls">
 
-<div class="tactics-dropdown" id="formationDropdown">
-  <div class="dd-selected">4-4-2</div>
-  <div class="dd-options">
-    <div data-value="4-4-2">4-4-2</div>
-    <div data-value="4-3-3">4-3-3</div>
-    <div data-value="3-5-2">3-5-2</div>
-    <div data-value="4-2-3-1">4-2-3-1</div>
-  </div>
-</div>
+      <div class="tactics-dropdown" id="formationDropdown">
+        <div class="dd-selected">4-4-2</div>
+        <div class="dd-options">
+          <div data-value="4-4-2">4-4-2</div>
+          <div data-value="4-3-3">4-3-3</div>
+          <div data-value="3-5-2">3-5-2</div>
+          <div data-value="4-2-3-1">4-2-3-1</div>
+        </div>
+      </div>
 
-<div class="tactics-dropdown" id="presetDropdown">
-  <div class="dd-selected">Balanced</div>
-  <div class="dd-options">
-    <div data-value="offensive">Offensiv</div>
-    <div data-value="balanced">Balanced</div>
-    <div data-value="defensive">Defensiv</div>
-  </div>
-</div>
+      <div class="tactics-dropdown" id="presetDropdown">
+        <div class="dd-selected">Balanced</div>
+        <div class="dd-options">
+          <div data-value="offensive">Offensiv</div>
+          <div data-value="balanced">Balanced</div>
+          <div data-value="defensive">Defensiv</div>
+        </div>
+      </div>
 
-<div class="tactics-dropdown" id="styleDropdown">
-  <div class="dd-selected">Ausgeglichen</div>
-  <div class="dd-options">
-    <div data-value="balanced">Ausgeglichen</div>
-    <div data-value="possession">Ballbesitz</div>
-    <div data-value="counter">Konter</div>
-    <div data-value="longball">Lange Bälle</div>
-    <div data-value="wings">Flügelspiel</div>
-  </div>
-</div>
+      <div class="tactics-dropdown" id="styleDropdown">
+        <div class="dd-selected">Ausgeglichen</div>
+        <div class="dd-options">
+          <div data-value="balanced">Ausgeglichen</div>
+          <div data-value="possession">Ballbesitz</div>
+          <div data-value="counter">Konter</div>
+          <div data-value="longball">Lange Bälle</div>
+          <div data-value="wings">Flügelspiel</div>
+        </div>
+      </div>
 
     </div>
 
     <!-- 🎲 CTA -->
-    <button id="chanceBtn" class="chance-btn big">
+    <button id="chanceBtn" class="chance-btn">
       🎲 Chance im Spiel
       <span>Riskiere es!</span>
     </button>
