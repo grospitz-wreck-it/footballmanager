@@ -339,22 +339,26 @@
 }
 
 /* =====================================================
-🪟 MODAL (CENTER)
+🪟 MODAL (FIXED FINAL)
 ===================================================== */
 
 #playerModal {
   position: fixed;
   inset: 0;
 
-  display: flex;
+  display: none; /* 🔥 CRITICAL FIX */
+
   align-items: center;
   justify-content: center;
 
-  z-index: 9999;
+  z-index: 10000; /* über tactics */
+
   pointer-events: none;
 }
 
+/* 👉 nur sichtbar wenn aktiv */
 #playerModal.show {
+  display: flex; /* 🔥 jetzt erst sichtbar */
   pointer-events: auto;
 }
 
