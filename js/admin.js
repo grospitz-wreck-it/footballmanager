@@ -1,5 +1,6 @@
 
 let insightChart = null;
+let currentAssets = [];
 import { supabase } from "./client.js";
 // =====================
 // STATE
