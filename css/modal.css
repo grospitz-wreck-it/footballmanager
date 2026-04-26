@@ -1,34 +1,42 @@
 /* =========================
-🪟 MODAL ROOT (NO OVERLAY)
+🪟 MODAL ROOT (SAFE LAYER)
 ========================= */
 #playerModal {
   position: fixed;
   inset: 0;
-  z-index: 4000;
+
+  display: none; /* 🔥 WICHTIG */
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 10000; /* 🔥 über tactics */
 
   pointer-events: none;
 }
 
+/* 👉 sichtbar */
 #playerModal.show {
+  display: flex;
   pointer-events: auto;
 }
 
 /* =========================
-🚫 OVERLAY DISABLED
+🚫 NO OVERLAY
 ========================= */
 .modal-overlay {
   position: absolute;
   inset: 0;
 
   display: flex;
-  align-items: flex-end; /* 🔥 kommt von unten */
+  align-items: center; /* 🔥 CENTER */
   justify-content: center;
 
-  background: transparent; /* ❌ kein dark layer */
+  background: transparent;
 }
 
 /* =========================
-🎴 FLOATING CARD (HELL)
+🎴 FLOATING CARD
 ========================= */
 .player-modal {
   width: 280px;
@@ -39,7 +47,7 @@
 
   position: relative;
 
-  overflow: visible; /* 🔥 WICHTIG: erlaubt Close Button außerhalb */
+  overflow: visible;
 
   display: flex;
   flex-direction: column;
@@ -59,25 +67,24 @@
     0 30px 80px rgba(0,0,0,0.6),
     0 0 0 1px rgba(255,255,255,0.6);
 
-  /* 🔥 FIX: nicht mehr von unten reinfahren */
   transform: scale(0.9);
   opacity: 0;
 
   transition:
-    transform 0.35s cubic-bezier(.2,.8,.2,1),
-    opacity 0.25s ease;
+    transform 0.25s ease,
+    opacity 0.2s ease;
 
   --glow: rgba(34,197,94,0.35);
 }
 
 /* 👉 sichtbar */
 #playerModal.show .player-modal {
-  transform: scale(1); /* 🔥 kein translateY mehr */
+  transform: scale(1);
   opacity: 1;
 }
 
 /* =========================
-✨ GLOW BORDER (MATCH DOTS)
+✨ GLOW
 ========================= */
 .player-modal::after {
   content: "";
@@ -97,7 +104,6 @@
 ========================= */
 .card-top {
   width: 100%;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -108,7 +114,6 @@
   border-radius: 12px;
 
   background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(6px);
 }
 
 .rating {
@@ -153,22 +158,22 @@
 }
 
 /* =========================
-❌ CLOSE BUTTON (FLOATING)
+❌ CLOSE BUTTON
 ========================= */
 .close-btn {
   position: absolute;
-  top: -14px;
-  right: -14px;
+  top: -18px;
+  right: -18px;
 
-  width: 44px;
-  height: 44px;
+  width: 60px; /* 🔥 größer */
+  height: 60px;
 
   border: none;
   background: none;
   padding: 0;
 
   cursor: pointer;
-  z-index: 10;
+  z-index: 20;
 }
 
 .close-btn img {
@@ -177,11 +182,11 @@
   object-fit: contain;
 
   filter:
-    drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+    drop-shadow(0 6px 16px rgba(0,0,0,0.7));
 }
 
 /* =========================
-🎨 GLOW COLORS (FP-DOT MATCH)
+🎨 GLOW COLORS
 ========================= */
 .player-modal[data-role="GK"]  { --glow: #facc15; }
 .player-modal[data-role="DEF"] { --glow: #38bdf8; }
