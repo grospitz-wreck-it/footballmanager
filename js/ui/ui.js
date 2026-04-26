@@ -13,6 +13,7 @@ import { renderSchedule as renderScheduleModule } from "../modules/scheduler.js"
 import { getPlayersOfTeam } from "../modules/league.js";
 import { mapPosition, mapPositionToRole, applyFormation, getBestXI } from "../core/football/position.js";
 import { FORMATIONS, getFormationProfile } from "../core/football/formation.js";
+import { openPlayerModal } from "../modal.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -1382,7 +1383,7 @@ function attachDotHandlers(players) {
 
       if (!player) return;
 
-      showPlayerModal(player);
+      openPlayerModal(player);
     };
   });
 }
