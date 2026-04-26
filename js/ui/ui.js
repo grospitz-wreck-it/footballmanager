@@ -1303,22 +1303,21 @@ function renderFormationPreview() {
     players = game.players;
   }
 
-  // ❌ kein Team → nichts rendern
   if (!players.length) {
     console.warn("⚠️ no players found for formation preview");
     return;
   }
 
   // =========================
-  // ⚙️ APPLY FORMATION
+  // ⚙️ BEST XI (SYNC MIT TEAM)
   // =========================
   let assigned = [];
 
   try {
-    assigned = applyFormation(players, formation);
+    assigned = getBestXI(players, formation);
   } catch (e) {
-    console.error("❌ applyFormation crashed:", e);
-    assigned = players; // fallback → zumindest dots anzeigen
+    console.error("❌ getBestXI failed in preview:", e);
+    assigned = players;
   }
 
   // =========================
@@ -1337,9 +1336,6 @@ function renderFormationPreview() {
     }
   });
 
-  // =========================
-  // 🎯 MATCH LAYOUT → PLAYER
-  // =========================
   const index = {
     GK: 0,
     DEF: 0,
@@ -1347,6 +1343,9 @@ function renderFormationPreview() {
     ATT: 0
   };
 
+  // =========================
+  // 🎯 RENDER DOTS
+  // =========================
   el.innerHTML = layout
     .map((p) => {
       const player = groups[p.role]?.[index[p.role]++] || null;
@@ -1354,6 +1353,7 @@ function renderFormationPreview() {
       return `
         <div 
           class="fp-dot ${p.role}"
+          data-id="${player?.id || ""}"
           style="
             top:${p.top};
             left:${p.left};
@@ -1362,6 +1362,29 @@ function renderFormationPreview() {
       `;
     })
     .join("");
+
+  // =========================
+  // 🖱 CLICK HANDLER
+  // =========================
+  attachDotHandlers(players);
+}
+
+
+function attachDotHandlers(players) {
+  document.querySelectorAll(".fp-dot").forEach((dot) => {
+    dot.onclick = () => {
+      const id = dot.dataset.id;
+      if (!id) return;
+
+      const player = players.find(
+        (p) => String(p.id) === String(id)
+      );
+
+      if (!player) return;
+
+      showPlayerModal(player);
+    };
+  });
 }
 // =========================
 // 🚀 INITIAL UI RENDER (FIX)
