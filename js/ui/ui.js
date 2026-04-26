@@ -954,11 +954,12 @@ function renderTeam() {
     }
   }
 
-  // 👉 FALLBACK (dein bestehendes System bleibt!)
- // =========================
-// ⚙️ APPLY FORMATION (🔥 KEY FIX)
 // =========================
-const formation = game.tactics?.formation || "4-4-2";
+// ⚙️ APPLY FORMATION (FINAL CLEAN)
+// =========================
+
+// 👉 vorhandene formation nutzen (KEIN zweites const!)
+const formation = game.tactics?.formation || lineup?.formation || "4-4-2";
 
 try {
   starters = applyFormation(players, formation);
@@ -971,9 +972,10 @@ try {
 const starterIds = new Set(starters.map(p => String(p.id)));
 benchPlayers = players.filter(p => !starterIds.has(String(p.id)));
 
-  const formation = game.tactics?.formation || lineup?.formation || "4-4-2";
-
-  let html = "";
+// =========================
+// 🧱 HTML BUILD
+// =========================
+let html = "";
 
   // =========================
   // 🧠 GROUPED STARTERS
