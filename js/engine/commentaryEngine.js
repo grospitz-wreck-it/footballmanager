@@ -43,6 +43,25 @@ const data = event;
     case "LEGACY":
       return event.text || null;
 
+    case "PASS":
+  return `${getPlayer(d)} spielt einen Pass`;
+
+case "DRIBBLE":
+  return `${getPlayer(d)} geht ins Dribbling`;
+
+case "INTERCEPTION":
+  return `${getPlayer(d)} fängt den Ball ab`;
+
+case "BALL_LOSS":
+  return `${getPlayer(d)} verliert den Ball`;
+
+case "BALL_RECOVERY":
+  return `${getPlayer(d)} erobert den Ball`;
+
+case "CLEARANCE":
+  return `${getPlayer(d)} klärt die Situation`;
+      
+
     default:
       return null;
   }
