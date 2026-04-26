@@ -104,6 +104,18 @@ function getEventDefinitions(){
 // =========================
 // 🎯 MAIN RESOLVER
 // =========================
+function weightedRandom(arr){
+  const total = arr.reduce((sum, i) => sum + (i.priority || 1), 0);
+  let r = Math.random() * total;
+
+  for(const item of arr){
+    r -= item.priority || 1;
+    if(r <= 0) return item;
+  }
+
+  return arr[0];
+}
+
 function resolveEventContent(event){
 
   if(!event){
@@ -114,17 +126,15 @@ function resolveEventContent(event){
   const definitions = getEventDefinitions();
   const type = normalize(event.type);
 
-  console.log("🧠 RESOLVER INPUT:", {
-    type,
-    definitions: definitions.length
-  });
-
   if(!definitions.length){
     console.warn("⚠️ No events loaded");
     return emptyResult();
   }
 
-  const matches = definitions.filter(e => {
+  // =========================
+  // 🔍 MATCH
+  // =========================
+  let matches = definitions.filter(e => {
 
     const possible = [
       e.type,
@@ -141,10 +151,55 @@ function resolveEventContent(event){
     return emptyResult();
   }
 
-  matches.sort((a,b) => (b.priority || 0) - (a.priority || 0));
+  // =========================
+  // 🔥 GUARANTEED FIRST
+  // =========================
+  const guaranteed = matches.filter(e => e.is_guaranteed);
 
-  const selected = matches[0];
+  if(guaranteed.length){
+    matches = guaranteed;
+  }
 
+  // =========================
+  // 🧠 COOLDOWN
+  // =========================
+  const memory = window.__eventMemory || [];
+  window.__eventMemory = memory;
+
+  matches = matches.filter(e => {
+
+    if(!e.cooldown) return true;
+
+    const last = memory.find(m => m.id === e.id);
+    if(!last) return true;
+
+    return (Date.now() - last.time) > (e.cooldown * 1000);
+  });
+
+  if(!matches.length){
+    matches = definitions;
+  }
+
+  // =========================
+  // 🎲 RANDOM PICK
+  // =========================
+  const selected = weightedRandom(matches);
+
+  // =========================
+  // 🧠 MEMORY SAVE
+  // =========================
+  memory.push({
+    id: selected.id,
+    time: Date.now()
+  });
+
+  if(memory.length > 20){
+    memory.shift();
+  }
+
+  // =========================
+  // 🖼 ASSETS
+  // =========================
   let assets = [];
 
   if(Array.isArray(selected.assets)){
@@ -160,10 +215,12 @@ function resolveEventContent(event){
   return {
     text: selected.title || null,
     assets,
+    duration: selected.duration || 5, // 🔥 NEU
+
     config: {
       id: selected.id,
       category: selected.category || "default",
-      priority: selected.priority || 0
+      priority: selected.priority || 1
     }
   };
 }
