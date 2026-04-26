@@ -613,59 +613,62 @@ function loadEventTypes(){
   select.innerHTML = "";
 
   // =========================
-  // 🧠 1. REGISTRY EVENTS (bestehend)
-  // =========================
-  const registryEvents = Object.values(EVENT_REGISTRY || []).map(e => ({
-    id: e.id,
-    label: e.label || e.id
-  }));
-
-  // =========================
-  // 🆕 2. MATCH ENGINE EVENTS (NEU)
+  // 🧠 CORE MATCH EVENTS
   // =========================
   const coreEvents = [
-    { id: "GOAL", label: "⚽ Tor" },
-    { id: "SHOT", label: "🎯 Schuss" },
-    { id: "SHOT_SAVED", label: "🧤 Parade" },
-    { id: "FOUL", label: "🚫 Foul" },
-    { id: "CORNER", label: "🚩 Ecke" },
-    { id: "DUEL", label: "⚔️ Zweikampf" },
+    ["GOAL", "⚽ Tor"],
+    ["SHOT", "🎯 Schuss"],
+    ["SHOT_SAVED", "🧤 Parade"],
+    ["FOUL", "🚫 Foul"],
+    ["CORNER", "🚩 Ecke"],
+    ["DUEL", "⚔️ Zweikampf"],
 
-    // 🔥 NEU (deine Erweiterung)
-    { id: "PASS", label: "➡️ Pass" },
-    { id: "DRIBBLE", label: "🌀 Dribbling" },
-    { id: "INTERCEPTION", label: "🛑 Interception" },
-    { id: "BALL_LOSS", label: "❌ Ballverlust" },
-    { id: "BALL_RECOVERY", label: "🔄 Ballgewinn" },
-    { id: "CLEARANCE", label: "🧹 Klärung" },
+    // 🔥 NEUE GAMEPLAY EVENTS
+    ["PASS", "➡️ Pass"],
+    ["DRIBBLE", "🌀 Dribbling"],
+    ["INTERCEPTION", "🛑 Interception"],
+    ["BALL_LOSS", "❌ Ballverlust"],
+    ["BALL_RECOVERY", "🔄 Ballgewinn"],
+    ["CLEARANCE", "🧹 Klärung"],
 
     // 🔥 WICHTIG
-    { id: "FULLTIME", label: "⏱️ Abpfiff" }
+    ["FULLTIME", "⏱️ Abpfiff"]
   ];
 
   // =========================
-  // 🔁 MERGE + DEDUPE
+  // 🎯 GROUP LABEL
   // =========================
-  const all = [...registryEvents, ...coreEvents];
+  const group = document.createElement("optgroup");
+  group.label = "Match Events";
 
-  const seen = new Set();
-  const unique = all.filter(e => {
-    if(seen.has(e.id)) return false;
-    seen.add(e.id);
-    return true;
-  });
-
-  // =========================
-  // 🎯 RENDER
-  // =========================
-  unique.forEach(e => {
-
+  coreEvents.forEach(([value, label]) => {
     const opt = document.createElement("option");
-    opt.value = e.id;
-    opt.textContent = e.label;
-
-    select.appendChild(opt);
+    opt.value = value;
+    opt.textContent = label;
+    group.appendChild(opt);
   });
+
+  select.appendChild(group);
+
+  // =========================
+  // 🧩 OPTIONAL: REGISTRY EVENTS
+  // =========================
+  if(typeof EVENT_REGISTRY !== "undefined"){
+
+    const regGroup = document.createElement("optgroup");
+    regGroup.label = "System Events";
+
+    Object.values(EVENT_REGISTRY).forEach(e => {
+
+      const opt = document.createElement("option");
+      opt.value = e.id;
+      opt.textContent = e.label || e.id;
+
+      regGroup.appendChild(opt);
+    });
+
+    select.appendChild(regGroup);
+  }
 }
 
 
@@ -1276,7 +1279,7 @@ function renderGameEvents(list){
           ? `
             <input data-field="title" value="${e.title}">
 
-            <input data-field="type" value="${e.type}">
+            <select data-field="type"></select>
             <input data-field="trigger" value="${e.trigger}">
 
             <input data-field="probability" type="number" step="0.01" value="${e.probability || 0}">
@@ -1309,6 +1312,40 @@ function renderGameEvents(list){
     `;
 
     container.appendChild(div);
+    if(isEdit){
+  const select = div.querySelector("[data-field='type']");
+  if(select){
+
+    // Optionen neu laden
+    select.innerHTML = "";
+
+    const coreEvents = [
+      ["GOAL", "⚽ Tor"],
+      ["SHOT", "🎯 Schuss"],
+      ["SHOT_SAVED", "🧤 Parade"],
+      ["FOUL", "🚫 Foul"],
+      ["CORNER", "🚩 Ecke"],
+      ["DUEL", "⚔️ Zweikampf"],
+      ["PASS", "➡️ Pass"],
+      ["DRIBBLE", "🌀 Dribbling"],
+      ["INTERCEPTION", "🛑 Interception"],
+      ["BALL_LOSS", "❌ Ballverlust"],
+      ["BALL_RECOVERY", "🔄 Ballgewinn"],
+      ["CLEARANCE", "🧹 Klärung"],
+      ["FULLTIME", "⏱️ Abpfiff"]
+    ];
+
+    coreEvents.forEach(([value, label]) => {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      select.appendChild(opt);
+    });
+
+    // aktuellen Wert setzen
+    select.value = e.type;
+  }
+}
   });
 }
 
@@ -1520,7 +1557,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🔥 INIT LOADS
   loadGameEvents();
-  loadEventTypes();
+  setTimeout(loadEventTypes, 0);
 
   switchTab("ads");
   loadCampaigns();
