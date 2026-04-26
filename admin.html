@@ -174,8 +174,25 @@
 
     <input id="geTitle" placeholder="Name des Events (z.B. 'Brutales Foul')">
 
-    <select id="geType" title="Event-Typ (z.B. goal, foul)"></select>
+<select id="geType" title="Event-Typ (z.B. goal, foul)">
+  <option value="GOAL">⚽ Tor</option>
+  <option value="SHOT">🎯 Schuss</option>
+  <option value="SHOT_SAVED">🧤 Parade</option>
+  <option value="FOUL">🚫 Foul</option>
+  <option value="CORNER">🚩 Ecke</option>
+  <option value="DUEL">⚔️ Zweikampf</option>
 
+  <!-- 🔥 NEUE ENGINE EVENTS -->
+  <option value="PASS">➡️ Pass</option>
+  <option value="DRIBBLE">🌀 Dribbling</option>
+  <option value="INTERCEPTION">🛑 Interception</option>
+  <option value="BALL_LOSS">❌ Ballverlust</option>
+  <option value="BALL_RECOVERY">🔄 Ballgewinn</option>
+  <option value="CLEARANCE">🧹 Klärung</option>
+
+  <!-- 🔥 WICHTIG -->
+  <option value="FULLTIME">⏱️ Abpfiff</option>
+</select>
     <select id="geTrigger" title="Wann das Event ausgelöst wird">
       <option value="random">Random (zufällig im Spiel)</option>
       <option value="always">Always (Debug / Test)</option>
@@ -208,7 +225,22 @@
       type="number"
       placeholder="Dauer in Sekunden (z.B. 3)"
     >
+    <input 
+  id="gePriority" 
+  type="number"
+  placeholder="Priority (z.B. 1–100)"
+>
 
+<label style="display:flex; align-items:center; gap:6px;">
+  <input type="checkbox" id="geGuaranteed">
+  Immer anzeigen (z.B. Sponsored)
+</label>
+
+<input 
+  id="geCooldown" 
+  type="number"
+  placeholder="Cooldown Sekunden (z.B. 30)"
+>
     <input 
       type="file" 
       id="geMedia" 
