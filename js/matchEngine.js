@@ -1000,51 +1000,47 @@ const gameEvents = game.data?.gameEvents;
 
   live.minute = 90;
 
-  // 🔥 FULLTIME EVENT TRIGGERN
-  emitMatchEvent(EVENT_TYPES.FULLTIME, {
-    minute: 90,
-    score: {
-      home: game.match.score.home,
-      away: game.match.score.away
-    }
-  });
+// 🔥 WICHTIG: nur EINMAL feuern
+if(!live._fulltimeEmitted){
 
-  live.running = false;
+  live._fulltimeEmitted = true;
 
-  // =========================
-  // 🆕 FULLTIME EVENT (WICHTIG)
-  // =========================
   emitMatchEvent(EVENT_TYPES.FULLTIME, {
     teamId: null,
+    playerId: null,
+    minute: 90,
     score: {
       home: game.match.score.home,
       away: game.match.score.away
     },
     outcome: "END"
   });
+}
 
-  // =========================
-  // 🔥 TABLE UPDATE (DEIN MATCH)
-  // =========================
-  const league = game.league?.current;
-  const match = game.match?.current;
+live.running = false;
 
-  if(league && match){
+// =========================
+// 🔥 TABLE UPDATE (DEIN MATCH)
+// =========================
+const league = game.league?.current;
+const match = game.match?.current;
 
-    const home = league.teams.find(t => String(t.id) === match.homeTeamId);
-    const away = league.teams.find(t => String(t.id) === match.awayTeamId);
+if(league && match){
 
-    const hg = game.match.score.home;
-    const ag = game.match.score.away;
+  const home = league.teams.find(t => String(t.id) === match.homeTeamId);
+  const away = league.teams.find(t => String(t.id) === match.awayTeamId);
 
-    updateTable(home, away, hg, ag);
-  }
+  const hg = game.match.score.home;
+  const ag = game.match.score.away;
 
-  clearInterval(matchInterval);
-  matchInterval = null;
+  updateTable(home, away, hg, ag);
+}
 
-  onEnd?.();
-  return;
+clearInterval(matchInterval);
+matchInterval = null;
+
+onEnd?.();
+return;
 }
 
       accumulator -= STEP;
