@@ -154,7 +154,10 @@ function updateUI() {
   updateScore();
   updateProgress();
   updateTacticsUI();
+  if (game.ui.tacticsOpen) {
   renderFormationPreview();
+  renderTacticStats();
+}
   updateTabs();
 
   // =========================
