@@ -274,7 +274,7 @@ function initUI() {
       }
     };
   }
-
+initTacticsDrag();
   // =========================
   // 🎛 DROPDOWNS
   // =========================
@@ -399,6 +399,120 @@ setupDropdown("styleDropdown", (value) => {
     };
   }
 }
+
+
+function initTacticsDrag() {
+  const sheet = document.querySelector(".tactics-sheet");
+  if (!sheet) return;
+  if (sheet.dataset.dragInit) return;
+sheet.dataset.dragInit = "1";
+  let startY = 0;
+  let currentY = 0;
+  let startTranslate = 0;
+  let dragging = false;
+  let velocity = 0;
+  let lastY = 0;
+  let lastTime = 0;
+
+  const getTranslate = () => {
+    const style = window.getComputedStyle(sheet);
+    const matrix = new DOMMatrix(style.transform);
+    return matrix.m42;
+  };
+
+  const setTranslate = (y) => {
+    sheet.style.transform = `translateY(${y}px)`;
+  };
+
+  const snapPoints = () => {
+    const h = window.innerHeight;
+
+    return [
+      0,           // FULL
+      h * 0.25,    // 75%
+      h * 0.5,     // 50%
+      h            // CLOSED
+    ];
+  };
+
+  // =========================
+// Snap to screen
+// =========================
+  
+  const snapTo = (y) => {
+    const points = snapPoints();
+
+    let closest = points[0];
+    let minDist = Infinity;
+
+    points.forEach(p => {
+      const dist = Math.abs(y - p);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = p;
+      }
+    });
+
+    sheet.classList.remove("dragging");
+    sheet.style.transition = "transform 0.35s cubic-bezier(.2,.8,.2,1)";
+    setTranslate(closest);
+
+    // CLOSE LOGIC
+    if (closest === window.innerHeight) {
+      game.ui.tacticsOpen = false;
+      updateUI();
+    }
+  };
+
+  sheet.addEventListener("touchstart", (e) => {
+    startY = e.touches[0].clientY;
+    startTranslate = getTranslate();
+
+    dragging = true;
+    velocity = 0;
+
+    lastY = startY;
+    lastTime = Date.now();
+
+    sheet.classList.add("dragging");
+  });
+
+  sheet.addEventListener("touchmove", (e) => {
+    if (!dragging) return;
+
+    currentY = e.touches[0].clientY;
+
+    const delta = currentY - startY;
+    let next = startTranslate + delta;
+
+    // clamp
+    next = Math.max(0, Math.min(window.innerHeight, next));
+
+    setTranslate(next);
+
+    // velocity calc
+    const now = Date.now();
+    const dy = currentY - lastY;
+    const dt = now - lastTime;
+
+    velocity = dy / (dt || 1);
+
+    lastY = currentY;
+    lastTime = now;
+  });
+
+  sheet.addEventListener("touchend", () => {
+    dragging = false;
+
+    let current = getTranslate();
+
+    // 👉 momentum boost
+    current += velocity * 120;
+
+    snapTo(current);
+  });
+}
+
 
 // =========================
 // ⚽ SCORE
