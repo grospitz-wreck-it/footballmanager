@@ -461,3 +461,85 @@
 .tactics-overlay::before {
   pointer-events: none !important;
 }
+/* =========================
+🔥 HOTFIX LAYER (UI RECOVERY)
+========================= */
+
+/* =========================
+📐 FIELD SPACING FIX
+========================= */
+.formation-preview {
+  margin-top: 12px;
+}
+
+/* =========================
+🍩 DONUT FIX (SIDE BY SIDE)
+========================= */
+.tactics-donuts {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 14px;
+  align-items: center;
+}
+
+/* =========================
+📊 STATS ROW FIX
+========================= */
+.tactics-stats-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+}
+
+/* =========================
+📊 BARS FIX (VISIBLE AGAIN)
+========================= */
+#tacticsBars {
+  pointer-events: none;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.tactics-bars {
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* =========================
+🎛 DROPDOWN FIX
+========================= */
+.tactics-controls {
+  position: relative;
+  z-index: 5000; /* 🔥 über alles */
+}
+
+.tactics-dropdown {
+  z-index: 6000;
+}
+
+.dd-options {
+  z-index: 7000 !important;
+}
+
+/* =========================
+🪟 MODAL FIX (AGAIN ON TOP)
+========================= */
+#playerModal {
+  z-index: 9999 !important;
+}
+
+/* =========================
+📦 SHEET OVERFLOW FIX
+========================= */
+.tactics-sheet {
+  overflow: visible !important;
+}
+
+/* =========================
+🔥 PREVENT OVERLAY BLOCKING
+========================= */
+.tactics-overlay::before {
+  pointer-events: none !important;
+}
