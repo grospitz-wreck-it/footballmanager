@@ -90,12 +90,15 @@ function getEventWeights(ctx, mod, attackingTeam){
   // =========================
   // ⚙️ BASE WEIGHTS
   // =========================
-  let weights = {
-    shot: 0.25,
-    foul: 0.20,
-    corner: 0.15,
-    duel: 0.40
-  };
+ let weights = {
+  shot: 0.20,
+  foul: 0.15,
+  corner: 0.10,
+  duel: 0.25,
+  pass: 0.15,
+  dribble: 0.10,
+  interception: 0.05
+};
 
   // =========================
   // 🔥 TACTICS INFLUENCE
