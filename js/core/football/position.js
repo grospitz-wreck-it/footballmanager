@@ -177,29 +177,54 @@ export function getBestXI(players, formationKey) {
   const result = [];
 
   // 👉 helper: best player für rolle holen
-  const pickBest = (candidates, role) => {
-    let best = null;
-    let bestScore = -1;
+ const pickBest = (role) => {
+  let best = null;
+  let bestScore = -1;
 
-    candidates.forEach(p => {
-      if (used.has(p.id)) return;
+  players.forEach(p => {
+    if (used.has(p.id)) return;
 
-      const score = getRoleScore(p, role);
+    const baseType = mapPosition(p.position_type);
 
-      if (score > bestScore) {
-        best = p;
-        bestScore = score;
-      }
-    });
+    // =========================
+    // 🎯 ERLAUBTE ROLLEN
+    // =========================
+    let allowed = false;
 
-    if (best) {
-      used.add(best.id);
-      result.push({ ...best, role });
-      return true;
+    if (role === "GK") {
+      allowed = baseType === "GK" || baseType === "DEF";
     }
 
-    return false;
-  };
+    if (role === "DEF") {
+      allowed = baseType === "DEF" || baseType === "MID" || baseType === "GK";
+    }
+
+    if (role === "MID") {
+      allowed = baseType === "MID" || baseType === "DEF";
+    }
+
+    if (role === "ATT") {
+      allowed = baseType === "ATT" || baseType === "MID";
+    }
+
+    if (!allowed) return;
+
+    const score = getRoleScore(p, role);
+
+    if (score > bestScore) {
+      best = p;
+      bestScore = score;
+    }
+  });
+
+  if (best) {
+    used.add(best.id);
+    result.push({ ...best, role });
+    return true;
+  }
+
+  return false;
+};
 
   // =========================
   // 🧤 GK
