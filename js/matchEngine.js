@@ -1001,6 +1001,18 @@ const gameEvents = game.data?.gameEvents;
   live.running = false;
 
   // =========================
+  // 🆕 FULLTIME EVENT (WICHTIG)
+  // =========================
+  emitMatchEvent(EVENT_TYPES.FULLTIME, {
+    teamId: null,
+    score: {
+      home: game.match.score.home,
+      away: game.match.score.away
+    },
+    outcome: "END"
+  });
+
+  // =========================
   // 🔥 TABLE UPDATE (DEIN MATCH)
   // =========================
   const league = game.league?.current;
