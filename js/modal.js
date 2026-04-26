@@ -84,10 +84,13 @@ function getPlayerStats(player){
 // 🪟 OPEN
 // =========================
 export function openPlayerModal(player){
-  console.log("PLAYER DEBUG:", player); // 👈 HIER
+  console.log("PLAYER DEBUG:", player);
 
   let modal = document.getElementById("playerModal");
 
+  // =========================
+  // 🧱 CREATE (EINMAL)
+  // =========================
   if(!modal){
     modal = document.createElement("div");
     modal.id = "playerModal";
@@ -96,7 +99,9 @@ export function openPlayerModal(player){
       <div class="modal-overlay">
         <div class="player-modal">
 
-          <button class="close-btn">✕</button>
+          <button class="close-btn">
+            <img src="./gfx/close.png" />
+          </button>
 
           <div class="card-top">
             <div class="rating" id="modalRating"></div>
@@ -117,14 +122,112 @@ export function openPlayerModal(player){
 
     document.body.appendChild(modal);
 
+    // =========================
+    // ❌ CLOSE BUTTON
+    // =========================
     modal.querySelector(".close-btn").onclick = closePlayerModal;
-
-    modal.querySelector(".modal-overlay").onclick = (e) => {
-      if(e.target.classList.contains("modal-overlay")){
-        closePlayerModal();
-      }
-    };
   }
+
+  // =========================
+  // 🧠 ELEMENTE
+  // =========================
+  const card = modal.querySelector(".player-modal");
+  const nameEl = modal.querySelector("#modalName");
+  const ratingEl = modal.querySelector("#modalRating");
+  const avatar = modal.querySelector("#player-avatar");
+  const starsEl = modal.querySelector("#modalStars");
+  const statsEl = modal.querySelector("#modalStats");
+
+  // =========================
+  // 🧠 DATA
+  // =========================
+  const name =
+    player.name ||
+    `${player.first_name || ""} ${player.last_name || ""}`.trim() ||
+    "Spieler";
+
+  nameEl.textContent = name;
+  ratingEl.textContent = player.overall ?? "-";
+
+  avatar.src = player.image || "./gfx/default_player.png";
+
+  // =========================
+  // ⭐ STARS
+  // =========================
+  starsEl.innerHTML = "";
+
+  const tier = player.tier ?? 1;
+  for(let i=0; i<tier; i++){
+    const img = document.createElement("img");
+    img.src = "./gfx/modal/star1.webp";
+    starsEl.appendChild(img);
+  }
+
+  // =========================
+  // 📊 STATS
+  // =========================
+  const stats = getPlayerStats(player);
+
+  statsEl.innerHTML = `
+    ${renderStat("Angriff", stats.attack)}
+    ${renderStat("Verteidigung", stats.defense)}
+    ${renderStat("Kontrolle", stats.control)}
+  `;
+
+  // =========================
+  // 🎨 GLOW (MATCH FP-DOT)
+  // =========================
+  const role = (player.role || player.position || "MID").toUpperCase();
+  card.setAttribute("data-role", role);
+
+  // =========================
+  // 📱 SWIPE DOWN RESET
+  // =========================
+  card.style.transform = "";
+  card.style.transition = "";
+
+  // =========================
+  // 📱 SWIPE DOWN HANDLER
+  // =========================
+  let startY = 0;
+  let currentY = 0;
+  let dragging = false;
+
+  card.ontouchstart = (e) => {
+    startY = e.touches[0].clientY;
+    dragging = true;
+  };
+
+  card.ontouchmove = (e) => {
+    if (!dragging) return;
+
+    currentY = e.touches[0].clientY;
+    const delta = currentY - startY;
+
+    if (delta > 0) {
+      card.style.transform = `translateY(${delta}px) scale(0.98)`;
+    }
+  };
+
+  card.ontouchend = () => {
+    dragging = false;
+
+    const delta = currentY - startY;
+
+    if (delta > 80) {
+      closePlayerModal();
+    } else {
+      card.style.transform = "";
+    }
+  };
+
+  // =========================
+  // 🚀 SHOW
+  // =========================
+  requestAnimationFrame(() => {
+    modal.classList.add("show");
+  });
+}
 
   // =========================
   // 🧠 DATA
