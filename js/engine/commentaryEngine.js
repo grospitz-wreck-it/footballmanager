@@ -44,22 +44,22 @@ const data = event;
       return event.text || null;
 
     case "PASS":
-  return `${getPlayer(d)} spielt einen Pass`;
+  return `${getPlayer(data)} spielt einen Pass`;
 
 case "DRIBBLE":
-  return `${getPlayer(d)} geht ins Dribbling`;
+  return `${getPlayer(data)} geht ins Dribbling`;
 
 case "INTERCEPTION":
-  return `${getPlayer(d)} fängt den Ball ab`;
+  return `${getPlayer(data)} fängt den Ball ab`;
 
 case "BALL_LOSS":
-  return `${getPlayer(d)} verliert den Ball`;
+  return `${getPlayer(data)} verliert den Ball`;
 
 case "BALL_RECOVERY":
-  return `${getPlayer(d)} erobert den Ball`;
+  return `${getPlayer(data)} erobert den Ball`;
 
 case "CLEARANCE":
-  return `${getPlayer(d)} klärt die Situation`;
+  return `${getPlayer(data)} klärt die Situation`;
       
 
     default:
