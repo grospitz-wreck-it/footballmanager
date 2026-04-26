@@ -443,7 +443,7 @@ try {
   console.error("❌ Template Error:", e);
   return null;
 }
-
+}
 // =========================
 // 🎲 RANDOM
 // =========================
@@ -525,4 +525,4 @@ function getDuel(data){
 
   return "zwei Spieler";
 }
-}
+
