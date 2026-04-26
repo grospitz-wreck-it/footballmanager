@@ -332,6 +332,45 @@
     0 8px 24px rgba(0,0,0,0.6);
 }
 
+/* =========================
+📊 TACTIC BARS FIX (FINAL)
+========================= */
+#tacticsBars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  margin-top: 10px;
+
+  position: relative;
+  z-index: 5; /* 🔥 über stats */
+}
+
+.tactics-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tactics-bar span {
+  width: 40px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.tactics-bar .bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tactics-bar .fill {
+  height: 100%;
+  border-radius: 6px;
+}
+
 /* =====================================================
 🎲 BUTTON (AAA)
 ===================================================== */
@@ -403,10 +442,18 @@
 /* =========================
 📊 STATS ROW FIX
 ========================= */
-.tactics-stats-row {
-  display: flex !important;
-  flex-direction: row !important;
+..tactics-stats-row {
+  display: flex;
+  gap: 20px;
   align-items: center;
+}
+
+#tacticsStats {
+  display: flex;
+}
+
+#tacticsBars {
+  flex: 1;
 }
 
 /* =========================
@@ -441,13 +488,40 @@
   z-index: 7000 !important;
 }
 
-/* =========================
-🪟 MODAL FIX (AGAIN ON TOP)
-========================= */
 #playerModal {
-  z-index: 9999 !important;
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+  pointer-events: none;
 }
 
+#playerModal.show {
+  pointer-events: auto;
+}
+
+/* =========================
+🪟 CARD CENTER FIX
+========================= */
+.player-modal {
+  position: relative;
+
+  transform: scale(0.9);
+  opacity: 0;
+
+  transition:
+    transform 0.25s ease,
+    opacity 0.2s ease;
+}
+
+#playerModal.show .player-modal {
+  transform: scale(1);
+  opacity: 1;
+}
 /* =========================
 📦 SHEET OVERFLOW FIX
 ========================= */
