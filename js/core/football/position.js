@@ -176,83 +176,125 @@ export function getBestXI(players, formationKey) {
   const used = new Set();
   const result = [];
 
-  // 👉 helper: best player für rolle holen
- const pickBest = (role) => {
-  let best = null;
-  let bestScore = -1;
+  // =========================
+  // 🧠 PICK BEST PLAYER
+  // =========================
+  const pickBest = (role) => {
+    let best = null;
+    let bestScore = -1;
 
-  players.forEach(p => {
-    if (used.has(p.id)) return;
+    players.forEach(p => {
+      if (!p || used.has(p.id)) return;
 
-    const baseType = mapPosition(p.position_type);
+      const baseType = mapPosition(p.position_type);
 
-    // =========================
-    // 🎯 ERLAUBTE ROLLEN
-    // =========================
-    let allowed = false;
+      // =========================
+      // 🎯 ERLAUBTE ROLLEN
+      // =========================
+      let allowed = false;
 
-    if (role === "GK") {
-      allowed = baseType === "GK" || baseType === "DEF";
+      if (role === "GK") {
+        allowed = baseType === "GK" || baseType === "DEF";
+      }
+
+      else if (role === "DEF") {
+        allowed = baseType === "DEF" || baseType === "MID" || baseType === "GK";
+      }
+
+      else if (role === "MID") {
+        allowed = baseType === "MID" || baseType === "DEF";
+      }
+
+      else if (role === "ATT") {
+        allowed = baseType === "ATT" || baseType === "MID";
+      }
+
+      if (!allowed) return;
+
+      // =========================
+      // ⚠️ POSITION PENALTY
+      // =========================
+      let penalty = 1;
+
+      if (baseType !== role) {
+        if (
+          (baseType === "MID" && role === "ATT") ||
+          (baseType === "DEF" && role === "MID")
+        ) {
+          penalty = 0.9;
+        }
+
+        else if (
+          (baseType === "DEF" && role === "ATT") ||
+          (baseType === "MID" && role === "DEF")
+        ) {
+          penalty = 0.75;
+        }
+
+        else if (role === "GK") {
+          penalty = 0.6;
+        }
+
+        else {
+          penalty = 0.7;
+        }
+      }
+
+      const score = getRoleScore(p, role) * penalty;
+
+      if (score > bestScore) {
+        best = p;
+        bestScore = score;
+      }
+    });
+
+    if (best) {
+      used.add(best.id);
+      result.push({ ...best, role });
+      return true;
     }
 
-    if (role === "DEF") {
-      allowed = baseType === "DEF" || baseType === "MID" || baseType === "GK";
-    }
-
-    if (role === "MID") {
-      allowed = baseType === "MID" || baseType === "DEF";
-    }
-
-    if (role === "ATT") {
-      allowed = baseType === "ATT" || baseType === "MID";
-    }
-
-    if (!allowed) return;
-
-    const score = getRoleScore(p, role);
-
-    if (score > bestScore) {
-      best = p;
-      bestScore = score;
-    }
-  });
-
-  if (best) {
-    used.add(best.id);
-    result.push({ ...best, role });
-    return true;
-  }
-
-  return false;
-};
+    return false;
+  };
 
   // =========================
   // 🧤 GK
   // =========================
-// GK zuerst versuchen
-if (!pickBest("GK")) {
-  // fallback → DEF darf rein
-  pickBest("DEF");
-}
+  if (!pickBest("GK")) {
+    pickBest("DEF"); // fallback
+  }
+
   // =========================
   // 🛡 DEF
   // =========================
   for (let i = 0; i < f.DEF; i++) {
-    if (!pickBest(players, "DEF")) break;
+    pickBest("DEF");
   }
 
   // =========================
   // 🎯 MID
   // =========================
   for (let i = 0; i < f.MID; i++) {
-    if (!pickBest(players, "MID")) break;
+    pickBest("MID");
   }
 
   // =========================
   // ⚡ ATT
   // =========================
   for (let i = 0; i < f.ATT; i++) {
-    if (!pickBest(players, "ATT")) break;
+    pickBest("ATT");
+  }
+
+  // =========================
+  // 🧯 HARD FALLBACK (nie <11 Spieler)
+  // =========================
+  if (result.length < 11) {
+    players.forEach(p => {
+      if (!used.has(p.id) && result.length < 11) {
+        used.add(p.id);
+        result.push({ ...p, role: "MID" });
+      }
+    });
   }
 
   return result;
