@@ -212,8 +212,8 @@ function resolveEventContent(event){
       }));
   }
 
-  return {
-    text: selected.title || null,
+    return {
+    text: event.text || selected.title || null,
     assets,
     duration: selected.duration || 5, // 🔥 NEU
 
