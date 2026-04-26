@@ -224,6 +224,12 @@ assets.push({
 return assets;
 }
 
+function getAssetType(){
+  const el = document.getElementById("assetType");
+  return el?.value || "image";
+}
+
+
 async function createCampaign(){
 
   const payload = {
@@ -262,6 +268,100 @@ if(error){
 clearForm();
 loadCampaigns();
 }
+
+
+async function addAssets(){
+
+  const files = qs("assetUpload")?.files;
+  const type = qs("assetType")?.value || "image";
+
+  if(!files || !files.length){
+    alert("❌ Keine Assets ausgewählt");
+    return;
+  }
+
+  const campaign = state.campaigns.find(c => c.active);
+
+  if(!campaign){
+    alert("❌ Keine aktive Kampagne");
+    return;
+  }
+
+  if(!campaign.ad_sets?.length){
+    alert("❌ Erst Ad Type erstellen");
+    return;
+  }
+
+  try {
+
+    // =========================
+    // 📤 UPLOAD
+    // =========================
+    const uploaded = await uploadFiles("ads", files);
+
+    if(!uploaded?.length){
+      alert("❌ Upload fehlgeschlagen");
+      return;
+    }
+
+    // =========================
+    // 🧠 NORMALIZE
+    // =========================
+    const newAssets = uploaded.map((asset, index) => ({
+      ...asset,
+      type,
+      layer: currentAssets.length + index
+    }));
+
+    // 👉 UI STATE
+    currentAssets.push(...newAssets);
+    renderAssetList();
+
+    // =========================
+    // 💾 SAVE IN DB
+    // =========================
+    const updatedSets = campaign.ad_sets.map((set, i) => {
+
+      if(i !== 0) return set;
+
+      const existing = set.assets || [];
+
+      return {
+        ...set,
+        assets: [
+          ...existing,
+          ...newAssets.map((a, idx) => ({
+            ...a,
+            layer: existing.length + idx
+          }))
+        ]
+      };
+    });
+
+    const { error } = await supabase
+      .from("campaigns")
+      .update({ ad_sets: updatedSets })
+      .eq("id", campaign.id);
+
+    if(error){
+      console.error(error);
+      alert("❌ Fehler beim Speichern");
+      return;
+    }
+
+    qs("assetUpload").value = "";
+
+    await loadCampaigns();
+
+  } catch(e){
+    console.error("❌ addAssets crash:", e);
+    alert("❌ Unerwarteter Fehler");
+  }
+}
+
+
+
+
 async function addAdSet(){
 
  const campaign = state.campaigns.find(c => c.active);
@@ -291,42 +391,38 @@ async function addAdSet(){
 
   loadCampaigns();
 }
-async function addAssets(){
 
-  const files = qs("assetUpload").files;
 
-  if(!files.length){
-    alert("❌ Keine Assets ausgewählt");
-    return;
-  }
 
-  const assets = await uploadFiles("ads", files);
+function renderAssetList(){
 
-  const campaign = state.campaigns.find(c => c.active);
-  if(!campaign) return;
+  const container = document.getElementById("assetList");
+  if(!container) return;
 
-  if(!campaign.ad_sets?.length){
-    alert("❌ Erst Ad Type erstellen");
-    return;
-  }
+  container.innerHTML = currentAssets.map((a, i) => `
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:6px;
+      background:#111;
+      padding:6px;
+      border-radius:6px;
+    ">
+      
+      <span style="width:70px;">${a.type}</span>
 
-  // 🔥 Assets in erstes Ad Set (MVP)
-const updatedSets = campaign.ad_sets.map((set, i) => {
-  if(i === 0){
-    return {
-      ...set,
-      assets: [...(set.assets || []), ...assets]
-    };
-  }
-  return set;
-});
-  await supabase
-    .from("campaigns")
-    .update({ ad_sets: updatedSets })
-    .eq("id", campaign.id);
+      <img src="${a.url}" style="height:40px;">
 
-  loadCampaigns();
+      <button onclick="moveAsset(${i}, -1)">⬆️</button>
+      <button onclick="moveAsset(${i}, 1)">⬇️</button>
+
+      <button onclick="removeAsset(${i})">❌</button>
+    </div>
+  `).join("");
 }
+
+
 // =====================
 // INLINE UPDATE CAMPAIGN
 // =====================
@@ -459,6 +555,9 @@ function renderCampaigns(list){
       `;
     }).join("");
 
+
+
+    
     // =========================
     // 🎮 ASSETS
     // =========================
@@ -1451,7 +1550,37 @@ if(tab === "insights"){
 }
 }
 
+function renderAssetList(){
 
+  const container = document.getElementById("assetList");
+  if(!container) return;
+
+  container.innerHTML = currentAssets.map((a, i) => `
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:6px;
+      background:#111;
+      padding:6px;
+      border-radius:6px;
+    ">
+      
+      <span style="width:80px;">${a.type}</span>
+
+      ${
+        a.type === "video"
+        ? `<video src="${a.url}" style="height:40px;" muted></video>`
+        : `<img src="${a.url}" style="height:40px;">`
+      }
+
+      <button onclick="moveAsset(${i}, -1)">⬆️</button>
+      <button onclick="moveAsset(${i}, 1)">⬇️</button>
+
+      <button onclick="removeAsset(${i})">❌</button>
+    </div>
+  `).join("");
+}
 // =====================
 // GLOBAL CLICK HANDLER (FIXED)
 // =====================
@@ -1531,8 +1660,6 @@ const a = target.dataset.action;
   }
 
 });
-
-
 
 // =====================
 // INIT
