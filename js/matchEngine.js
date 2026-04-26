@@ -137,7 +137,19 @@ function getEventWeights(ctx, mod, attackingTeam){
   if(last === "shot"){
     weights.duel += 0.2;
   }
+  // 🔥 BALL FLOW LOGIK
+  if(last === "pass"){
+  weights.shot += 0.15;
+  weights.dribble += 0.10;
+  }
 
+  if(last === "dribble"){
+  weights.shot += 0.20;
+  }
+
+  if(last === "interception"){
+  weights.pass += 0.20;
+  }
   // =========================
   // 🔒 SAFETY (kein negativer Müll)
   // =========================
@@ -642,7 +654,70 @@ function createDuel(ctx){
     relatedPlayerId: p2?.id
   });
 }
+function createPass(ctx){
 
+  const teamId = game.match?.live?.possession;
+  if(!teamId) return;
+
+  const passer = getRandomPlayer(teamId);
+
+  emitMatchEvent(EVENT_TYPES.PASS, {
+    teamId,
+    playerId: passer?.id
+  });
+
+  // 🔁 kleine Chance auf Ballverlust
+  if(Math.random() < 0.1){
+    emitMatchEvent(EVENT_TYPES.BALL_LOSS, {
+      teamId,
+      playerId: passer?.id
+    });
+
+    switchPossession(ctx);
+  }
+}
+
+function createDribble(ctx){
+
+  const teamId = game.match?.live?.possession;
+  if(!teamId) return;
+
+  const player = getRandomPlayer(teamId);
+
+  const success = Math.random() < 0.6;
+
+  emitMatchEvent(EVENT_TYPES.DRIBBLE, {
+    teamId,
+    playerId: player?.id,
+    outcome: success ? "SUCCESS" : "FAIL"
+  });
+
+  if(!success){
+    switchPossession(ctx);
+
+    emitMatchEvent(EVENT_TYPES.BALL_RECOVERY, {
+      teamId: teamId === ctx.match.homeTeamId
+        ? ctx.match.awayTeamId
+        : ctx.match.homeTeamId
+    });
+  }
+}
+
+function createInterception(ctx){
+
+  const defendingTeam = game.match?.live?.possession === ctx.match.homeTeamId
+    ? ctx.match.awayTeamId
+    : ctx.match.homeTeamId;
+
+  const player = getRandomPlayer(defendingTeam);
+
+  emitMatchEvent(EVENT_TYPES.INTERCEPTION, {
+    teamId: defendingTeam,
+    playerId: player?.id
+  });
+
+  switchPossession(ctx);
+}
 // =========================
 // 🔁 SIMULATION
 // =========================
@@ -768,6 +843,18 @@ if (!attackingTeam) {
     default:
       createDuel(ctx);
       break;
+    case "pass":
+    createPass(ctx);
+    break;
+
+    case "dribble":
+    createDribble(ctx);
+    break;
+
+    case "interception":
+    createInterception(ctx);
+    break;
+      
   }
 
   // =========================
