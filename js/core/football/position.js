@@ -142,3 +142,90 @@ export function applyFormation(players, formationKey) {
 
   return result;
 }
+
+function getRoleScore(player, role) {
+  const o = player.overall ?? 50;
+
+  const atk = player.attack ?? o;
+  const def = player.defense ?? o;
+  const ctrl = player.control ?? o;
+  const gk = player.goalkeeping ?? o;
+
+  switch (role) {
+    case "ATT":
+      return atk * 1.2 + ctrl * 0.3;
+
+    case "MID":
+      return ctrl * 1.0 + atk * 0.4 + def * 0.3;
+
+    case "DEF":
+      return def * 1.2 + ctrl * 0.3;
+
+    case "GK":
+      return gk * 1.4 + def * 0.4;
+
+    default:
+      return o;
+  }
+}
+
+export function getBestXI(players, formationKey) {
+  const f = getFormationProfile(formationKey);
+  if (!f) return players.slice(0, 11);
+
+  const used = new Set();
+  const result = [];
+
+  // 👉 helper: best player für rolle holen
+  const pickBest = (candidates, role) => {
+    let best = null;
+    let bestScore = -1;
+
+    candidates.forEach(p => {
+      if (used.has(p.id)) return;
+
+      const score = getRoleScore(p, role);
+
+      if (score > bestScore) {
+        best = p;
+        bestScore = score;
+      }
+    });
+
+    if (best) {
+      used.add(best.id);
+      result.push({ ...best, role });
+      return true;
+    }
+
+    return false;
+  };
+
+  // =========================
+  // 🧤 GK
+  // =========================
+  pickBest(players, "GK");
+
+  // =========================
+  // 🛡 DEF
+  // =========================
+  for (let i = 0; i < f.DEF; i++) {
+    if (!pickBest(players, "DEF")) break;
+  }
+
+  // =========================
+  // 🎯 MID
+  // =========================
+  for (let i = 0; i < f.MID; i++) {
+    if (!pickBest(players, "MID")) break;
+  }
+
+  // =========================
+  // ⚡ ATT
+  // =========================
+  for (let i = 0; i < f.ATT; i++) {
+    if (!pickBest(players, "ATT")) break;
+  }
+
+  return result;
+}
