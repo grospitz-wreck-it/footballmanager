@@ -539,7 +539,10 @@ try {
     ? playerMatch.homeTeamId
     : playerMatch.awayTeamId,
 
-  lastEvent: null
+  lastEvent: null,
+
+  // 🔥 CRITICAL FIX (für Abpfiff!)
+  _fulltimeEmitted: false
 };
 
   game.match.home = {
