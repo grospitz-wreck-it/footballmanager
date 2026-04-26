@@ -195,21 +195,34 @@ const team = findTeam(null, event.teamId);
   // =========================
   // 🧠 TEXT GENERATION
   // =========================
-  let text = null;
+ let text = null;
 
-  try {
-    text =
-      resolved.text ||
-      generateCommentary({
-  ...enrichedInput,
-  player,
-  relatedPlayer,
-  team
-}) ||
-      generateText(enrichedInput);
-  } catch(e){
-    console.error("❌ Commentary Crash:", e);
+try {
+
+  // 1️⃣ BEST: AI / Template Commentary
+  text = generateCommentary({
+    ...enrichedInput,
+    player,
+    relatedPlayer,
+    team
+  });
+
+  // 2️⃣ FALLBACK: einfache Texte
+  if(!text){
+    text = generateText(enrichedInput);
   }
+
+  // 3️⃣ LETZTER FALLBACK: DB (Supabase)
+  if(!text){
+    text = resolved.text;
+  }
+
+} catch(e){
+  console.error("❌ Commentary Crash:", e);
+
+  // HARD FALLBACK
+  text = resolved.text || "...";
+}
 
   const finalEvent = {
     ...enrichedInput,
@@ -218,8 +231,10 @@ const team = findTeam(null, event.teamId);
 
     text: text || "...",
 
-    assets: resolved.assets || event.assets || [],
-
+    assets: resolved.assets?.length
+  ? resolved.assets
+  : (event.assets || []),
+    
     meta: {
       ...resolved.config,
       ...enrichMeta(enrichedInput)
