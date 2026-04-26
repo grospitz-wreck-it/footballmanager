@@ -1321,29 +1321,25 @@ function renderTacticStats() {
   }
 
   el.innerHTML = `
-  <div class="tactics-donuts">
-
-    <div class="stat attack">
-      <div class="donut" style="--val:0%">
-        <span>${attackVal}</span>
-      </div>
-      <div class="label">ATT</div>
+  <div class="stat attack">
+    <div class="donut" style="--val:0%">
+      <span>${attackVal}</span>
     </div>
+    <div class="label">ATT</div>
+  </div>
 
-    <div class="stat defense">
-      <div class="donut" style="--val:0%">
-        <span>${defenseVal}</span>
-      </div>
-      <div class="label">DEF</div>
+  <div class="stat defense">
+    <div class="donut" style="--val:0%">
+      <span>${defenseVal}</span>
     </div>
+    <div class="label">DEF</div>
+  </div>
 
-    <div class="stat control">
-      <div class="donut" style="--val:0%">
-        <span>${controlVal}</span>
-      </div>
-      <div class="label">CTRL</div>
+  <div class="stat control">
+    <div class="donut" style="--val:0%">
+      <span>${controlVal}</span>
     </div>
-
+    <div class="label">CTRL</div>
   </div>
 `;
 const barsEl = document.getElementById("tacticsBars");
