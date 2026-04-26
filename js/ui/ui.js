@@ -1246,12 +1246,24 @@ document.querySelectorAll(".player-row").forEach((el) => {
 
 function renderTacticStats() {
   const el = document.getElementById("tacticsStats");
-  if (!el) return;
+  const barsEl = document.getElementById("tacticsBars");
+
+  // =========================
+  // 🛑 HARD GUARD (CRASH FIX)
+  // =========================
+  if (!el || !barsEl) {
+    console.warn("⚠️ tactics DOM missing");
+    return;
+  }
+
+  // 👉 nur rendern wenn Overlay offen
+  if (!game.ui?.tacticsOpen) return;
 
   const base = calculateTeamStats();
 
   if (!base) {
     el.innerHTML = "<p style='opacity:0.6'>Keine Teamdaten</p>";
+    barsEl.innerHTML = "";
     return;
   }
 
@@ -1264,7 +1276,6 @@ function renderTacticStats() {
   // =========================
   // ⚙️ TACTICS APPLY
   // =========================
-
   if (t.tempo === "fast") {
     attack *= 1.2;
     control *= 0.9;
@@ -1295,56 +1306,58 @@ function renderTacticStats() {
     attack *= 0.95;
   }
 
-  // Clamp
+  // =========================
+  // 📊 NORMALIZE
+  // =========================
   const clamp = (v) => Math.max(0, Math.min(150, Math.round(v)));
 
   attack = clamp(attack);
   defense = clamp(defense);
   control = clamp(control);
 
-  // =========================
-  // 🎨 RENDER
-  // =========================
-  function normalize(val) {
-    if (val == null || isNaN(val)) return 0;
-    return Math.max(0, Math.min(100, Math.round(Number(val))));
-  }
+  const normalize = (v) => Math.max(0, Math.min(100, Math.round(v)));
 
   const attackVal = normalize(attack);
   const defenseVal = normalize(defense);
   const controlVal = normalize(control);
 
+  // =========================
+  // 🔁 HASH (optional)
+  // =========================
   const dataHash = `${attackVal}-${defenseVal}-${controlVal}-${t.preset}-${t.tempo}-${t.pressing}-${t.line}`;
 
-  if (dataHash !== lastTacticHash) {
-    lastTacticHash = dataHash;
-  }
+  if (dataHash === lastTacticHash) return;
+  lastTacticHash = dataHash;
 
+  // =========================
+  // 🍩 DONUTS (NO WRAPPER BUG)
+  // =========================
   el.innerHTML = `
-  <div class="stat attack">
-    <div class="donut" style="--val:0%">
-      <span>${attackVal}</span>
+    <div class="stat attack">
+      <div class="donut" style="--val:0%">
+        <span>${attackVal}</span>
+      </div>
+      <div class="label">ATT</div>
     </div>
-    <div class="label">ATT</div>
-  </div>
 
-  <div class="stat defense">
-    <div class="donut" style="--val:0%">
-      <span>${defenseVal}</span>
+    <div class="stat defense">
+      <div class="donut" style="--val:0%">
+        <span>${defenseVal}</span>
+      </div>
+      <div class="label">DEF</div>
     </div>
-    <div class="label">DEF</div>
-  </div>
 
-  <div class="stat control">
-    <div class="donut" style="--val:0%">
-      <span>${controlVal}</span>
+    <div class="stat control">
+      <div class="donut" style="--val:0%">
+        <span>${controlVal}</span>
+      </div>
+      <div class="label">CTRL</div>
     </div>
-    <div class="label">CTRL</div>
-  </div>
-`;
-const barsEl = document.getElementById("tacticsBars");
+  `;
 
-if (barsEl) {
+  // =========================
+  // 📊 BARS (SYNC FIX)
+  // =========================
   barsEl.innerHTML = `
     <div class="tactics-bar">
       <span>ATT</span>
@@ -1367,18 +1380,20 @@ if (barsEl) {
       </div>
     </div>
   `;
-}
+
+  // =========================
+  // 🎬 DONUT ANIMATION (SAFE)
+  // =========================
   requestAnimationFrame(() => {
     const donuts = el.querySelectorAll(".donut");
 
-    console.log("🎯 tactics donuts:", donuts.length);
+    if (donuts.length < 3) {
+      console.warn("⚠️ donut render failed");
+      return;
+    }
 
     [attackVal, defenseVal, controlVal].forEach((v, i) => {
-      if (donuts[i]) {
-        setDonut(donuts[i], v);
-      } else {
-        console.warn("❌ donut fehlt index", i);
-      }
+      setDonut(donuts[i], v);
     });
   });
 }
