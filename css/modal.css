@@ -38,7 +38,8 @@
   padding: 18px;
 
   position: relative;
-  overflow: hidden;
+
+  overflow: visible; /* 🔥 WICHTIG: erlaubt Close Button außerhalb */
 
   display: flex;
   flex-direction: column;
@@ -58,7 +59,8 @@
     0 30px 80px rgba(0,0,0,0.6),
     0 0 0 1px rgba(255,255,255,0.6);
 
-  transform: translateY(120px) scale(0.9);
+  /* 🔥 FIX: nicht mehr von unten reinfahren */
+  transform: scale(0.9);
   opacity: 0;
 
   transition:
@@ -70,7 +72,7 @@
 
 /* 👉 sichtbar */
 #playerModal.show .player-modal {
-  transform: translateY(0) scale(1);
+  transform: scale(1); /* 🔥 kein translateY mehr */
   opacity: 1;
 }
 
