@@ -201,6 +201,109 @@ const DUEL_TEMPLATES = [
 ];
 
 // =========================
+// 🆕 PASS
+// =========================
+const PASS_TEMPLATES = [
+  {
+    id: "pass_simple",
+    weight: 5,
+    when: () => true,
+    text: d => `${getPlayer(d)} spielt einen sauberen Pass`
+  },
+  {
+    id: "pass_forward",
+    weight: 6,
+    when: () => true,
+    text: d => `${getPlayer(d)} mit dem Ball nach vorne`
+  },
+  {
+    id: "pass_safe",
+    weight: 4,
+    when: () => true,
+    text: d => `${getPlayer(d)} hält den Ball in den eigenen Reihen`
+  }
+];
+
+// =========================
+// 🆕 DRIBBLE
+// =========================
+const DRIBBLE_TEMPLATES = [
+  {
+    id: "dribble_attack",
+    weight: 6,
+    when: () => true,
+    text: d => `${getPlayer(d)} geht ins Dribbling`
+  },
+  {
+    id: "dribble_push",
+    weight: 5,
+    when: () => true,
+    text: d => `${getPlayer(d)} versucht sich durchzusetzen`
+  },
+  {
+    id: "dribble_pressure",
+    weight: 4,
+    when: c => c.drama !== "low",
+    text: d => `${getPlayer(d)} unter Druck am Ball`
+  }
+];
+
+// =========================
+// 🆕 INTERCEPTION
+// =========================
+const INTERCEPTION_TEMPLATES = [
+  {
+    id: "intercept_basic",
+    weight: 5,
+    when: () => true,
+    text: d => `${getPlayer(d)} fängt den Ball ab`
+  },
+  {
+    id: "intercept_strong",
+    weight: 6,
+    when: () => true,
+    text: d => `${getPlayer(d)} liest das Spiel stark`
+  }
+];
+
+// =========================
+// 🆕 BALL LOSS
+// =========================
+const BALL_LOSS_TEMPLATES = [
+  {
+    id: "loss_basic",
+    weight: 5,
+    when: () => true,
+    text: d => `${getPlayer(d)} verliert den Ball`
+  },
+  {
+    id: "loss_pressure",
+    weight: 6,
+    when: c => c.drama !== "low",
+    text: d => `${getPlayer(d)} unter Druck – Ball weg`
+  }
+];
+
+// =========================
+// 🆕 RECOVERY
+// =========================
+const BALL_RECOVERY_TEMPLATES = [
+  {
+    id: "recovery_basic",
+    weight: 5,
+    when: () => true,
+    text: d => `${getPlayer(d)} erobert den Ball`
+  },
+  {
+    id: "recovery_fast",
+    weight: 6,
+    when: () => true,
+    text: d => `${getPlayer(d)} schaltet schnell um und gewinnt den Ball`
+  }
+];
+
+
+// =========================
 // ⚖️ SELECTOR
 // =========================
 
