@@ -443,6 +443,36 @@ html, body {
     0 10px 30px rgba(0,0,0,0.5);
 }
 
+
+#gameEventOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0,0,0,0.85);
+}
+
+#gameEventOverlay.hidden {
+  display: none;
+}
+
+#gameEventImage {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+
+  animation: popIn 0.2s ease;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* =========================
 📡 LIVE FEED
 ========================= */
