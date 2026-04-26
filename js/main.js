@@ -151,16 +151,16 @@ function startBackgroundSimulation(){
   }, 2000);
 }
 
-// =========================
-// 🔥 EVENT RENDER
-// =========================
 function renderEvents(){
 
   const events = game.events?.history || [];
 
   const feed = document.getElementById("liveFeed");
   const headline = document.getElementById("eventText");
-  const slide = document.getElementById("eventSlide");
+
+  // 🔥 HIER IST DER RICHTIGE CONTAINER (nicht gameCenter!)
+  const overlay = document.getElementById("gameEventOverlay");
+  const img = document.getElementById("gameEventImage");
 
   // =========================
   // 📝 FEED
@@ -191,63 +191,35 @@ function renderEvents(){
   }
 
   // =========================
-// 🖼 GAME CENTER POP (INLINE)
-// =========================
-const container = document.getElementById("gameCenter"); // 👈 wichtig!
+  // 🖼 EVENT IMAGE POP (FINAL FIX)
+  // =========================
+  if(!overlay || !img || !top) return;
 
-if(!container || !top) return;
+  // 🔒 nicht doppelt rendern
+  if(overlay.dataset.eventId === top.id) return;
 
-// 🔒 nicht doppelt rendern
-if(container.dataset.eventId === top.id) return;
+  if(top.assets && top.assets.length){
 
-if(top.assets && top.assets.length){
+    const asset = top.assets[0];
 
-  const asset = top.assets[0];
+    overlay.dataset.eventId = top.id;
 
-  container.dataset.eventId = top.id;
+    img.src = asset.url;
+    overlay.classList.remove("hidden");
 
-  // 🔥 ORIGINAL CONTENT MERKEN
-  if(!container.dataset.original){
-    container.dataset.original = container.innerHTML;
+    const duration = (top.duration || 5) * 1000;
+
+    setTimeout(() => {
+
+      // nur schließen wenn noch gleiches Event
+      if(overlay.dataset.eventId === top.id){
+        overlay.classList.add("hidden");
+        img.src = "";
+        overlay.dataset.eventId = "";
+      }
+
+    }, duration);
   }
-
-  // =========================
-  // 🎯 INLINE RENDER
-  // =========================
-  container.innerHTML = `
-    <div style="
-      width:100%;
-      height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#000;
-    ">
-      <img src="${asset.url}" 
-           style="
-             max-width:100%;
-             max-height:100%;
-             object-fit:contain;
-           ">
-    </div>
-  `;
-
-  // =========================
-  // ⏱ DURATION
-  // =========================
-  const duration = (top.duration || 5) * 1000;
-
-  setTimeout(() => {
-
-    // nur wenn noch gleiches Event
-    if(container.dataset.eventId === top.id){
-
-      container.innerHTML = container.dataset.original || "";
-      container.dataset.eventId = "";
-    }
-
-  }, duration);
-}
 }
 
 // =========================
