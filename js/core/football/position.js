@@ -1,3 +1,26 @@
+export function mapPosition(typeRaw){
+
+  const type = (typeRaw || "").toUpperCase();
+
+  if(type.includes("GK")){
+    return "GK";
+  }
+
+  if(["CB","LB","RB","WB","RWB","LWB","DEF"].some(p => type.includes(p))){
+    return "DEF";
+  }
+
+  if(["CM","CDM","CAM","MID"].some(p => type.includes(p))){
+    return "MID";
+  }
+
+  if(["ST","FW","CF","ATT"].some(p => type.includes(p))){
+    return "ATT";
+  }
+
+  return "MID";
+}
+
 // =========================
 // 🧠 FORMATION PROFILE (FIXED)
 // =========================
