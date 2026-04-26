@@ -608,9 +608,57 @@ import { EVENT_REGISTRY } from "./engine/eventRegistry.js";
 function loadEventTypes(){
 
   const select = qs("geType");
+  if(!select) return;
+
   select.innerHTML = "";
 
-  Object.values(EVENT_REGISTRY).forEach(e => {
+  // =========================
+  // 🧠 1. REGISTRY EVENTS (bestehend)
+  // =========================
+  const registryEvents = Object.values(EVENT_REGISTRY || []).map(e => ({
+    id: e.id,
+    label: e.label || e.id
+  }));
+
+  // =========================
+  // 🆕 2. MATCH ENGINE EVENTS (NEU)
+  // =========================
+  const coreEvents = [
+    { id: "GOAL", label: "⚽ Tor" },
+    { id: "SHOT", label: "🎯 Schuss" },
+    { id: "SHOT_SAVED", label: "🧤 Parade" },
+    { id: "FOUL", label: "🚫 Foul" },
+    { id: "CORNER", label: "🚩 Ecke" },
+    { id: "DUEL", label: "⚔️ Zweikampf" },
+
+    // 🔥 NEU (deine Erweiterung)
+    { id: "PASS", label: "➡️ Pass" },
+    { id: "DRIBBLE", label: "🌀 Dribbling" },
+    { id: "INTERCEPTION", label: "🛑 Interception" },
+    { id: "BALL_LOSS", label: "❌ Ballverlust" },
+    { id: "BALL_RECOVERY", label: "🔄 Ballgewinn" },
+    { id: "CLEARANCE", label: "🧹 Klärung" },
+
+    // 🔥 WICHTIG
+    { id: "FULLTIME", label: "⏱️ Abpfiff" }
+  ];
+
+  // =========================
+  // 🔁 MERGE + DEDUPE
+  // =========================
+  const all = [...registryEvents, ...coreEvents];
+
+  const seen = new Set();
+  const unique = all.filter(e => {
+    if(seen.has(e.id)) return false;
+    seen.add(e.id);
+    return true;
+  });
+
+  // =========================
+  // 🎯 RENDER
+  // =========================
+  unique.forEach(e => {
 
     const opt = document.createElement("option");
     opt.value = e.id;
