@@ -160,21 +160,28 @@ function renderEvents(){
 
   const feed = document.getElementById("liveFeed");
   const headline = document.getElementById("eventText");
+  const slide = document.getElementById("eventSlide");
 
+  // =========================
+  // 📝 FEED
+  // =========================
   if(feed){
     feed.innerHTML = events.length > 0
       ? events.slice(-20).reverse()
-    .map(e => {
-      const safeText = String(e.text)
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    
-      return `<div>${e.minute}' - ${safeText}</div>`;
-    })
-      .join("")
+        .map(e => {
+          const safeText = String(e.text)
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        
+          return `<div>${e.minute}' - ${safeText}</div>`;
+        })
+        .join("")
       : "";
   }
 
+  // =========================
+  // 🧠 HEADLINE
+  // =========================
   const top = events.at(-1);
 
   if(headline){
@@ -182,6 +189,65 @@ function renderEvents(){
       ? `${top.minute}' - ${top.text}`
       : "";
   }
+
+  // =========================
+// 🖼 GAME CENTER POP (INLINE)
+// =========================
+const container = document.getElementById("gameCenter"); // 👈 wichtig!
+
+if(!container || !top) return;
+
+// 🔒 nicht doppelt rendern
+if(container.dataset.eventId === top.id) return;
+
+if(top.assets && top.assets.length){
+
+  const asset = top.assets[0];
+
+  container.dataset.eventId = top.id;
+
+  // 🔥 ORIGINAL CONTENT MERKEN
+  if(!container.dataset.original){
+    container.dataset.original = container.innerHTML;
+  }
+
+  // =========================
+  // 🎯 INLINE RENDER
+  // =========================
+  container.innerHTML = `
+    <div style="
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#000;
+    ">
+      <img src="${asset.url}" 
+           style="
+             max-width:100%;
+             max-height:100%;
+             object-fit:contain;
+           ">
+    </div>
+  `;
+
+  // =========================
+  // ⏱ DURATION
+  // =========================
+  const duration = (top.duration || 5) * 1000;
+
+  setTimeout(() => {
+
+    // nur wenn noch gleiches Event
+    if(container.dataset.eventId === top.id){
+
+      container.innerHTML = container.dataset.original || "";
+      container.dataset.eventId = "";
+    }
+
+  }, duration);
+}
 }
 
 // =========================
