@@ -47,6 +47,15 @@ export const EVENT_TYPES = {
   CORNER: "CORNER",
   FREE_KICK: "FREE_KICK",
   PENALTY: "PENALTY",
+// =========================
+// 🆕 MICRO EVENTS
+// =========================
+PASS: "PASS",
+DRIBBLE: "DRIBBLE",
+INTERCEPTION: "INTERCEPTION",
+BALL_LOSS: "BALL_LOSS",
+BALL_RECOVERY: "BALL_RECOVERY",
+CLEARANCE: "CLEARANCE",
 
   // =========================
   // 📦 OTHER
@@ -69,15 +78,6 @@ export const EVENT_TYPES = {
   TACTIC_CHANGE: "TACTIC_CHANGE"
 };
 
-// =========================
-// 🆕 MICRO EVENTS
-// =========================
-PASS: "PASS",
-DRIBBLE: "DRIBBLE",
-INTERCEPTION: "INTERCEPTION",
-BALL_LOSS: "BALL_LOSS",
-BALL_RECOVERY: "BALL_RECOVERY",
-CLEARANCE: "CLEARANCE",
 
 // =========================
 // 🎯 EVENT OUTCOMES
