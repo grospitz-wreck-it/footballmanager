@@ -1479,17 +1479,22 @@ tr:hover {
 }
 
 /* =========================
-🎮 OVERLAY (PREMIUM AAA)
+🎮 OVERLAY (SAFE + PREMIUM)
 ========================= */
 .tactics-overlay {
   position: fixed;
-  inset: 0;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
   display: flex;
   justify-content: center;
   align-items: flex-end;
 
   padding: 0 10px;
+  padding-top: env(safe-area-inset-top); /* 🔥 iPhone FIX */
 
   background:
     radial-gradient(circle at 20% 20%, rgba(34,197,94,0.25), transparent 45%),
@@ -1516,7 +1521,9 @@ tr:hover {
   opacity: 1;
 }
 
-/* Glow Layer */
+/* =========================
+✨ GLOW LAYER
+========================= */
 .tactics-overlay::before {
   content: "";
   position: absolute;
@@ -1534,22 +1541,53 @@ tr:hover {
 }
 
 /* =========================
-🌑 VIGNETTE (DEPTH)
+📦 SHEET (BOTTOM SHEET FIX)
 ========================= */
-.tactics-overlay::after {
+.tactics-sheet {
+  width: 100%;
+  max-width: 480px;
+
+  height: 85vh;
+  max-height: 85vh;
+
+  background: #020617;
+  border-radius: 20px 20px 0 0;
+
+  padding: 16px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  position: relative;
+
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+
+  touch-action: none; /* 🔥 für Drag */
+
+  box-shadow:
+    0 -20px 60px rgba(0,0,0,0.8);
+}
+
+/* OPEN STATE */
+.tactics-overlay.open .tactics-sheet {
+  transform: translateY(0);
+}
+
+/* =========================
+🧲 DRAG HANDLE
+========================= */
+.tactics-sheet::before {
   content: "";
-  position: absolute;
-  inset: 0;
+  width: 40px;
+  height: 5px;
+  border-radius: 999px;
 
-  pointer-events: none;
+  background: rgba(255,255,255,0.25);
 
-  background: radial-gradient(
-    circle at center,
-    transparent 40%,
-    rgba(0,0,0,0.6)
-  );
-
-  opacity: 0.8;
+  display: block;
+  margin: 0 auto 12px;
 }
 
 /* =========================
@@ -1558,65 +1596,17 @@ tr:hover {
 @keyframes overlayGlowMove {
   0% {
     transform: scale(1) translate(0, 0);
-    opacity: 0.5;
+    opacity: 0.6;
   }
-
   50% {
     transform: scale(1.1) translate(-20px, 10px);
-    opacity: 0.7;
+    opacity: 0.8;
   }
-
   100% {
     transform: scale(1.2) translate(20px, -10px);
-    opacity: 0.9;
+    opacity: 1;
   }
 }
-
-/* =========================
-📦 SHEET
-========================= */
-.tactics-sheet {
-  width: 100%;
-  max-width: 480px;
-
-  height: 90vh;
-  max-height: 90vh;
-
-  padding: 16px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
-
-  overflow-y: auto;
-  overflow-x: visible;
-
-  position: relative;
-
-  transform: translateY(100%);
-  transition: transform 0.3s ease;
-
-  box-shadow:
-    0 -20px 60px rgba(0,0,0,0.8);
-}
-
-.tactics-overlay.open .tactics-sheet {
-  transform: translateY(0);
-}
-
-.tactics-sheet {
-  background: rgba(2,6,23,0.85); /* 🔥 statt #020617 */
-  backdrop-filter: blur(20px);
-}
-
-/* Drag Handle */
-.tactics-sheet::before {
-  content: "";
-  width: 40px;
-  height: 4px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 999px;
-  display: block;
-  margin: 0 auto 10px;
-}
-
 
 /* =========================
 🧠 HEADER (SCROLL SAFE)
