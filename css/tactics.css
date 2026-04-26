@@ -1,15 +1,10 @@
 /* =====================================================
-🎮 TACTICS OVERLAY (AAA SYSTEM)
+🎮 TACTICS OVERLAY (CLEAN AAA)
 ===================================================== */
 
 #tacticsOverlay {
   position: fixed;
-
-  top: env(safe-area-inset-top);
-  bottom: 0;
-  left: 0;
-  right: 0;
-
+  inset: 0;
   z-index: 5000;
 
   display: flex;
@@ -22,18 +17,13 @@
     radial-gradient(circle at 20% 20%, rgba(34,197,94,0.25), transparent 45%),
     radial-gradient(circle at 80% 30%, rgba(168,85,247,0.25), transparent 50%),
     radial-gradient(circle at 50% 80%, rgba(56,189,248,0.18), transparent 55%),
-    linear-gradient(
-      180deg,
-      rgba(2,6,23,0.55),
-      rgba(2,6,23,0.8)
-    );
+    linear-gradient(180deg, rgba(2,6,23,0.6), rgba(2,6,23,0.9));
 
-  backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(14px);
 
   opacity: 0;
   pointer-events: none;
-
-  transition: opacity 0.35s ease;
+  transition: opacity 0.3s ease;
 }
 
 #tacticsOverlay.open {
@@ -42,75 +32,29 @@
 }
 
 /* =====================================================
-✨ DYNAMIC GLOW BACKGROUND
-===================================================== */
-
-#tacticsOverlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-
-  background:
-    radial-gradient(circle at 30% 40%, rgba(34,197,94,0.35), transparent 55%),
-    radial-gradient(circle at 70% 60%, rgba(168,85,247,0.35), transparent 60%);
-
-  filter: blur(60px);
-  opacity: 0.8;
-
-  animation: overlayGlowMove 18s ease-in-out infinite alternate;
-
-  pointer-events: none;
-}
-
-/* =====================================================
-📦 IOS STYLE BOTTOM SHEET
+📦 SHEET
 ===================================================== */
 
 .tactics-sheet {
   width: 100%;
   max-width: 480px;
 
-  height: 100%;
-  max-height: 100%;
+  height: 85vh;
 
-  border-radius: 26px 26px 0 0;
+  border-radius: 24px 24px 0 0;
 
   padding: 16px;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
 
   overflow-y: auto;
-  overflow-x: hidden;
 
-  position: relative;
-
-  background:
-    linear-gradient(160deg, #020617, #0f172a),
-    repeating-linear-gradient(
-      135deg,
-      rgba(255,255,255,0.025) 0px,
-      rgba(255,255,255,0.025) 2px,
-      transparent 2px,
-      transparent 6px
-    );
-
-  box-shadow:
-    0 -30px 80px rgba(0,0,0,0.9),
-    inset 0 0 40px rgba(255,255,255,0.04);
+  background: linear-gradient(160deg, #020617, #0f172a);
 
   transform: translateY(100%);
-  transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
-
-  will-change: transform;
-  touch-action: none;
+  transition: transform 0.35s ease;
 }
 
 #tacticsOverlay.open .tactics-sheet {
   transform: translateY(0);
-}
-
-/* 👉 dragging state */
-.tactics-sheet.dragging {
-  transition: none;
 }
 
 /* =====================================================
@@ -121,57 +65,10 @@
   content: "";
   width: 42px;
   height: 5px;
-
   border-radius: 999px;
-
-  background: rgba(255,255,255,0.25);
-
+  background: rgba(255,255,255,0.3);
   display: block;
   margin: 0 auto 14px;
-
-  box-shadow:
-    0 0 10px rgba(255,255,255,0.2);
-}
-
-/* =====================================================
-🧠 HEADER
-===================================================== */
-
-.tactics-header {
-  position: relative;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  margin-bottom: 10px;
-}
-
-.tactics-header img {
-  width: clamp(110px, 32vw, 170px);
-
-  filter:
-    drop-shadow(0 10px 24px rgba(0,0,0,0.8))
-    brightness(1.05);
-
-  transform: translateY(2px);
-}
-
-.tactics-header::after {
-  content: "";
-  position: absolute;
-
-  width: 200px;
-  height: 100px;
-
-  background: radial-gradient(
-    ellipse at center,
-    rgba(34,197,94,0.22),
-    transparent 70%
-  );
-
-  filter: blur(26px);
-  z-index: -1;
 }
 
 /* =====================================================
@@ -188,72 +85,61 @@
 
   background: url("../gfx/field.svg") center/cover no-repeat;
 
-  box-shadow:
-    inset 0 0 60px rgba(0,0,0,0.8),
-    0 16px 50px rgba(0,0,0,0.7);
-
-  margin-bottom: 10px;
-}
-
-.formation-preview::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 1px;
-  background: rgba(255,255,255,0.15);
+  margin-top: 12px;
+  margin-bottom: 14px;
 }
 
 /* =====================================================
-⚽ PLAYER DOTS (AAA GLOW)
+⚽ DOTS
 ===================================================== */
 
 .fp-dot {
   position: absolute;
   transform: translate(-50%, -50%);
-
   width: 12px;
   height: 12px;
   border-radius: 50%;
 
-  z-index: 2;
+  z-index: 5;
 
   box-shadow:
     0 0 6px rgba(255,255,255,0.7),
-    0 0 14px currentColor,
-    0 0 26px currentColor;
-
-  transition: transform 0.15s ease;
+    0 0 12px currentColor,
+    0 0 20px currentColor;
 }
 
-.fp-dot:active {
-  transform: translate(-50%, -50%) scale(1.4);
-}
-
-/* COLORS */
 .fp-dot.GK  { background: #facc15; color: #facc15; }
 .fp-dot.DEF { background: #38bdf8; color: #38bdf8; }
 .fp-dot.MID { background: #a855f7; color: #a855f7; }
 .fp-dot.ATT { background: #ef4444; color: #ef4444; }
 
 /* =====================================================
-📊 STATS PANEL
+📊 STATS LAYOUT (FIXED)
 ===================================================== */
 
 .tactics-stats-row {
   display: flex;
-  gap: 14px;
-  margin-top: 14px;
+  gap: 20px;
+  align-items: center;
 
   padding: 14px;
   border-radius: 18px;
 
   background: rgba(255,255,255,0.04);
+}
 
-  box-shadow:
-    inset 0 0 25px rgba(0,0,0,0.6),
-    0 12px 30px rgba(0,0,0,0.5);
+/* LEFT SIDE (DONUTS) */
+#tacticsStats {
+  display: flex;
+  gap: 12px;
+}
+
+/* RIGHT SIDE (BARS) */
+#tacticsBars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* =====================================================
@@ -261,11 +147,10 @@
 ===================================================== */
 
 .donut {
-  --size: 64px;
   --val: 0%;
 
-  width: var(--size);
-  height: var(--size);
+  width: 64px;
+  height: 64px;
 
   border-radius: 50%;
 
@@ -273,8 +158,7 @@
   align-items: center;
   justify-content: center;
 
-  font-size: 13px;
-  font-weight: 700;
+  font-weight: bold;
   color: white;
 
   background:
@@ -283,12 +167,6 @@
       currentColor var(--val),
       rgba(255,255,255,0.08) var(--val)
     );
-
-  position: relative;
-
-  box-shadow:
-    inset 0 0 20px rgba(0,0,0,0.8),
-    0 0 25px rgba(255,255,255,0.08);
 }
 
 .donut::after {
@@ -300,51 +178,8 @@
 }
 
 /* =====================================================
-🎛 CONTROLS
+📊 BARS (FIXED)
 ===================================================== */
-
-.tactics-controls {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.dd-selected {
-  height: 50px;
-
-  border-radius: 16px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 14px;
-  font-weight: 600;
-  color: white;
-
-  background: rgba(255,255,255,0.06);
-
-  backdrop-filter: blur(10px);
-
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    0 8px 24px rgba(0,0,0,0.6);
-}
-
-/* =========================
-📊 TACTIC BARS FIX (FINAL)
-========================= */
-#tacticsBars {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  margin-top: 10px;
-
-  position: relative;
-  z-index: 5; /* 🔥 über stats */
-}
 
 .tactics-bar {
   display: flex;
@@ -363,7 +198,6 @@
   height: 6px;
   background: rgba(255,255,255,0.08);
   border-radius: 6px;
-  overflow: hidden;
 }
 
 .tactics-bar .fill {
@@ -372,121 +206,88 @@
 }
 
 /* =====================================================
-🎲 BUTTON (AAA)
+🎛 DROPDOWNS (FIXED!)
 ===================================================== */
 
-.chance-btn {
-  margin: 26px auto 0;
-  width: min(100%, 360px);
-
-  padding: 18px;
-  border-radius: 20px;
-
-  text-align: center;
-
-  background: linear-gradient(
-    90deg,
-    #22c55e,
-    #38bdf8,
-    #a855f7
-  );
-
-  color: #020617;
-  font-weight: 800;
-  font-size: 16px;
-
-  box-shadow:
-    0 14px 50px rgba(34,197,94,0.4),
-    0 0 80px rgba(168,85,247,0.3);
-
-  transition: all 0.2s ease;
-}
-
-.chance-btn:active {
-  transform: scale(0.95);
-}
-
-/* =====================================================
-🎬 ANIMATION
-===================================================== */
-
-@keyframes overlayGlowMove {
-  0% {
-    transform: scale(1) translate(0,0);
-  }
-  100% {
-    transform: scale(1.2) translate(20px,-10px);
-  }
-}
-/* =========================
-🔥 HOTFIX LAYER (UI RECOVERY)
-========================= */
-
-/* =========================
-📐 FIELD SPACING FIX
-========================= */
-.formation-preview {
-  margin-top: 12px;
-}
-
-/* =========================
-🍩 DONUT FIX (SIDE BY SIDE)
-========================= */
-.tactics-donuts {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 14px;
-  align-items: center;
-}
-
-/* =========================
-📊 STATS ROW FIX
-========================= */
-..tactics-stats-row {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-#tacticsStats {
-  display: flex;
-}
-
-#tacticsBars {
-  flex: 1;
-}
-
-/* =========================
-📊 BARS FIX (VISIBLE AGAIN)
-========================= */
-#tacticsBars {
-  pointer-events: none;
-  position: relative;
-  z-index: 2;
-  width: 100%;
-}
-
-.tactics-bars {
-  display: flex !important;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* =========================
-🎛 DROPDOWN FIX
-========================= */
 .tactics-controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  margin-top: 18px;
+
   position: relative;
-  z-index: 5000; /* 🔥 über alles */
+  z-index: 10;
 }
 
 .tactics-dropdown {
-  z-index: 6000;
+  position: relative;
 }
 
-.dd-options {
-  z-index: 7000 !important;
+.dd-selected {
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+  background: rgba(255,255,255,0.06);
+  color: white;
+
+  cursor: pointer;
 }
+
+/* 👉 OPTIONS HIDDEN BY DEFAULT */
+.dd-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  background: #020617;
+
+  border-radius: 12px;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transform: translateY(-6px);
+  transition: all 0.2s ease;
+
+  z-index: 100;
+}
+
+/* 👉 ONLY SHOW WHEN OPEN */
+.tactics-dropdown.open .dd-options {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* =====================================================
+🎲 BUTTON
+===================================================== */
+
+.chance-btn {
+  margin: 24px auto 0;
+  width: 100%;
+
+  padding: 16px;
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  background: linear-gradient(90deg,#22c55e,#38bdf8,#a855f7);
+  color: #020617;
+
+  font-weight: bold;
+}
+
+/* =====================================================
+🪟 MODAL FIX (CENTERED)
+===================================================== */
 
 #playerModal {
   position: fixed;
@@ -504,35 +305,13 @@
   pointer-events: auto;
 }
 
-/* =========================
-🪟 CARD CENTER FIX
-========================= */
 .player-modal {
-  position: relative;
-
   transform: scale(0.9);
   opacity: 0;
-
-  transition:
-    transform 0.25s ease,
-    opacity 0.2s ease;
+  transition: 0.25s ease;
 }
 
 #playerModal.show .player-modal {
   transform: scale(1);
   opacity: 1;
 }
-/* =========================
-📦 SHEET OVERFLOW FIX
-========================= */
-.tactics-sheet {
-  overflow: visible !important;
-}
-
-/* =========================
-🔥 PREVENT OVERLAY BLOCKING
-========================= */
-.tactics-overlay::before {
-  pointer-events: none !important;
-}
-
