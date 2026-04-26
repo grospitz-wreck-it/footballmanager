@@ -907,7 +907,7 @@ function renderTeam() {
   }
 
   // =========================
-  // 📐 FORMATION
+  // 📐 FORMATION (EINMAL!)
   // =========================
   const formation =
     game.tactics?.formation ||
@@ -918,13 +918,13 @@ function renderTeam() {
   let benchPlayers = [];
 
   // =========================
-  // 🧠 AUTO BEST XI (🔥 KEY FIX)
+  // 🧠 AUTO BEST XI
   // =========================
   try {
     starters = getBestXI(players, formation);
   } catch (e) {
     console.error("❌ getBestXI failed:", e);
-    starters = players.slice(0, 11); // fallback safe
+    starters = players.slice(0, 11);
   }
 
   // =========================
@@ -932,7 +932,7 @@ function renderTeam() {
   // =========================
   const starterIds = new Set(
     starters
-      .filter(p => p.id) // 🔥 verhindert dummy-probleme
+      .filter(p => p?.id)
       .map(p => String(p.id))
   );
 
@@ -948,28 +948,10 @@ function renderTeam() {
   console.log("🧪 starters:", starters.length);
   console.log("🧪 bench:", benchPlayers.length);
 
-// =========================
-// ⚙️ APPLY FORMATION (FINAL CLEAN)
-// =========================
-
-// 👉 vorhandene formation nutzen (KEIN zweites const!)
-const formation = game.tactics?.formation || lineup?.formation || "4-4-2";
-
-try {
-  starters = applyFormation(players, formation);
-} catch (e) {
-  console.error("❌ applyFormation failed in team:", e);
-  starters = players.slice(0, 11); // fallback
-}
-
-// 👉 bench neu berechnen
-const starterIds = new Set(starters.map(p => String(p.id)));
-benchPlayers = players.filter(p => !starterIds.has(String(p.id)));
-
-// =========================
-// 🧱 HTML BUILD
-// =========================
-let html = "";
+  // =========================
+  // 🧱 HTML BUILD
+  // =========================
+  let html = "";
 
   // =========================
   // 🧠 GROUPED STARTERS
