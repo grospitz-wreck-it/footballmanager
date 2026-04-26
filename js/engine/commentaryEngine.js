@@ -525,3 +525,4 @@ function getDuel(data){
 
   return "zwei Spieler";
 }
+}
