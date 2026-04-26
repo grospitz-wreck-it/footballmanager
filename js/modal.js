@@ -276,7 +276,7 @@ statsEl.innerHTML = `
   requestAnimationFrame(() => {
     modal.classList.add("show");
   });
-}
+
 
 
 // =========================
