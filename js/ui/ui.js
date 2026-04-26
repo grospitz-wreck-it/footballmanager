@@ -1303,20 +1303,38 @@ function renderFormationPreview() {
 
   const formation = game.tactics?.formation || "4-4-2";
   const layout = FORMATIONS[formation];
-
   if (!layout) return;
+
+  // 👉 DEIN TEAM holen (WICHTIG: ggf. anpassen!)
+  const players = game.team || game.players || [];
+
+  // 👉 Formation auf Team anwenden
+  const assigned = applyFormation(players, formation);
+
+  // 👉 nach Rollen gruppieren
+  const groups = {
+    GK: assigned.filter(p => p.role === "GK"),
+    DEF: assigned.filter(p => p.role === "DEF"),
+    MID: assigned.filter(p => p.role === "MID"),
+    ATT: assigned.filter(p => p.role === "ATT")
+  };
+
+  // 👉 Layout durchgehen und mit Spielern matchen
+  let index = { GK: 0, DEF: 0, MID: 0, ATT: 0 };
 
   el.innerHTML = layout
     .map((p) => {
+      const player = groups[p.role]?.[index[p.role]++] || null;
+
       return `
-      <div 
-        class="fp-dot ${p.role}"
-        style="
-          top:${p.top};
-          left:${p.left};
-        "
-      ></div>
-    `;
+        <div 
+          class="fp-dot ${p.role}"
+          style="
+            top:${p.top};
+            left:${p.left};
+          "
+        ></div>
+      `;
     })
     .join("");
 }
