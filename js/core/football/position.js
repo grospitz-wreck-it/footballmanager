@@ -1,4 +1,4 @@
-import { FORMATIONS } from "./formations.js";
+import { FORMATIONS } from "./formation.js";
 export function mapPosition(typeRaw){
 
   const type = (typeRaw || "").toUpperCase();
