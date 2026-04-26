@@ -1190,20 +1190,22 @@ tr:hover {
 /* =========================
 🎮 OVERLAY (SAFE + PREMIUM)
 ========================= */
+/* =========================
+🪟 TACTICS OVERLAY (FIXED MOBILE)
+========================= */
 .tactics-overlay {
   position: fixed;
 
-  top: 0;
+  top: env(safe-area-inset-top);
+  bottom: 0;
   left: 0;
   right: 0;
-  bottom: 0;
 
   display: flex;
   justify-content: center;
   align-items: flex-end;
 
-  padding: 0 10px;
-  padding-top: env(safe-area-inset-top); /* 🔥 iPhone FIX */
+  padding: 0 10px calc(10px + env(safe-area-inset-bottom));
 
   background:
     radial-gradient(circle at 20% 20%, rgba(34,197,94,0.25), transparent 45%),
@@ -1228,6 +1230,14 @@ tr:hover {
 .tactics-overlay.open {
   pointer-events: auto;
   opacity: 1;
+}
+.tactics-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  /* 🔥 garantiert klickbar */
+  pointer-events: auto;
 }
 
 /* =========================
