@@ -44,19 +44,19 @@ const data = event;
       return event.text || null;
 
     case "PASS":
-  return `${getPlayer(data)} spielt einen Pass`;
+  return select(context, PASS_TEMPLATES, data);
 
 case "DRIBBLE":
-  return `${getPlayer(data)} geht ins Dribbling`;
+  return select(context, DRIBBLE_TEMPLATES, data);
 
 case "INTERCEPTION":
-  return `${getPlayer(data)} fängt den Ball ab`;
+  return select(context, INTERCEPTION_TEMPLATES, data);
 
 case "BALL_LOSS":
-  return `${getPlayer(data)} verliert den Ball`;
+  return select(context, BALL_LOSS_TEMPLATES, data);
 
 case "BALL_RECOVERY":
-  return `${getPlayer(data)} erobert den Ball`;
+  return select(context, BALL_RECOVERY_TEMPLATES, data);
 
 case "CLEARANCE":
   return `${getPlayer(data)} klärt die Situation`;
@@ -101,102 +101,174 @@ function buildContext(event){
 // 🥅 GOAL
 const GOAL_TEMPLATES = [
   {
-    id: "goal_hype_late",
-    weight: 10,
-    when: c => c.drama === "high",
-    text: d => `⚽ TOOOOR!!! ${getTeam(d)} in der Schlussphase!`
+    id: "goal_last_minute",
+    weight: 12,
+    when: c => c.minute > 85,
+    text: d => `⚽ UNGLAUBLICH! ${getPlayer(d)} trifft spät für ${getTeam(d)}!`
   },
   {
     id: "goal_comeback",
-    weight: 8,
+    weight: 10,
     when: c => c.isTrailing,
-    text: d => `${getTeam(d)} meldet sich zurück! ${getPlayer(d)} trifft!`
+    text: d => `${getTeam(d)} ist zurück im Spiel! ${getPlayer(d)} trifft!`
   },
   {
-    id: "goal_normal",
-    weight: 5,
+    id: "goal_leading_extend",
+    weight: 8,
+    when: c => c.isLeading,
+    text: d => `${getTeam(d)} baut die Führung aus – ${getPlayer(d)} trifft`
+  },
+  {
+    id: "goal_counter",
+    weight: 7,
     when: () => true,
-    text: d => `${getPlayer(d)} trifft für ${getTeam(d)}`
+    text: d => `⚡ Schneller Angriff! ${getPlayer(d)} vollendet für ${getTeam(d)}`
   },
   {
-    id: "goal_clean",
+    id: "goal_clean_finish",
+    weight: 6,
+    when: () => true,
+    text: d => `${getPlayer(d)} bleibt eiskalt vor dem Tor`
+  },
+  {
+    id: "goal_power",
+    weight: 6,
+    when: () => true,
+    text: d => `💥 Wuchtiger Abschluss von ${getPlayer(d)} – drin!`
+  },
+  {
+    id: "goal_simple",
     weight: 4,
     when: () => true,
-    text: d => `💥 Abschluss von ${getPlayer(d)} – drin!`
+    text: d => `${getPlayer(d)} trifft für ${getTeam(d)}`
   }
 ];
 
 // 🎯 SHOT
 const SHOT_TEMPLATES = [
   {
-    id: "shot_basic",
-    weight: 5,
-    when: () => true,
-    text: d => `${getPlayer(d)} zieht ab…`
+    id: "shot_pressure",
+    weight: 7,
+    when: c => c.drama !== "low",
+    text: d => `${getTeam(d)} drückt – ${getPlayer(d)} zieht ab!`
   },
   {
-    id: "shot_pressure",
+    id: "shot_distance",
     weight: 6,
-    when: c => c.drama !== "low",
-    text: d => `${getTeam(d)} sucht jetzt den Abschluss…`
+    when: () => true,
+    text: d => `${getPlayer(d)} versucht es aus der Distanz`
+  },
+  {
+    id: "shot_quick",
+    weight: 5,
+    when: () => true,
+    text: d => `${getPlayer(d)} kommt schnell zum Abschluss`
+  },
+  {
+    id: "shot_basic",
+    weight: 4,
+    when: () => true,
+    text: d => `${getPlayer(d)} schießt`
   }
 ];
 
 // 🧤 SAVE
 const SAVE_TEMPLATES = [
   {
-    id: "save_strong",
+    id: "save_big",
+    weight: 8,
+    when: c => c.drama === "high",
+    text: d => `🧤 WAS FÜR EINE PARADE von ${getKeeper(d)}!`
+  },
+  {
+    id: "save_reaction",
     weight: 6,
     when: () => true,
-    text: d => `🧤 Starke Parade von ${getKeeper(d)}!`
+    text: d => `${getKeeper(d)} reagiert blitzschnell`
+  },
+  {
+    id: "save_safe",
+    weight: 5,
+    when: () => true,
+    text: d => `${getKeeper(d)} hält sicher`
   },
   {
     id: "save_basic",
-    weight: 5,
+    weight: 4,
     when: () => true,
-    text: d => `${getPlayer(d)} schießt – gehalten!`
+    text: d => `Schuss gehalten`
   }
 ];
 
 // 🚫 FOUL
 const FOUL_TEMPLATES = [
   {
-    id: "foul_basic",
-    weight: 5,
-    when: () => true,
-    text: d => `${getPlayer(d)} foult im Mittelfeld`
+    id: "foul_hard",
+    weight: 7,
+    when: c => c.drama === "high",
+    text: d => `💢 Hartes Einsteigen von ${getPlayer(d)}!`
   },
   {
-    id: "foul_late",
+    id: "foul_stop_attack",
     weight: 6,
-    when: c => c.drama === "high",
-    text: d => `Hartes Foul von ${getPlayer(d)} in dieser Phase!`
+    when: () => true,
+    text: d => `${getPlayer(d)} stoppt den Angriff mit einem Foul`
+  },
+  {
+    id: "foul_mid",
+    weight: 5,
+    when: () => true,
+    text: d => `Foul im Mittelfeld von ${getPlayer(d)}`
+  },
+  {
+    id: "foul_light",
+    weight: 4,
+    when: () => true,
+    text: d => `Leichtes Foulspiel`
   }
 ];
 
 // 🚩 CORNER
 const CORNER_TEMPLATES = [
   {
-    id: "corner_basic",
-    weight: 5,
-    when: () => true,
-    text: d => `Ecke für ${getTeam(d)}`
+    id: "corner_pressure",
+    weight: 7,
+    when: c => c.drama !== "low",
+    text: d => `${getTeam(d)} erhöht den Druck – Ecke!`
   },
   {
-    id: "corner_pressure",
+    id: "corner_danger",
     weight: 6,
-    when: c => c.drama !== "low",
-    text: d => `${getTeam(d)} bleibt dran – Ecke!`
+    when: () => true,
+    text: d => `Gefährliche Ecke für ${getTeam(d)}`
+  },
+  {
+    id: "corner_standard",
+    weight: 5,
+    when: () => true,
+    text: d => `Eckball für ${getTeam(d)}`
   }
 ];
 
 // ⚔️ DUEL
 const DUEL_TEMPLATES = [
   {
-    id: "duel_basic",
+    id: "duel_intense",
+    weight: 7,
+    when: c => c.drama !== "low",
+    text: d => `⚔️ Intensiver Zweikampf: ${getDuel(d)}`
+  },
+  {
+    id: "duel_midfield",
+    weight: 6,
+    when: () => true,
+    text: d => `Zweikampf im Mittelfeld`
+  },
+  {
+    id: "duel_simple",
     weight: 5,
     when: () => true,
-    text: d => `Zweikampf: ${getDuel(d)}`
+    text: d => `${getDuel(d)} im Duell`
   }
 ];
 
@@ -327,9 +399,17 @@ function select(context, templates, data){
   if(memory.length > MEMORY_LIMIT){
     memory.shift();
   }
+const prefixPool = [
+  "",
+  "🔥 ",
+  "👉 ",
+  "⚡ ",
+  "💬 "
+];
 
+const prefix = prefixPool[Math.floor(Math.random() * prefixPool.length)];
   try {
-    return chosen.text(data);
+return prefix + chosen.text(data);
   } catch(e){
     console.error("❌ Template Error:", e);
     return null;
