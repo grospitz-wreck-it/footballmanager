@@ -13,8 +13,8 @@
 
   padding: 0 10px calc(10px + env(safe-area-inset-bottom));
 
-  background: rgba(2,6,23,0.75);
-  backdrop-filter: blur(12px);
+  background: rgba(2,6,23,0.7);
+  backdrop-filter: blur(14px);
 
   opacity: 0;
   pointer-events: none;
@@ -33,16 +33,14 @@
 .tactics-sheet {
   width: 100%;
   max-width: 480px;
-
   height: 85vh;
 
-  border-radius: 24px 24px 0 0;
+  border-radius: 26px 26px 0 0;
 
   padding: 16px;
-
   overflow-y: auto;
 
-  background: linear-gradient(160deg, #020617, #0f172a);
+  background: linear-gradient(160deg,#020617,#0f172a);
 
   transform: translateY(100%);
   transition: transform 0.35s ease;
@@ -58,12 +56,29 @@
 
 .tactics-sheet::before {
   content: "";
-  width: 40px;
+  width: 44px;
   height: 5px;
   border-radius: 999px;
   background: rgba(255,255,255,0.3);
+  margin: 0 auto 14px;
   display: block;
-  margin: 0 auto 12px;
+}
+
+/* =====================================================
+🧠 HEADER (FIX CENTER)
+===================================================== */
+
+.tactics-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.tactics-header img {
+  width: 130px;
+  height: auto;
+  display: block;
 }
 
 /* =====================================================
@@ -80,11 +95,11 @@
 
   background: url("../gfx/field.svg") center/cover no-repeat;
 
-  margin: 10px 0 14px;
+  margin: 12px 0 16px;
 }
 
 /* =====================================================
-⚽ DOTS (CLICK FIX!)
+⚽ DOTS
 ===================================================== */
 
 .fp-dot {
@@ -95,8 +110,8 @@
   height: 14px;
   border-radius: 50%;
 
-  z-index: 50;              /* 🔥 wichtig */
-  pointer-events: auto;     /* 🔥 klick fix */
+  z-index: 50;
+  pointer-events: auto;
 
   box-shadow:
     0 0 6px rgba(255,255,255,0.7),
@@ -109,27 +124,28 @@
 .fp-dot.ATT { background:#ef4444; color:#ef4444; }
 
 /* =====================================================
-📊 STATS ROW (FIXED LAYOUT)
+📊 STATS (FIXED!)
 ===================================================== */
 
 .tactics-stats-row {
   display: flex;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
 
   padding: 14px;
   border-radius: 16px;
 
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.05);
 }
 
-/* LEFT (DONUTS) */
+/* 👉 DONUTS FIX (WICHTIG) */
 #tacticsStats {
-  display: flex;
-  gap: 12px;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 14px;
 }
 
-/* RIGHT (BARS) */
+/* 👉 BARS */
 #tacticsBars {
   flex: 1;
   display: flex;
@@ -144,8 +160,8 @@
 .donut {
   position: relative;
 
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
 
   border-radius: 50%;
 
@@ -153,7 +169,7 @@
   align-items: center;
   justify-content: center;
 
-  font-weight: bold;
+  font-weight: 700;
   color: white;
 
   background:
@@ -178,7 +194,7 @@
 }
 
 /* =====================================================
-📊 BARS (FILL FIX)
+📊 BARS
 ===================================================== */
 
 .tactics-bar {
@@ -203,55 +219,74 @@
 
 .tactics-bar .fill {
   height: 100%;
-  width: 0%; /* JS setzt Wert */
   border-radius: 6px;
 }
 
-/* COLORS */
-.fill.att { background: #22c55e; }
-.fill.def { background: #38bdf8; }
-.fill.ctrl { background: #a855f7; }
+.fill.att { background:#22c55e; }
+.fill.def { background:#38bdf8; }
+.fill.ctrl { background:#a855f7; }
 
 /* =====================================================
-🎛 DROPDOWNS (FIX VISIBLE BUG)
+🎛 DROPDOWNS (PREMIUM STYLE)
 ===================================================== */
 
 .tactics-controls {
   display: grid;
   grid-template-columns: repeat(3,1fr);
-  gap: 12px;
-  margin-top: 18px;
+  gap: 14px;
+  margin-top: 20px;
 }
 
 .tactics-dropdown {
   position: relative;
 }
 
+/* BUTTON */
 .dd-selected {
-  height: 48px;
+  height: 52px;
+
+  border-radius: 18px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 14px;
-
-  background: rgba(255,255,255,0.06);
+  font-size: 14px;
+  font-weight: 600;
   color: white;
 
   cursor: pointer;
+
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.02)
+  );
+
+  backdrop-filter: blur(10px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 10px 25px rgba(0,0,0,0.6);
+
+  transition: all 0.2s ease;
 }
 
-/* 👉 HIDDEN DEFAULT */
+.dd-selected:active {
+  transform: scale(0.96);
+}
+
+/* OPTIONS PANEL */
 .dd-options {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
 
-  background: #020617;
+  border-radius: 14px;
 
-  border-radius: 12px;
+  background: rgba(2,6,23,0.95);
+  backdrop-filter: blur(12px);
 
   opacity: 0;
   pointer-events: none;
@@ -259,14 +294,26 @@
   transform: translateY(-6px);
   transition: 0.2s ease;
 
-  z-index: 1000;
+  z-index: 200;
 }
 
-/* 👉 ONLY WHEN OPEN */
+/* OPEN */
 .tactics-dropdown.open .dd-options {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+/* ITEMS */
+.dd-options div {
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dd-options div:hover {
+  background: rgba(255,255,255,0.08);
 }
 
 /* =====================================================
@@ -274,20 +321,23 @@
 ===================================================== */
 
 .chance-btn {
-  margin-top: 20px;
-  padding: 16px;
+  margin-top: 24px;
+  padding: 18px;
 
-  border-radius: 16px;
+  border-radius: 20px;
 
   text-align: center;
 
-  background: linear-gradient(90deg,#22c55e,#38bdf8,#a855f7);
+  background: linear-gradient(
+    90deg,#22c55e,#38bdf8,#a855f7
+  );
+
   color: #020617;
-  font-weight: bold;
+  font-weight: 800;
 }
 
 /* =====================================================
-🪟 MODAL (CENTER FIX)
+🪟 MODAL (CENTER)
 ===================================================== */
 
 #playerModal {
@@ -315,14 +365,4 @@
 #playerModal.show .player-modal {
   transform: scale(1);
   opacity: 1;
-}
-
-/* =====================================================
-🖼 HEADER IMAGE FIX (TOO BIG BUG)
-===================================================== */
-
-.tactics-header img {
-  width: 140px;
-  max-width: 50%;
-  height: auto;
 }
