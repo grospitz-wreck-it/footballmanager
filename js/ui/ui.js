@@ -11,7 +11,7 @@ import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
 import { renderSchedule as renderScheduleModule } from "../modules/scheduler.js";
 import { getPlayersOfTeam } from "../modules/league.js";
-import { mapPosition, mapPositionToRole, applyFormation } from "../core/football/position.js";
+import { mapPosition, mapPositionToRole, applyFormation, getBestXI } from "../core/football/position.js";
 import { FORMATIONS, getFormationProfile } from "../core/football/formation.js";
 // =========================
 // 🔒 INTERNAL
@@ -901,59 +901,52 @@ function renderTeam() {
   const players = getPlayersOfTeam(teamId);
   const lineup = game.team?.lineup;
 
-  let starters = [];
-  let benchPlayers = [...players];
-
-  // 🔥 Lineup vorhanden → echte Startelf
-  if (lineup?.slots) {
-    const ids = Object.values(lineup.slots).filter(Boolean);
-
-    if (ids.length) {
-      starters = players.filter((p) => ids.includes(String(p.id)));
-      benchPlayers = players.filter((p) => !ids.includes(String(p.id)));
-    }
-  }
-
-  // 🔥 Fallback (dein bestehendes System bleibt)
-  if (!starters.length) {
-    starters = players.slice(0, 11);
-    benchPlayers = players.slice(11);
-  }
-  console.log("🧪 teamId:", teamId);
-  console.log("🧪 team players:", players.length);
-  console.log("🧪 starters:", starters.length);
-  console.log("🧪 bench:", benchPlayers.length);
   if (!players.length) {
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
 
-  const byType = { GK: [], DEF: [], MID: [], ST: [] };
+  // =========================
+  // 📐 FORMATION
+  // =========================
+  const formation =
+    game.tactics?.formation ||
+    lineup?.formation ||
+    "4-4-2";
 
-  players.forEach((p) => {
-    const type = (p.position_type || "MID").toUpperCase();
-    (byType[type] || byType.MID).push(p);
-  });
-
-  // Sortieren (safe)
-  Object.values(byType).forEach((arr) => {
-    if (!Array.isArray(arr)) return;
-    arr.sort((a, b) => (b.overall ?? 0) - (a.overall ?? 0));
-  });
+  let starters = [];
+  let benchPlayers = [];
 
   // =========================
-  // 🔥 LINEUP INTEGRATION
+  // 🧠 AUTO BEST XI (🔥 KEY FIX)
   // =========================
-
-  if (lineup?.slots) {
-    const pool = window.playerPool || players;
-
-    const ids = Object.values(lineup.slots).filter(Boolean);
-
-    if (ids.length) {
-      starters = pool.filter((p) => ids.includes(String(p.id)));
-    }
+  try {
+    starters = getBestXI(players, formation);
+  } catch (e) {
+    console.error("❌ getBestXI failed:", e);
+    starters = players.slice(0, 11); // fallback safe
   }
+
+  // =========================
+  // 🪑 BENCH CLEAN
+  // =========================
+  const starterIds = new Set(
+    starters
+      .filter(p => p.id) // 🔥 verhindert dummy-probleme
+      .map(p => String(p.id))
+  );
+
+  benchPlayers = players.filter(
+    p => !starterIds.has(String(p.id))
+  );
+
+  // =========================
+  // 🧪 DEBUG
+  // =========================
+  console.log("🧪 teamId:", teamId);
+  console.log("🧪 team players:", players.length);
+  console.log("🧪 starters:", starters.length);
+  console.log("🧪 bench:", benchPlayers.length);
 
 // =========================
 // ⚙️ APPLY FORMATION (FINAL CLEAN)
