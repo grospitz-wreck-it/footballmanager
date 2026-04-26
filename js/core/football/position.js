@@ -37,3 +37,66 @@ export function mapPositionToRole(typeRaw){
 
   return core;
 }
+
+export function applyFormation(players, formationKey) {
+  const f = FORMATIONS[formationKey];
+
+  // Pools erstellen
+  const pools = {
+    GK: players.filter(p => mapPosition(p.type) === "GK"),
+    DEF: players.filter(p => mapPosition(p.type) === "DEF"),
+    MID: players.filter(p => mapPosition(p.type) === "MID"),
+    ATT: players.filter(p => mapPosition(p.type) === "ATT")
+  };
+
+  const result = [];
+
+  // =========================
+  // 🥅 GK (nur echte GK oder DEF fallback)
+  // =========================
+  if (pools.GK.length > 0) {
+    result.push({ ...pools.GK.shift(), role: "GK" });
+  } else if (pools.DEF.length > 0) {
+    result.push({ ...pools.DEF.shift(), role: "GK" });
+  }
+
+  // =========================
+  // 🛡 DEF
+  // DEF kann: DEF + MID + (im Notfall GK)
+  // =========================
+  for (let i = 0; i < f.DEF; i++) {
+    if (pools.DEF.length > 0) {
+      result.push({ ...pools.DEF.shift(), role: "DEF" });
+    } else if (pools.MID.length > 0) {
+      result.push({ ...pools.MID.shift(), role: "DEF" });
+    } else if (pools.GK.length > 0) {
+      result.push({ ...pools.GK.shift(), role: "DEF" });
+    }
+  }
+
+  // =========================
+  // 🧠 MID
+  // MID kann: MID + DEF
+  // =========================
+  for (let i = 0; i < f.MID; i++) {
+    if (pools.MID.length > 0) {
+      result.push({ ...pools.MID.shift(), role: "MID" });
+    } else if (pools.DEF.length > 0) {
+      result.push({ ...pools.DEF.shift(), role: "MID" });
+    }
+  }
+
+  // =========================
+  // ⚡ ATT
+  // ATT kann: ATT + MID
+  // =========================
+  for (let i = 0; i < f.ATT; i++) {
+    if (pools.ATT.length > 0) {
+      result.push({ ...pools.ATT.shift(), role: "ATT" });
+    } else if (pools.MID.length > 0) {
+      result.push({ ...pools.MID.shift(), role: "ATT" });
+    }
+  }
+
+  return result;
+}
