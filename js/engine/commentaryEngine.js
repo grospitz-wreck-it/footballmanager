@@ -380,6 +380,7 @@ const BALL_RECOVERY_TEMPLATES = [
 // =========================
 
 const memory = [];
+let lastLine = null;
 const MEMORY_LIMIT = 6;
 
 function select(context, templates, data){
@@ -408,12 +409,39 @@ const prefixPool = [
 ];
 
 const prefix = prefixPool[Math.floor(Math.random() * prefixPool.length)];
-  try {
-return prefix + chosen.text(data);
-  } catch(e){
-    console.error("❌ Template Error:", e);
-    return null;
+
+try {
+
+  let line = chosen.text(data);
+
+  // =========================
+  // 🔗 CONTINUATION LOGIC
+  // =========================
+  if(lastLine && Math.random() < 0.35){
+
+    const connectors = [
+      "… ",
+      "— ",
+      "… und ",
+      "… jetzt "
+    ];
+
+    const joiner = connectors[Math.floor(Math.random() * connectors.length)];
+
+    line = joiner + line;
   }
+
+  // speichern für nächsten Tick
+  lastLine = line;
+
+  // =========================
+  // 🎯 RETURN
+  // =========================
+  return prefix + line;
+
+} catch(e){
+  console.error("❌ Template Error:", e);
+  return null;
 }
 
 // =========================
