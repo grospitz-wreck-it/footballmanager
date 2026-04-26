@@ -996,7 +996,18 @@ const gameEvents = game.data?.gameEvents;
         saveGame();
       }
 
-      if(live.minute >= 90){
+     if(live.minute >= 90){
+
+  live.minute = 90;
+
+  // 🔥 FULLTIME EVENT TRIGGERN
+  emitMatchEvent(EVENT_TYPES.FULLTIME, {
+    minute: 90,
+    score: {
+      home: game.match.score.home,
+      away: game.match.score.away
+    }
+  });
 
   live.running = false;
 
