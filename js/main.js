@@ -317,7 +317,7 @@ export function handleAppVisibility(){
 
 
 // =========================
-// 🔎 LIGEN FINDEN (PLZ₃ FIX)
+// 🔎 LIGEN FINDEN (STABIL)
 // =========================
 async function findLeaguesByCode(input){
 
@@ -326,42 +326,45 @@ async function findLeaguesByCode(input){
   if(!input || input.length < 2) return [];
 
   // =========================
-  // 🧠 TEAMS DIREKT ÜBER PLZ
+  // 🧠 STABILER QUERY (OHNE JOIN BUG)
   // =========================
-  const { data: teams, error } = await supabase
+  const { data, error } = await supabase
     .from("teams")
     .select(`
       id,
       name,
       competition_id,
-      competitions (
+      competitions!inner (
         id,
         name,
         level
       ),
       cities!inner (
-  plz)
+        plz
+      )
     `)
-    .ilike("cities.plz", `${input}%`);
+    .filter("cities.plz", "like", `${input}%`)   // 🔥 WICHTIG: NICHT ilike!
+    .gte("competitions.level", 7)
+    .lte("competitions.level", 9);
 
   if(error){
     console.error("❌ Team-PLZ Query Fehler:", error);
     return [];
   }
 
-  if(!teams || !teams.length){
+  if(!data || !data.length){
     console.warn("⚠️ Keine Teams für PLZ gefunden");
     return [];
   }
 
-  console.log("🏆 Teams gefunden:", teams.length);
+  console.log("🏆 Teams gefunden:", data.length);
 
   // =========================
   // 🏆 LIGEN AUS TEAMS BAUEN
   // =========================
   const map = new Map();
 
-  teams.forEach(t => {
+  data.forEach(t => {
 
     const comp = t.competitions;
     if(!comp) return;
@@ -370,34 +373,24 @@ async function findLeaguesByCode(input){
 
     if(!map.has(id)){
       map.set(id, {
-  id,
-  name: comp.name,
-  level: comp.level,
-
-  // 🔥 WICHTIG: kompatibel mit deinem System
-  teams: [],
-
-  // optional (für Debug)
-  _fromPLZ: true
-});
+        id,
+        name: comp.name,
+        level: comp.level,
+        teams: [],
+        _fromPLZ: true
+      });
     }
 
     map.get(id).teams.push({
-  id: String(t.id),
-  name: t.name,
-  competition_id: t.competition_id,
-  city_id: t.city_id || null
-});
-});
-  let leagues = Array.from(map.values());
+      id: String(t.id),
+      name: t.name,
+      competition_id: t.competition_id,
+      city_id: t.city_id || null
+    });
 
-  // =========================
-  // 🎯 LEVEL FILTER
-  // =========================
-  leagues = leagues.filter(l => {
-    const lvl = Number(l.level) || 7;
-    return lvl >= 7 && lvl <= 9;
   });
+
+  let leagues = Array.from(map.values());
 
   // =========================
   // 🔥 SORT
