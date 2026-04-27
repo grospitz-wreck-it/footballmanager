@@ -411,6 +411,10 @@ function initUI() {
 }
 
 function showToast(text) {
+  // ❌ wenn Splash sichtbar → abbrechen
+  const splash = document.getElementById("splashScreen");
+  if (splash && !splash.classList.contains("hidden")) return;
+
   let el = document.getElementById("toast");
 
   if (!el) {
