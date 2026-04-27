@@ -1475,24 +1475,38 @@ function pushEventIcon(type) {
   const lane = document.getElementById("eventLane");
   if (!lane) return;
 
+  // 👉 WICHTIG: deine echten Event Types
   const map = {
-    goal: "⚽",
-    yellow: "🟨",
-    red: "🟥",
-    corner: "🏳️",
-    injury: "🩹",
-    whistle: "🔔"
+    GOAL: "⚽",
+    SHOT: "🥅",
+    SAVE: "🧤",
+    SHOT_SAVED: "🧤",
+    FOUL: "💢",
+    CORNER: "🏳️",
+    DUEL: "⚔️",
+    PASS: "➝",
+    DRIBBLE: "🌀",
+    INTERCEPTION: "⛔",
+    BALL_LOSS: "❌",
+    BALL_RECOVERY: "♻️",
+    CLEARANCE: "🛡️",
+    LEGACY: "•"
   };
+
+  const icon = map[type] || "•";
 
   const el = document.createElement("div");
   el.className = "event-icon";
-  el.textContent = map[type] || "•";
+  el.textContent = icon;
 
   lane.prepend(el);
 
+  // 👉 Auto cleanup (wichtig für Performance)
   setTimeout(() => {
-    el.remove();
-  }, 3000);
+    el.style.opacity = "0";
+    el.style.transform = "scale(0.6)";
+    setTimeout(() => el.remove(), 200);
+  }, 2500);
 }
 
 // =========================
