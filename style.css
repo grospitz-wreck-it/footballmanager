@@ -309,72 +309,64 @@ html, body {
 /* =========================
 🚀 MATCH TOP BAR (SCI-FI HUD)
 ========================= */
-
 #topBar {
   position: relative;
 
-  padding: 14px 16px;
+  padding: 10px 14px 14px;
 
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 4px;
 
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-
-  background: radial-gradient(
-      circle at 50% -20%,
-      rgba(59,130,246,0.15),
+  background:
+    radial-gradient(
+      circle at 50% -30%,
+      rgba(34,211,238,0.25),
       transparent 60%
     ),
-    linear-gradient(160deg,#020617,#0f172a);
+    linear-gradient(160deg,#020617,#0b1220);
+
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.8),
+    0 10px 30px rgba(0,0,0,0.9),
     inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
-/* =========================
-🏷 TOP TEAMS (UPGRADED)
-========================= */
+/* SCORE */
+#topScore {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: 2px;
 
+  color: white;
+
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.2),
+    0 0 22px rgba(34,211,238,0.6);
+}
+
+/* TEAMS */
 #topTeams {
-  font-size: 13px;
-  letter-spacing: 0.5px;
-
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  color: #cbd5e1;
-}
-
-/* HOME */
-#topTeams .home {
-  color: #38bdf8;
-  font-weight: 600;
-
-  text-shadow:
-    0 0 6px rgba(56,189,248,0.4),
-    0 0 12px rgba(56,189,248,0.2);
-}
-
-/* VS */
-#topTeams .vs {
-  opacity: 0.4;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
+
+  opacity: 0.7;
+  color: var(--text-dim);
+
+  text-transform: uppercase;
 }
 
-/* AWAY */
-#topTeams .away {
-  color: #ef4444;
-  font-weight: 600;
+/* MINUTE */
+#topMinute {
+  position: absolute;
+  right: 12px;
+  top: 10px;
 
-  text-shadow:
-    0 0 6px rgba(239,68,68,0.4),
-    0 0 12px rgba(239,68,68,0.2);
+  font-size: 11px;
+  color: var(--text-dim);
 }
-
 
 /* =========================
 ⚽ SCORE (HERO)
@@ -410,7 +402,15 @@ html, body {
 
   z-index: -1;
 }
+.event-icon {
+  color: var(--energy);
 
+  text-shadow: var(--glow-main);
+
+  font-size: 16px;
+
+  animation: eventPop 2s ease forwards;
+}
 /* =========================
 ⚽ GOAL ANIMATION
 ========================= */
@@ -509,18 +509,15 @@ html, body {
 }
 
 #progressFill {
-  height: 100%;
-  width: 0%;
-
-  /* 🔥 Gelb → Orange → Rot */
   background: linear-gradient(
     90deg,
-    #facc15,   /* gelb */
-    #f97316,   /* orange */
-    #ef4444    /* rot */
+    #22d3ee,
+    #a78bfa
   );
 
-  transition: width 0.3s ease;
+  box-shadow:
+    0 0 12px rgba(34,211,238,0.6),
+    0 0 24px rgba(167,139,250,0.3);
 }
 
 /* =========================
