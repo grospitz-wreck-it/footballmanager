@@ -480,7 +480,7 @@ setupDropdown("styleDropdown", (value) => {
 
     snapTo(current);
   });
-}
+
 
 
 // =========================
