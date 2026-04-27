@@ -146,10 +146,14 @@ function resolveEventContent(event){
     return possible.includes(type);
   });
 
-  if(!matches.length){
-    console.warn("⚠️ No definition match for:", type);
-    return emptyResult();
-  }
+ if(!matches.length){
+  // 🔥 KEIN ERROR MEHR
+  return {
+    text: null,
+    assets: [],
+    config: null
+  };
+}
 
   // =========================
   // 🔥 GUARANTEED FIRST
