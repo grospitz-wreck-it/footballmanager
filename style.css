@@ -428,15 +428,15 @@ html, body {
 ========================= */
 
 #topScore {
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 
   color: white;
 
   text-shadow:
-    0 0 6px rgba(255,255,255,0.2),
-    0 0 18px rgba(59,130,246,0.35);
+    0 0 8px rgba(255,255,255,0.25),
+    0 0 20px var(--accent-glow);
 
   position: relative;
 }
@@ -445,26 +445,29 @@ html, body {
 #topScore::after {
   content: "";
   position: absolute;
-  inset: -6px -12px;
+  inset: -8px -16px;
 
-  border-radius: 12px;
+  border-radius: 14px;
 
   background: radial-gradient(
     circle,
-    rgba(59,130,246,0.15),
+    var(--accent-soft),
     transparent 70%
   );
 
   z-index: -1;
 }
-.event-icon {
-  color: var(--energy);
 
-  text-shadow: var(--glow-main);
+/* =========================
+🎯 EVENT ICONS (FIXED)
+========================= */
+.event-icon {
+  color: var(--accent); /* 🔥 jetzt korrekt */
+  text-shadow: 0 0 8px var(--accent-glow);
 
   font-size: 16px;
 
-  animation: eventPop 2s ease forwards;
+  animation: eventPop 1.6s ease forwards;
 }
 /* =========================
 ⚽ GOAL ANIMATION
