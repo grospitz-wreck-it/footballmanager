@@ -433,8 +433,10 @@ function showToast(text) {
 }
 
 // =========================
-// ⚽ SCORE
+// ⚽ SCORE (UPGRADED)
 // =========================
+let lastScoreState = { home: null, away: null };
+
 function updateScore() {
   const match = game.match?.live;
   if (!match) return;
@@ -442,47 +444,102 @@ function updateScore() {
   const scoreEl = document.getElementById("topScore");
   const teamsEl = document.getElementById("topTeams");
   const minuteEl = document.getElementById("topMinute");
-  const tacticsEl = document.getElementById("topTactics"); // 🔥 NEU (optional)
+  const tacticsEl = document.getElementById("topTactics");
 
   // =========================
-  // 🏷 TEAM NAMES
+  // 🏷 TEAM NAMES (UPGRADED)
   // =========================
   if (teamsEl) {
     const current = game.match?.current;
 
     if (current) {
-      const homeName = game.match?.home?.name || current?.home?.name || "-";
+      const homeName =
+        game.match?.home?.name || current?.home?.name || "-";
 
-      const awayName = game.match?.away?.name || current?.away?.name || "-";
+      const awayName =
+        game.match?.away?.name || current?.away?.name || "-";
 
-     teamsEl.innerHTML = `
-  <span class="home">${homeName}</span>
-  <span class="vs">vs</span>
-  <span class="away">${awayName}</span>
-`;
+      teamsEl.innerHTML = `
+        <span class="home">${homeName}</span>
+        <span class="vs">vs</span>
+        <span class="away">${awayName}</span>
+      `;
     }
   }
 
   // =========================
-  // ⚽ SCORE + MINUTE
+  // ⚽ SCORE + GOAL DETECT
   // =========================
+  const home = match.score?.home ?? 0;
+  const away = match.score?.away ?? 0;
+
   if (scoreEl) {
-    scoreEl.textContent = `${match.score?.home ?? 0} : ${match.score?.away ?? 0}`;
+    const isGoal =
+      lastScoreState.home !== null &&
+      (home !== lastScoreState.home ||
+       away !== lastScoreState.away);
+
+    scoreEl.textContent = `${home} : ${away}`;
+
+    // 🎯 GOAL ANIMATION
+    if (isGoal) {
+      scoreEl.classList.remove("goal", "shake");
+
+      // 👉 reflow trick (wichtig!)
+      void scoreEl.offsetWidth;
+
+      scoreEl.classList.add("goal", "shake");
+
+      setTimeout(() => {
+        scoreEl.classList.remove("goal", "shake");
+      }, 600);
+    }
   }
 
+  // save state
+  lastScoreState = { home, away };
+
+  // =========================
+  // ⏱ MINUTE
+  // =========================
   if (minuteEl) {
     minuteEl.textContent = `${match.minute ?? 0}'`;
   }
 
   // =========================
-  // ⚙️ TACTICS (NEU, SAFE)
+  // ⚙️ TACTICS LABEL
   // =========================
   if (tacticsEl && game.tactics) {
     const preset = game.tactics.preset || "balanced";
 
     tacticsEl.textContent =
-      preset === "custom" ? "CUSTOM" : preset.toUpperCase();
+      preset === "custom"
+        ? "CUSTOM"
+        : preset.toUpperCase();
   }
+}
+
+function triggerGoalAnimation(side) {
+  const scoreEl = document.getElementById("topScore");
+  const barEl = document.getElementById("topBar");
+
+  if (!scoreEl || !barEl) return;
+
+  // reset (damit Animation erneut triggert)
+  scoreEl.classList.remove("goal", "shake");
+  barEl.classList.remove("goal-home", "goal-away");
+
+  void scoreEl.offsetWidth; // 🔥 reflow trick
+
+  // apply
+  scoreEl.classList.add("goal", "shake");
+  barEl.classList.add(side === "home" ? "goal-home" : "goal-away");
+
+  // cleanup
+  setTimeout(() => {
+    scoreEl.classList.remove("goal", "shake");
+    barEl.classList.remove("goal-home", "goal-away");
+  }, 700);
 }
 
 // =========================
