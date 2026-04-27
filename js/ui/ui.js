@@ -1526,6 +1526,16 @@ function applyColor(color) {
   document.documentElement.style.setProperty("--accent-opp-glow", hexToRgba(opp, 0.5));
 }
 
+function getComplementaryColor(hex) {
+  const r = 255 - parseInt(hex.substr(1, 2), 16);
+  const g = 255 - parseInt(hex.substr(3, 2), 16);
+  const b = 255 - parseInt(hex.substr(5, 2), 16);
+
+  return "#" + [r, g, b]
+    .map(x => x.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function attachDotHandlers(players) {
   document.querySelectorAll(".fp-dot").forEach((dot) => {
     dot.onclick = () => {
