@@ -208,22 +208,6 @@ function updateUI() {
     renderTacticStats();
   }
 
-// =========================
-// 🎮 OVERLAY CLOSE (TAP OUTSIDE FIX)
-// =========================
-const tacticsOverlay = document.getElementById("tacticsOverlay");
-
-if (tacticsOverlay) {
-  tacticsOverlay.addEventListener("click", (e) => {
-
-    // 👉 nur backdrop klick
-    if (e.target === tacticsOverlay) {
-      game.ui.tacticsOpen = false;
-      updateUI();
-    }
-
-  });
-}
 
   // =========================
   // 🍔 SIDEBAR
@@ -265,6 +249,151 @@ if (tacticsOverlay) {
     };
   }
 
+  function initUI() {
+  if (initialized) return;
+  initialized = true;
+
+  console.log("🧱 UI init");
+
+  // =========================
+  // 🍔 SIDEBAR
+  // =========================
+  const burger = document.getElementById("burgerBtn");
+  const wrapper = document.getElementById("sidebarWrapper");
+  const overlay = document.getElementById("sidebarOverlay");
+
+  if (burger && wrapper) {
+    burger.onclick = () => {
+      game.ui.sidebarOpen = !game.ui.sidebarOpen;
+      applySidebar();
+    };
+
+    overlay?.addEventListener("click", () => {
+      game.ui.sidebarOpen = false;
+      applySidebar();
+    });
+  }
+
+  // =========================
+  // 🔥 STATE LISTENER
+  // =========================
+  on(EVENTS.STATE_CHANGED, () => {
+    if (game.events?.history?.length) {
+      updateEvents();
+    }
+  });
+
+  // =========================
+  // ⚙️ TACTICS BUTTON
+  // =========================
+  const tacticsBtn = document.getElementById("tacticsBtn");
+
+  if (tacticsBtn) {
+    tacticsBtn.onclick = () => {
+      game.ui.tacticsOpen = !game.ui.tacticsOpen;
+      updateUI();
+    };
+  }
+
+  // =========================
+  // 🎮 OVERLAY CLOSE (FIX)
+  // =========================
+  const tacticsOverlay = document.getElementById("tacticsOverlay");
+
+  if (tacticsOverlay) {
+    tacticsOverlay.addEventListener("click", (e) => {
+      if (e.target === tacticsOverlay) {
+        game.ui.tacticsOpen = false;
+        updateUI();
+      }
+    });
+  }
+
+  // =========================
+  // 🎛 DROPDOWNS
+  // =========================
+  function setupDropdown(id, onSelect) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const selected = el.querySelector(".dd-selected");
+    const options = el.querySelector(".dd-options");
+
+    if (!selected || !options) return;
+
+    selected.onclick = () => {
+      el.classList.toggle("open");
+    };
+
+    options.querySelectorAll("div").forEach((opt) => {
+      opt.onclick = () => {
+        const value = opt.dataset.value;
+
+        selected.textContent = opt.textContent;
+        el.classList.remove("open");
+
+        onSelect(value);
+      };
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!el.contains(e.target)) {
+        el.classList.remove("open");
+      }
+    });
+  }
+
+  // =========================
+  // 📐 FORMATION
+  // =========================
+  setupDropdown("formationDropdown", (value) => {
+    game.tactics.formation = value;
+    updateUI();
+  });
+
+  setupDropdown("presetDropdown", (value) => {
+    const config = PRESETS[value];
+    if (!config) return;
+
+    game.tactics.preset = value;
+    game.tactics.tempo = config.tempo;
+    game.tactics.pressing = config.pressing;
+    game.tactics.line = config.line;
+
+    updateUI();
+  });
+
+  setupDropdown("styleDropdown", (value) => {
+    if (!STYLES[value]) return;
+    game.tactics.style = value;
+    updateUI();
+  });
+
+  // =========================
+  // 🎲 CHANCE BUTTON
+  // =========================
+  const chanceBtn = document.getElementById("chanceBtn");
+
+  if (chanceBtn) {
+    chanceBtn.onclick = () => {
+      if (!game.match?.live?.running) return;
+
+      game.events.history.push({
+        id: Date.now(),
+        minute: game.match.live.minute,
+        type: "chance",
+        text: "🔥 Große Chance durch taktische Umstellung!",
+      });
+
+      updateUI();
+    };
+  }
+
+  // =========================
+  // 👉 DRAG INIT (WICHTIG)
+  // =========================
+  initTacticsDrag();
+}
 
   // =========================
   // 🎛 DROPDOWNS
