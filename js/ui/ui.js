@@ -278,7 +278,7 @@ if (tacticsOverlay) {
       }
     };
   }
-initTacticsDrag();
+//initTacticsDrag();
   // =========================
   // 🎛 DROPDOWNS
   // =========================
