@@ -319,6 +319,9 @@ export function handleAppVisibility(){
 // =========================
 // 🔎 LIGEN FINDEN (STABIL)
 // =========================
+// =========================
+// 🔎 LIGEN FINDEN (FINAL V2)
+// =========================
 async function findLeaguesByCode(input){
 
   console.log("🔍 INPUT:", input);
@@ -326,15 +329,13 @@ async function findLeaguesByCode(input){
   if(!input || input.length < 2) return [];
 
   // =========================
-  // 🧠 STABILER QUERY (OHNE JOIN BUG)
+  // 🧠 STEP 1: relevante competitions finden
   // =========================
-  const { data, error } = await supabase
+  const { data: baseTeams, error: err1 } = await supabase
     .from("teams")
     .select(`
-      id,
-      name,
       competition_id,
-      competitions!inner (
+      competitions (
         id,
         name,
         level
@@ -343,65 +344,101 @@ async function findLeaguesByCode(input){
         plz
       )
     `)
-    .filter("cities.plz", "like", `${input}%`)   // 🔥 WICHTIG: NICHT ilike!
-    .gte("competitions.level", 7)
-    .lte("competitions.level", 9);
+    .ilike("cities.plz", `${input}%`);
 
-  if(error){
-    console.error("❌ Team-PLZ Query Fehler:", error);
+  if(err1){
+    console.error("❌ STEP 1 Fehler:", err1);
     return [];
   }
 
-  if(!data || !data.length){
-    console.warn("⚠️ Keine Teams für PLZ gefunden");
+  if(!baseTeams || !baseTeams.length){
+    console.warn("⚠️ Keine passenden Teams (PLZ)");
     return [];
   }
 
-  console.log("🏆 Teams gefunden:", data.length);
-
   // =========================
-  // 🏆 LIGEN AUS TEAMS BAUEN
+  // 🎯 EINDEUTIGE LIGEN IDS
   // =========================
-  const map = new Map();
+  const compMap = new Map();
 
-  data.forEach(t => {
-
+  baseTeams.forEach(t => {
     const comp = t.competitions;
     if(!comp) return;
 
-    const id = String(comp.id);
-
-    if(!map.has(id)){
-      map.set(id, {
-        id,
-        name: comp.name,
-        level: comp.level,
-        teams: [],
-        _fromPLZ: true
-      });
-    }
-
-    map.get(id).teams.push({
-      id: String(t.id),
-      name: t.name,
-      competition_id: t.competition_id,
-      city_id: t.city_id || null
+    compMap.set(String(comp.id), {
+      id: String(comp.id),
+      name: comp.name,
+      level: comp.level,
+      teams: [],
+      _fromPLZ: true
     });
-
   });
 
-  let leagues = Array.from(map.values());
+  const compIds = Array.from(compMap.keys());
+
+  console.log("🏆 Gefundene Ligen:", compIds.length);
 
   // =========================
-  // 🔥 SORT
+  // 🧠 STEP 2: ALLE Teams dieser Ligen laden
+  // =========================
+  const { data: fullTeams, error: err2 } = await supabase
+    .from("teams")
+    .select(`
+      id,
+      name,
+      competition_id,
+      competitions (
+        id,
+        name,
+        level
+      )
+    `)
+    .in("competition_id", compIds);
+
+  if(err2){
+    console.error("❌ STEP 2 Fehler:", err2);
+    return [];
+  }
+
+  if(!fullTeams || !fullTeams.length){
+    console.warn("⚠️ Keine Teams für gefundene Ligen");
+    return [];
+  }
+
+  // =========================
+  // 🏗️ LIGEN MIT TEAMS FÜLLEN
+  // =========================
+  fullTeams.forEach(t => {
+    const compId = String(t.competition_id);
+
+    if(!compMap.has(compId)) return;
+
+    compMap.get(compId).teams.push({
+      id: String(t.id),
+      name: t.name,
+      competition_id: compId
+    });
+  });
+
+  let leagues = Array.from(compMap.values());
+
+  // =========================
+  // 🎯 LEVEL FILTER (7–9)
+  // =========================
+  leagues = leagues.filter(l => {
+    const lvl = Number(l.level) || 7;
+    return lvl >= 7 && lvl <= 9;
+  });
+
+  // =========================
+  // 🔥 SORT (höchste Liga zuerst)
   // =========================
   leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
-  console.log("✅ Ligen aus PLZ:", leagues.length);
+  console.log("✅ FINAL LIGEN:", leagues.length);
 
   return leagues;
 }
-
 // =========================
 // 🚀 INIT
 // =========================
