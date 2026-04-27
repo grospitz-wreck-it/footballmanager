@@ -1474,6 +1474,48 @@ function renderFormationPreview() {
   // =========================
   attachDotHandlers(players);
 }
+  // =========================
+  // 🖱 Color Picker
+  // =========================
+function initColorPicker() {
+  const picker = document.getElementById("colorPicker");
+  if (!picker) return;
+
+  const saved = localStorage.getItem("userColor");
+
+  if (saved) {
+    picker.value = saved;
+    applyColor(saved);
+  } else {
+    applyColor(picker.value);
+  }
+
+  picker.addEventListener("input", (e) => {
+    const color = e.target.value;
+
+    applyColor(color);
+    localStorage.setItem("userColor", color);
+
+    if (typeof showToast === "function") {
+      showToast("Farbe aktualisiert");
+    }
+  });
+}
+
+function applyColor(color) {
+  document.documentElement.style.setProperty("--accent", color);
+  document.documentElement.style.setProperty("--accent-soft", hexToRgba(color, 0.2));
+  document.documentElement.style.setProperty("--accent-glow", hexToRgba(color, 0.5));
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.substring(1, 3), 16);
+  const g = parseInt(hex.substring(3, 5), 16);
+  const b = parseInt(hex.substring(5, 7), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 
 function attachDotHandlers(players) {
   document.querySelectorAll(".fp-dot").forEach((dot) => {
