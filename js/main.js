@@ -339,9 +339,8 @@ async function findLeaguesByCode(input){
         name,
         level
       ),
-      cities (
-        plz
-      )
+      cities!inner (
+  plz)
     `)
     .ilike("cities.plz", `${input}%`);
 
