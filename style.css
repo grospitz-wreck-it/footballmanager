@@ -29,10 +29,16 @@ html, body {
 /* =========================
 🟡 SPLASH SCREEN
 ========================= */
+/* =========================
+🚀 SPLASH SCREEN (SOLID FINAL)
+========================= */
+
 #splash {
   position: fixed;
   inset: 0;
-  z-index: 20000;
+
+  z-index: 999999; /* 🔥 gewinnt IMMER */
+  isolation: isolate; /* 🔥 eigener stacking context */
 
   display: flex;
   flex-direction: column;
@@ -44,19 +50,44 @@ html, body {
   color: white;
   padding: 20px;
   text-align: center;
+
+  pointer-events: all; /* 🔥 blockiert alles darunter */
+
+  opacity: 1;
+  visibility: visible;
+
+  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
+/* =========================
+❌ HIDDEN STATE
+========================= */
+#splash.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* =========================
+📦 CONTENT
+========================= */
 #splash > * {
   width: 100%;
   max-width: 320px;
 }
 
+/* =========================
+🎮 LOGO
+========================= */
 #logo {
   width: 70%;
   max-width: 220px;
   image-rendering: pixelated;
 }
 
+/* =========================
+🎛 INPUTS
+========================= */
 #splash input,
 #splash select,
 #splash button {
@@ -66,11 +97,13 @@ html, body {
   border: none;
 }
 
+/* input */
 #splash input {
   background: #111827;
   color: white;
 }
 
+/* button */
 #splash button {
   background: linear-gradient(135deg, #22c55e, #16a34a);
   color: white;
