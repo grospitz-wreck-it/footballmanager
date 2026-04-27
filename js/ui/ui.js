@@ -1470,6 +1470,31 @@ function attachDotHandlers(players) {
     };
   });
 }
+
+function pushEventIcon(type) {
+  const lane = document.getElementById("eventLane");
+  if (!lane) return;
+
+  const map = {
+    goal: "⚽",
+    yellow: "🟨",
+    red: "🟥",
+    corner: "🏳️",
+    injury: "🩹",
+    whistle: "🔔"
+  };
+
+  const el = document.createElement("div");
+  el.className = "event-icon";
+  el.textContent = map[type] || "•";
+
+  lane.prepend(el);
+
+  setTimeout(() => {
+    el.remove();
+  }, 3000);
+}
+
 // =========================
 // 🚀 INITIAL UI RENDER (FIX)
 // =========================
