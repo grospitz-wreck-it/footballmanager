@@ -1515,7 +1515,16 @@ function hexToRgba(hex, alpha) {
 
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+function applyColor(color) {
+  const opp = getComplementaryColor(color);
 
+  document.documentElement.style.setProperty("--accent", color);
+  document.documentElement.style.setProperty("--accent-soft", hexToRgba(color, 0.2));
+  document.documentElement.style.setProperty("--accent-glow", hexToRgba(color, 0.5));
+
+  document.documentElement.style.setProperty("--accent-opp", opp);
+  document.documentElement.style.setProperty("--accent-opp-glow", hexToRgba(opp, 0.5));
+}
 
 function attachDotHandlers(players) {
   document.querySelectorAll(".fp-dot").forEach((dot) => {
