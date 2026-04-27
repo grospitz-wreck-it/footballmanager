@@ -50,8 +50,9 @@
   transform: translateY(100%);
   transition: transform 0.35s ease;
 
-  /* 🔥 FIX: verhindert Scroll-Chain */
+  
   overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 #tacticsOverlay.open .tactics-sheet {
