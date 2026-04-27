@@ -28,6 +28,130 @@ let liveTableInterval = null;
 let selectedPlayerId = null;
 let lastTacticHash = null;
 
+ // =========================
+  // 🖱 Color Picker
+  // =========================
+function initColorPicker() {
+  const picker = document.getElementById("colorPicker");
+  if (!picker) return;
+
+  const saved = localStorage.getItem("userColor");
+
+  if (saved) {
+    picker.value = saved;
+    applyColor(saved);
+  } else {
+    applyColor(picker.value);
+  }
+
+  picker.addEventListener("input", (e) => {
+    const color = e.target.value;
+
+    applyColor(color);
+    localStorage.setItem("userColor", color);
+
+    if (typeof showToast === "function") {
+      showToast("Farbe aktualisiert");
+    }
+  });
+}
+
+function applyColor(color) {
+  const opp = getComplementaryColor(color);
+
+  // 👉 Hauptfarbe
+  document.documentElement.style.setProperty("--accent", color);
+  document.documentElement.style.setProperty(
+    "--accent-soft",
+    hexToRgba(color, 0.2)
+  );
+  document.documentElement.style.setProperty(
+    "--accent-glow",
+    hexToRgba(color, 0.5)
+  );
+
+  // 👉 Gegnerfarbe (SMART complement)
+  document.documentElement.style.setProperty("--accent-opp", opp);
+  document.documentElement.style.setProperty(
+    "--accent-opp-glow",
+    hexToRgba(opp, 0.45)
+  );
+}
+
+// =========================
+// 🎨 SMART COMPLEMENT COLOR
+// =========================
+
+function getComplementaryColor(hex) {
+  const { h, s, l } = hexToHsl(hex);
+
+  // 🔥 nicht 180°, sondern softer shift
+  let newHue = (h + 150) % 360;
+
+  // leichte Anpassung für UI Harmonie
+  const newSat = Math.min(100, s * 0.9);
+  const newLight = Math.min(85, l * 1.05);
+
+  return hslToHex(newHue, newSat, newLight);
+}
+
+// =========================
+// 🎨 HEX → HSL
+// =========================
+function hexToHsl(hex) {
+  let r = parseInt(hex.substring(1, 3), 16) / 255;
+  let g = parseInt(hex.substring(3, 5), 16) / 255;
+  let b = parseInt(hex.substring(5, 7), 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+
+  let h, s, l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+
+    s = l > 0.5
+      ? d / (2 - max - min)
+      : d / (max + min);
+
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+
+    h /= 6;
+  }
+
+  return {
+    h: Math.round(h * 360),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100)
+  };
+}
+
+// =========================
+// 🎨 HSL → HEX
+// =========================
+function hslToHex(h, s, l) {
+  s /= 100;
+  l /= 100;
+
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+
+  const f = n =>
+    Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+
+  return `#${[f(0), f(8), f(4)]
+    .map(x => x.toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
+
 // =========================
 // ⚙️ TACTICS PRESETS (GLOBAL)
 // =========================
@@ -1481,129 +1605,7 @@ function renderFormationPreview() {
   // =========================
   attachDotHandlers(players);
 }
-  // =========================
-  // 🖱 Color Picker
-  // =========================
-function initColorPicker() {
-  const picker = document.getElementById("colorPicker");
-  if (!picker) return;
-
-  const saved = localStorage.getItem("userColor");
-
-  if (saved) {
-    picker.value = saved;
-    applyColor(saved);
-  } else {
-    applyColor(picker.value);
-  }
-
-  picker.addEventListener("input", (e) => {
-    const color = e.target.value;
-
-    applyColor(color);
-    localStorage.setItem("userColor", color);
-
-    if (typeof showToast === "function") {
-      showToast("Farbe aktualisiert");
-    }
-  });
-}
-
-function applyColor(color) {
-  const opp = getComplementaryColor(color);
-
-  // 👉 Hauptfarbe
-  document.documentElement.style.setProperty("--accent", color);
-  document.documentElement.style.setProperty(
-    "--accent-soft",
-    hexToRgba(color, 0.2)
-  );
-  document.documentElement.style.setProperty(
-    "--accent-glow",
-    hexToRgba(color, 0.5)
-  );
-
-  // 👉 Gegnerfarbe (SMART complement)
-  document.documentElement.style.setProperty("--accent-opp", opp);
-  document.documentElement.style.setProperty(
-    "--accent-opp-glow",
-    hexToRgba(opp, 0.45)
-  );
-}
-
-// =========================
-// 🎨 SMART COMPLEMENT COLOR
-// =========================
-
-function getComplementaryColor(hex) {
-  const { h, s, l } = hexToHsl(hex);
-
-  // 🔥 nicht 180°, sondern softer shift
-  let newHue = (h + 150) % 360;
-
-  // leichte Anpassung für UI Harmonie
-  const newSat = Math.min(100, s * 0.9);
-  const newLight = Math.min(85, l * 1.05);
-
-  return hslToHex(newHue, newSat, newLight);
-}
-
-// =========================
-// 🎨 HEX → HSL
-// =========================
-function hexToHsl(hex) {
-  let r = parseInt(hex.substring(1, 3), 16) / 255;
-  let g = parseInt(hex.substring(3, 5), 16) / 255;
-  let b = parseInt(hex.substring(5, 7), 16) / 255;
-
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-
-  let h, s, l = (max + min) / 2;
-
-  if (max === min) {
-    h = s = 0;
-  } else {
-    const d = max - min;
-
-    s = l > 0.5
-      ? d / (2 - max - min)
-      : d / (max + min);
-
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-
-    h /= 6;
-  }
-
-  return {
-    h: Math.round(h * 360),
-    s: Math.round(s * 100),
-    l: Math.round(l * 100)
-  };
-}
-
-// =========================
-// 🎨 HSL → HEX
-// =========================
-function hslToHex(h, s, l) {
-  s /= 100;
-  l /= 100;
-
-  const k = n => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-
-  const f = n =>
-    Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
-
-  return `#${[f(0), f(8), f(4)]
-    .map(x => x.toString(16).padStart(2, "0"))
-    .join("")}`;
-}
-
+ 
 
 function attachDotHandlers(players) {
   document.querySelectorAll(".fp-dot").forEach((dot) => {
