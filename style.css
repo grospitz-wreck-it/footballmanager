@@ -497,7 +497,31 @@ html, body {
   50% { transform: scale(1.6); opacity: 0.6; }
   100% { transform: scale(1); opacity: 1; }
 }
+/* =========================
+⏱ PROGRESS BAR (FIXED + COLOR FADE)
+========================= */
+#progressBar {
+  height: 8px;
+  background: #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 4px;
+}
 
+#progressFill {
+  height: 100%;
+  width: 0%;
+
+  /* 🔥 Gelb → Orange → Rot */
+  background: linear-gradient(
+    90deg,
+    #facc15,   /* gelb */
+    #f97316,   /* orange */
+    #ef4444    /* rot */
+  );
+
+  transition: width 0.3s ease;
+}
 
 /* =========================
 🍔 SIDEBAR
@@ -572,31 +596,7 @@ html, body {
   opacity: 0.7;
 }
 
-/* =========================
-⏱ PROGRESS BAR (FIXED + COLOR FADE)
-========================= */
-#progressBar {
-  height: 8px;
-  background: #1e293b;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 4px;
-}
 
-#progressFill {
-  height: 100%;
-  width: 0%;
-
-  /* 🔥 Gelb → Orange → Rot */
-  background: linear-gradient(
-    90deg,
-    #facc15,   /* gelb */
-    #f97316,   /* orange */
-    #ef4444    /* rot */
-  );
-
-  transition: width 0.3s ease;
-}
 /* =========================
 🎮 GAME SCREEN (FIXED)
 ========================= */
