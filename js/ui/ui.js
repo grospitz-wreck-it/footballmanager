@@ -268,16 +268,16 @@ if (tacticsOverlay) {
   // =========================
   // 🎮 OVERLAY CLOSE
   // =========================
-  const tacticsOverlay = document.getElementById("tacticsOverlay");
+ const tacticsOverlay = document.getElementById("tacticsOverlay");
 
-  if (tacticsOverlay) {
-    tacticsOverlay.onclick = (e) => {
-      if (e.target === tacticsOverlay) {
-        game.ui.tacticsOpen = false;
-        updateUI();
-      }
-    };
-  }
+if (tacticsOverlay) {
+  tacticsOverlay.onclick = (e) => {
+    if (e.target === tacticsOverlay) {
+      game.ui.tacticsOpen = false;
+      updateUI();
+    }
+  };
+}
 //initTacticsDrag();
   // =========================
   // 🎛 DROPDOWNS
