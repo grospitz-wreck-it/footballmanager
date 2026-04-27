@@ -410,6 +410,24 @@ function initUI() {
   }
 }
 
+function showToast(text) {
+  let el = document.getElementById("toast");
+
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "toast";
+    document.body.appendChild(el);
+  }
+
+  el.textContent = text;
+  el.classList.add("show");
+
+  clearTimeout(el._t);
+  el._t = setTimeout(() => {
+    el.classList.remove("show");
+  }, 2000);
+}
+
 // =========================
 // ⚽ SCORE
 // =========================
