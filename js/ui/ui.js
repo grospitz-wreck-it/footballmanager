@@ -566,22 +566,38 @@ function updateEvents() {
   if (!events?.length) return;
 
   const newest = events[events.length - 1];
-
   if (!newest) return;
 
   console.log("🧪 EVENT DEBUG:", newest);
 
-  // 🔥 doppelte Render verhindern
+  // =========================
+  // 🔁 DUPLICATE GUARD
+  // =========================
   if (newest.id === lastRenderedEventId) return;
   lastRenderedEventId = newest.id;
 
+  // =========================
+  // 📊 TRACKING
+  // =========================
   track("game_event", {
     minute: newest.minute,
     text: newest.text || null,
+    type: newest.type || "UNKNOWN"
   });
 
   // =========================
-  // 🧠 TEXT
+  // 🎬 EVENT ICON (NEU)
+  // =========================
+  if (newest.type) {
+    try {
+      pushEventIcon(newest.type);
+    } catch (e) {
+      console.warn("⚠️ pushEventIcon failed", e);
+    }
+  }
+
+  // =========================
+  // 🧠 TEXT GENERATION
   // =========================
   let text = newest.text;
 
@@ -601,11 +617,14 @@ function updateEvents() {
   const div = document.createElement("div");
 
   div.innerHTML = `
-    <span style="color:#888">${newest.minute}'</span> 
+    <span style="color:#64748b">${newest.minute}'</span> 
     <span>${text}</span>
   `;
 
   container.appendChild(div);
+
+  // 👉 optional: autoscroll
+  container.scrollTop = container.scrollHeight;
 
   // =========================
   // 🎬 OVERLAY (optional)
@@ -1471,42 +1490,97 @@ function attachDotHandlers(players) {
   });
 }
 
+let lastIconTime = 0;
+let lastSpamIconTime = 0;
+
 function pushEventIcon(type) {
   const lane = document.getElementById("eventLane");
   if (!lane) return;
 
-  // 👉 WICHTIG: deine echten Event Types
-  const map = {
+  const now = Date.now();
+
+  // =========================
+  // 🎯 PRIORITY SYSTEM
+  // =========================
+  const IMPORTANT = ["GOAL"];
+  const MEDIUM = ["SHOT", "SAVE", "SHOT_SAVED", "FOUL", "CORNER", "DUEL"];
+  const SPAM = [
+    "PASS",
+    "DRIBBLE",
+    "INTERCEPTION",
+    "BALL_LOSS",
+    "BALL_RECOVERY",
+    "CLEARANCE"
+  ];
+
+  // =========================
+  // ⏱ GLOBAL COOLDOWN
+  // =========================
+  if (now - lastIconTime < 800) return;
+
+  // =========================
+  // 🧠 FILTER LOGIC
+  // =========================
+
+  // 🔥 Wichtige Events → immer
+  if (IMPORTANT.includes(type)) {
+    lastIconTime = now;
+    renderIcon(type);
+    return;
+  }
+
+  // 🟡 Medium → leicht gedrosselt
+  if (MEDIUM.includes(type)) {
+    if (Math.random() < 0.7) {
+      lastIconTime = now;
+      renderIcon(type);
+    }
+    return;
+  }
+
+  // ⚪ Spam → hart gedrosselt + extra cooldown
+  if (SPAM.includes(type)) {
+    if (now - lastSpamIconTime < 2000) return;
+
+    if (Math.random() < 0.25) {
+      lastIconTime = now;
+      lastSpamIconTime = now;
+      renderIcon(type);
+    }
+    return;
+  }
+}
+
+// =========================
+// 🎬 RENDER
+// =========================
+function renderIcon(type) {
+  const lane = document.getElementById("eventLane");
+  if (!lane) return;
+
+  const ICONS = {
     GOAL: "⚽",
     SHOT: "🥅",
     SAVE: "🧤",
     SHOT_SAVED: "🧤",
     FOUL: "💢",
-    CORNER: "🏳️",
+    CORNER: "🚩",
     DUEL: "⚔️",
-    PASS: "➝",
+    PASS: "➤",
     DRIBBLE: "🌀",
-    INTERCEPTION: "⛔",
+    INTERCEPTION: "✋",
     BALL_LOSS: "❌",
     BALL_RECOVERY: "♻️",
-    CLEARANCE: "🛡️",
-    LEGACY: "•"
+    CLEARANCE: "🛡️"
   };
 
-  const icon = map[type] || "•";
+  const icon = document.createElement("div");
+  icon.className = "event-icon";
+  icon.textContent = ICONS[type] || "•";
 
-  const el = document.createElement("div");
-  el.className = "event-icon";
-  el.textContent = icon;
+  lane.appendChild(icon);
 
-  lane.prepend(el);
-
-  // 👉 Auto cleanup (wichtig für Performance)
-  setTimeout(() => {
-    el.style.opacity = "0";
-    el.style.transform = "scale(0.6)";
-    setTimeout(() => el.remove(), 200);
-  }, 2500);
+  setTimeout(() => icon.remove(), 2200);
 }
 
 // =========================
