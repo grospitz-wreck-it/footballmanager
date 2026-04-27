@@ -130,6 +130,13 @@ function setDonut(el, value) {
   const span = el.querySelector("span");
   if (span) span.textContent = val;
 }
+
+// =========================
+// 🎨 INIT COLOR PICKER (FIX)
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+  initColorPicker();
+});
 // =========================
 // 🔄 GLOBAL UI UPDATE (FIX)
 // =========================
