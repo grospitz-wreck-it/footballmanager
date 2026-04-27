@@ -11,7 +11,12 @@ import { on } from "../core/events.js";
 import { EVENTS } from "../core/events.constants.js";
 import { renderSchedule as renderScheduleModule } from "../modules/scheduler.js";
 import { getPlayersOfTeam } from "../modules/league.js";
-import { mapPosition, mapPositionToRole, applyFormation, getBestXI } from "../core/football/position.js";
+import {
+  mapPosition,
+  mapPositionToRole,
+  applyFormation,
+  getBestXI,
+} from "../core/football/position.js";
 import { FORMATIONS, getFormationProfile } from "../core/football/formation.js";
 import { openPlayerModal } from "../modal.js";
 // =========================
@@ -83,7 +88,7 @@ const STYLES = {
     attack: 1.2,
     defense: 0.95,
     control: 0.7,
-  }
+  },
 };
 
 // =========================
@@ -155,9 +160,9 @@ function updateUI() {
   updateProgress();
   updateTacticsUI();
   if (game.ui.tacticsOpen) {
-  renderFormationPreview();
-  renderTacticStats();
-}
+    renderFormationPreview();
+    renderTacticStats();
+  }
   updateTabs();
 
   // =========================
@@ -324,61 +329,61 @@ function initUI() {
   });
 
   setupDropdown("presetDropdown", (value) => {
-  if (!game.tactics) game.tactics = {};
+    if (!game.tactics) game.tactics = {};
 
-  const config = PRESETS[value];
+    const config = PRESETS[value];
 
-  if (!config) {
-    console.warn("❌ unknown preset:", value);
-    return;
-  }
+    if (!config) {
+      console.warn("❌ unknown preset:", value);
+      return;
+    }
 
-  // =========================
-  // 🎯 PRESET SETZEN
-  // =========================
-  game.tactics.preset = value;
+    // =========================
+    // 🎯 PRESET SETZEN
+    // =========================
+    game.tactics.preset = value;
 
-  // =========================
-  // 🔥 WERTE ÜBERNEHMEN (RESET SAFE)
-  // =========================
-  game.tactics.tempo = config.tempo || "normal";
-  game.tactics.pressing = config.pressing || "medium";
-  game.tactics.line = config.line || "medium";
+    // =========================
+    // 🔥 WERTE ÜBERNEHMEN (RESET SAFE)
+    // =========================
+    game.tactics.tempo = config.tempo || "normal";
+    game.tactics.pressing = config.pressing || "medium";
+    game.tactics.line = config.line || "medium";
 
-  // =========================
-  // 🎨 STYLE RESET (optional aber sinnvoll)
-  // =========================
-  if (!game.tactics.style) {
-    game.tactics.style = "balanced";
-  }
+    // =========================
+    // 🎨 STYLE RESET (optional aber sinnvoll)
+    // =========================
+    if (!game.tactics.style) {
+      game.tactics.style = "balanced";
+    }
 
-  // =========================
-  // 🧪 DEBUG
-  // =========================
-  console.log("⚙️ preset applied:", value, {
-    tempo: game.tactics.tempo,
-    pressing: game.tactics.pressing,
-    line: game.tactics.line,
-    style: game.tactics.style
+    // =========================
+    // 🧪 DEBUG
+    // =========================
+    console.log("⚙️ preset applied:", value, {
+      tempo: game.tactics.tempo,
+      pressing: game.tactics.pressing,
+      line: game.tactics.line,
+      style: game.tactics.style,
+    });
+
+    // =========================
+    // 🔄 UI UPDATE
+    // =========================
+    updateUI();
   });
 
   // =========================
-  // 🔄 UI UPDATE
+  // 🎨 STYLE DROPDOWN
   // =========================
-  updateUI();
-});
+  setupDropdown("styleDropdown", (value) => {
+    if (!STYLES[value]) return;
 
-  // =========================
-// 🎨 STYLE DROPDOWN
-// =========================
-setupDropdown("styleDropdown", (value) => {
-  if (!STYLES[value]) return;
+    game.tactics.style = value;
 
-  game.tactics.style = value;
+    updateUI();
+  });
 
-  updateUI();
-});
-  
   // =========================
   // 🎲 CHANCE BUTTON
   // =========================
@@ -386,11 +391,13 @@ setupDropdown("styleDropdown", (value) => {
 
   if (chanceBtn) {
     chanceBtn.onclick = () => {
+      // ❌ kein laufendes Spiel
       if (!game.match?.live?.running) {
-        console.warn("⛔ kein laufendes Spiel");
+        showToast("⚠️ Erst im laufenden Spiel aktiv");
         return;
       }
 
+      // ✅ normales Verhalten
       game.events.history.push({
         id: Date.now(),
         minute: game.match.live.minute,
@@ -402,8 +409,6 @@ setupDropdown("styleDropdown", (value) => {
     };
   }
 }
-
-
 
 // =========================
 // ⚽ SCORE
@@ -676,7 +681,7 @@ function updateTacticsUI() {
         counter: "Konter",
         longball: "Lange Bälle",
         wings: "Flügelspiel",
-        balanced: "Ausgeglichen"
+        balanced: "Ausgeglichen",
       };
 
       selected.textContent = labels[style] || style;
@@ -697,7 +702,6 @@ function ensureLiveTableLoop() {
     renderLiveTable();
   }, 1000);
 }
-
 
 // =========================
 // 🧠 ROLE PICKER
@@ -831,50 +835,44 @@ function calculateTeamStats() {
   // 🧠 STATS BERECHNUNG
   // =========================
   let attack = 0;
-let defense = 0;
-let control = 0;
+  let defense = 0;
+  let control = 0;
 
-players.forEach((p) => {
-  const rating = p.overall ?? 50;
-  const type = mapPosition(p.position_type);
+  players.forEach((p) => {
+    const rating = p.overall ?? 50;
+    const type = mapPosition(p.position_type);
 
-  if (type === "ATT") {
-    attack += rating * 1.2;
-    control += rating * 0.3;
-  }
-
-  else if (type === "MID") {
-    attack += rating * 0.6;
-    control += rating * 1.0;
-  }
-
-  else if (type === "DEF") {
-    defense += rating * 1.1;
-    control += rating * 0.4;
-  }
-
-  else if (type === "GK") {
-    defense += rating * 1.4;
-    control += rating * 0.2;
-  }
-});
+    if (type === "ATT") {
+      attack += rating * 1.2;
+      control += rating * 0.3;
+    } else if (type === "MID") {
+      attack += rating * 0.6;
+      control += rating * 1.0;
+    } else if (type === "DEF") {
+      defense += rating * 1.1;
+      control += rating * 0.4;
+    } else if (type === "GK") {
+      defense += rating * 1.4;
+      control += rating * 0.2;
+    }
+  });
 
   const formation = game.tactics?.formation || "4-4-2";
-const profile = getFormationProfile(formation);
+  const profile = getFormationProfile(formation);
 
-if (profile) {
-  const total = profile.DEF + profile.MID + profile.ATT;
+  if (profile) {
+    const total = profile.DEF + profile.MID + profile.ATT;
 
-  if (total > 0) {
-    const defRatio = profile.DEF / total;
-    const midRatio = profile.MID / total;
-    const attRatio = profile.ATT / total;
+    if (total > 0) {
+      const defRatio = profile.DEF / total;
+      const midRatio = profile.MID / total;
+      const attRatio = profile.ATT / total;
 
-    attack *= 0.8 + attRatio * 0.6;
-    defense *= 0.8 + defRatio * 0.6;
-    control *= 0.8 + midRatio * 0.6;
+      attack *= 0.8 + attRatio * 0.6;
+      defense *= 0.8 + defRatio * 0.6;
+      control *= 0.8 + midRatio * 0.6;
+    }
   }
-}
 
   // =========================
   // 📊 NORMALIZE
@@ -915,10 +913,7 @@ function renderTeam() {
   // =========================
   // 📐 FORMATION (EINMAL!)
   // =========================
-  const formation =
-    game.tactics?.formation ||
-    lineup?.formation ||
-    "4-4-2";
+  const formation = game.tactics?.formation || lineup?.formation || "4-4-2";
 
   let starters = [];
   let benchPlayers = [];
@@ -937,14 +932,10 @@ function renderTeam() {
   // 🪑 BENCH CLEAN
   // =========================
   const starterIds = new Set(
-    starters
-      .filter(p => p?.id)
-      .map(p => String(p.id))
+    starters.filter((p) => p?.id).map((p) => String(p.id)),
   );
 
-  benchPlayers = players.filter(
-    p => !starterIds.has(String(p.id))
-  );
+  benchPlayers = players.filter((p) => !starterIds.has(String(p.id)));
 
   // =========================
   // 🧪 DEBUG
@@ -1011,94 +1002,90 @@ function renderTeam() {
 
   container.innerHTML = html;
 
-// =========================
-// 🍩 TEAM STATS DONUTS (FIX)
-// =========================
-const stats = calculateTeamStats();
+  // =========================
+  // 🍩 TEAM STATS DONUTS (FIX)
+  // =========================
+  const stats = calculateTeamStats();
 
-const donuts = container.querySelectorAll(".donut");
+  const donuts = container.querySelectorAll(".donut");
 
-if (stats && donuts.length) {
-  const values = [stats.attack, stats.defense, stats.control];
+  if (stats && donuts.length) {
+    const values = [stats.attack, stats.defense, stats.control];
 
-  donuts.forEach((d, i) => {
-    setDonut(d, values[i] ?? 0);
-  });
-}
+    donuts.forEach((d, i) => {
+      setDonut(d, values[i] ?? 0);
+    });
+  }
 
-// =========================
-// 🖱️ CLICK HANDLER
-// =========================
-document.querySelectorAll(".player-row").forEach((el) => {
-  el.onclick = () => {
-    const id = el.dataset.id;
-    if (!id) return;
+  // =========================
+  // 🖱️ CLICK HANDLER
+  // =========================
+  document.querySelectorAll(".player-row").forEach((el) => {
+    el.onclick = () => {
+      const id = el.dataset.id;
+      if (!id) return;
 
-    if (selectedPlayerId === id) {
+      if (selectedPlayerId === id) {
+        selectedPlayerId = null;
+        el.classList.remove("selected");
+        return;
+      }
+
+      if (!selectedPlayerId) {
+        document
+          .querySelectorAll(".player-row")
+          .forEach((el) => el.classList.remove("selected"));
+
+        selectedPlayerId = id;
+        el.classList.add("selected");
+        return;
+      }
+
+      const lineup = game.team?.lineup;
+
+      if (lineup?.slots) {
+        const slots = lineup.slots;
+
+        let slotA = null;
+        let slotB = null;
+
+        Object.entries(slots).forEach(([key, value]) => {
+          if (String(value) === String(selectedPlayerId)) slotA = key;
+          if (String(value) === String(id)) slotB = key;
+        });
+
+        const getType = (pid) => {
+          const p = players.find((pl) => String(pl.id) === String(pid));
+          return (p?.position_type || "MID").toUpperCase();
+        };
+
+        const getSlotType = (slot) => slot.split("_")[0];
+
+        const typeA = getType(selectedPlayerId);
+        const typeB = getType(id);
+
+        if (slotA && slotB) {
+          if (getSlotType(slotA) === typeB && getSlotType(slotB) === typeA) {
+            const temp = slots[slotA];
+            slots[slotA] = slots[slotB];
+            slots[slotB] = temp;
+          } else return;
+        } else if (slotA && !slotB) {
+          if (typeB === getSlotType(slotA)) {
+            slots[slotA] = id;
+          } else return;
+        } else if (!slotA && slotB) {
+          if (typeA === getSlotType(slotB)) {
+            slots[slotB] = selectedPlayerId;
+          } else return;
+        }
+      }
+
       selectedPlayerId = null;
-      el.classList.remove("selected");
-      return;
-    }
-
-    if (!selectedPlayerId) {
-      document
-        .querySelectorAll(".player-row")
-        .forEach((el) => el.classList.remove("selected"));
-
-      selectedPlayerId = id;
-      el.classList.add("selected");
-      return;
-    }
-
-    const lineup = game.team?.lineup;
-
-    if (lineup?.slots) {
-      const slots = lineup.slots;
-
-      let slotA = null;
-      let slotB = null;
-
-      Object.entries(slots).forEach(([key, value]) => {
-        if (String(value) === String(selectedPlayerId)) slotA = key;
-        if (String(value) === String(id)) slotB = key;
-      });
-
-      const getType = (pid) => {
-        const p = players.find((pl) => String(pl.id) === String(pid));
-        return (p?.position_type || "MID").toUpperCase();
-      };
-
-      const getSlotType = (slot) => slot.split("_")[0];
-
-      const typeA = getType(selectedPlayerId);
-      const typeB = getType(id);
-
-      if (slotA && slotB) {
-        if (getSlotType(slotA) === typeB && getSlotType(slotB) === typeA) {
-          const temp = slots[slotA];
-          slots[slotA] = slots[slotB];
-          slots[slotB] = temp;
-        } else return;
-      }
-
-      else if (slotA && !slotB) {
-        if (typeB === getSlotType(slotA)) {
-          slots[slotA] = id;
-        } else return;
-      }
-
-      else if (!slotA && slotB) {
-        if (typeA === getSlotType(slotB)) {
-          slots[slotB] = selectedPlayerId;
-        } else return;
-      }
-    }
-
-    selectedPlayerId = null;
-    renderTeam();
-    renderTacticStats();
-  };
-});
+      renderTeam();
+      renderTacticStats();
+    };
+  });
 
   // =========================
   // 🔵 PLAYER DOT
@@ -1344,10 +1331,10 @@ function renderFormationPreview() {
     GK: [],
     DEF: [],
     MID: [],
-    ATT: []
+    ATT: [],
   };
 
-  assigned.forEach(p => {
+  assigned.forEach((p) => {
     if (groups[p.role]) {
       groups[p.role].push(p);
     }
@@ -1357,7 +1344,7 @@ function renderFormationPreview() {
     GK: 0,
     DEF: 0,
     MID: 0,
-    ATT: 0
+    ATT: 0,
   };
 
   // =========================
@@ -1386,16 +1373,13 @@ function renderFormationPreview() {
   attachDotHandlers(players);
 }
 
-
 function attachDotHandlers(players) {
   document.querySelectorAll(".fp-dot").forEach((dot) => {
     dot.onclick = () => {
       const id = dot.dataset.id;
       if (!id) return;
 
-      const player = players.find(
-        (p) => String(p.id) === String(id)
-      );
+      const player = players.find((p) => String(p.id) === String(id));
 
       if (!player) return;
 
