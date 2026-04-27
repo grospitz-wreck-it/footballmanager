@@ -208,21 +208,22 @@ function updateUI() {
     renderTacticStats();
   }
 
-  // =========================
-  // 🪟 TACTICS OVERLAY
-  // =========================
-  const tacticsOverlay = document.getElementById("tacticsOverlay");
+// =========================
+// 🎮 OVERLAY CLOSE (TAP OUTSIDE FIX)
+// =========================
+const tacticsOverlay = document.getElementById("tacticsOverlay");
 
-  if (tacticsOverlay) {
-    tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
-  }
+if (tacticsOverlay) {
+  tacticsOverlay.addEventListener("click", (e) => {
+
+    // 👉 nur backdrop klick
+    if (e.target === tacticsOverlay) {
+      game.ui.tacticsOpen = false;
+      updateUI();
+    }
+
+  });
 }
-
-function initUI() {
-  if (initialized) return;
-  initialized = true;
-
-  console.log("🧱 UI init");
 
   // =========================
   // 🍔 SIDEBAR
