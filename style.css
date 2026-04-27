@@ -310,39 +310,121 @@ html, body {
 
 
 /* =========================
-⚽ MATCH TOP BAR
+🚀 MATCH TOP BAR (SCI-FI HUD)
 ========================= */
+
 #topBar {
-  padding: 12px 14px;
+  position: relative;
+
+  padding: 14px 16px;
 
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
 
-  background: linear-gradient(135deg, #020617, #111827);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 
-  border-bottom: 1px solid #1e293b;
+  background: radial-gradient(
+      circle at 50% -20%,
+      rgba(59,130,246,0.15),
+      transparent 60%
+    ),
+    linear-gradient(160deg,#020617,#0f172a);
 
-  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
-/* Inhalte bleiben gleich */
+/* =========================
+🏷 TEAMS
+========================= */
+
 #topTeams {
-  text-align: left;
   font-size: 13px;
+  color: #cbd5e1;
   opacity: 0.85;
+
+  letter-spacing: 0.5px;
 }
+
+/* optional split look */
+#topTeams::first-line {
+  font-weight: 600;
+}
+
+/* =========================
+⚽ SCORE (HERO)
+========================= */
 
 #topScore {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 800;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  color: white;
+
+  text-shadow:
+    0 0 6px rgba(255,255,255,0.2),
+    0 0 18px rgba(59,130,246,0.35);
+
+  position: relative;
 }
+
+/* Glow Ring hinter Score */
+#topScore::after {
+  content: "";
+  position: absolute;
+  inset: -6px -12px;
+
+  border-radius: 12px;
+
+  background: radial-gradient(
+    circle,
+    rgba(59,130,246,0.15),
+    transparent 70%
+  );
+
+  z-index: -1;
+}
+
+/* =========================
+⏱ MINUTE (LIVE INDICATOR)
+========================= */
 
 #topMinute {
   text-align: right;
+
   font-size: 12px;
-  opacity: 0.7;
+  color: #94a3b8;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* 🔴 Live Dot */
+#topMinute::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+  background: #ef4444;
+
+  box-shadow:
+    0 0 6px #ef4444,
+    0 0 12px rgba(239,68,68,0.6);
+
+  animation: pulseLive 1.2s infinite;
+}
+
+/* Pulse Animation */
+@keyframes pulseLive {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 
