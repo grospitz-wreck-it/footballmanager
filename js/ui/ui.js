@@ -208,48 +208,17 @@ function updateUI() {
     renderTacticStats();
   }
 
-
   // =========================
-  // 🍔 SIDEBAR
+  // 🪟 TACTICS OVERLAY
   // =========================
-  const burger = document.getElementById("burgerBtn");
-  const wrapper = document.getElementById("sidebarWrapper");
-  const overlay = document.getElementById("sidebarOverlay");
+  const tacticsOverlay = document.getElementById("tacticsOverlay");
 
-  if (burger && wrapper) {
-    burger.onclick = () => {
-      game.ui.sidebarOpen = !game.ui.sidebarOpen;
-      applySidebar();
-    };
-
-    overlay?.addEventListener("click", () => {
-      game.ui.sidebarOpen = false;
-      applySidebar();
-    });
+  if (tacticsOverlay) {
+    tacticsOverlay.classList.toggle("open", !!game.ui.tacticsOpen);
   }
+}
 
-  // =========================
-  // 🔥 STATE LISTENER
-  // =========================
-  on(EVENTS.STATE_CHANGED, () => {
-    if (game.events?.history?.length) {
-      updateEvents();
-    }
-  });
-
-  // =========================
-  // ⚙️ TACTICS BUTTON
-  // =========================
-  const tacticsBtn = document.getElementById("tacticsBtn");
-
-  if (tacticsBtn) {
-    tacticsBtn.onclick = () => {
-      game.ui.tacticsOpen = !game.ui.tacticsOpen;
-      updateUI();
-    };
-  }
-
-  function initUI() {
+function initUI() {
   if (initialized) return;
   initialized = true;
 
@@ -296,104 +265,18 @@ function updateUI() {
   }
 
   // =========================
-  // 🎮 OVERLAY CLOSE (FIX)
+  // 🎮 OVERLAY CLOSE
   // =========================
   const tacticsOverlay = document.getElementById("tacticsOverlay");
 
   if (tacticsOverlay) {
-    tacticsOverlay.addEventListener("click", (e) => {
+    tacticsOverlay.onclick = (e) => {
       if (e.target === tacticsOverlay) {
         game.ui.tacticsOpen = false;
         updateUI();
       }
-    });
-  }
-
-  // =========================
-  // 🎛 DROPDOWNS
-  // =========================
-  function setupDropdown(id, onSelect) {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    const selected = el.querySelector(".dd-selected");
-    const options = el.querySelector(".dd-options");
-
-    if (!selected || !options) return;
-
-    selected.onclick = () => {
-      el.classList.toggle("open");
-    };
-
-    options.querySelectorAll("div").forEach((opt) => {
-      opt.onclick = () => {
-        const value = opt.dataset.value;
-
-        selected.textContent = opt.textContent;
-        el.classList.remove("open");
-
-        onSelect(value);
-      };
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!el.contains(e.target)) {
-        el.classList.remove("open");
-      }
-    });
-  }
-
-  // =========================
-  // 📐 FORMATION
-  // =========================
-  setupDropdown("formationDropdown", (value) => {
-    game.tactics.formation = value;
-    updateUI();
-  });
-
-  setupDropdown("presetDropdown", (value) => {
-    const config = PRESETS[value];
-    if (!config) return;
-
-    game.tactics.preset = value;
-    game.tactics.tempo = config.tempo;
-    game.tactics.pressing = config.pressing;
-    game.tactics.line = config.line;
-
-    updateUI();
-  });
-
-  setupDropdown("styleDropdown", (value) => {
-    if (!STYLES[value]) return;
-    game.tactics.style = value;
-    updateUI();
-  });
-
-  // =========================
-  // 🎲 CHANCE BUTTON
-  // =========================
-  const chanceBtn = document.getElementById("chanceBtn");
-
-  if (chanceBtn) {
-    chanceBtn.onclick = () => {
-      if (!game.match?.live?.running) return;
-
-      game.events.history.push({
-        id: Date.now(),
-        minute: game.match.live.minute,
-        type: "chance",
-        text: "🔥 Große Chance durch taktische Umstellung!",
-      });
-
-      updateUI();
     };
   }
-
-  // =========================
-  // 👉 DRAG INIT (WICHTIG)
-  // =========================
-  initTacticsDrag();
-}
 
   // =========================
   // 🎛 DROPDOWNS
@@ -520,40 +403,6 @@ setupDropdown("styleDropdown", (value) => {
   }
 }
 
-
-function initTacticsDrag() {
-  const sheet = document.querySelector(".tactics-sheet");
-  if (!sheet) return;
-  if (sheet.dataset.dragInit) return;
-sheet.dataset.dragInit = "1";
-  let startY = 0;
-  let currentY = 0;
-  let startTranslate = 0;
-  let dragging = false;
-  let velocity = 0;
-  let lastY = 0;
-  let lastTime = 0;
-
-  const getTranslate = () => {
-    const style = window.getComputedStyle(sheet);
-    const matrix = new DOMMatrix(style.transform);
-    return matrix.m42;
-  };
-
-  const setTranslate = (y) => {
-    sheet.style.transform = `translateY(${y}px)`;
-  };
-
-  const snapPoints = () => {
-    const h = window.innerHeight;
-
-    return [
-      0,           // FULL
-      h * 0.25,    // 75%
-      h * 0.5,     // 50%
-      h            // CLOSED
-    ];
-  };
 
   // =========================
 // Snap to screen
