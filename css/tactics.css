@@ -251,6 +251,10 @@ html, body {
 🎛 TACTICS DROPDOWNS (UPGRADED)
 ========================= */
 
+/* =========================
+🎛 TACTICS DROPDOWNS (PRO)
+========================= */
+
 .tactics-controls {
   display: grid;
   grid-template-columns: repeat(3,1fr);
@@ -262,189 +266,173 @@ html, body {
   position: relative;
 }
 
-/* =========================
-🔘 SELECTED BUTTON
-========================= */
+/* BUTTON */
 .dd-selected {
-  height: 52px;
-  border-radius: 18px;
+  height: 54px;
+  border-radius: 16px;
 
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
 
-  padding: 0 14px;
+  padding: 8px 12px;
 
-  font-size: 14px;
-  font-weight: 600;
-  color: #e5e7eb;
-
-  cursor: pointer;
-
-  background: linear-gradient(145deg, #0f172a, #020617);
+  background: linear-gradient(160deg,#020617,#0f172a);
   border: 1px solid rgba(255,255,255,0.06);
 
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    0 6px 18px rgba(0,0,0,0.6);
+    0 6px 18px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.05);
 
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 /* hover */
 .dd-selected:hover {
-  transform: translateY(-1px);
+  border-color: rgba(59,130,246,0.4);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 10px 25px rgba(0,0,0,0.8);
+    0 10px 25px rgba(0,0,0,0.9),
+    0 0 10px rgba(59,130,246,0.2);
 }
 
-/* active press */
-.dd-selected:active {
-  transform: scale(0.96);
+/* label (klein oben) */
+.dd-label {
+  font-size: 10px;
+  opacity: 0.6;
+  letter-spacing: 0.5px;
 }
 
-/* open state */
+/* value (groß) */
+.dd-selected span:not(.dd-label) {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+/* arrow */
+.dd-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  font-size: 12px;
+}
+
+/* OPEN */
 .tactics-dropdown.open .dd-selected {
   border-color: rgba(59,130,246,0.6);
   box-shadow:
-    0 0 0 2px rgba(59,130,246,0.25),
-    0 10px 30px rgba(0,0,0,0.9);
+    0 0 0 2px rgba(59,130,246,0.2),
+    0 15px 30px rgba(0,0,0,0.9);
 }
 
-/* =========================
-⬇️ ARROW
-========================= */
-.dd-arrow {
-  font-size: 12px;
-  opacity: 0.6;
-  transition: transform 0.2s ease;
-}
-
-.tactics-dropdown.open .dd-arrow {
-  transform: rotate(180deg);
-}
-
-/* =========================
-📦 OPTIONS PANEL
-========================= */
+/* OPTIONS */
 .dd-options {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
 
-  border-radius: 16px;
+  border-radius: 14px;
 
   background: linear-gradient(160deg,#020617,#0f172a);
-  border: 1px solid rgba(255,255,255,0.05);
-
-  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.06);
 
   opacity: 0;
   pointer-events: none;
 
-  transform: translateY(-8px) scale(0.98);
-  transition: all 0.2s ease;
+  transform: translateY(-6px);
+  transition: 0.2s ease;
 
-  box-shadow:
-    0 20px 50px rgba(0,0,0,0.9);
-
-  overflow: hidden;
-  z-index: 200;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.9);
 }
 
-/* open */
+/* OPEN */
 .tactics-dropdown.open .dd-options {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
 }
 
-/* =========================
-📋 ITEMS
-========================= */
+/* ITEMS */
 .dd-options div {
-  padding: 13px;
+  padding: 12px;
   text-align: center;
   font-size: 13px;
+  color: #cbd5e1;
   cursor: pointer;
-
-  color: #cbd5f5;
-
-  transition: all 0.15s ease;
 }
 
-/* hover */
 .dd-options div:hover {
   background: rgba(59,130,246,0.15);
-  color: #fff;
-}
-
-/* selected (optional JS later) */
-.dd-options div.active {
-  background: rgba(59,130,246,0.25);
   color: white;
 }
-
 
 /* =========================
 🎲 CHANCE BUTTON (FINAL)
 ========================= */
 
+/* =========================
+🎲 CHANCE BUTTON (PRO)
+========================= */
+
 .chance-btn {
   display: block;
-  margin: 20px auto;
+  margin: 26px auto 10px;
 
-  width: 200px;
-  padding: 12px;
+  width: 220px;
+  padding: 14px;
 
-  border-radius: 16px;
+  border-radius: 18px;
 
-  background: linear-gradient(145deg,#1e40af,#1d4ed8);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: linear-gradient(160deg,#020617,#0f172a);
+  border: 1px solid rgba(255,255,255,0.08);
 
   color: white;
-  font-weight: 600;
 
   box-shadow:
-    0 10px 25px rgba(0,0,0,0.6),
-    inset 0 1px 0 rgba(255,255,255,0.1);
+    0 10px 30px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.06);
 
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
-/* hover */
+/* TITLE */
+.chance-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* SUB */
+.chance-sub {
+  display: block;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* HOVER */
 .chance-btn:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 15px 35px rgba(0,0,0,0.8);
+    0 18px 40px rgba(0,0,0,0.9),
+    0 0 12px rgba(59,130,246,0.25);
 }
 
-/* click */
+/* ACTIVE */
 .chance-btn:active {
   transform: scale(0.96);
 }
 
-/* title */
-.chance-title {
-  display: block;
-  font-size: 14px;
-}
-
-/* subtitle */
-.chance-sub {
-  display: block;
-  font-size: 11px;
-  opacity: 0.7;
-}
-
-/* disabled state (WICHTIG: bleibt klickbar!) */
+/* DISABLED */
 .chance-btn.disabled {
-  opacity: 0.4;
-  filter: grayscale(0.7);
+  opacity: 0.35;
+  filter: grayscale(0.6);
   cursor: not-allowed;
+  box-shadow: none;
 }
 /* =====================================================
 Toast
