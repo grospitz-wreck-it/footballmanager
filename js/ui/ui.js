@@ -1503,37 +1503,42 @@ function initColorPicker() {
 }
 
 function applyColor(color) {
-  document.documentElement.style.setProperty("--accent", color);
-  document.documentElement.style.setProperty("--accent-soft", hexToRgba(color, 0.2));
-  document.documentElement.style.setProperty("--accent-glow", hexToRgba(color, 0.5));
-}
-
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.substring(1, 3), 16);
-  const g = parseInt(hex.substring(3, 5), 16);
-  const b = parseInt(hex.substring(5, 7), 16);
-
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-function applyColor(color) {
   const opp = getComplementaryColor(color);
 
+  // 👉 Hauptfarbe
   document.documentElement.style.setProperty("--accent", color);
-  document.documentElement.style.setProperty("--accent-soft", hexToRgba(color, 0.2));
-  document.documentElement.style.setProperty("--accent-glow", hexToRgba(color, 0.5));
+  document.documentElement.style.setProperty(
+    "--accent-soft",
+    hexToRgba(color, 0.2)
+  );
+  document.documentElement.style.setProperty(
+    "--accent-glow",
+    hexToRgba(color, 0.5)
+  );
 
+  // 👉 Gegnerfarbe (SMART complement)
   document.documentElement.style.setProperty("--accent-opp", opp);
-  document.documentElement.style.setProperty("--accent-opp-glow", hexToRgba(opp, 0.5));
+  document.documentElement.style.setProperty(
+    "--accent-opp-glow",
+    hexToRgba(opp, 0.45)
+  );
 }
 
-function getComplementaryColor(hex) {
-  const r = 255 - parseInt(hex.substr(1, 2), 16);
-  const g = 255 - parseInt(hex.substr(3, 2), 16);
-  const b = 255 - parseInt(hex.substr(5, 2), 16);
+// =========================
+// 🎨 SMART COMPLEMENT COLOR
+// =========================
 
-  return "#" + [r, g, b]
-    .map(x => x.toString(16).padStart(2, "0"))
-    .join("");
+function getComplementaryColor(hex) {
+  const { h, s, l } = hexToHsl(hex);
+
+  // 🔥 nicht 180°, sondern softer shift
+  let newHue = (h + 150) % 360;
+
+  // leichte Anpassung für UI Harmonie
+  const newSat = Math.min(100, s * 0.9);
+  const newLight = Math.min(85, l * 1.05);
+
+  return hslToHex(newHue, newSat, newLight);
 }
 
 function attachDotHandlers(players) {
