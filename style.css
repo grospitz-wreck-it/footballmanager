@@ -690,27 +690,6 @@ html, body {
   transform: scale(1.02);
 }
 
-/* =========================
-⚽ INFO BAR (FIXED)
-========================= */
-
-#topTeams {
-  text-align: left;
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-#topScore {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 800;
-}
-
-#topMinute {
-  text-align: right;
-  font-size: 12px;
-  opacity: 0.7;
-}
 
 
 /* =========================
