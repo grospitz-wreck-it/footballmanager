@@ -455,7 +455,11 @@ function updateScore() {
 
       const awayName = game.match?.away?.name || current?.away?.name || "-";
 
-      teamsEl.textContent = `${homeName} vs ${awayName}`;
+     teamsEl.innerHTML = `
+  <span class="home">${homeName}</span>
+  <span class="vs">vs</span>
+  <span class="away">${awayName}</span>
+`;
     }
   }
 
