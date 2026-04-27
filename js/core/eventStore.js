@@ -183,52 +183,38 @@ function processEvent(event) {
   // =========================
   // 🧠 TEXT GENERATION
   // =========================
- let text = null;
+  let text = null;
 
-try {
+  try {
+    // 1️⃣ DB CONTENT (HÖCHSTE PRIO)
+    if (resolved?.text) {
+      text = resolved.text;
+    }
 
-  // =========================
-  // 1️⃣ DB CONTENT (HÖCHSTE PRIO)
-  // =========================
-  if(resolved?.text){
-    text = resolved.text;
-  }
+    // 2️⃣ AI / TEMPLATE COMMENTARY
+    if (!text) {
+      text = generateCommentary({
+        ...enrichedInput,
+        player,
+        relatedPlayer,
+        team,
+      });
+    }
 
-  // =========================
-  // 2️⃣ AI / TEMPLATE COMMENTARY
-  // =========================
-  if(!text){
-    text = generateCommentary({
-      ...enrichedInput,
-      player,
-      relatedPlayer,
-      team,
-    });
-  }
+    // 3️⃣ FALLBACK TEXT
+    if (!text) {
+      text = generateText(enrichedInput);
+    }
 
-  // =========================
-  // 3️⃣ FALLBACK TEXT
-  // =========================
-  if(!text){
-    text = generateText(enrichedInput);
-  }
-
-} catch(e){
-  console.error("❌ Commentary Crash:", e);
-
-  // 🔥 SAFETY FALLBACK
-  text = resolved?.text || generateText(enrichedInput) || "...";
-}
-
-    // =========================
-    // ⭐ BONUS: PRIORITY OVERRIDE
-    // =========================
+    // ⭐ PRIORITY OVERRIDE
     if (resolved?.config?.priority >= 90) {
       text = resolved.text || text;
     }
   } catch (e) {
     console.error("❌ Commentary Crash:", e);
-    text = resolved.text || "...";
+
+    // 🔥 SAFETY FALLBACK
+    text = resolved?.text || generateText(enrichedInput) || "...";
   }
 
   const finalEvent = {
