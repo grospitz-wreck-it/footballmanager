@@ -183,26 +183,42 @@ function processEvent(event) {
   // =========================
   // 🧠 TEXT GENERATION
   // =========================
-  let text = null;
+ let text = null;
 
-  try {
-    // 1️⃣ BEST: AI / Template Commentary
+try {
+
+  // =========================
+  // 1️⃣ DB CONTENT (HÖCHSTE PRIO)
+  // =========================
+  if(resolved?.text){
+    text = resolved.text;
+  }
+
+  // =========================
+  // 2️⃣ AI / TEMPLATE COMMENTARY
+  // =========================
+  if(!text){
     text = generateCommentary({
       ...enrichedInput,
       player,
       relatedPlayer,
       team,
     });
+  }
 
-    // 2️⃣ FALLBACK: einfache Texte
-    if (!text) {
-      text = generateText(enrichedInput);
-    }
+  // =========================
+  // 3️⃣ FALLBACK TEXT
+  // =========================
+  if(!text){
+    text = generateText(enrichedInput);
+  }
 
-    // 3️⃣ LETZTER FALLBACK: DB (Supabase)
-    if (!text) {
-      text = resolved.text;
-    }
+} catch(e){
+  console.error("❌ Commentary Crash:", e);
+
+  // 🔥 SAFETY FALLBACK
+  text = resolved?.text || generateText(enrichedInput) || "...";
+}
 
     // =========================
     // ⭐ BONUS: PRIORITY OVERRIDE
