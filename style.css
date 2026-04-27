@@ -27,9 +27,6 @@ html, body {
 }
 
 /* =========================
-🟡 SPLASH SCREEN
-========================= */
-/* =========================
 🚀 SPLASH SCREEN (SOLID FINAL)
 ========================= */
 
@@ -337,20 +334,45 @@ html, body {
 }
 
 /* =========================
-🏷 TEAMS
+🏷 TOP TEAMS (UPGRADED)
 ========================= */
 
 #topTeams {
   font-size: 13px;
-  color: #cbd5e1;
-  opacity: 0.85;
-
   letter-spacing: 0.5px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #cbd5e1;
 }
 
-/* optional split look */
-#topTeams::first-line {
+/* HOME */
+#topTeams .home {
+  color: #38bdf8;
   font-weight: 600;
+
+  text-shadow:
+    0 0 6px rgba(56,189,248,0.4),
+    0 0 12px rgba(56,189,248,0.2);
+}
+
+/* VS */
+#topTeams .vs {
+  opacity: 0.4;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* AWAY */
+#topTeams .away {
+  color: #ef4444;
+  font-weight: 600;
+
+  text-shadow:
+    0 0 6px rgba(239,68,68,0.4),
+    0 0 12px rgba(239,68,68,0.2);
 }
 
 /* =========================
