@@ -130,17 +130,23 @@
   </div>
 
   <!-- 🍔 SIDEBAR -->
-  <div id="sidebarWrapper" class="sidebar-wrapper">
-    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+<div id="sidebarWrapper" class="sidebar-wrapper">
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-    <div id="sidebar">
-      <button id="saveBtn">💾 Speichern</button>
-      <button id="loadBtn">📂 Laden</button>
-      <button id="resetBtn">🗑 Reset</button>
+  <div id="sidebar">
 
-      <hr>
+    <button id="saveBtn">💾 Speichern</button>
+    <button id="loadBtn">📂 Laden</button>
+    <button id="resetBtn">🗑 Reset</button>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Team Farbe</div>
+      <input type="color" id="colorPicker" value="#22d3ee">
     </div>
+
+    <hr>
   </div>
+</div>
 
   <!-- 📦 MAIN -->
   <div class="container">
