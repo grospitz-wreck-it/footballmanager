@@ -19,6 +19,7 @@ import {
 } from "../core/football/position.js";
 import { FORMATIONS, getFormationProfile } from "../core/football/formation.js";
 import { openPlayerModal } from "../modal.js";
+import { isPlayerAvailable } from "../modules/playerAvailability.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -1147,8 +1148,13 @@ function renderTeam() {
   }
 
   const teamId = game.team?.selectedId;
-  const players = getPlayersOfTeam(teamId);
-  const lineup = game.team?.lineup;
+
+let players = getPlayersOfTeam(teamId);
+players = players.filter((player) =>
+  isPlayerAvailable(player.id),
+);
+
+const lineup = game.team?.lineup;
 
   if (!players.length) {
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
