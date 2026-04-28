@@ -1,5 +1,6 @@
 import { game } from "../core/state.js";
 import { processPromotionRelegation } from "./promotion.js";
+import { buildSeasonOutcomeEvent } from "./seasonEvents.js";
 
 function resetLeagueTable(league) {
   if (!league?.table?.length) return;
@@ -33,7 +34,27 @@ export function processSeasonTransition() {
   // 🏆 PROMOTION / RELEGATION
   // =========================
   const seasonResult = processPromotionRelegation();
+  const specialEvent = buildSeasonOutcomeEvent(seasonResult);
 
+  if (specialEvent) {
+    game.events = game.events || {};
+    game.events.history = game.events.history || [];
+
+    game.events.history.push({
+      id: crypto.randomUUID(),
+      minute: 0,
+      ...specialEvent,
+    });
+
+    // 🔥 UI SUMMARY
+    game.ui = game.ui || {};
+    game.ui.seasonSummary = seasonResult;
+
+    // 💀 GAME OVER FLAG
+    if (specialEvent.gameOver) {
+      game.phase = "gameover";
+    }
+  }
   // =========================
   // 📈 PLAYER DEVELOPMENT (HOOK)
   // =========================
