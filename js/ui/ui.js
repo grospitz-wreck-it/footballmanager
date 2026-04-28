@@ -1223,7 +1223,7 @@ function renderTeam() {
     starters.filter((p) => p?.id).map((p) => String(p.id)),
   );
 
-  benchPlayers = players.filter((p) => !starterIds.has(String(p.id)));
+  benchPlayers = allPlayers.filter((p) => !starterIds.has(String(p.id)));
 
   // =========================
   // 🧪 DEBUG
@@ -1312,6 +1312,11 @@ function renderTeam() {
     el.onclick = () => {
       const id = el.dataset.id;
       if (!id) return;
+
+      if (!isPlayerAvailable(id)) {
+        showToast("⚠️ Spieler nicht verfügbar");
+        return;
+      }
 
       if (selectedPlayerId === id) {
         selectedPlayerId = null;
