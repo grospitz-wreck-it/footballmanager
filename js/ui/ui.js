@@ -1179,12 +1179,21 @@ function renderTeam() {
 
   const teamId = game.team?.selectedId;
 
-  let players = getPlayersOfTeam(teamId);
-  players = players.filter((player) => isPlayerAvailable(player.id));
+  // =========================
+  // 👥 SPIELER LADEN
+  // =========================
+  const allPlayers = getPlayersOfTeam(teamId);
+
+  // 🔥 Nur verfügbare Spieler für Startelf
+  const availablePlayers = allPlayers.filter((player) =>
+    isPlayerAvailable(player.id),
+  );
+
+  let players = availablePlayers;
 
   const lineup = game.team?.lineup;
 
-  if (!players.length) {
+  if (!allPlayers.length) {
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
     return;
   }
