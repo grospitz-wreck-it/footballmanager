@@ -33,9 +33,24 @@ const game = {
   // =========================
   // 👕 TEAM
   // =========================
-  team: {
+ team: {
   selected: null,
   selectedId: null,
+
+  // =========================
+  // 🚫 PLAYER AVAILABILITY
+  // =========================
+  availability: {
+    suspended: {},
+    injured: {}
+  },
+
+  // =========================
+  // 🟨 DISCIPLINE SYSTEM
+  // =========================
+  discipline: {
+    yellowCards: {}
+  },
 
   // 🔥 LINEUP SYSTEM
   lineup: {
