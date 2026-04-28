@@ -19,7 +19,11 @@ import {
 } from "../core/football/position.js";
 import { FORMATIONS, getFormationProfile } from "../core/football/formation.js";
 import { openPlayerModal } from "../modal.js";
-import { isPlayerAvailable } from "../modules/playerAvailability.js";
+import {
+  isPlayerAvailable,
+  isPlayerSuspended,
+  isPlayerInjured,
+} from "../modules/playerAvailability.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
@@ -29,9 +33,9 @@ let liveTableInterval = null;
 let selectedPlayerId = null;
 let lastTacticHash = null;
 
- // =========================
-  // 🖱 Color Picker
-  // =========================
+// =========================
+// 🖱 Color Picker
+// =========================
 function initColorPicker() {
   const picker = document.getElementById("colorPicker");
   if (!picker) return;
@@ -81,21 +85,27 @@ function hexToHsl(hex) {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
 
-  let h, s, l = (max + min) / 2;
+  let h,
+    s,
+    l = (max + min) / 2;
 
   if (max === min) {
     h = s = 0;
   } else {
     const d = max - min;
 
-    s = l > 0.5
-      ? d / (2 - max - min)
-      : d / (max + min);
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
 
     h /= 6;
@@ -104,7 +114,7 @@ function hexToHsl(hex) {
   return {
     h: Math.round(h * 360),
     s: Math.round(s * 100),
-    l: Math.round(l * 100)
+    l: Math.round(l * 100),
   };
 }
 
@@ -113,14 +123,16 @@ function hslToHex(h, s, l) {
   s /= 100;
   l /= 100;
 
-  const k = n => (n + h / 30) % 12;
+  const k = (n) => (n + h / 30) % 12;
   const a = s * Math.min(l, 1 - l);
 
-  const f = n =>
-    Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+  const f = (n) =>
+    Math.round(
+      255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))),
+    );
 
   return `#${[f(0), f(8), f(4)]
-    .map(x => x.toString(16).padStart(2, "0"))
+    .map((x) => x.toString(16).padStart(2, "0"))
     .join("")}`;
 }
 
@@ -131,18 +143,18 @@ function applyColor(color) {
   document.documentElement.style.setProperty("--accent", color);
   document.documentElement.style.setProperty(
     "--accent-soft",
-    hexToRgba(color, 0.2)
+    hexToRgba(color, 0.2),
   );
   document.documentElement.style.setProperty(
     "--accent-glow",
-    hexToRgba(color, 0.5)
+    hexToRgba(color, 0.5),
   );
 
   // 👉 Gegnerfarbe (SMART complement)
   document.documentElement.style.setProperty("--accent-opp", opp);
   document.documentElement.style.setProperty(
     "--accent-opp-glow",
-    hexToRgba(opp, 0.45)
+    hexToRgba(opp, 0.45),
   );
 }
 
@@ -162,8 +174,6 @@ function getComplementaryColor(hex) {
 
   return hslToHex(newHue, newSat, newLight);
 }
-
-
 
 // =========================
 // ⚙️ TACTICS PRESETS (GLOBAL)
@@ -597,11 +607,9 @@ function updateScore() {
     const current = game.match?.current;
 
     if (current) {
-      const homeName =
-        game.match?.home?.name || current?.home?.name || "-";
+      const homeName = game.match?.home?.name || current?.home?.name || "-";
 
-      const awayName =
-        game.match?.away?.name || current?.away?.name || "-";
+      const awayName = game.match?.away?.name || current?.away?.name || "-";
 
       teamsEl.innerHTML = `
         <span class="home">${homeName}</span>
@@ -620,8 +628,7 @@ function updateScore() {
   if (scoreEl) {
     const isGoal =
       lastScoreState.home !== null &&
-      (home !== lastScoreState.home ||
-       away !== lastScoreState.away);
+      (home !== lastScoreState.home || away !== lastScoreState.away);
 
     scoreEl.textContent = `${home} : ${away}`;
 
@@ -657,9 +664,7 @@ function updateScore() {
     const preset = game.tactics.preset || "balanced";
 
     tacticsEl.textContent =
-      preset === "custom"
-        ? "CUSTOM"
-        : preset.toUpperCase();
+      preset === "custom" ? "CUSTOM" : preset.toUpperCase();
   }
 }
 
@@ -726,7 +731,7 @@ function updateEvents() {
   track("game_event", {
     minute: newest.minute,
     text: newest.text || null,
-    type: newest.type || "UNKNOWN"
+    type: newest.type || "UNKNOWN",
   });
 
   // =========================
@@ -1010,7 +1015,30 @@ function renderPlayerRow(p) {
   const pos = POS_MAP[rawPos] || rawPos;
 
   const rating = p.overall ?? 0;
+  // =========================
+  // 🚫 STATUS BADGES
+  // =========================
+  let statusBadge = "";
 
+  const availability = game.team?.availability;
+
+  if (isPlayerSuspended(p.id)) {
+    const matches = availability?.suspended?.[String(p.id)]?.matchesLeft || 0;
+
+    statusBadge = `
+      <span class="status suspended">
+        🟥 Sperre (${matches})
+      </span>
+    `;
+  } else if (isPlayerInjured(p.id)) {
+    const matches = availability?.injured?.[String(p.id)]?.matchesLeft || 0;
+
+    statusBadge = `
+      <span class="status injured">
+        🤕 Verletzt (${matches})
+      </span>
+    `;
+  }
   let ratingClass = "low";
   if (rating >= 85) ratingClass = "high";
   else if (rating >= 70) ratingClass = "mid";
@@ -1027,8 +1055,10 @@ function renderPlayerRow(p) {
         <span class="stars">${"★".repeat(stars)}</span>
       </span>
 
-      <span class="rating ${ratingClass}">${rating}</span>
-    </div>
+  <span class="rating ${ratingClass}">${rating}</span>
+
+${statusBadge}
+</div>
   `;
 }
 
@@ -1149,12 +1179,10 @@ function renderTeam() {
 
   const teamId = game.team?.selectedId;
 
-let players = getPlayersOfTeam(teamId);
-players = players.filter((player) =>
-  isPlayerAvailable(player.id),
-);
+  let players = getPlayersOfTeam(teamId);
+  players = players.filter((player) => isPlayerAvailable(player.id));
 
-const lineup = game.team?.lineup;
+  const lineup = game.team?.lineup;
 
   if (!players.length) {
     container.innerHTML = "<p>Keine Spieler vorhanden</p>";
@@ -1623,7 +1651,6 @@ function renderFormationPreview() {
   // =========================
   attachDotHandlers(players);
 }
- 
 
 function attachDotHandlers(players) {
   document.querySelectorAll(".fp-dot").forEach((dot) => {
@@ -1660,7 +1687,7 @@ function pushEventIcon(type) {
     "INTERCEPTION",
     "BALL_LOSS",
     "BALL_RECOVERY",
-    "CLEARANCE"
+    "CLEARANCE",
   ];
 
   // =========================
@@ -1721,7 +1748,7 @@ function renderIcon(type) {
     INTERCEPTION: "✋",
     BALL_LOSS: "❌",
     BALL_RECOVERY: "♻️",
-    CLEARANCE: "🛡️"
+    CLEARANCE: "🛡️",
   };
 
   const icon = document.createElement("div");
