@@ -2,7 +2,7 @@
 // 📅 SPIELPLAN GENERIEREN (FINAL CLEAN FIXED)
 // =========================
 import { game } from "../core/state.js";
-
+import { decrementAvailability } from "../modules/playerAvailability.js";
 // =========================
 // 🧠 ID HELPERS
 // =========================
@@ -471,7 +471,7 @@ function advanceSchedule(){
 
   const schedule = game.league?.current?.schedule;
   if(!schedule?.length) return;
-
+  decrementAvailability();
   let r = game.league.currentRound ?? 0;
   let m = game.league.currentMatchIndex ?? 0;
 
