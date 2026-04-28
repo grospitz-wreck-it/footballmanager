@@ -1,17 +1,17 @@
-
 // =========================
 // ⚽ MATCH ENGINE (FINAL FIXED IMPORTS)
 // =========================
 
 import { game } from "./core/state.js";
 import { emit } from "./core/events.js";
-import { EVENTS, EVENT_TYPES, EVENT_OUTCOMES } from "./core/events.constants.js";
-import { RULES } from "./core/rules.js";
-
 import {
-  updateEvents,
-  rollRandomEvents
-} from "./engine/eventSystem.js";
+  EVENTS,
+  EVENT_TYPES,
+  EVENT_OUTCOMES,
+} from "./core/events.constants.js";
+import { RULES } from "./core/rules.js";
+import { addSuspension, addInjury } from "./modules/playerAvailability.js";
+import { updateEvents, rollRandomEvents } from "./engine/eventSystem.js";
 
 import { saveGame } from "./services/storage.js"; // 🔥 FIXED
 
@@ -22,20 +22,68 @@ import { getTacticModifier } from "./engine/tacticsEngine.js";
 import {
   simulateMatchday,
   updateTable,
-  simulateLiveMatchMinute
+  simulateLiveMatchMinute,
 } from "./modules/scheduler.js";
-
 
 // =========================
 // 🧠 INTERNAL
 // =========================
 let matchInterval = null;
 
+function determineRedCardBan() {
+  const r = Math.random();
+
+  if (r < 0.15) return 1;
+  if (r < 0.85) return 2;
+  if (r < 0.95) return 3;
+  if (r < 0.99) return 4;
+
+  return 5;
+}
+
+function maybeTriggerInjury(teamId) {
+  if (!teamId) return;
+
+  // 🔥 Sehr selten
+  if (Math.random() > 0.015) return;
+
+  const player = getRandomPlayer(teamId);
+  if (!player?.id) return;
+
+  const r = Math.random();
+
+  let matches = 1;
+  let type = "minor";
+
+  if (r < 0.75) {
+    matches = 1;
+    type = "minor";
+  } else if (r < 0.9) {
+    matches = 3;
+    type = "medium";
+  } else if (r < 0.98) {
+    matches = 6;
+    type = "serious";
+  } else {
+    matches = 12;
+    type = "severe";
+  }
+
+  addInjury(player.id, matches, type);
+
+  emitMatchEvent("INJURY", {
+    teamId,
+    playerId: player.id,
+    injuryType: type,
+    matchesOut: matches,
+  });
+}
+
 // =========================
 // 🧠 ID HELPERS
 // =========================
-function normalizeId(id){
-  if(id === null || id === undefined) return null;
+function normalizeId(id) {
+  if (id === null || id === undefined) return null;
   return String(id);
 }
 
@@ -43,33 +91,26 @@ function normalizeId(id){
 // 🧠 HELPERS
 // =========================
 
-
-function getTeamById(id){
-
+function getTeamById(id) {
   const nid = normalizeId(id);
 
   const leagueTeams = game.league?.current?.teams || [];
 
-  const leagueMatch = leagueTeams.find(
-    t => normalizeId(t.id) === nid
-  );
+  const leagueMatch = leagueTeams.find((t) => normalizeId(t.id) === nid);
 
-  if(leagueMatch){
+  if (leagueMatch) {
     return leagueMatch;
   }
 
   // 🔥 bleibt erhalten (kein Name-Fallback!)
-  return (game.data?.teams || []).find(
-    t => normalizeId(t.id) === nid
-  );
+  return (game.data?.teams || []).find((t) => normalizeId(t.id) === nid);
 }
 
-function getTeamNameById(id){
+function getTeamNameById(id) {
   return getTeamById(id)?.name || "Unbekannt";
 }
 
-function getEventWeights(ctx, mod, attackingTeam){
-
+function getEventWeights(ctx, mod, attackingTeam) {
   const intensity = RULES?.match?.intensity ?? 1;
 
   const homeId = ctx.match.homeTeamId;
@@ -80,33 +121,30 @@ function getEventWeights(ctx, mod, attackingTeam){
   const homeStrength = getTeamStrength(homeId);
   const awayStrength = getTeamStrength(awayId);
 
-  const strengthDiff =
-    (homeStrength - awayStrength) / 100;
+  const strengthDiff = (homeStrength - awayStrength) / 100;
 
-  const attackStrength = isHomeAttack
-    ? strengthDiff
-    : -strengthDiff;
+  const attackStrength = isHomeAttack ? strengthDiff : -strengthDiff;
 
   // =========================
   // ⚙️ BASE WEIGHTS
   // =========================
- let weights = {
-  shot: 0.20,
-  foul: 0.15,
-  corner: 0.10,
-  duel: 0.25,
-  pass: 0.15,
-  dribble: 0.10,
-  interception: 0.05
-};
+  let weights = {
+    shot: 0.2,
+    foul: 0.15,
+    corner: 0.1,
+    duel: 0.25,
+    pass: 0.15,
+    dribble: 0.1,
+    interception: 0.05,
+  };
 
   // =========================
   // 🔥 TACTICS INFLUENCE
   // =========================
-  weights.shot   += mod.attackBias * 0.5;
-  weights.duel   += mod.attackBias * 0.3;
+  weights.shot += mod.attackBias * 0.5;
+  weights.duel += mod.attackBias * 0.3;
 
-  weights.foul   += mod.controlBonus * 0.4;
+  weights.foul += mod.controlBonus * 0.4;
   weights.corner += mod.eventRate * 0.2;
 
   // =========================
@@ -126,69 +164,66 @@ function getEventWeights(ctx, mod, attackingTeam){
   // =========================
   const last = game.match?.live?.lastEvent;
 
-  if(last === "duel"){
+  if (last === "duel") {
     weights.shot += 0.1;
   }
 
-  if(last === "corner"){
+  if (last === "corner") {
     weights.shot += 0.2;
   }
 
-  if(last === "shot"){
+  if (last === "shot") {
     weights.duel += 0.2;
   }
   // 🔥 BALL FLOW LOGIK
-  if(last === "pass"){
-  weights.shot += 0.15;
-  weights.dribble += 0.10;
+  if (last === "pass") {
+    weights.shot += 0.15;
+    weights.dribble += 0.1;
   }
 
-  if(last === "dribble"){
-  weights.shot += 0.20;
+  if (last === "dribble") {
+    weights.shot += 0.2;
   }
 
-  if(last === "interception"){
-  weights.pass += 0.20;
+  if (last === "interception") {
+    weights.pass += 0.2;
   }
   // =========================
   // 🔒 SAFETY (kein negativer Müll)
   // =========================
-  Object.keys(weights).forEach(k => {
+  Object.keys(weights).forEach((k) => {
     weights[k] = Math.max(0.01, weights[k]);
   });
 
   // =========================
   // 🔄 NORMALIZE (wichtig!)
   // =========================
-  const total = Object.values(weights).reduce((a,b)=>a+b,0);
+  const total = Object.values(weights).reduce((a, b) => a + b, 0);
 
-  Object.keys(weights).forEach(k => {
+  Object.keys(weights).forEach((k) => {
     weights[k] = weights[k] / total;
   });
 
   return weights;
 }
 
-function switchPossession(ctx){
+function switchPossession(ctx) {
   const live = game.match?.live;
-  if(!live) return;
+  if (!live) return;
 
   const home = ctx.match.homeTeamId;
   const away = ctx.match.awayTeamId;
 
-  live.possession =
-    live.possession === home ? away : home;
+  live.possession = live.possession === home ? away : home;
 }
-  
 
-function pickEventByWeight(weights){
-
+function pickEventByWeight(weights) {
   const r = Math.random();
   let sum = 0;
 
-  for(const key in weights){
+  for (const key in weights) {
     sum += weights[key];
-    if(r < sum) return key;
+    if (r < sum) return key;
   }
 
   return "duel";
@@ -197,7 +232,6 @@ function pickEventByWeight(weights){
 // 🆕 EVENT EMITTER
 // =========================
 function emitMatchEvent(type, payload = {}) {
-
   const live = game.match?.live;
   const match = game.match?.current;
 
@@ -208,22 +242,18 @@ function emitMatchEvent(type, payload = {}) {
   // 🔥 TEAM NAME RESOLVE (ZENTRAL!)
   let teamName = null;
 
-  if(teamId){
+  if (teamId) {
     const isHome = String(teamId) === String(match.homeTeamId);
 
-    teamName = isHome
-      ? match.home?.name
-      : match.away?.name;
+    teamName = isHome ? match.home?.name : match.away?.name;
   }
 
   // 🔥 PLAYER NAME RESOLVE
   let playerName = null;
 
-  if(payload.playerId){
- const pool = game.players || [];
-    const player = pool.find(p =>
-      String(p.id) === String(payload.playerId)
-    );
+  if (payload.playerId) {
+    const pool = game.players || [];
+    const player = pool.find((p) => String(p.id) === String(payload.playerId));
 
     playerName = player?.name || null;
   }
@@ -236,37 +266,41 @@ function emitMatchEvent(type, payload = {}) {
     // 🔥 ENRICHED DATA
     ...payload,
     teamName,
-    playerName
+    playerName,
   };
 
   console.log("📡 FINAL EVENT:", event);
+  // 🔥 RED CARD → automatische Sperre
+  if (type === EVENT_TYPES.RED_CARD && payload.playerId) {
+    addSuspension(payload.playerId, determineRedCardBan(), "red_card");
+  }
 
+  // 🔥 Verletzungen selten im Spielfluss
+  if (teamId) {
+    maybeTriggerInjury(teamId);
+  }
   emit(EVENTS.MATCH_EVENT, event);
 }
 // =========================
 // 🎮 GAME EVENT EFFECT HANDLER
 // =========================
-function applyGameEventEffect(event, ctx){
-
-  if(!event) return;
+function applyGameEventEffect(event, ctx) {
+  if (!event) return;
 
   const type = String(event.type || event.effect || "").toLowerCase();
 
   // =========================
   // ⚽ GOAL EVENT
   // =========================
-  if(type === "goal"){
-
+  if (type === "goal") {
     const isHome = Math.random() < 0.5;
 
-    const teamId = isHome
-      ? ctx.match.homeTeamId
-      : ctx.match.awayTeamId;
+    const teamId = isHome ? ctx.match.homeTeamId : ctx.match.awayTeamId;
 
     const player = getRandomPlayer(teamId);
 
     // 🔥 SCORE UPDATE
-    if(isHome){
+    if (isHome) {
       game.match.live.score.home++;
       game.match.score.home++;
     } else {
@@ -274,25 +308,23 @@ function applyGameEventEffect(event, ctx){
       game.match.score.away++;
     }
 
-
     // 🔥 FINAL EMIT
-   emitMatchEvent(EVENT_TYPES.GOAL, {
-  teamId,
-  playerId: player?.id,
-  relatedPlayerId: getRandomPlayer(teamId)?.id,
-  outcome: EVENT_OUTCOMES.SUCCESS
-});
+    emitMatchEvent(EVENT_TYPES.GOAL, {
+      teamId,
+      playerId: player?.id,
+      relatedPlayerId: getRandomPlayer(teamId)?.id,
+      outcome: EVENT_OUTCOMES.SUCCESS,
+    });
   }
 }
 // =========================
 // 👥 PLAYER ACCESS
 // =========================
-function getPlayersOfTeam(teamId){
-
+function getPlayersOfTeam(teamId) {
   const nid = normalizeId(teamId);
 
-  const team = game.league?.current?.teams.find(t =>
-    normalizeId(t.id) === nid
+  const team = game.league?.current?.teams.find(
+    (t) => normalizeId(t.id) === nid,
   );
 
   const players = team?.players || [];
@@ -303,25 +335,23 @@ function getPlayersOfTeam(teamId){
   return players;
 }
 
-function autoFillLineup(teamId){
-
-  if(!game.team.lineup){
+function autoFillLineup(teamId) {
+  if (!game.team.lineup) {
     game.team.lineup = { formation: "4-4-2", slots: {} };
   }
 
-  if(!game.team.lineup.slots){
+  if (!game.team.lineup.slots) {
     game.team.lineup.slots = {};
   }
 
   const nid = normalizeId(teamId);
   const myTeamId =
-    normalizeId(game.team?.selectedId) ||
-    normalizeId(game.team?.id);
+    normalizeId(game.team?.selectedId) || normalizeId(game.team?.id);
 
-  if(nid !== myTeamId) return;
+  if (nid !== myTeamId) return;
 
   const pool = getPlayersOfTeam(teamId);
-  if(!pool.length) return;
+  if (!pool.length) return;
 
   const lineup = game.team.lineup;
 
@@ -329,55 +359,59 @@ function autoFillLineup(teamId){
     GK: [],
     DEF: [],
     MID: [],
-    ST: []
+    ST: [],
   };
 
-  pool.forEach(p => {
+  pool.forEach((p) => {
     const pos = (p.position_type || "").toUpperCase();
 
-    if(pos.includes("GK")) byPos.GK.push(p);
-    else if(pos.includes("DEF")) byPos.DEF.push(p);
-    else if(pos.includes("MID")) byPos.MID.push(p);
-    else if(pos.includes("ST")) byPos.ST.push(p);
+    if (pos.includes("GK")) byPos.GK.push(p);
+    else if (pos.includes("DEF")) byPos.DEF.push(p);
+    else if (pos.includes("MID")) byPos.MID.push(p);
+    else if (pos.includes("ST")) byPos.ST.push(p);
   });
 
-  function pick(arr){
+  function pick(arr) {
     return arr.shift()?.id || null;
   }
 
-  Object.keys(lineup.slots).forEach(slot => {
+  Object.keys(lineup.slots).forEach((slot) => {
+    if (lineup.slots[slot]) return; // schon gesetzt
 
-    if(lineup.slots[slot]) return; // schon gesetzt
-
-    if(slot === "GK") lineup.slots[slot] = pick(byPos.GK);
-
-    else if(slot.startsWith("DEF")) lineup.slots[slot] = pick(byPos.DEF);
-
-    else if(slot.startsWith("MID")) lineup.slots[slot] = pick(byPos.MID);
-
-    else if(slot.startsWith("ST")) lineup.slots[slot] = pick(byPos.ST);
+    if (slot === "GK") lineup.slots[slot] = pick(byPos.GK);
+    else if (slot.startsWith("DEF")) lineup.slots[slot] = pick(byPos.DEF);
+    else if (slot.startsWith("MID")) lineup.slots[slot] = pick(byPos.MID);
+    else if (slot.startsWith("ST")) lineup.slots[slot] = pick(byPos.ST);
   });
 }
 
-function getRandomPlayer(teamId){
-
+function getRandomPlayer(teamId) {
   const nid = normalizeId(teamId);
   const current = game.match?.current;
 
-  if(current){
-
-    if(normalizeId(current.homeTeamId) === nid && current.homePlayers?.length){
-      return current.homePlayers[Math.floor(Math.random() * current.homePlayers.length)];
+  if (current) {
+    if (
+      normalizeId(current.homeTeamId) === nid &&
+      current.homePlayers?.length
+    ) {
+      return current.homePlayers[
+        Math.floor(Math.random() * current.homePlayers.length)
+      ];
     }
 
-    if(normalizeId(current.awayTeamId) === nid && current.awayPlayers?.length){
-      return current.awayPlayers[Math.floor(Math.random() * current.awayPlayers.length)];
+    if (
+      normalizeId(current.awayTeamId) === nid &&
+      current.awayPlayers?.length
+    ) {
+      return current.awayPlayers[
+        Math.floor(Math.random() * current.awayPlayers.length)
+      ];
     }
   }
 
   const list = getPlayersOfTeam(nid);
 
-  if(!list.length){
+  if (!list.length) {
     console.warn("⚠️ Keine Spieler für Team-ID:", nid);
     return null;
   }
@@ -388,13 +422,11 @@ function getRandomPlayer(teamId){
 // =========================
 // 🧠 MATCH CHECK
 // =========================
-function isMyMatch(match){
-
+function isMyMatch(match) {
   const myTeamId =
-    normalizeId(game.team?.selectedId) ||
-    normalizeId(game.team?.id);
+    normalizeId(game.team?.selectedId) || normalizeId(game.team?.id);
 
-  if(!myTeamId) return true;
+  if (!myTeamId) return true;
 
   return (
     normalizeId(match.homeTeamId) === myTeamId ||
@@ -405,164 +437,155 @@ function isMyMatch(match){
 // =========================
 // 🎮 INIT MATCH (STRICT ID)
 // =========================
-function initMatch(round){
-
+function initMatch(round) {
   // 🔥 FIX: game.match absichern
-  if(!game.match){
+  if (!game.match) {
     game.match = {};
   }
 
   // 🔥 RESET MATCH LOOP
-  if(matchInterval){
+  if (matchInterval) {
     clearInterval(matchInterval);
     matchInterval = null;
   }
 
   // ❗ Erst prüfen
-  if(!round?.length) return false;
-
+  if (!round?.length) return false;
 
   // =========================
   // 🧠 DANACH dein Spiel suchen
   // =========================
-  const playerMatch = round.find(m => isMyMatch(m));
+  const playerMatch = round.find((m) => isMyMatch(m));
 
-// =========================
-// ⚽ BYE HANDLING (FIX)
-// =========================
-if(!playerMatch){
-  console.warn("⚽ BYE: Team hat spielfrei", round);
+  // =========================
+  // ⚽ BYE HANDLING (FIX)
+  // =========================
+  if (!playerMatch) {
+    console.warn("⚽ BYE: Team hat spielfrei", round);
 
-  game.match._scheduleRef = null;
-  game.match.current = null;
+    game.match._scheduleRef = null;
+    game.match.current = null;
+
+    game.match.live = {
+      minute: 0,
+      running: false,
+      score: { home: 0, away: 0 },
+      events: [],
+      phase: "bye",
+
+      // 🔥 WICHTIG (RESET)
+      _fulltimeEmitted: false,
+    };
+
+    game.match.home = null;
+    game.match.away = null;
+
+    game.match.score = {
+      home: 0,
+      away: 0,
+    };
+
+    return {
+      isBye: true,
+    };
+  }
+
+  // =========================
+  // ⚽ NORMAL MATCH
+  // =========================
+  const homeId = normalizeId(playerMatch.homeTeamId);
+  const awayId = normalizeId(playerMatch.awayTeamId);
+
+  // 🔥 STRICT: KEIN FALLBACK MEHR
+  if (!homeId || !awayId) {
+    console.error("❌ MATCH INIT FAILED (STRICT ID)", playerMatch);
+    return false;
+  }
+
+  game.match._scheduleRef = playerMatch;
+
+  game.match.current = {
+    id: playerMatch.id,
+
+    homeTeamId: homeId,
+    awayTeamId: awayId,
+
+    home: playerMatch.home,
+    away: playerMatch.away,
+
+    result: null,
+  };
+
+  try {
+    autoFillLineup(homeId);
+    autoFillLineup(awayId);
+
+    function getPlayersFromLineup(teamId) {
+      const nid = normalizeId(teamId);
+
+      const myTeamId =
+        normalizeId(game.team?.selectedId) || normalizeId(game.team?.id);
+
+      // 👉 Gegner-Team
+      if (nid !== myTeamId) {
+        return getPlayersOfTeam(teamId);
+      }
+
+      const slots = game.team?.lineup?.slots || {};
+      const ids = Object.values(slots).filter(Boolean);
+
+      // 👉 kein Lineup gesetzt → alle Spieler
+      if (!ids.length) {
+        return getPlayersOfTeam(teamId);
+      }
+
+      // 🔥 HIER IST FIX 3
+      const pool = game.players || [];
+
+      return pool.filter((p) => ids.includes(normalizeId(p.id)));
+    }
+
+    game.match.current.homePlayers = getPlayersFromLineup(homeId);
+    game.match.current.awayPlayers = getPlayersFromLineup(awayId);
+  } catch (e) {
+    console.warn("⚠️ Player init failed", e);
+  }
 
   game.match.live = {
     minute: 0,
-    running: false,
+    running: true,
     score: { home: 0, away: 0 },
     events: [],
-    phase: "bye",
+    phase: "first_half",
 
-    // 🔥 WICHTIG (RESET)
-    _fulltimeEmitted: false
+    // 🔥 NEU
+    possession:
+      Math.random() < 0.5 ? playerMatch.homeTeamId : playerMatch.awayTeamId,
+
+    lastEvent: null,
+
+    // 🔥 CRITICAL FIX (für Abpfiff!)
+    _fulltimeEmitted: false,
   };
-
-  game.match.home = null;
-  game.match.away = null;
-
-  game.match.score = {
-    home: 0,
-    away: 0
-  };
-
-  return {
-    isBye: true
-  };
-}
-
-// =========================
-// ⚽ NORMAL MATCH
-// =========================
-const homeId = normalizeId(playerMatch.homeTeamId);
-const awayId = normalizeId(playerMatch.awayTeamId);
-
-// 🔥 STRICT: KEIN FALLBACK MEHR
-if(!homeId || !awayId){
-  console.error("❌ MATCH INIT FAILED (STRICT ID)", playerMatch);
-  return false;
-}
-
-game.match._scheduleRef = playerMatch;
-
-game.match.current = {
-  id: playerMatch.id,
-
-  homeTeamId: homeId,
-  awayTeamId: awayId,
-
-  home: playerMatch.home,
-  away: playerMatch.away,
-
-  result: null
-};
-
-try {
-
-  autoFillLineup(homeId);
-  autoFillLineup(awayId);
-
-  function getPlayersFromLineup(teamId){
-
-  const nid = normalizeId(teamId);
-
-  const myTeamId =
-    normalizeId(game.team?.selectedId) ||
-    normalizeId(game.team?.id);
-
-  // 👉 Gegner-Team
-  if(nid !== myTeamId){
-    return getPlayersOfTeam(teamId);
-  }
-
-  const slots = game.team?.lineup?.slots || {};
-  const ids = Object.values(slots).filter(Boolean);
-
-  // 👉 kein Lineup gesetzt → alle Spieler
-  if(!ids.length){
-    return getPlayersOfTeam(teamId);
-  }
-
-  // 🔥 HIER IST FIX 3
-  const pool = game.players || [];
-
-  return pool.filter(p =>
-    ids.includes(normalizeId(p.id))
-  );
-}
-
-  game.match.current.homePlayers = getPlayersFromLineup(homeId);
-  game.match.current.awayPlayers = getPlayersFromLineup(awayId);
-
-} catch(e){
-  console.warn("⚠️ Player init failed", e);
-}
-
-  game.match.live = {
-  minute: 0,
-  running: true,
-  score: { home: 0, away: 0 },
-  events: [],
-  phase: "first_half",
-
-  // 🔥 NEU
-  possession: Math.random() < 0.5
-    ? playerMatch.homeTeamId
-    : playerMatch.awayTeamId,
-
-  lastEvent: null,
-
-  // 🔥 CRITICAL FIX (für Abpfiff!)
-  _fulltimeEmitted: false
-};
 
   game.match.home = {
     id: homeId,
-    name: getTeamNameById(homeId)
+    name: getTeamNameById(homeId),
   };
 
   game.match.away = {
     id: awayId,
-    name: getTeamNameById(awayId)
+    name: getTeamNameById(awayId),
   };
 
   game.match.score = {
     home: 0,
-    away: 0
+    away: 0,
   };
 
   console.log("✅ MATCH INIT:", {
     home: game.match.home,
-    away: game.match.away
+    away: game.match.away,
   });
 
   return true;
@@ -571,8 +594,7 @@ try {
 // =========================
 // ⚽ EVENTS
 // =========================
-function createShot(ctx){
-
+function createShot(ctx) {
   const isHome = Math.random() < 0.5;
 
   const teamId = isHome ? ctx.match.homeTeamId : ctx.match.awayTeamId;
@@ -582,15 +604,14 @@ function createShot(ctx){
   const keeper = getRandomPlayer(opponentId);
 
   const w = getPositionWeights(shooter);
-  if(Math.random() > w.shot) return;
+  if (Math.random() > w.shot) return;
 
   const r = Math.random();
   const goalChance = 0.2;
   const saveChance = 0.5;
 
-  if(r < goalChance){
-
-    if(isHome){
+  if (r < goalChance) {
+    if (isHome) {
       game.match.live.score.home++;
       game.match.score.home++;
     } else {
@@ -598,23 +619,21 @@ function createShot(ctx){
       game.match.score.away++;
     }
 
- emitMatchEvent(EVENT_TYPES.GOAL, {
-  teamId,
-  playerId: shooter?.id,
-  relatedPlayerId: getRandomPlayer(teamId)?.id,
-  outcome: EVENT_OUTCOMES.SUCCESS
-
-
-});
+    emitMatchEvent(EVENT_TYPES.GOAL, {
+      teamId,
+      playerId: shooter?.id,
+      relatedPlayerId: getRandomPlayer(teamId)?.id,
+      outcome: EVENT_OUTCOMES.SUCCESS,
+    });
 
     return;
   }
 
-  if(r < goalChance + saveChance){
+  if (r < goalChance + saveChance) {
     emitMatchEvent(EVENT_TYPES.SHOT_SAVED, {
       teamId: opponentId,
       playerId: keeper?.id,
-      outcome: EVENT_OUTCOMES.SAVED
+      outcome: EVENT_OUTCOMES.SAVED,
     });
     return;
   }
@@ -622,69 +641,64 @@ function createShot(ctx){
   emitMatchEvent(EVENT_TYPES.SHOT, {
     teamId,
     playerId: shooter?.id,
-    outcome: EVENT_OUTCOMES.FAIL
+    outcome: EVENT_OUTCOMES.FAIL,
   });
 }
 
-function createFoul(ctx){
-  const teamId = Math.random() < 0.5
-    ? ctx.match.homeTeamId
-    : ctx.match.awayTeamId;
+function createFoul(ctx) {
+  const teamId =
+    Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId;
 
   const player = getRandomPlayer(teamId);
 
   emitMatchEvent(EVENT_TYPES.FOUL, {
     teamId,
     playerId: player?.id,
-    outcome: EVENT_OUTCOMES.NEUTRAL
+    outcome: EVENT_OUTCOMES.NEUTRAL,
   });
 }
 
-function createCorner(ctx){
-  const teamId = Math.random() < 0.5
-    ? ctx.match.homeTeamId
-    : ctx.match.awayTeamId;
+function createCorner(ctx) {
+  const teamId =
+    Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId;
 
   emitMatchEvent(EVENT_TYPES.CORNER, { teamId });
 }
 
-function createDuel(ctx){
-
+function createDuel(ctx) {
   const p1 = getRandomPlayer(ctx.match.homeTeamId);
   const p2 = getRandomPlayer(ctx.match.awayTeamId);
 
   emitMatchEvent(EVENT_TYPES.DUEL, {
     playerId: p1?.id,
-    relatedPlayerId: p2?.id
+    relatedPlayerId: p2?.id,
   });
 }
-function createPass(ctx){
-
+function createPass(ctx) {
   const teamId = game.match?.live?.possession;
-  if(!teamId) return;
+  if (!teamId) return;
 
   const passer = getRandomPlayer(teamId);
 
   emitMatchEvent(EVENT_TYPES.PASS, {
     teamId,
-    playerId: passer?.id
+    playerId: passer?.id,
   });
 
   // 🔁 kleine Chance auf Ballverlust
-  if(Math.random() < 0.1){
+  if (Math.random() < 0.1) {
     emitMatchEvent(EVENT_TYPES.BALL_LOSS, {
       teamId,
-      playerId: passer?.id
+      playerId: passer?.id,
     });
 
     switchPossession(ctx);
   }
 }
 
-function createDribble(ctx){
-
+function createDribble(ctx) {
   const teamId = game.match?.live?.possession;
-  if(!teamId) return;
+  if (!teamId) return;
 
   const player = getRandomPlayer(teamId);
 
@@ -693,31 +707,32 @@ function createDribble(ctx){
   emitMatchEvent(EVENT_TYPES.DRIBBLE, {
     teamId,
     playerId: player?.id,
-    outcome: success ? "SUCCESS" : "FAIL"
+    outcome: success ? "SUCCESS" : "FAIL",
   });
 
-  if(!success){
+  if (!success) {
     switchPossession(ctx);
 
     emitMatchEvent(EVENT_TYPES.BALL_RECOVERY, {
-      teamId: teamId === ctx.match.homeTeamId
-        ? ctx.match.awayTeamId
-        : ctx.match.homeTeamId
+      teamId:
+        teamId === ctx.match.homeTeamId
+          ? ctx.match.awayTeamId
+          : ctx.match.homeTeamId,
     });
   }
 }
 
-function createInterception(ctx){
-
-  const defendingTeam = game.match?.live?.possession === ctx.match.homeTeamId
-    ? ctx.match.awayTeamId
-    : ctx.match.homeTeamId;
+function createInterception(ctx) {
+  const defendingTeam =
+    game.match?.live?.possession === ctx.match.homeTeamId
+      ? ctx.match.awayTeamId
+      : ctx.match.homeTeamId;
 
   const player = getRandomPlayer(defendingTeam);
 
   emitMatchEvent(EVENT_TYPES.INTERCEPTION, {
     teamId: defendingTeam,
-    playerId: player?.id
+    playerId: player?.id,
   });
 
   switchPossession(ctx);
@@ -727,57 +742,47 @@ function createInterception(ctx){
 // =========================
 let momentum = 0;
 
-function updateMomentum(){
+function updateMomentum() {
   momentum += (Math.random() - 0.5) * 0.2;
   momentum = Math.max(-1, Math.min(1, momentum));
 }
 
-function getTeamStrength(teamId){
-
+function getTeamStrength(teamId) {
   const nid = normalizeId(teamId);
 
   const myTeamId =
-    normalizeId(game.team?.selectedId) ||
-    normalizeId(game.team?.id);
+    normalizeId(game.team?.selectedId) || normalizeId(game.team?.id);
 
   let players;
 
   // 🔥 nur dein Team nutzt Lineup
-  if(nid === myTeamId){
-
+  if (nid === myTeamId) {
     // 🔥 HIER IST DER FIX
     autoFillLineup(teamId);
 
     const slots = game.team?.lineup?.slots || {};
     const ids = Object.values(slots).filter(Boolean);
 
-    if(ids.length){
+    if (ids.length) {
+      const pool = game.players || [];
 
- const pool = game.players || [];
-      
-      players = pool.filter(p =>
-        ids.includes(normalizeId(p.id))
-      );
-
+      players = pool.filter((p) => ids.includes(normalizeId(p.id)));
     } else {
       players = getPlayersOfTeam(teamId);
     }
-
   } else {
     players = getPlayersOfTeam(teamId);
   }
 
-  if(!players?.length) return 50;
+  if (!players?.length) return 50;
 
   const avg =
-    players.reduce((sum, p) => sum + getPlayerRating(p), 0) /
-    players.length;
+    players.reduce((sum, p) => sum + getPlayerRating(p), 0) / players.length;
 
   return avg;
 }
 
-function simulateLiveEvent(ctx){
-
+function simulateLiveEvent(ctx) {
   updateMomentum();
 
   const intensity = RULES?.match?.intensity ?? 1;
@@ -805,13 +810,10 @@ function simulateLiveEvent(ctx){
 
   let attackingTeam = game.match?.live?.possession;
 
-// fallback
-if (!attackingTeam) {
-  attackingTeam =
-    Math.random() < (adjustedHomeChance + bias)
-      ? homeId
-      : awayId;
-}
+  // fallback
+  if (!attackingTeam) {
+    attackingTeam = Math.random() < adjustedHomeChance + bias ? homeId : awayId;
+  }
 
   // =========================
   // 🔥 HIGH LINE RISIKO
@@ -830,7 +832,6 @@ if (!attackingTeam) {
   // 🎮 EXECUTE
   // =========================
   switch (eventType) {
-
     case "shot":
       createShot({ match: ctx.match, teamId: attackingTeam });
       break;
@@ -848,17 +849,16 @@ if (!attackingTeam) {
       createDuel(ctx);
       break;
     case "pass":
-    createPass(ctx);
-    break;
+      createPass(ctx);
+      break;
 
     case "dribble":
-    createDribble(ctx);
-    break;
+      createDribble(ctx);
+      break;
 
     case "interception":
-    createInterception(ctx);
-    break;
-      
+      createInterception(ctx);
+      break;
   }
 
   // =========================
@@ -867,57 +867,50 @@ if (!attackingTeam) {
   const live = game.match?.live;
 
   if (live) {
-
     live.lastEvent = eventType;
 
-   if (eventType === "shot" && Math.random() < 0.6) {
-  switchPossession(ctx);
-}
-    else if (eventType === "duel") {
+    if (eventType === "shot" && Math.random() < 0.6) {
+      switchPossession(ctx);
+    } else if (eventType === "duel") {
       if (Math.random() < 0.5) {
         switchPossession(ctx);
       }
     }
-
   }
 }
 
-  
 // =========================
 // ▶️ CONTROL
 // =========================
-function pauseMatch(){
-  if(game.match?.live){
+function pauseMatch() {
+  if (game.match?.live) {
     game.match.live.running = false;
   }
 }
 
-function resumeMatch(){
-  if(game.match?.live){
+function resumeMatch() {
+  if (game.match?.live) {
     game.match.live.running = true;
   }
 }
 
-
 // =========================
 // 🔁 LOOP
 // =========================
-function runMatchLoop({ onTick, onEnd } = {}){
-
-  if(matchInterval) return;
+function runMatchLoop({ onTick, onEnd } = {}) {
+  if (matchInterval) return;
 
   let lastTime = performance.now();
   let accumulator = 0;
   const STEP = 1000;
 
   matchInterval = setInterval(() => {
-
     const live = game.match?.live;
     const currentMatch = game.match?.current;
 
-    if(!live || !currentMatch) return;
-    if(live.phase === "bye") return;
-    if(live.running === false) return;
+    if (!live || !currentMatch) return;
+    if (live.phase === "bye") return;
+    if (live.running === false) return;
 
     const now = performance.now();
     const delta = now - lastTime;
@@ -927,71 +920,68 @@ function runMatchLoop({ onTick, onEnd } = {}){
 
     let safety = 0;
 
-    while(accumulator >= STEP && safety < 10){
+    while (accumulator >= STEP && safety < 10) {
+      live.minute++;
 
-  live.minute++;
+      // =========================
+      // ⚡ ANDERE MATCHES LIVE
+      // =========================
+      const league = game.league?.current;
+      const round = league?.schedule?.[league.currentRound];
 
-  // =========================
-  // ⚡ ANDERE MATCHES LIVE
-  // =========================
-  const league = game.league?.current;
-  const round = league?.schedule?.[league.currentRound];
+      simulateLiveMatchMinute(round, live.minute);
 
-  simulateLiveMatchMinute(round, live.minute);
-
-  const ctx = {
-    match: currentMatch,
-    requestGoal: (data = {}) => {
-      game.match.flags = game.match.flags || {};
-      game.match.flags.goalRequested = true;
-      game.match.flags.goalData = data;
-    }
-  };
+      const ctx = {
+        match: currentMatch,
+        requestGoal: (data = {}) => {
+          game.match.flags = game.match.flags || {};
+          game.match.flags.goalRequested = true;
+          game.match.flags.goalData = data;
+        },
+      };
 
       try {
         rollRandomEvents(ctx);
         simulateLiveEvent(ctx);
         updateEvents();
-      } catch(e){
+      } catch (e) {
         console.warn("⚠️ Simulation error", e);
       }
 
-const gameEvents = game.data?.gameEvents;
-      
-      if(Array.isArray(gameEvents)){
-        gameEvents.forEach(ev => {
+      const gameEvents = game.data?.gameEvents;
 
-    if(ev.active === false) return;
-          
-          if(ev.trigger === "always"){
-            if(live.minute % 5 === 0){
+      if (Array.isArray(gameEvents)) {
+        gameEvents.forEach((ev) => {
+          if (ev.active === false) return;
+
+          if (ev.trigger === "always") {
+            if (live.minute % 5 === 0) {
               applyGameEventEffect(ev, ctx);
             }
           }
 
-          if(ev._lastTrigger === undefined){
+          if (ev._lastTrigger === undefined) {
             ev._lastTrigger = -999;
           }
 
-          if(ev.trigger === "random"){
-            if(
+          if (ev.trigger === "random") {
+            if (
               live.minute - ev._lastTrigger > 1 &&
               Math.random() < (ev.probability || 0)
-            ){
+            ) {
               ev._lastTrigger = live.minute;
               applyGameEventEffect(ev, ctx);
             }
           }
-
         });
       }
 
-      if(live.minute === 45 && live.phase === "first_half"){
+      if (live.minute === 45 && live.phase === "first_half") {
         live.phase = "halftime";
         live.running = false;
 
         setTimeout(() => {
-          if(game.match?.live){
+          if (game.match?.live) {
             game.match.live.running = true;
             game.match.live.phase = "second_half";
           }
@@ -1000,69 +990,63 @@ const gameEvents = game.data?.gameEvents;
         saveGame();
       }
 
-     if(live.minute >= 90){
+      if (live.minute >= 90) {
+        live.minute = 90;
 
-  live.minute = 90;
+        // 🔥 WICHTIG: nur EINMAL feuern
+        if (!live._fulltimeEmitted) {
+          live._fulltimeEmitted = true;
 
-// 🔥 WICHTIG: nur EINMAL feuern
-if(!live._fulltimeEmitted){
+          emitMatchEvent(EVENT_TYPES.FULLTIME, {
+            teamId: null,
+            playerId: null,
+            minute: 90,
+            score: {
+              home: game.match.score.home,
+              away: game.match.score.away,
+            },
+            outcome: "END",
+          });
+        }
 
-  live._fulltimeEmitted = true;
+        live.running = false;
 
-  emitMatchEvent(EVENT_TYPES.FULLTIME, {
-    teamId: null,
-    playerId: null,
-    minute: 90,
-    score: {
-      home: game.match.score.home,
-      away: game.match.score.away
-    },
-    outcome: "END"
-  });
-}
+        // =========================
+        // 🔥 TABLE UPDATE (DEIN MATCH)
+        // =========================
+        const league = game.league?.current;
+        const match = game.match?.current;
 
-live.running = false;
+        if (league && match) {
+          const home = league.teams.find(
+            (t) => String(t.id) === match.homeTeamId,
+          );
+          const away = league.teams.find(
+            (t) => String(t.id) === match.awayTeamId,
+          );
 
-// =========================
-// 🔥 TABLE UPDATE (DEIN MATCH)
-// =========================
-const league = game.league?.current;
-const match = game.match?.current;
+          const hg = game.match.score.home;
+          const ag = game.match.score.away;
 
-if(league && match){
+          updateTable(home, away, hg, ag);
+        }
 
-  const home = league.teams.find(t => String(t.id) === match.homeTeamId);
-  const away = league.teams.find(t => String(t.id) === match.awayTeamId);
+        clearInterval(matchInterval);
+        matchInterval = null;
 
-  const hg = game.match.score.home;
-  const ag = game.match.score.away;
-
-  updateTable(home, away, hg, ag);
-}
-
-clearInterval(matchInterval);
-matchInterval = null;
-
-onEnd?.();
-return;
-}
+        onEnd?.();
+        return;
+      }
 
       accumulator -= STEP;
       safety++;
     }
 
     onTick?.();
-
   }, 50);
 }
 
 // =========================
 // 📦 EXPORTS
 // =========================
-export {
-  initMatch,
-  runMatchLoop,
-  pauseMatch,
-  resumeMatch,
-  
-};
+export { initMatch, runMatchLoop, pauseMatch, resumeMatch };
