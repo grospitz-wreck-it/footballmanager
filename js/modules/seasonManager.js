@@ -1,6 +1,10 @@
 import { game } from "../core/state.js";
 import { processPromotionRelegation } from "./promotion.js";
 import { buildSeasonOutcomeEvent } from "./seasonEvents.js";
+import {
+  processPlayerProgression,
+  ensureManagerState,
+} from "./playerProgression.js";
 
 function resetLeagueTable(league) {
   if (!league?.table?.length) return;
@@ -34,6 +38,14 @@ export function processSeasonTransition() {
   // 🏆 PROMOTION / RELEGATION
   // =========================
   const seasonResult = processPromotionRelegation();
+
+  ensureManagerState();
+
+  processPlayerProgression({
+    promoted: seasonResult?.promoted?.includes(game.team?.selectedId),
+    relegated: seasonResult?.relegated?.includes(game.team?.selectedId),
+  });
+
   const specialEvent = buildSeasonOutcomeEvent(seasonResult);
 
   if (specialEvent) {
@@ -46,11 +58,9 @@ export function processSeasonTransition() {
       ...specialEvent,
     });
 
-    // 🔥 UI SUMMARY
     game.ui = game.ui || {};
     game.ui.seasonSummary = seasonResult;
 
-    // 💀 GAME OVER FLAG
     if (specialEvent.gameOver) {
       game.phase = "gameover";
     }
