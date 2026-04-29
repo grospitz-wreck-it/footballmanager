@@ -1513,3 +1513,44 @@ tr:hover {
 .player-row:active {
   transform: scale(0.98);
 }
+
+#gameOverOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  background:
+    rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+}
+
+.gameover-card {
+  text-align: center;
+  padding: 40px;
+  border-radius: 20px;
+  background: rgba(20,20,20,0.95);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 40px rgba(255,0,0,0.25);
+}
+
+.gameover-card h1 {
+  font-size: 3rem;
+  color: #ff4d4d;
+  margin-bottom: 20px;
+}
+
+.gameover-card p {
+  color: white;
+  margin: 10px 0;
+}
+
+.gameover-card button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+}
