@@ -253,6 +253,39 @@ function applySidebar() {
 
   wrapper.classList.toggle("open", game.ui.sidebarOpen);
 }
+
+function showGameOverScreen() {
+  let overlay = document.getElementById("gameOverOverlay");
+
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "gameOverOverlay";
+
+    overlay.innerHTML = `
+      <div class="gameover-card">
+        <h1>💀 GAME OVER</h1>
+        <p>Abstieg aus der Kreisliga A.</p>
+        <p>Deine Trainerkarriere ist beendet.</p>
+        <button id="restartCareerBtn">Neue Karriere starten</button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const btn =
+      overlay.querySelector(
+        "#restartCareerBtn",
+      );
+
+    if (btn) {
+      btn.onclick = () => {
+        location.reload();
+      };
+    }
+  }
+
+  overlay.style.display = "flex";
+}
 // =========================
 // 🍩 DONUT HELPER (GLOBAL)
 // =========================
@@ -290,7 +323,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function updateUI() {
   initUI();
-
+// =========================
+  // 💀 GAME OVER
+  // =========================
+  if (game.phase === "gameover") {
+    showGameOverScreen();
+    return;
+  }
   // =========================
   // 🎮 MATCH OVERLAY
   // =========================
