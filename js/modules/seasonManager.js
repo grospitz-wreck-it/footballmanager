@@ -5,6 +5,7 @@ import {
   processPlayerProgression,
   ensureManagerState,
 } from "./playerProgression.js";
+import { applySeasonBudget } from "./financeManager.js";
 
 function resetLeagueTable(league) {
   if (!league?.table?.length) return;
@@ -18,7 +19,7 @@ function resetLeagueTable(league) {
 }
 
 function processPlayerProgression() {
-  // 🔥 PHASE 2+
+  applySeasonBudget(seasonResult);
   // Spielerentwicklung / Marktwert / Tier-Upgrades
   return;
 }
@@ -39,12 +40,15 @@ export function processSeasonTransition() {
   // =========================
   const seasonResult = processPromotionRelegation();
 
+if (seasonResult) {
   ensureManagerState();
 
   processPlayerProgression({
     promoted: seasonResult?.promoted?.includes(game.team?.selectedId),
     relegated: seasonResult?.relegated?.includes(game.team?.selectedId),
   });
+
+  applySeasonBudget(seasonResult);
 
   const specialEvent = buildSeasonOutcomeEvent(seasonResult);
 
@@ -65,6 +69,7 @@ export function processSeasonTransition() {
       game.phase = "gameover";
     }
   }
+}
   // =========================
   // 📈 PLAYER DEVELOPMENT (HOOK)
   // =========================
