@@ -269,12 +269,12 @@ function getMatchForMyTeam(round){
   const myTeamId = normalizeId(game.team?.selectedId);
 
   if(!myTeamId){
-    console.warn("❌ Kein Team gewählt");
+    if (window.DEBUG) console.warn("❌ Kein Team gewählt");
     return null;
   }
 
   if(!round || !round.length){
-    console.warn("❌ Kein Round vorhanden");
+    if (window.DEBUG) console.warn("❌ Kein Round vorhanden");
     return null;
   }
 
@@ -353,7 +353,7 @@ async function findLeaguesByCode(input){
   }
 
   if(!baseTeams || !baseTeams.length){
-    console.warn("⚠️ Keine passenden Teams (PLZ)");
+    if (window.DEBUG) console.warn("⚠️ Keine passenden Teams (PLZ)");
     return [];
   }
 
@@ -402,7 +402,7 @@ async function findLeaguesByCode(input){
   }
 
   if(!fullTeams || !fullTeams.length){
-    console.warn("⚠️ Keine Teams für gefundene Ligen");
+    if (window.DEBUG) console.warn("⚠️ Keine Teams für gefundene Ligen");
     return [];
   }
 
@@ -641,7 +641,7 @@ let leagueTeams = teams.filter(t =>
 );
 
 if(!leagueTeams.length){
-  console.warn("❌ Keine Teams für Liga:", c.name);
+  if (window.DEBUG) console.warn("❌ Keine Teams für Liga:", c.name);
   return; // 🔥 skip diese Liga komplett
 }
   // =========================
@@ -737,7 +737,7 @@ function bindPLZInput(){
 
     // 👉 warten bis Ligen geladen sind
     if(!game.league?.available?.length){
-      console.warn("⏳ warten auf Ligen...");
+      if (window.DEBUG) console.warn("⏳ warten auf Ligen...");
       return;
     }
 
@@ -827,7 +827,7 @@ function updateMainButtonText(){
   const live = game.match?.live;
 
   if(!mainBtn){
-    console.warn("⚠️ mainButton fehlt im DOM");
+    if (window.DEBUG) console.warn("⚠️ mainButton fehlt im DOM");
     return;
   }
 
@@ -865,7 +865,7 @@ mainBtn?.addEventListener("click", () => {
   // ❌ KEINE LIGA
   // =========================
   if(!league){
-    console.warn("❌ Keine Liga aktiv");
+    if (window.DEBUG) console.warn("❌ Keine Liga aktiv");
     return;
   }
 
@@ -882,7 +882,7 @@ mainBtn?.addEventListener("click", () => {
   const match = nextMatch();
 
   if(!match){
-    console.warn("❌ Kein Match verfügbar");
+    if (window.DEBUG) console.warn("❌ Kein Match verfügbar");
     return;
   }
 
@@ -913,7 +913,7 @@ mainBtn?.addEventListener("click", () => {
 }
 
 if(!live){
-  console.warn("❌ Kein Live-State nach Init");
+  if (window.DEBUG) console.warn("❌ Kein Live-State nach Init");
   return;
 }
 
@@ -922,7 +922,7 @@ if(!live){
 // 🚫 BYE → AUTO SKIP
 // =========================
 if(live.phase === "bye"){
-  console.warn("⚽ Spielfrei → skip");
+  if (window.DEBUG) console.warn("⚽ Spielfrei → skip");
 
   // =========================
   // 🖥 UI FEEDBACK
@@ -940,7 +940,7 @@ if(live.phase === "bye"){
   const nextRound = league.schedule?.[game.league.currentRound];
 
   if(!nextRound){
-    console.warn("🏁 Saison Ende erreicht");
+    if (window.DEBUG) console.warn("🏁 Saison Ende erreicht");
     return;
   }
 
@@ -996,7 +996,7 @@ if(live.phase === "bye"){
     const round = league.schedule?.[game.league?.currentRound || 0];
 
     if(!round){
-      console.warn("🏁 Saison Ende erreicht");
+      if (window.DEBUG) console.warn("🏁 Saison Ende erreicht");
       return;
     }
 
