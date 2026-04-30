@@ -12,7 +12,7 @@ import { handleAppVisibility } from "../main.js";
 import {
   ensureManagerState,
   recalculateSquadValue
-} from "./managerSystem.js";
+} from "././playerProgression.js";
 // =========================
 // 🧠 HELPERS
 // =========================
