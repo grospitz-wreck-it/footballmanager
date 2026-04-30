@@ -62,57 +62,62 @@ body {
 
 #topBar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
-  padding: 16px 24px;
-  min-height: 86px;
+  gap: 12px;
+  padding: 18px 24px;
+  min-height: 120px;
   border-radius: var(--ds-radius-lg);
   background: linear-gradient(155deg, var(--ds-bg-1), var(--ds-bg-2));
-  overflow: hidden;
   box-sizing: border-box;
-}
-
-#topTeams {
-  display: contents;
-}
-
-#topTeams .home-team {
-  grid-column: 1;
-  text-align: right;
-}
-
-#topTeams .away-team {
-  grid-column: 3;
-  text-align: left;
-}
-
-#topTeams .home-team,
-#topTeams .away-team {
-  min-width: 0;
-  white-space: nowrap;
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
-  font-weight: 800;
-  padding: 0 8px;
+}
+
+#eventLane {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+#scoreWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  grid-column: 1 / 2;
 }
 
 #topScore {
-  grid-column: 2;
-  flex-shrink: 0;
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(2.4rem, 5vw, 4rem);
   font-weight: 900;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+#topTeams {
+  width: 100%;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0 14px;
 }
 
 #topMinute {
-  grid-column: 4;
-  flex-shrink: 0;
+  position: absolute;
+  top: 14px;
+  right: 20px;
   min-width: 60px;
   text-align: right;
-  color: var(--ds-text-muted);
   font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ds-text-muted);
 }
 
 #gameCanvas,
