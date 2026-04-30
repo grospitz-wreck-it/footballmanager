@@ -27,6 +27,13 @@ import {
 // =========================
 // 🔒 INTERNAL
 // =========================
+game.ui = game.ui || {};
+game.ui.dirty = true;
+
+export function requestUIUpdate() {
+  game.ui.dirty = true;
+}
+
 let initialized = false;
 let lastRenderedEventId = null;
 let liveTableInterval = null;
@@ -524,7 +531,7 @@ function initUI() {
   if (tacticsBtn) {
     tacticsBtn.onclick = () => {
       game.ui.tacticsOpen = !game.ui.tacticsOpen;
-      updateUI();
+      requestUIUpdate();
     };
   }
 
@@ -537,7 +544,7 @@ function initUI() {
     tacticsOverlay.onclick = (e) => {
       if (e.target === tacticsOverlay) {
         game.ui.tacticsOpen = false;
-        updateUI();
+        requestUIUpdate();
       }
     };
   }
@@ -584,7 +591,7 @@ function initUI() {
       game.team.lineup.formation = value;
     }
 
-    updateUI();
+    requestUIUpdate();
   });
 
   setupDropdown("presetDropdown", (value) => {
@@ -629,7 +636,7 @@ function initUI() {
     // =========================
     // 🔄 UI UPDATE
     // =========================
-    updateUI();
+    requestUIUpdate();
   });
 
   // =========================
@@ -640,7 +647,7 @@ function initUI() {
 
     game.tactics.style = value;
 
-    updateUI();
+    requestUIUpdate();
   });
 
   // =========================
@@ -664,7 +671,7 @@ function initUI() {
         text: "🔥 Große Chance durch taktische Umstellung!",
       });
 
-      updateUI();
+     requestUIUpdate();
     };
   }
 }
@@ -988,7 +995,7 @@ function updateTabs() {
         if (el) el.style.display = "block";
       }
 
-      updateUI();
+      requestUIUpdate();
     };
   });
 }
@@ -1884,7 +1891,7 @@ function renderIcon(type) {
 // =========================
 requestAnimationFrame(() => {
   console.log("🚀 initial UI render");
-  updateUI();
+  requestUIUpdate();
 });
 
 // =========================
