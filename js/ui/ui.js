@@ -315,6 +315,45 @@ function showGameOverScreen() {
   });
 
 
+function updateSidebarManagerPanel() {
+  const manager = game.manager || {};
+  const league = game.league?.current || {};
+  const season = game.season || {};
+
+  const budgetEl = document.getElementById("sidebarBudget");
+  const transferEl = document.getElementById("sidebarTransferBudget");
+  const repEl = document.getElementById("sidebarReputation");
+  const valueEl = document.getElementById("sidebarSquadValue");
+  const leagueEl = document.getElementById("sidebarLeague");
+  const seasonEl = document.getElementById("sidebarSeason");
+
+  if (budgetEl) {
+    budgetEl.textContent =
+      "€" + Number(manager.budget || 0).toLocaleString("de-DE");
+  }
+
+  if (transferEl) {
+    transferEl.textContent =
+      "€" + Number(manager.transferBudget || 0).toLocaleString("de-DE");
+  }
+
+  if (repEl) {
+    repEl.textContent = manager.reputation || 0;
+  }
+
+  if (valueEl) {
+    valueEl.textContent =
+      "€" + Number(manager.squadValue || 0).toLocaleString("de-DE");
+  }
+
+  if (leagueEl) {
+    leagueEl.textContent = league.name || "-";
+  }
+
+  if (seasonEl) {
+    seasonEl.textContent = season.year || "1";
+  }
+}
 // =========================
 // 🍩 DONUT HELPER (GLOBAL)
 // =========================
@@ -377,14 +416,18 @@ function updateUI() {
   // =========================
   // 🧱 CORE UI
   // =========================
-  applySidebar();
+   applySidebar();
+  updateSidebarManagerPanel();
+
   updateScore();
   updateProgress();
   updateTacticsUI();
+
   if (game.ui.tacticsOpen) {
     renderFormationPreview();
     renderTacticStats();
   }
+
   updateTabs();
 
   // =========================
