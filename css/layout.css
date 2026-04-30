@@ -17,9 +17,7 @@
 }
 
 /* =========================
-TOPBAR DIRECT GITHUB FIX
-Paste this as ONLY topbar system in css/layout.css
-Remove all other #topBar/#topTeams/#topScore/#topMinute duplicates
+TOPBAR DIRECT GITHUB 
 ========================= */
 
 #topBar {
@@ -235,14 +233,13 @@ Remove all other #topBar/#topTeams/#topScore/#topMinute duplicates
   overflow: hidden;
 }
 
-/* NUR innerhalb #table! */
 #table table {
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
 }
 
-/* HEADER */
+
 #table thead {
   background: #111827;
 }
@@ -254,13 +251,13 @@ Remove all other #topBar/#topTeams/#topScore/#topMinute duplicates
   color: #94a3b8;
 }
 
-/* ROWS */
+
 #table td {
   padding: 8px 6px;
   border-top: 1px solid #1e293b;
 }
 
-/* ZEBRA */
+
 #table tbody tr:nth-child(even) {
   background: rgba(255,255,255,0.02);
 }
@@ -281,8 +278,7 @@ Remove all other #topBar/#topTeams/#topScore/#topMinute duplicates
   text-align: center;
 }
 /* =========================
-📅 SCHEDULE VIEW — SINGLE MATCHDAY SWIPE CARD
-Replace old schedule styles with this unified premium system
+📅 SCHEDULE VIEW
 ========================= */
 
 .schedule-card {
