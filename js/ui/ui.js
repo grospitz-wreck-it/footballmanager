@@ -710,7 +710,6 @@ function updateScore() {
   if (!match || !current) return;
 
   const topBar = document.getElementById("topBar");
-  const minuteEl = document.getElementById("topMinute");
   const tacticsEl = document.getElementById("topTactics");
 
   if (!topBar) return;
@@ -731,14 +730,14 @@ function updateScore() {
     "-";
 
   /* =========================
-  ⚽ SCORE
+  ⚽ SCORE + MINUTE
   ========================= */
   const home = match.score?.home ?? 0;
   const away = match.score?.away ?? 0;
   const minute = match.minute ?? 0;
 
   /* =========================
-  🔥 GOAL DETECT
+  🔥 GOAL DETECTION
   ========================= */
   const isGoal =
     lastScoreState.home !== null &&
@@ -748,7 +747,7 @@ function updateScore() {
     );
 
   /* =========================
-  🧱 FULL TOPBAR RENDER
+  🧱 FULL MODERN TOPBAR RENDER
   ========================= */
   topBar.innerHTML = `
     <div id="topMinute" class="minute">${minute}'</div>
@@ -790,7 +789,7 @@ function updateScore() {
   }
 
   /* =========================
-  💾 SAVE SCORE
+  💾 SAVE SCORE STATE
   ========================= */
   lastScoreState = {
     home,
