@@ -286,6 +286,35 @@ function showGameOverScreen() {
 
   overlay.style.display = "flex";
 }
+
+
+  // =========================
+  // 🧠 SIDEBAR PANEL SWITCH
+  // =========================
+  document.querySelectorAll(".side-tab").forEach((tab) => {
+    tab.onclick = () => {
+      const panel = tab.dataset.panel;
+
+      document
+        .querySelectorAll(".side-tab")
+        .forEach((t) => t.classList.remove("active"));
+
+      document
+        .querySelectorAll(".sidebar-panel")
+        .forEach((p) => p.classList.remove("active"));
+
+      tab.classList.add("active");
+
+      const target =
+        panel === "manager"
+          ? document.getElementById("managerPanel")
+          : document.getElementById("systemPanel");
+
+      target?.classList.add("active");
+    };
+  });
+
+
 // =========================
 // 🍩 DONUT HELPER (GLOBAL)
 // =========================
