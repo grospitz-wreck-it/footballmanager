@@ -125,28 +125,98 @@
     <div>Kreisliga Manager</div>
 
     <button id="tacticsBtn" class="tactics-btn">
-  <img src="./gfx/tacticsettings.webp" alt="Tactics" />
-</button>
+      <img src="./gfx/tacticsettings.webp" alt="Tactics" />
+    </button>
   </div>
 
   <!-- 🍔 SIDEBAR -->
-<div id="sidebarWrapper" class="sidebar-wrapper">
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div id="sidebarWrapper" class="sidebar-wrapper">
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-  <div id="sidebar">
+    <div id="sidebar">
 
-    <button id="saveBtn">💾 Speichern</button>
-    <button id="loadBtn">📂 Laden</button>
-    <button id="resetBtn">🗑 Reset</button>
+      <!-- ========================= -->
+      <!-- 🧠 HEADER -->
+      <!-- ========================= -->
+      <div class="sidebar-header">
+        <div class="sidebar-title">KARRIERE HUB</div>
+        <div class="sidebar-sub">Manager & System</div>
+      </div>
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">Team Farbe</div>
-      <input type="color" id="colorPicker" value="#22d3ee">
+      <!-- ========================= -->
+      <!-- 🔀 TOP TABS -->
+      <!-- ========================= -->
+      <div class="sidebar-top-tabs">
+        <button class="side-tab active" data-panel="manager">Manager</button>
+        <button class="side-tab" data-panel="system">System</button>
+      </div>
+
+      <!-- ========================= -->
+      <!-- 📈 MANAGER PANEL -->
+      <!-- ========================= -->
+      <div id="managerPanel" class="sidebar-panel active">
+
+        <div class="manager-card">
+
+          <div class="manager-stat">
+            <span>💰 Budget</span>
+            <strong id="sidebarBudget">€0</strong>
+          </div>
+
+          <div class="manager-stat">
+            <span>🔁 Transferbudget</span>
+            <strong id="sidebarTransferBudget">€0</strong>
+          </div>
+
+          <div class="manager-stat">
+            <span>⭐ Reputation</span>
+            <strong id="sidebarReputation">0</strong>
+          </div>
+
+          <div class="manager-stat">
+            <span>👥 Kaderwert</span>
+            <strong id="sidebarSquadValue">€0</strong>
+          </div>
+
+          <div class="manager-stat">
+            <span>🏆 Liga</span>
+            <strong id="sidebarLeague">-</strong>
+          </div>
+
+          <div class="manager-stat">
+            <span>📅 Saison</span>
+            <strong id="sidebarSeason">-</strong>
+          </div>
+
+        </div>
+
+        <!-- 🔧 SUB ACTIONS -->
+        <div class="manager-actions">
+          <button id="transferMarketBtn">🔄 Transfermarkt</button>
+          <button id="sponsorBtn">🤝 Sponsoren</button>
+          <button id="squadBtn">📋 Kaderanalyse</button>
+        </div>
+
+      </div>
+
+      <!-- ========================= -->
+      <!-- ⚙️ SYSTEM PANEL -->
+      <!-- ========================= -->
+      <div id="systemPanel" class="sidebar-panel">
+
+        <button id="saveBtn">💾 Speichern</button>
+        <button id="loadBtn">📂 Laden</button>
+        <button id="resetBtn">🗑 Reset</button>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Team Farbe</div>
+          <input type="color" id="colorPicker" value="#22d3ee">
+        </div>
+
+      </div>
+
     </div>
-
-    <hr>
   </div>
-</div>
 
   <!-- 📦 MAIN -->
   <div class="container">
