@@ -711,7 +711,7 @@ if(plzInputEl){
 // =========================
 // 🏆 LEAGUE SELECT (nur vorbereiten)
 // =========================
-initLeagueSelect([]); // 🔥 leer starten!
+
 
 // =========================
 // 🔎 PLZ BINDING (FIXED)
