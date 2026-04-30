@@ -168,7 +168,7 @@ function renderEvents(){
   // =========================
   if(feed){
     feed.innerHTML = events.length > 0
-      ? events.slice(-20).reverse()
+      ? events.slice(-8).reverse()
         .map(e => {
           const safeText = String(e.text)
             .replace(/</g, "&lt;")
