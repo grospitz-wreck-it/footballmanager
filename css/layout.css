@@ -17,44 +17,45 @@
 }
 
 /* =========================
-🎯 TOPBAR TRUE CENTER FIX
-PERFECT VISUAL BALANCE
+🎯 TOPBAR ABSOLUTE TRUE CENTER
+HEADER-ALIGNED / COMPACT / PREMIUM
 ========================= */
 
-/* TOPBAR */
 #topBar {
   position: relative;
 
-  display: grid;
-  grid-template-columns: 1fr;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  padding: 14px 20px;
-  min-height: 100px;
+  min-height: 92px;
+  padding: 12px 18px;
 
-  border-radius: 22px;
+  border-radius: 20px;
 
   background:
-    radial-gradient(circle at top center, rgba(34,211,238,0.10), transparent 50%),
-    radial-gradient(circle at bottom right, rgba(167,139,250,0.08), transparent 45%),
+    radial-gradient(circle at top center, rgba(34,211,238,0.08), transparent 48%),
+    radial-gradient(circle at bottom right, rgba(167,139,250,0.06), transparent 42%),
     linear-gradient(160deg, #020617 0%, #071226 55%, #020617 100%);
 
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.035);
 
   box-shadow:
-    0 12px 26px rgba(0,0,0,0.68),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+    0 10px 22px rgba(0,0,0,0.62),
+    inset 0 1px 0 rgba(255,255,255,0.035);
 
   overflow: hidden;
 }
 
 /* =========================
-⏱ MINUTE
+⏱ LIVE MINUTE
 ========================= */
 #topBar .topbar-live {
   position: absolute;
-  top: 14px;
   left: 18px;
+  top: 50%;
+
+  transform: translateY(-50%);
 
   z-index: 5;
 }
@@ -62,51 +63,60 @@ PERFECT VISUAL BALANCE
 #topBar .minute {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 800;
 
   color: #cbd5e1;
+}
 
+/* no chip */
+#topBar .minute,
+#topBar .topbar-live {
   background: transparent;
+  border: none;
+  box-shadow: none;
   padding: 0;
-  margin: 0;
 }
 
 /* =========================
-🏟 MATCHUP BLOCK
+🏟 MATCHUP PERFECT CENTER
 ========================= */
 #topBar .matchup {
-  width: 100%;
-  max-width: 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
 
-  display: grid;
-  grid-template-rows: auto auto auto;
+  transform: translate(-50%, -50%);
 
-  justify-items: center;
+  width: min(92%, 520px);
+
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
 
-  gap: 8px;
-
-  padding: 0 42px; /* 🔥 gleiche Luft links/rechts */
-  margin: 0 auto;
+  gap: 4px;
 }
 
 /* =========================
-🏠 HOME
+🏠 HOME TEAM
 ========================= */
 #topBar .home {
   width: 100%;
-  max-width: 100%;
 
   text-align: center;
 
-  font-size: clamp(0.82rem, 1.45vw, 1.05rem);
+  font-size: clamp(0.78rem, 1.25vw, 0.98rem);
   font-weight: 850;
-  line-height: 1.15;
+  line-height: 1.1;
 
   color: var(--accent);
+
+  text-shadow:
+    0 0 7px var(--accent-glow),
+    0 0 14px rgba(34,211,238,0.12);
 
   white-space: nowrap;
   overflow: hidden;
@@ -125,33 +135,38 @@ PERFECT VISUAL BALANCE
 }
 
 #topBar .score {
-  display: block;
-
-  text-align: center;
-
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2.3rem, 4vw, 3.5rem);
   font-weight: 950;
-  line-height: 0.88;
+  line-height: 0.86;
 
   color: white;
 
-  margin: 0 auto;
-}
-
-/* =========================
-🛡 AWAY
-========================= */
-#topBar .away {
-  width: 100%;
-  max-width: 100%;
+  letter-spacing: -0.05em;
 
   text-align: center;
 
-  font-size: clamp(0.82rem, 1.45vw, 1.05rem);
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.18),
+    0 0 18px rgba(34,211,238,0.10);
+}
+
+/* =========================
+🛡 AWAY TEAM
+========================= */
+#topBar .away {
+  width: 100%;
+
+  text-align: center;
+
+  font-size: clamp(0.78rem, 1.25vw, 0.98rem);
   font-weight: 850;
-  line-height: 1.15;
+  line-height: 1.1;
 
   color: var(--accent-opp);
+
+  text-shadow:
+    0 0 7px var(--accent-opp-glow),
+    0 0 14px rgba(167,139,250,0.12);
 
   white-space: nowrap;
   overflow: hidden;
@@ -163,22 +178,29 @@ PERFECT VISUAL BALANCE
 ========================= */
 @media (max-width: 480px) {
   #topBar {
-    min-height: 108px;
-    padding: 12px 16px;
+    min-height: 86px;
+    padding: 10px 14px;
   }
 
-  #topBar .matchup {
-    padding: 0 34px;
-    gap: 6px;
+  #topBar .topbar-live {
+    left: 14px;
+  }
+
+  #topBar .minute {
+    font-size: 0.68rem;
   }
 
   #topBar .home,
   #topBar .away {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
   }
 
   #topBar .score {
-    font-size: clamp(2.2rem, 10vw, 3.4rem);
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+
+  #topBar .matchup {
+    width: min(88%, 420px);
   }
 }
 /* =========================
