@@ -220,19 +220,21 @@
   <!-- 📦 MAIN -->
   <div class="container">
 
-topBar.innerHTML = `
-  <div id="topMinute" class="minute">${minute}'</div>
+<div id="topBar">
+  <div class="topbar-live">
+    <div id="topMinute" class="minute">0'</div>
+  </div>
 
   <div class="matchup">
-    <div class="home">${homeName}</div>
+    <div id="topHome" class="home">Home Team</div>
 
     <div class="scoreRow">
-      <span id="topScore" class="score">${home}:${away}</span>
+      <span id="topScore" class="score">0:0</span>
     </div>
 
-    <div class="away">${awayName}</div>
+    <div id="topAway" class="away">Away Team</div>
   </div>
-`;
+</div>
 
     <!-- ⏱ PROGRESS -->
    <div id="progressWrapper">
