@@ -281,28 +281,79 @@ Remove all other #topBar/#topTeams/#topScore/#topMinute duplicates
   text-align: center;
 }
 /* =========================
-📅 SCHEDULE SAFE
+📅 SCHEDULE PRO UI
 ========================= */
-#scheduleView {
-  display: block;
+
+.schedule-card {
+  background: linear-gradient(180deg, #020617, #0f172a);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: fadeIn 0.3s ease;
 }
-#teamView {
-  display: block;
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.team-field {
-  position: relative;
-  width: 100%;
+.schedule-header button {
+  background: #1e293b;
+  color: white;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
 
-  /* 🔥 stabiler als nur aspect-ratio */
-  aspect-ratio: 16/9;
-  max-height: 500px;
+.schedule-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
 
-background: url("../gfx/field.svg") center/cover no-repeat;
-  border-radius: 14px;
-  margin-bottom: 12px;
-  overflow: hidden;
+.schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-  /* 🔥 wichtig für sauberes Positioning */
-  display: block;
+.match {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px;
+  border-radius: 10px;
+
+  background: rgba(255,255,255,0.03);
+  transition: all 0.2s ease;
+}
+
+.match:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.match.active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #022c22;
+  font-weight: bold;
+  transform: scale(1.02);
+}
+
+.match .vs {
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
