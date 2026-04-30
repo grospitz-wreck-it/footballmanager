@@ -517,17 +517,6 @@ body #topBar.user-match #topTeams .away {
     transform: translateY(0);
   }
 }
-body {
-  outline: 8px solid red !important;
-}
-
-#topBar {
-  background: red !important;
-}
-
-#scheduleView {
-  background: lime !important;
-}
 /* =========================
 FINAL TOPBAR OVERRIDE
 ========================= */
