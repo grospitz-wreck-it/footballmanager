@@ -6,7 +6,7 @@
 @import "./css/splash.css";
 @import "./css/tactics.css";
 @import "./css/team.css";
-
+@import "./design-system.css";
 :root {
   --accent: #22d3ee;
 
