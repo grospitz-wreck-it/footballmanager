@@ -45,6 +45,39 @@ function ensureManager() {
   return game.manager;
 }
 
+export function recalculateSquadValue() {
+  const manager = ensureManager();
+
+  const selectedId = String(game.team?.selectedId || "");
+  if (!selectedId) {
+    manager.squadValue = 0;
+    return 0;
+  }
+
+  const leagues = game?.league?.available || game?.leagues || [];
+  let squadValue = 0;
+
+  for (const league of leagues) {
+    if (!league?.teams?.length) continue;
+
+    const team = league.teams.find(
+      (t) => String(t.id) === selectedId
+    );
+
+    if (!team?.players?.length) continue;
+
+    squadValue = team.players.reduce((sum, player) => {
+      return sum + (Number(player.marketValue) || 0);
+    }, 0);
+
+    break;
+  }
+
+  manager.squadValue = Math.round(squadValue);
+
+  return manager.squadValue;
+}
+
 // =========================
 // 📈 REPUTATION
 // =========================
@@ -143,6 +176,8 @@ export function applySeasonBudget(seasonResult = {}) {
     sponsorLevel: manager.sponsorLevel
   });
 
+
+  recalculateSquadValue();
   return {
     seasonIncome,
     totalBudget: manager.budget,
