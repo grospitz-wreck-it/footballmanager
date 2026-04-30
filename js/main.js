@@ -145,7 +145,7 @@ function startBackgroundSimulation(){
     }
 
     if(game.ui?.tab === "table" || game.ui?.tab === "match"){
-      updateUI();
+      game.ui.dirty = true;
     }
 
   }, 2000);
@@ -249,7 +249,7 @@ function initEventBindings(){
 
 // 🔥 Sync back
 game.league.currentRound = game.league.currentRound;
-    updateUI();
+    game.ui.dirty = true;
     renderEvents();
     renderSchedule();
   });
@@ -804,7 +804,7 @@ bindPLZInput();
 // UI
 // =========================
 handleAppVisibility();
-updateUI();
+game.ui.dirty = true;
 } catch(e){
     console.error("💥 INIT CRASH:", e);
   }
@@ -972,7 +972,7 @@ if(live.phase === "bye"){
   // =========================
   // 🖥 UI UPDATE
   // =========================
-  updateUI();
+  game.ui.dirty = true;
   updateMainButtonText();
 
   return;
@@ -1008,17 +1008,17 @@ if(live.phase === "bye"){
 
     runMatchLoop({
       onTick: () => {
-        updateUI();
+        game.ui.dirty = true;
         updateMainButtonText();
       },
       onEnd: () => {
         matchLoopRunning = false;
-        updateUI();
+        game.ui.dirty = true;
         updateMainButtonText();
       }
     });
 
-    updateUI();
+    game.ui.dirty = true;
     updateMainButtonText();
     return;
   }
@@ -1041,12 +1041,12 @@ if(live.phase === "bye"){
 
     runMatchLoop({
       onTick: () => {
-        updateUI();
+        game.ui.dirty = true;
         updateMainButtonText();
       },
       onEnd: () => {
         matchLoopRunning = false;
-        updateUI();
+        game.ui.dirty = true;
         updateMainButtonText();
       }
     });
@@ -1072,12 +1072,12 @@ if(live.phase === "bye"){
 
     runMatchLoop({
       onTick: () => {
-        updateUI();
+        game.ui.dirty = true;
         updateMainButtonText();
       },
       onEnd: () => {
         matchLoopRunning = false;
-        updateUI();
+        game.ui.dirty = true;
         updateMainButtonText();
       }
     });
@@ -1112,7 +1112,7 @@ document.getElementById("resetBtn")?.addEventListener("click", async () => {
   // 🔥 UI NEU BEWERTEN
   // =========================
   handleAppVisibility();
-  updateUI();
+  game.ui.dirty = true;
 
 });
 
