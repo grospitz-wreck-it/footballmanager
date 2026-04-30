@@ -467,11 +467,22 @@ TOPBAR DIRECT GITHUB
 
 .match .home {
   text-align: right;
-  color: var(--accent);
+  color: #e5e7eb;
+  text-shadow: none;
 }
 
 .match .away {
   text-align: left;
+  color: #e5e7eb;
+  text-shadow: none;
+}
+
+/* Nur User Match bleibt Brand-Style */
+.match.active .home {
+  color: var(--accent);
+}
+
+.match.active .away {
   color: var(--accent-opp);
 }
 
