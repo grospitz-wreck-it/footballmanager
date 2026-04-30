@@ -1808,18 +1808,19 @@ function pushEventIcon(type) {
   const IMPORTANT = ["GOAL"];
   const MEDIUM = ["SHOT", "SAVE", "SHOT_SAVED", "FOUL", "CORNER", "DUEL"];
   const SPAM = [
-    "PASS",
-    "DRIBBLE",
-    "INTERCEPTION",
-    "BALL_LOSS",
-    "BALL_RECOVERY",
-    "CLEARANCE",
-  ];
+  "PASS",
+  "DRIBBLE",
+  "INTERCEPTION",
+  "BALL_LOSS",
+  "BALL_RECOVERY",
+  "CLEARANCE",
+  "DUEL",
+];
 
   // =========================
   // ⏱ GLOBAL COOLDOWN
   // =========================
-  if (now - lastIconTime < 800) return;
+  if (now - lastIconTime < 1600) return;
 
   // =========================
   // 🧠 FILTER LOGIC
@@ -1843,9 +1844,9 @@ function pushEventIcon(type) {
 
   // ⚪ Spam → hart gedrosselt + extra cooldown
   if (SPAM.includes(type)) {
-    if (now - lastSpamIconTime < 2000) return;
+    if (now - lastSpamIconTime < 4000) return;
 
-    if (Math.random() < 0.25) {
+    if (Math.random() < 0.08) {
       lastIconTime = now;
       lastSpamIconTime = now;
       renderIcon(type);
