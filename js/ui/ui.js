@@ -272,10 +272,7 @@ function showGameOverScreen() {
 
     document.body.appendChild(overlay);
 
-    const btn =
-      overlay.querySelector(
-        "#restartCareerBtn",
-      );
+    const btn = overlay.querySelector("#restartCareerBtn");
 
     if (btn) {
       btn.onclick = () => {
@@ -286,34 +283,6 @@ function showGameOverScreen() {
 
   overlay.style.display = "flex";
 }
-
-
-  // =========================
-  // 🧠 SIDEBAR PANEL SWITCH
-  // =========================
-  document.querySelectorAll(".side-tab").forEach((tab) => {
-    tab.onclick = () => {
-      const panel = tab.dataset.panel;
-
-      document
-        .querySelectorAll(".side-tab")
-        .forEach((t) => t.classList.remove("active"));
-
-      document
-        .querySelectorAll(".sidebar-panel")
-        .forEach((p) => p.classList.remove("active"));
-
-      tab.classList.add("active");
-
-      const target =
-        panel === "manager"
-          ? document.getElementById("managerPanel")
-          : document.getElementById("systemPanel");
-
-      target?.classList.add("active");
-    };
-  });
-
 
 function updateSidebarManagerPanel() {
   const manager = game.manager || {};
@@ -391,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function updateUI() {
   initUI();
-// =========================
+  // =========================
   // 💀 GAME OVER
   // =========================
   if (game.phase === "gameover") {
@@ -416,7 +385,7 @@ function updateUI() {
   // =========================
   // 🧱 CORE UI
   // =========================
-   applySidebar();
+  applySidebar();
   updateSidebarManagerPanel();
 
   updateScore();
@@ -493,7 +462,9 @@ function initUI() {
   initialized = true;
 
   console.log("🧱 UI init");
-
+  if (typeof ensureManagerState === "function") {
+    ensureManagerState();
+  }
   // =========================
   // 🍔 SIDEBAR
   // =========================
@@ -512,6 +483,29 @@ function initUI() {
       applySidebar();
     });
   }
+
+  document.querySelectorAll(".side-tab").forEach((tab) => {
+    tab.onclick = () => {
+      const panel = tab.dataset.panel;
+
+      document
+        .querySelectorAll(".side-tab")
+        .forEach((t) => t.classList.remove("active"));
+
+      document
+        .querySelectorAll(".sidebar-panel")
+        .forEach((p) => p.classList.remove("active"));
+
+      tab.classList.add("active");
+
+      const target =
+        panel === "manager"
+          ? document.getElementById("managerPanel")
+          : document.getElementById("systemPanel");
+
+      target?.classList.add("active");
+    };
+  });
 
   // =========================
   // 🔥 STATE LISTENER
