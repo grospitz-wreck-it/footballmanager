@@ -220,19 +220,19 @@
   <!-- 📦 MAIN -->
   <div class="container">
 
-<div id="topBar">
-  <div id="topMinute" class="minute">0'</div>
+topBar.innerHTML = `
+  <div id="topMinute" class="minute">${minute}'</div>
 
   <div class="matchup">
-    <div id="topHome" class="home">-</div>
+    <div class="home">${homeName}</div>
 
     <div class="scoreRow">
-      <span id="topScore" class="score">0:0</span>
+      <span id="topScore" class="score">${home}:${away}</span>
     </div>
 
-    <div id="topAway" class="away">-</div>
+    <div class="away">${awayName}</div>
   </div>
-</div>
+`;
 
     <!-- ⏱ PROGRESS -->
    <div id="progressWrapper">
