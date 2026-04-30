@@ -597,18 +597,3 @@ body #topMinute {
   font-size: 13px !important;
 }
 
-/* =========================
-FINAL SCHEDULE OVERRIDE
-========================= */
-
-body #scheduleView .schedule-card {
-  border-radius: 18px !important;
-  padding: 14px !important;
-}
-
-body #scheduleView .match {
-  display: grid !important;
-  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) !important;
-  padding: 12px 14px !important;
-  border-radius: 14px !important;
-}
