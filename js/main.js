@@ -699,6 +699,8 @@ game.leagues = leagues;
 game.league = game.league || {};
 game.league.available = leagues;
 
+initLeagueSelect(leagues);
+
 if (window.DEBUG) console.log("🏁 Leagues built:", leagues.length);
     const plzInputEl = document.getElementById("plzInput");
 
