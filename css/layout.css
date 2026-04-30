@@ -17,8 +17,8 @@
 }
 
 /* =========================
-🚀 TOPBAR COMPLETE NEW SYSTEM
-FOR NEW HTML STRUCTURE
+🚀 TOPBAR REFINED MATCH HUD
+HOME TOP / SCORE CENTER / AWAY BOTTOM
 ========================= */
 
 #topBar {
@@ -26,10 +26,10 @@ FOR NEW HTML STRUCTURE
 
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 18px;
+  gap: 20px;
 
   padding: 22px 24px;
-  min-height: 160px;
+  min-height: 170px;
 
   border-radius: 24px;
 
@@ -54,7 +54,7 @@ FOR NEW HTML STRUCTURE
   align-items: center;
   justify-content: center;
 
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
 
   color: #94a3b8;
@@ -63,40 +63,38 @@ FOR NEW HTML STRUCTURE
 }
 
 /* =========================
-🏟 MATCHUP BLOCK
+🏟 MATCHUP
 ========================= */
 #topBar .matchup {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 
   gap: 10px;
 
   min-width: 0;
+  width: 100%;
 }
 
 /* =========================
-🏠 TEAM NAMES
+🏠 HOME TEAM
 ========================= */
-#topBar .home,
-#topBar .away {
+#topBar .home {
   font-size: clamp(1rem, 1.8vw, 1.35rem);
   font-weight: 800;
   line-height: 1.2;
 
-  color: #e5e7eb;
+  text-align: center;
+
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
 
-#topBar .home {
-  text-align: left;
-}
-
-#topBar .away {
-  text-align: right;
+  max-width: 100%;
 }
 
 /* =========================
@@ -106,8 +104,6 @@ FOR NEW HTML STRUCTURE
   display: flex;
   align-items: center;
   justify-content: center;
-
-  gap: 18px;
 }
 
 /* SCORE */
@@ -123,15 +119,29 @@ FOR NEW HTML STRUCTURE
     0 0 24px rgba(34,211,238,0.18);
 }
 
-/* VS */
+/* VS komplett ausblenden */
 #topBar .vs {
-  font-size: 1rem;
-  font-weight: 900;
+  display: none !important;
+}
 
-  color: var(--accent);
+/* =========================
+🛡 AWAY TEAM
+========================= */
+#topBar .away {
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.2;
 
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  text-align: center;
+
+  color: var(--accent-opp);
+  text-shadow: 0 0 10px var(--accent-opp-glow);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  max-width: 100%;
 }
 
 /* =========================
@@ -150,10 +160,6 @@ FOR NEW HTML STRUCTURE
 
   #topBar .score {
     font-size: clamp(2.5rem, 10vw, 4rem);
-  }
-
-  #topBar .vs {
-    font-size: 0.9rem;
   }
 }
 /* =========================
