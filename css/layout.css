@@ -17,20 +17,20 @@
 }
 
 /* =========================
-👑 TOPBAR STRUCTURE FIX
-CLEAN / CENTERED / LOWER / PROFESSIONAL
-REPLACES CURRENT TOPBAR CSS
+🎯 TOPBAR TRUE CENTER FIX
+PERFECT VISUAL BALANCE
 ========================= */
 
+/* TOPBAR */
 #topBar {
   position: relative;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
 
   padding: 14px 20px;
-  min-height: 118px;
+  min-height: 100px;
 
   border-radius: 22px;
 
@@ -49,17 +49,14 @@ REPLACES CURRENT TOPBAR CSS
 }
 
 /* =========================
-⏱ MINUTE (NO CONTAINER)
+⏱ MINUTE
 ========================= */
 #topBar .topbar-live {
   position: absolute;
   top: 14px;
   left: 18px;
 
-  display: flex;
-  align-items: center;
-
-  z-index: 4;
+  z-index: 5;
 }
 
 #topBar .minute {
@@ -67,75 +64,49 @@ REPLACES CURRENT TOPBAR CSS
   align-items: center;
   gap: 8px;
 
-  padding: 0;
-  margin: 0;
-
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  backdrop-filter: none;
-
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 800;
-  letter-spacing: 0.03em;
 
   color: #cbd5e1;
-}
 
-/* 🔴 DOT */
-#topBar .minute::before {
-  content: "";
-
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-  background: #ef4444;
-
-  box-shadow:
-    0 0 8px rgba(239,68,68,0.85),
-    0 0 16px rgba(239,68,68,0.55);
-
-  animation: pulseLiveElite 1.15s infinite;
+  background: transparent;
+  padding: 0;
+  margin: 0;
 }
 
 /* =========================
 🏟 MATCHUP BLOCK
 ========================= */
 #topBar .matchup {
-  position: relative;
-  z-index: 2;
+  width: 100%;
+  max-width: 100%;
 
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto auto;
+
+  justify-items: center;
   align-items: center;
-  justify-content: center;
 
   gap: 8px;
 
-  width: 100%;
-  max-width: 96%;
-
-  padding: 0 20px;
+  padding: 0 42px; /* 🔥 gleiche Luft links/rechts */
+  margin: 0 auto;
 }
 
 /* =========================
-🏠 HOME TEAM
+🏠 HOME
 ========================= */
 #topBar .home {
   width: 100%;
+  max-width: 100%;
+
+  text-align: center;
 
   font-size: clamp(0.82rem, 1.45vw, 1.05rem);
   font-weight: 850;
   line-height: 1.15;
 
-  text-align: center;
-
   color: var(--accent);
-
-  text-shadow:
-    0 0 8px var(--accent-glow),
-    0 0 18px rgba(34,211,238,0.14);
 
   white-space: nowrap;
   overflow: hidden;
@@ -147,54 +118,44 @@ REPLACES CURRENT TOPBAR CSS
 ========================= */
 #topBar .scoreRow {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 
-  margin: 1px 0;
+  width: 100%;
 }
 
 #topBar .score {
+  display: block;
+
+  text-align: center;
+
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 950;
-  line-height: 0.9;
+  line-height: 0.88;
 
   color: white;
 
-  letter-spacing: -0.04em;
-
-  text-shadow:
-    0 0 12px rgba(255,255,255,0.18),
-    0 0 24px rgba(34,211,238,0.12);
+  margin: 0 auto;
 }
 
 /* =========================
-🛡 AWAY TEAM
+🛡 AWAY
 ========================= */
 #topBar .away {
   width: 100%;
+  max-width: 100%;
+
+  text-align: center;
 
   font-size: clamp(0.82rem, 1.45vw, 1.05rem);
   font-weight: 850;
   line-height: 1.15;
 
-  text-align: center;
-
   color: var(--accent-opp);
-
-  text-shadow:
-    0 0 8px var(--accent-opp-glow),
-    0 0 18px rgba(167,139,250,0.14);
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* =========================
-🔥 GOAL SHAKE
-========================= */
-#topBar.goal .score {
-  animation: scoreImpactElite 0.72s ease;
 }
 
 /* =========================
@@ -206,13 +167,9 @@ REPLACES CURRENT TOPBAR CSS
     padding: 12px 16px;
   }
 
-  #topBar .topbar-live {
-    top: 12px;
-    left: 14px;
-  }
-
-  #topBar .minute {
-    font-size: 0.72rem;
+  #topBar .matchup {
+    padding: 0 34px;
+    gap: 6px;
   }
 
   #topBar .home,
@@ -222,10 +179,6 @@ REPLACES CURRENT TOPBAR CSS
 
   #topBar .score {
     font-size: clamp(2.2rem, 10vw, 3.4rem);
-  }
-
-  #topBar .matchup {
-    padding: 0 14px;
   }
 }
 /* =========================
