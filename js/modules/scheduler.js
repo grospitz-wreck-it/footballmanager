@@ -511,60 +511,96 @@ function advanceSchedule(){
 // =========================
 // 📅 RENDER
 // =========================
-function renderSchedule(){
-
+function renderSchedule() {
   const container = document.getElementById("scheduleView");
-  if(!container) return;
+  if (!container) return;
 
   const schedule = game.league?.current?.schedule;
-  if(!schedule?.length){
+  if (!schedule?.length) {
     container.innerHTML = "<p>Kein Spielplan vorhanden</p>";
     return;
   }
 
+  let selectedRound =
+    typeof window.scheduleViewIndex === "number"
+      ? window.scheduleViewIndex
+      : game.league.currentRound || 0;
+
+  selectedRound = Math.max(0, Math.min(selectedRound, schedule.length - 1));
+  window.scheduleViewIndex = selectedRound;
+
+  const round = schedule[selectedRound];
   const myMatch = game.match?.current || null;
 
-  let html = "";
+  let html = `
+    <div class="schedule-card">
+      <div class="schedule-header">
+        <button class="prev-day" ${selectedRound === 0 ? "disabled" : ""}>‹</button>
+        <h3>Spieltag ${selectedRound + 1}</h3>
+        <button class="next-day" ${
+          selectedRound === schedule.length - 1 ? "disabled" : ""
+        }>›</button>
+      </div>
+      <div class="schedule-list">
+  `;
 
-  schedule.forEach((round, rIndex) => {
+  round.forEach((match, mIndex) => {
+    const isUserMatch =
+      myMatch &&
+      match.id === myMatch.id;
 
-    html += `<div class="round">
-      <h3>Spieltag ${rIndex + 1}</h3>
-      <ul style="list-style:none;padding:0;">`;
+    const isCurrent =
+      selectedRound === game.league.currentRound &&
+      mIndex === game.league.currentMatchIndex;
 
-    round.forEach((match, mIndex) => {
+    const matchClasses = [
+      "match",
+      isUserMatch ? "active" : "",
+      isCurrent ? "current" : ""
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-      const isUserMatch =
-  game.match?.current &&
-  match.id === game.match.current.id;
+    const centerDisplay = match.result
+      ? `<span class="score">${match.result.home}:${match.result.away}</span>`
+      : `<span class="vs">vs</span>`;
 
-const isCurrent =
-  rIndex === game.league.currentRound &&
-  mIndex === game.league.currentMatchIndex;
-
-      html += `
-        <li style="
-          padding:6px;
-          margin:2px 0;
-          border-radius:4px;
-          ${
-  isUserMatch
-    ? "background:#1a1a1a;color:#00ff88;font-weight:bold;"
-    : isCurrent
-      ? "background:#111;color:#aaa;"
-      : ""
-}
-        ">
-${getTeamName(match.homeTeamId)} ${match.result ? match.result.home + ":" + match.result.away : "vs"} ${getTeamName(match.awayTeamId)}
-${match._processed ? " ✅" : ""}
-        </li>
-      `;
-    });
-
-    html += `</ul></div>`;
+    html += `
+      <div class="${matchClasses}">
+        <span class="home">${getTeamName(match.homeTeamId)}</span>
+        ${centerDisplay}
+        <span class="away">${getTeamName(match.awayTeamId)}</span>
+      </div>
+    `;
   });
 
+  html += `
+      </div>
+    </div>
+  `;
+
   container.innerHTML = html;
+
+  const prevBtn = container.querySelector(".prev-day");
+  const nextBtn = container.querySelector(".next-day");
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (window.scheduleViewIndex > 0) {
+        window.scheduleViewIndex--;
+        renderSchedule();
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      if (window.scheduleViewIndex < schedule.length - 1) {
+        window.scheduleViewIndex++;
+        renderSchedule();
+      }
+    });
+  }
 }
 
 // =========================
