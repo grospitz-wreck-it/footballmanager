@@ -517,3 +517,14 @@ TOPBAR DIRECT GITHUB
     transform: translateY(0);
   }
 }
+body {
+  outline: 8px solid red !important;
+}
+
+#topBar {
+  background: red !important;
+}
+
+#scheduleView {
+  background: lime !important;
+}
