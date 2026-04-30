@@ -1,13 +1,18 @@
 // =========================
 // 📦 IMPORTS
 // =========================
-import { renderCurrentMatch } from "../ui/ui.js";
+import { renderCurrentMatch, updateUI } from "../ui/ui.js";
 import { game } from "../core/state.js";
 import { generateTeam } from "./teamLoader.js";
 import { initMatch } from "../matchEngine.js";
-import { generateSchedule } from "./scheduler.js"; // 🔥 FIX
+import { generateSchedule } from "./scheduler.js";
 import { startGame } from "../ui/layout.js";
 import { handleAppVisibility } from "../main.js";
+
+import {
+  ensureManagerState,
+  recalculateSquadValue
+} from "./managerSystem.js";
 // =========================
 // 🧠 HELPERS
 // =========================
@@ -620,45 +625,79 @@ function selectTeamById(teamId) {
     return false;
   }
 
+  // =========================
+  // 👤 TEAM SETZEN
+  // =========================
   game.team.selected = team.name;
   game.team.selectedId = normalizeId(team.id);
+
+  // =========================
+  // 💼 MANAGER SYSTEM INIT
+  // =========================
   if (typeof ensureManagerState === "function") {
     ensureManagerState();
   }
 
-  if (typeof recalculateSquadValue === "function") {
-    recalculateSquadValue();
-  }
+  // =========================
+  // 👥 SPIELER AUFBAU
+  // =========================
   let players = ensureTeamPlayers(team);
 
-  // 🔥 FALLBACK: wenn leer → nochmal versuchen (aber NUR hier!)
+  // 🔥 FALLBACK
   if (!players || players.length === 0) {
     console.warn("⚠️ Team hatte keine Spieler → retry build");
-
     players = ensureTeamPlayers(team);
   }
 
-  // 🔥 FINAL GUARD (sehr wichtig)
+  // =========================
+  // 🧠 TEAM BINDING
+  // =========================
   if (players && players.length) {
     game.team.players = players;
   }
 
+  // =========================
+  // 💰 KADERWERT NACH SPIELERN
+  // =========================
+  if (typeof recalculateSquadValue === "function") {
+    recalculateSquadValue();
+  }
+
+  // =========================
+  // 📊 DEBUG
+  // =========================
+  console.log("📊 MANAGER:", game.manager);
+
+  // =========================
+  // ⚽ MATCH INIT
+  // =========================
   console.log("✅ Team gewählt (ID):", team.id);
 
   const round = league.schedule?.[0];
+
   if (round && round.length > 0) {
     const ok = initMatch(round);
-    if (ok) {
+
+    if (ok && game.match?.live) {
       game.match.live.running = false;
     }
   }
 
+  // =========================
+  // 🖥 UI REFRESH
+  // =========================
   renderCurrentMatch();
+
+  if (typeof updateUI === "function") {
+    updateUI();
+  }
+
   handleAppVisibility();
+
   console.log("TEAM ID NACH SET:", game.team?.selectedId);
+
   return true;
 }
-
 // =========================
 // 🧠 GET TEAM
 // =========================
