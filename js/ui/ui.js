@@ -705,84 +705,108 @@ let lastScoreState = { home: null, away: null };
 
 function updateScore() {
   const match = game.match?.live;
-  if (!match) return;
+  const current = game.match?.current;
 
-  const scoreEl = document.getElementById("topScore");
-  const teamsEl = document.getElementById("topTeams");
+  if (!match || !current) return;
+
+  const topBar = document.getElementById("topBar");
   const minuteEl = document.getElementById("topMinute");
   const tacticsEl = document.getElementById("topTactics");
 
-  // =========================
-  // 🏷 TEAM NAMES (UPGRADED)
-  // =========================
-  if (teamsEl) {
-    const homeEl = document.getElementById("topHome");
-const awayEl = document.getElementById("topAway");
+  if (!topBar) return;
 
-const current = game.match?.current;
-
-if (current) {
+  /* =========================
+  🏷 TEAM NAMES
+  ========================= */
   const homeName =
     game.match?.home?.name ||
     current?.home?.name ||
+    getTeamName(current.homeTeamId) ||
     "-";
 
   const awayName =
     game.match?.away?.name ||
     current?.away?.name ||
+    getTeamName(current.awayTeamId) ||
     "-";
 
-  if (homeEl) homeEl.textContent = homeName;
-  if (awayEl) awayEl.textContent = awayName;
-}
-  }
-
-  // =========================
-  // ⚽ SCORE + GOAL DETECT
-  // =========================
+  /* =========================
+  ⚽ SCORE
+  ========================= */
   const home = match.score?.home ?? 0;
   const away = match.score?.away ?? 0;
+  const minute = match.minute ?? 0;
 
-  if (scoreEl) {
-    const isGoal =
-      lastScoreState.home !== null &&
-      (home !== lastScoreState.home || away !== lastScoreState.away);
+  /* =========================
+  🔥 GOAL DETECT
+  ========================= */
+  const isGoal =
+    lastScoreState.home !== null &&
+    (
+      home !== lastScoreState.home ||
+      away !== lastScoreState.away
+    );
 
-    scoreEl.textContent = `${home} : ${away}`;
+  /* =========================
+  🧱 FULL TOPBAR RENDER
+  ========================= */
+  topBar.innerHTML = `
+    <div id="topMinute" class="minute">${minute}'</div>
 
-    // 🎯 GOAL ANIMATION
-    if (isGoal) {
-      scoreEl.classList.remove("goal", "shake");
+    <div class="matchup">
+      <div id="topHome" class="home">${homeName}</div>
 
-      // 👉 reflow trick (wichtig!)
+      <div class="scoreRow">
+        <span id="topScore" class="score">${home}:${away}</span>
+      </div>
+
+      <div id="topAway" class="away">${awayName}</div>
+    </div>
+  `;
+
+  /* =========================
+  🎯 GOAL FX
+  ========================= */
+  if (isGoal) {
+    topBar.classList.remove("goal");
+    void topBar.offsetWidth;
+    topBar.classList.add("goal");
+
+    const scoreEl = document.getElementById("topScore");
+
+    if (scoreEl) {
+      scoreEl.classList.remove("shake");
       void scoreEl.offsetWidth;
-
-      scoreEl.classList.add("goal", "shake");
+      scoreEl.classList.add("shake");
 
       setTimeout(() => {
-        scoreEl.classList.remove("goal", "shake");
-      }, 600);
+        scoreEl.classList.remove("shake");
+      }, 700);
     }
+
+    setTimeout(() => {
+      topBar.classList.remove("goal");
+    }, 750);
   }
 
-  // save state
-  lastScoreState = { home, away };
+  /* =========================
+  💾 SAVE SCORE
+  ========================= */
+  lastScoreState = {
+    home,
+    away
+  };
 
-  // =========================
-  // ⏱ MINUTE
-  // =========================
-  if (minuteEl) {
-    minuteEl.textContent = `${match.minute ?? 0}'`;
-  }
-
-  // =========================
-  // ⚙️ TACTICS LABEL
-  // =========================
+  /* =========================
+  ⚙️ TACTICS LABEL
+  ========================= */
   if (tacticsEl && game.tactics) {
     const preset = game.tactics.preset || "balanced";
 
     tacticsEl.textContent =
-      preset === "custom" ? "CUSTOM" : preset.toUpperCase();
+      preset === "custom"
+        ? "CUSTOM"
+        : preset.toUpperCase();
   }
 }
 
