@@ -5,7 +5,7 @@ import {
   processPlayerProgression,
   ensureManagerState,
 } from "./playerProgression.js";
-import { applySeasonBudget } from "./financeManager.js";
+import { applySeasonBudget, recalculateSquadValue } from "./financeManager.js";
 
 function resetLeagueTable(league) {
   if (!league?.table?.length) return;
@@ -43,13 +43,27 @@ export function processSeasonTransition() {
 if (seasonResult) {
   ensureManagerState();
 
+  // =========================
+  // 📈 SPIELERENTWICKLUNG
+  // =========================
   processPlayerProgression({
     promoted: seasonResult?.promoted?.includes(game.team?.selectedId),
     relegated: seasonResult?.relegated?.includes(game.team?.selectedId),
   });
 
+  // =========================
+  // 💎 KADERWERT UPDATE
+  // =========================
+  recalculateSquadValue();
+
+  // =========================
+  // 💰 FINANZEN / BUDGET
+  // =========================
   applySeasonBudget(seasonResult);
 
+  // =========================
+  // 🎬 SPECIAL EVENTS
+  // =========================
   const specialEvent = buildSeasonOutcomeEvent(seasonResult);
 
   if (specialEvent) {
@@ -62,9 +76,15 @@ if (seasonResult) {
       ...specialEvent,
     });
 
+    // =========================
+    // 📊 UI SAISON SUMMARY
+    // =========================
     game.ui = game.ui || {};
     game.ui.seasonSummary = seasonResult;
 
+    // =========================
+    // 💀 GAME OVER
+    // =========================
     if (specialEvent.gameOver) {
       game.phase = "gameover";
     }
