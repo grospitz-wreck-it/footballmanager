@@ -1796,6 +1796,9 @@ function attachDotHandlers(players) {
 let lastIconTime = 0;
 let lastSpamIconTime = 0;
 
+let lastIconTime = 0;
+let lastSpamIconTime = 0;
+
 function pushEventIcon(type) {
   const lane = document.getElementById("eventLane");
   if (!lane) return;
@@ -1805,17 +1808,32 @@ function pushEventIcon(type) {
   // =========================
   // 🎯 PRIORITY SYSTEM
   // =========================
-  const IMPORTANT = ["GOAL"];
-  const MEDIUM = ["SHOT", "SAVE", "SHOT_SAVED", "FOUL", "CORNER", "DUEL"];
+  const IMPORTANT = [
+    "GOAL",
+    "PENALTY_GOAL",
+    "RED_CARD",
+    "INJURY",
+    "PROMOTION",
+    "RELEGATION"
+  ];
+
+  const MEDIUM = [
+    "SHOT",
+    "SAVE",
+    "SHOT_SAVED",
+    "FOUL",
+    "CORNER"
+  ];
+
   const SPAM = [
-  "PASS",
-  "DRIBBLE",
-  "INTERCEPTION",
-  "BALL_LOSS",
-  "BALL_RECOVERY",
-  "CLEARANCE",
-  "DUEL",
-];
+    "PASS",
+    "DRIBBLE",
+    "INTERCEPTION",
+    "BALL_LOSS",
+    "BALL_RECOVERY",
+    "CLEARANCE",
+    "DUEL"
+  ];
 
   // =========================
   // ⏱ GLOBAL COOLDOWN
@@ -1823,34 +1841,37 @@ function pushEventIcon(type) {
   if (now - lastIconTime < 1600) return;
 
   // =========================
-  // 🧠 FILTER LOGIC
+  // 🔥 IMPORTANT EVENTS
   // =========================
-
-  // 🔥 Wichtige Events → immer
   if (IMPORTANT.includes(type)) {
     lastIconTime = now;
     renderIcon(type);
     return;
   }
 
-  // 🟡 Medium → leicht gedrosselt
+  // =========================
+  // 🟡 MEDIUM EVENTS
+  // =========================
   if (MEDIUM.includes(type)) {
-    if (Math.random() < 0.7) {
+    if (Math.random() < 0.45) {
       lastIconTime = now;
       renderIcon(type);
     }
     return;
   }
 
-  // ⚪ Spam → hart gedrosselt + extra cooldown
+  // =========================
+  // ⚪ SPAM EVENTS
+  // =========================
   if (SPAM.includes(type)) {
-    if (now - lastSpamIconTime < 4000) return;
+    if (now - lastSpamIconTime < 4500) return;
 
     if (Math.random() < 0.08) {
       lastIconTime = now;
       lastSpamIconTime = now;
       renderIcon(type);
     }
+
     return;
   }
 }
