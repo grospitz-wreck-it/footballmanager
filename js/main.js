@@ -1,5 +1,5 @@
-console.log("🚀 MAIN.JS LOADED");
-
+window.DEBUG = false;
+if (window.DEBUG) console.log("🚀 MAIN.JS LOADED");
 // =========================
 // 📦 IMPORTS (CLEAN)
 // =========================
@@ -41,7 +41,7 @@ import { updateUI } from "./ui/ui.js";
 // DEBUG
 import { initDebugOverlay } from "../debug/debugOverlay.js";
 
-console.log("🔥 IMPORTS DONE");
+if (window.DEBUG) console.log("🔥 IMPORTS DONE");
 game.ui = game.ui || {};
 game.ui.dirty = true;
 
@@ -141,7 +141,7 @@ function startBackgroundSimulation(){
 
       if(allDone){
         stopBackgroundSimulation();
-        console.log("🏁 Saison beendet (Simulation gestoppt)");
+        if (window.DEBUG) console.log("🏁 Saison beendet (Simulation gestoppt)");
       }
     }
 
@@ -287,7 +287,7 @@ function getMatchForMyTeam(round){
   });
 
   // 🔥 DEBUG
-  console.log("🔍 MATCH SEARCH:", {
+  if (window.DEBUG) console.log("🔍 MATCH SEARCH:", {
     myTeamId,
     found: !!match,
     round: round.map(m => ({
@@ -325,7 +325,7 @@ export function handleAppVisibility(){
 // =========================
 async function findLeaguesByCode(input){
 
-  console.log("🔍 INPUT:", input);
+  if (window.DEBUG) console.log("🔍 INPUT:", input);
 
   if(!input || input.length < 2) return [];
 
@@ -377,7 +377,7 @@ async function findLeaguesByCode(input){
 
   const compIds = Array.from(compMap.keys());
 
-  console.log("🏆 Gefundene Ligen:", compIds.length);
+  if (window.DEBUG) console.log("🏆 Gefundene Ligen:", compIds.length);
 
   // =========================
   // 🧠 STEP 2: ALLE Teams dieser Ligen laden
@@ -436,7 +436,7 @@ async function findLeaguesByCode(input){
   // =========================
   leagues.sort((a,b) => (a.level || 99) - (b.level || 99));
 
-  console.log("✅ FINAL LIGEN:", leagues.length);
+  if (window.DEBUG) console.log("✅ FINAL LIGEN:", leagues.length);
 
   return leagues;
 }
@@ -446,6 +446,11 @@ async function findLeaguesByCode(input){
 async function init(){
 
   window.game = game;
+
+  // =========================
+  // 🐞 DEBUG SYSTEM INIT
+  // =========================
+  initDebugOverlay();
 
   const splash = document.getElementById("splash");
   const app = document.getElementById("app");
@@ -468,7 +473,7 @@ if(teamsError){
 const teams = teamsRaw || [];
 window.teams = teams;
 
-console.log("🏆 Teams loaded:", teams.length);
+if (window.DEBUG) console.log("🏆 Teams loaded:", teams.length);
 
 // =========================
 // 🔧 HELPERS (LOKAL)
@@ -534,7 +539,7 @@ const cleanPlayers = (loadedPlayers || []).map(p => ({
 game.players = cleanPlayers;
 window.playerPool = cleanPlayers;
 
-console.log("🧠 CLEAN PLAYER POOL:", cleanPlayers.length);
+if (window.DEBUG) console.log("🧠 CLEAN PLAYER POOL:", cleanPlayers.length);
 
 
     
@@ -563,7 +568,7 @@ console.log("🧠 CLEAN PLAYER POOL:", cleanPlayers.length);
 
     const competitions = competitionsRaw || [];
 
-    console.log("🏟 Competitions loaded:", competitions.length);
+    if (window.DEBUG) console.log("🏟 Competitions loaded:", competitions.length);
     // =========================
 // 🧪 DEBUG KIT
 // =========================
@@ -573,7 +578,7 @@ window.debugData = {
   players: window.playerPool
 };
 
-console.log("🧪 DEBUG READY → window.debugData");
+if (window.DEBUG) console.log("🧪 DEBUG READY → window.debugData");
     // =========================
     // 🎮 GAME EVENTS
     // =========================
@@ -581,7 +586,7 @@ console.log("🧪 DEBUG READY → window.debugData");
   .from("event_definitions")
   .select("*");
 
-    console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
+    if (window.DEBUG) console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
 // 🔥🔥🔥 DAS HAT GEFEHLT
 game.data = game.data || {};
 game.data.eventDefinitions = gameEvents || [];
@@ -590,12 +595,12 @@ game.data.eventDefinitions = gameEvents || [];
 // =========================
 const leagueMap = new Map();
 // 🔥 HIER REIN
-console.log("🧪 START LEAGUE BUILD");
-console.log("🧪 competitions:", competitions);
-console.log("🧪 teams:", teams);
+if (window.DEBUG) console.log("🧪 START LEAGUE BUILD");
+if (window.DEBUG) console.log("🧪 competitions:", competitions);
+if (window.DEBUG) console.log("🧪 teams:", teams);
 competitions.forEach(c => {
-console.log("🔁 COMP:", c?.name, c?.id);
-  console.log("👉 region_id:", c?.region_id);
+if (window.DEBUG) console.log("🔁 COMP:", c?.name, c?.id);
+  if (window.DEBUG) console.log("👉 region_id:", c?.region_id);
   if(!c) return;
 
   const rawName = (c.name || "").trim();
@@ -668,7 +673,7 @@ if(!leagueTeams.length){
   // =========================
   // ✅ SUCCESS
   // =========================
-  console.log("✅ LEAGUE OK:", displayName, "| teams:", leagueTeams.length);
+  if (window.DEBUG) console.log("✅ LEAGUE OK:", displayName, "| teams:", leagueTeams.length);
 
 // =========================
 // 🏗 BUILD
@@ -687,19 +692,19 @@ teams: leagueTeams
 // ✅ NACH DEM LOOP
 const leagues = Array.from(leagueMap.values());
 
-console.log("🧪 RAW LEAGUE MAP:", leagueMap);
-console.log("🧪 BUILT LEAGUES:", leagues);
+if (window.DEBUG) console.log("🧪 RAW LEAGUE MAP:", leagueMap);
+if (window.DEBUG) console.log("🧪 BUILT LEAGUES:", leagues);
 
 game.leagues = leagues;
 game.league = game.league || {};
 game.league.available = leagues;
 
-console.log("🏁 Leagues built:", leagues.length);
+if (window.DEBUG) console.log("🏁 Leagues built:", leagues.length);
     const plzInputEl = document.getElementById("plzInput");
 
 if(plzInputEl){
   plzInputEl.disabled = false;
-  console.log("✅ PLZ ready");
+ if (window.DEBUG) console.log("✅ PLZ ready");
 }
 // =========================
 // 🏆 LEAGUE SELECT (nur vorbereiten)
@@ -711,7 +716,7 @@ initLeagueSelect([]); // 🔥 leer starten!
 // =========================
 function bindPLZInput(){
 
-  console.log("🚀 bindPLZInput CALLED");
+  if (window.DEBUG) console.log("🚀 bindPLZInput CALLED");
 
   const plzInput = document.getElementById("plzInput");
   const resultsEl = document.getElementById("leagueResults");
@@ -728,7 +733,7 @@ function bindPLZInput(){
 
     const value = e.target.value;
 
-    console.log("🔥 INPUT EVENT:", value);
+    if (window.DEBUG) console.log("🔥 INPUT EVENT:", value);
 
     // 👉 warten bis Ligen geladen sind
     if(!game.league?.available?.length){
@@ -745,7 +750,7 @@ function bindPLZInput(){
     const leagues = await findLeaguesByCode(value);
     // 🔥 DROPDOWN AKTUALISIEREN (CRITICAL FIX)
     initLeagueSelect(leagues);
-    console.log("🏆 FOUND LEAGUES:", leagues);
+    if (window.DEBUG) console.log("🏆 FOUND LEAGUES:", leagues);
 
     if(!leagues || !leagues.length){
       resultsEl.innerHTML = `<div style="padding:8px;opacity:0.6">Keine Ligen gefunden</div>`;
@@ -792,7 +797,7 @@ function bindPLZInput(){
 
   };
 
-  console.log("✅ PLZ Input gebunden");
+  if (window.DEBUG) console.log("✅ PLZ Input gebunden");
 }
 
     
@@ -881,7 +886,7 @@ mainBtn?.addEventListener("click", () => {
     return;
   }
 
-  console.log("🎯 MATCH GEFUNDEN:", {
+  if (window.DEBUG) console.log("🎯 MATCH GEFUNDEN:", {
     home: match.homeTeamId,
     away: match.awayTeamId,
     myTeam: game.team?.selectedId
