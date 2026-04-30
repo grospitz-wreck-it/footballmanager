@@ -907,8 +907,15 @@ function updateEvents() {
 
 let overlayTimeout = null;
 let overlayHideTimeout = null;
+let lastOverlayTime = 0;
 
 export function showOverlay(imageUrl, text, duration = 2500) {
+  const now = Date.now();
+
+  // 🔥 Overlay Cooldown (verhindert Spam)
+  if (now - lastOverlayTime < 4000) return;
+  lastOverlayTime = now;
+
   const overlayEl = document.getElementById("matchOverlay");
   const overlayImg = document.getElementById("overlayImage");
   const overlayText = document.getElementById("overlayText");
@@ -946,16 +953,13 @@ export function showOverlay(imageUrl, text, duration = 2500) {
   });
 
   // 🔥 AUTO HIDE (guarded)
-  overlayTimeout = setTimeout(
-    () => {
-      overlayEl.classList.remove("show");
+  overlayTimeout = setTimeout(() => {
+    overlayEl.classList.remove("show");
 
-      overlayHideTimeout = setTimeout(() => {
-        overlayEl.classList.add("hidden");
-      }, 250);
-    },
-    Math.max(0, duration || 0),
-  );
+    overlayHideTimeout = setTimeout(() => {
+      overlayEl.classList.add("hidden");
+    }, 250);
+  }, Math.max(0, duration || 0));
 }
 
 // =========================
