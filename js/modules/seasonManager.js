@@ -40,56 +40,56 @@ export function processSeasonTransition() {
   // =========================
   const seasonResult = processPromotionRelegation();
 
-if (seasonResult) {
-  ensureManagerState();
+  if (seasonResult) {
+    ensureManagerState();
 
-  // =========================
-  // 📈 SPIELERENTWICKLUNG
-  // =========================
-  processPlayerProgression({
-    promoted: seasonResult?.promoted?.includes(game.team?.selectedId),
-    relegated: seasonResult?.relegated?.includes(game.team?.selectedId),
-  });
-
-  // =========================
-  // 💎 KADERWERT UPDATE
-  // =========================
-  recalculateSquadValue();
-
-  // =========================
-  // 💰 FINANZEN / BUDGET
-  // =========================
-  applySeasonBudget(seasonResult);
-
-  // =========================
-  // 🎬 SPECIAL EVENTS
-  // =========================
-  const specialEvent = buildSeasonOutcomeEvent(seasonResult);
-
-  if (specialEvent) {
-    game.events = game.events || {};
-    game.events.history = game.events.history || [];
-
-    game.events.history.push({
-      id: crypto.randomUUID(),
-      minute: 0,
-      ...specialEvent,
+    // =========================
+    // 📈 SPIELERENTWICKLUNG
+    // =========================
+    processPlayerProgression({
+      promoted: seasonResult?.promoted?.includes(game.team?.selectedId),
+      relegated: seasonResult?.relegated?.includes(game.team?.selectedId),
     });
 
     // =========================
-    // 📊 UI SAISON SUMMARY
+    // 💎 KADERWERT UPDATE
     // =========================
-    game.ui = game.ui || {};
-    game.ui.seasonSummary = seasonResult;
+    recalculateSquadValue();
 
     // =========================
-    // 💀 GAME OVER
+    // 💰 FINANZEN / BUDGET
     // =========================
-    if (specialEvent.gameOver) {
-      game.phase = "gameover";
+    applySeasonBudget(seasonResult);
+
+    // =========================
+    // 🎬 SPECIAL EVENTS
+    // =========================
+    const specialEvent = buildSeasonOutcomeEvent(seasonResult);
+
+    if (specialEvent) {
+      game.events = game.events || {};
+      game.events.history = game.events.history || [];
+
+      game.events.history.push({
+        id: crypto.randomUUID(),
+        minute: 0,
+        ...specialEvent,
+      });
+
+      // =========================
+      // 📊 UI SAISON SUMMARY
+      // =========================
+      game.ui = game.ui || {};
+      game.ui.seasonSummary = seasonResult;
+
+      // =========================
+      // 💀 GAME OVER
+      // =========================
+      if (specialEvent.gameOver) {
+        game.phase = "gameover";
+      }
     }
   }
-}
   // =========================
   // 📈 PLAYER DEVELOPMENT (HOOK)
   // =========================
