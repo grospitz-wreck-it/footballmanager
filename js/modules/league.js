@@ -622,7 +622,13 @@ function selectTeamById(teamId) {
 
   game.team.selected = team.name;
   game.team.selectedId = normalizeId(team.id);
+  if (typeof ensureManagerState === "function") {
+    ensureManagerState();
+  }
 
+  if (typeof recalculateSquadValue === "function") {
+    recalculateSquadValue();
+  }
   let players = ensureTeamPlayers(team);
 
   // 🔥 FALLBACK: wenn leer → nochmal versuchen (aber NUR hier!)
