@@ -278,10 +278,10 @@ TOPBAR DIRECT GITHUB
   text-align: center;
 }
 /* =========================
-📅 SCHEDULE VIEW
+📅 SCHEDULE VIEW (FINAL DROP-IN)
 ========================= */
 
-.schedule-card {
+#scheduleView .schedule-card {
   position: relative;
   overflow: hidden;
 
@@ -304,7 +304,7 @@ TOPBAR DIRECT GITHUB
 /* =========================
 📍 HEADER
 ========================= */
-.schedule-header {
+#scheduleView .schedule-header {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
@@ -313,7 +313,7 @@ TOPBAR DIRECT GITHUB
   gap: 10px;
 }
 
-.schedule-header h3 {
+#scheduleView .schedule-header h3 {
   margin: 0;
 
   text-align: center;
@@ -326,8 +326,12 @@ TOPBAR DIRECT GITHUB
   color: white;
 }
 
-/* Swipe/Nav Buttons */
-.schedule-header button {
+/* =========================
+◀ ▶ NAV BUTTONS
+========================= */
+#scheduleView .schedule-header button,
+#scheduleView .prev-day,
+#scheduleView .next-day {
   width: 44px;
   height: 44px;
 
@@ -353,12 +357,24 @@ TOPBAR DIRECT GITHUB
   transition: all 0.18s ease;
 }
 
-.schedule-header button:hover {
+#scheduleView .schedule-header button:hover,
+#scheduleView .prev-day:hover,
+#scheduleView .next-day:hover {
   transform: scale(1.04);
 }
 
-.schedule-header button:active {
+#scheduleView .schedule-header button:active,
+#scheduleView .prev-day:active,
+#scheduleView .next-day:active {
   transform: scale(0.94);
+}
+
+#scheduleView .schedule-header button:disabled,
+#scheduleView .prev-day:disabled,
+#scheduleView .next-day:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* =========================
