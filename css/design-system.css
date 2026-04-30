@@ -61,12 +61,43 @@ body {
 }
 
 #topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 22px;
+  min-height: 78px;
   border-radius: var(--ds-radius-lg);
-  padding: var(--ds-space-3);
   background: linear-gradient(155deg, var(--ds-bg-1), var(--ds-bg-2));
+  overflow: visible !important;
+  flex-wrap: nowrap;
+  box-sizing: border-box;
 }
-#topScore { font-size: clamp(1.3rem, 2.4vw, 1.7rem); }
-#topTeams, #topMinute { color: var(--ds-text-muted); }
+
+#topTeams {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  font-weight: 700;
+  padding: 0 12px;
+}
+
+#topScore {
+  flex-shrink: 0;
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+  font-weight: 800;
+}
+
+#topMinute {
+  flex-shrink: 0;
+  min-width: 58px;
+  text-align: right;
+  color: var(--ds-text-muted);
+}
 
 #gameCanvas,
 .team-field,
