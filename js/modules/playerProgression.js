@@ -257,12 +257,85 @@ export function processPlayerProgression(context = {}) {
 // 💸 MANAGER PREP
 // =========================
 export function ensureManagerState() {
-  if (!game.manager || typeof game.manager !== "object") {
-    game.manager = {
-      budget: 500000,
-      wageBudget: 100000,
-      transferHistory: [],
-      reputation: 1
+  game.manager = game.manager || {};
+
+  const leagueLevel = Number(
+    game.league?.current?.level ||
+    game.league?.current?.tier ||
+    9
+  );
+
+  // =========================
+  // 💰 REALISTISCHE STARTBUDGETS
+  // =========================
+  const baseBudgets = {
+    1: 50000000, // Bundesliga
+    2: 15000000, // 2. Bundesliga
+    3: 5000000,  // 3. Liga
+    4: 1500000,  // Regionalliga
+    5: 750000,   // Oberliga
+    6: 300000,   // Verbandsliga
+    7: 120000,   // Landesliga
+    8: 50000,    // Bezirksliga
+    9: 15000     // Kreisliga A
+  };
+
+  const startBudget = baseBudgets[leagueLevel] || 10000;
+
+  // =========================
+  // 🏦 BUDGET
+  // =========================
+  if (typeof game.manager.budget !== "number") {
+    game.manager.budget = startBudget;
+  }
+
+  // =========================
+  // 💸 TRANSFERBUDGET
+  // =========================
+  if (typeof game.manager.transferBudget !== "number") {
+    game.manager.transferBudget = Math.floor(game.manager.budget * 0.35);
+  }
+
+  // =========================
+  // 💼 GEHALTSBUDGET
+  // =========================
+  if (typeof game.manager.wageBudget !== "number") {
+    game.manager.wageBudget = Math.floor(game.manager.budget * 0.25);
+  }
+
+  // =========================
+  // ⭐ REPUTATION
+  // =========================
+  if (typeof game.manager.reputation !== "number") {
+    game.manager.reputation = Math.max(1, 11 - leagueLevel);
+  }
+
+  // =========================
+  // 👥 KADERWERT
+  // =========================
+  if (typeof game.manager.squadValue !== "number") {
+    game.manager.squadValue = 0;
+  }
+
+  // =========================
+  // 📚 HISTORY
+  // =========================
+  if (!Array.isArray(game.manager.transferHistory)) {
+    game.manager.transferHistory = [];
+  }
+
+  if (!Array.isArray(game.manager.financeHistory)) {
+    game.manager.financeHistory = [];
+  }
+
+  // =========================
+  // 🏟 OPTIONAL FUTURE SYSTEMS
+  // =========================
+  if (!game.manager.club) {
+    game.manager.club = {
+      stadiumLevel: 1,
+      fanBase: 100,
+      youthLevel: 1
     };
   }
 
