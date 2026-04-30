@@ -17,9 +17,9 @@
 }
 
 /* =========================
-👑 ULTRA TOPBAR ELITE HUD
-CINEMATIC / PREMIUM / LIVE MATCHDAY
-FULL DROP-IN
+👑 TOPBAR STRUCTURE FIX
+CLEAN / CENTERED / LOWER / PROFESSIONAL
+REPLACES CURRENT TOPBAR CSS
 ========================= */
 
 #topBar {
@@ -29,90 +29,60 @@ FULL DROP-IN
   align-items: center;
   justify-content: center;
 
-  padding: 20px 24px;
-  min-height: 168px;
+  padding: 14px 20px;
+  min-height: 118px;
 
-  border-radius: 26px;
+  border-radius: 22px;
 
   background:
-    radial-gradient(circle at 50% 0%, rgba(34,211,238,0.16), transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(167,139,250,0.10), transparent 45%),
+    radial-gradient(circle at top center, rgba(34,211,238,0.10), transparent 50%),
+    radial-gradient(circle at bottom right, rgba(167,139,250,0.08), transparent 45%),
     linear-gradient(160deg, #020617 0%, #071226 55%, #020617 100%);
 
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.04);
 
   box-shadow:
-    0 18px 40px rgba(0,0,0,0.78),
-    0 0 30px rgba(34,211,238,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+    0 12px 26px rgba(0,0,0,0.68),
+    inset 0 1px 0 rgba(255,255,255,0.04);
 
   overflow: hidden;
-
-  isolation: isolate;
 }
 
 /* =========================
-✨ AMBIENT GLOW LAYER
+⏱ MINUTE (NO CONTAINER)
 ========================= */
-#topBar::before {
-  content: "";
+#topBar .topbar-live {
   position: absolute;
-  inset: -20%;
-
-  background:
-    radial-gradient(circle at 30% 20%, rgba(34,211,238,0.08), transparent 35%),
-    radial-gradient(circle at 70% 80%, rgba(167,139,250,0.08), transparent 35%);
-
-  filter: blur(40px);
-
-  animation: topBarAmbient 14s ease-in-out infinite alternate;
-
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes topBarAmbient {
-  0% {
-    transform: scale(1) translate(0, 0);
-    opacity: 0.75;
-  }
-  100% {
-    transform: scale(1.15) translate(8px, -8px);
-    opacity: 1;
-  }
-}
-
-/* =========================
-⏱ LIVE MINUTE CHIP
-========================= */
-#topBar .minute {
-  position: absolute;
-  top: 16px;
+  top: 14px;
   left: 18px;
 
   display: flex;
   align-items: center;
+
+  z-index: 4;
+}
+
+#topBar .minute {
+  display: flex;
+  align-items: center;
   gap: 8px;
 
-  padding: 6px 10px;
+  padding: 0;
+  margin: 0;
 
-  border-radius: 999px;
-
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.04);
-
-  backdrop-filter: blur(8px);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
 
   font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 
   color: #cbd5e1;
-
-  z-index: 3;
 }
 
-/* 🔴 LIVE DOT */
+/* 🔴 DOT */
 #topBar .minute::before {
   content: "";
 
@@ -123,20 +93,14 @@ FULL DROP-IN
   background: #ef4444;
 
   box-shadow:
-    0 0 10px #ef4444,
-    0 0 18px rgba(239,68,68,0.65);
+    0 0 8px rgba(239,68,68,0.85),
+    0 0 16px rgba(239,68,68,0.55);
 
   animation: pulseLiveElite 1.15s infinite;
 }
 
-@keyframes pulseLiveElite {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.7); opacity: 0.55; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
 /* =========================
-🏟 MAIN MATCH BLOCK
+🏟 MATCHUP BLOCK
 ========================= */
 #topBar .matchup {
   position: relative;
@@ -147,10 +111,12 @@ FULL DROP-IN
   align-items: center;
   justify-content: center;
 
-  gap: 10px;
+  gap: 8px;
 
   width: 100%;
-  max-width: 90%;
+  max-width: 96%;
+
+  padding: 0 20px;
 }
 
 /* =========================
@@ -159,8 +125,8 @@ FULL DROP-IN
 #topBar .home {
   width: 100%;
 
-  font-size: clamp(1rem, 1.9vw, 1.35rem);
-  font-weight: 900;
+  font-size: clamp(0.82rem, 1.45vw, 1.05rem);
+  font-weight: 850;
   line-height: 1.15;
 
   text-align: center;
@@ -168,64 +134,37 @@ FULL DROP-IN
   color: var(--accent);
 
   text-shadow:
-    0 0 10px var(--accent-glow),
-    0 0 24px rgba(34,211,238,0.18);
+    0 0 8px var(--accent-glow),
+    0 0 18px rgba(34,211,238,0.14);
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
-  letter-spacing: 0.02em;
 }
 
 /* =========================
-⚽ SCORE CORE
+⚽ SCORE
 ========================= */
 #topBar .scoreRow {
-  position: relative;
-
   display: flex;
   align-items: center;
   justify-content: center;
+
+  margin: 1px 0;
 }
 
 #topBar .score {
-  position: relative;
-
-  font-size: clamp(3.2rem, 6vw, 5.4rem);
+  font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 950;
-  line-height: 0.86;
+  line-height: 0.9;
 
   color: white;
 
+  letter-spacing: -0.04em;
+
   text-shadow:
-    0 0 14px rgba(255,255,255,0.22),
-    0 0 28px rgba(34,211,238,0.14);
-
-  letter-spacing: -0.03em;
-
-  transition:
-    transform 0.18s ease,
-    text-shadow 0.18s ease;
-}
-
-/* subtle divider glow */
-#topBar .scoreRow::after {
-  content: "";
-  position: absolute;
-
-  width: 140%;
-  height: 2px;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,0.10),
-      transparent
-    );
-
-  bottom: -10px;
+    0 0 12px rgba(255,255,255,0.18),
+    0 0 24px rgba(34,211,238,0.12);
 }
 
 /* =========================
@@ -234,8 +173,8 @@ FULL DROP-IN
 #topBar .away {
   width: 100%;
 
-  font-size: clamp(1rem, 1.9vw, 1.35rem);
-  font-weight: 900;
+  font-size: clamp(0.82rem, 1.45vw, 1.05rem);
+  font-weight: 850;
   line-height: 1.15;
 
   text-align: center;
@@ -243,62 +182,19 @@ FULL DROP-IN
   color: var(--accent-opp);
 
   text-shadow:
-    0 0 10px var(--accent-opp-glow),
-    0 0 24px rgba(167,139,250,0.18);
+    0 0 8px var(--accent-opp-glow),
+    0 0 18px rgba(167,139,250,0.14);
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
-  letter-spacing: 0.02em;
 }
 
 /* =========================
-🚫 VS OFF
+🔥 GOAL SHAKE
 ========================= */
-#topBar .vs {
-  display: none !important;
-}
-
-/* =========================
-🔥 GOAL MODE
-========================= */
-#topBar.goal {
-  animation: topBarFlash 0.7s ease;
-}
-
-@keyframes topBarFlash {
-  0% {
-    box-shadow:
-      0 18px 40px rgba(0,0,0,0.78),
-      0 0 0 rgba(34,211,238,0);
-  }
-
-  35% {
-    box-shadow:
-      0 18px 40px rgba(0,0,0,0.78),
-      0 0 50px rgba(34,211,238,0.18);
-  }
-
-  100% {
-    box-shadow:
-      0 18px 40px rgba(0,0,0,0.78),
-      0 0 0 rgba(34,211,238,0);
-  }
-}
-
 #topBar.goal .score {
-  animation: scoreImpactElite 0.75s ease;
-}
-
-@keyframes scoreImpactElite {
-  0% { transform: scale(1) rotate(0deg); }
-  12% { transform: scale(1.28) rotate(-2deg); }
-  24% { transform: scale(1.34) rotate(2deg); }
-  36% { transform: scale(1.26) rotate(-2deg); }
-  48% { transform: scale(1.18) rotate(1deg); }
-  64% { transform: scale(1.08); }
-  100% { transform: scale(1); }
+  animation: scoreImpactElite 0.72s ease;
 }
 
 /* =========================
@@ -306,30 +202,30 @@ FULL DROP-IN
 ========================= */
 @media (max-width: 480px) {
   #topBar {
-    padding: 18px;
-    min-height: 150px;
-    border-radius: 22px;
+    min-height: 108px;
+    padding: 12px 16px;
+  }
+
+  #topBar .topbar-live {
+    top: 12px;
+    left: 14px;
   }
 
   #topBar .minute {
-    top: 14px;
-    left: 14px;
-
     font-size: 0.72rem;
-    padding: 5px 9px;
   }
 
   #topBar .home,
   #topBar .away {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
   }
 
   #topBar .score {
-    font-size: clamp(2.8rem, 12vw, 4.3rem);
+    font-size: clamp(2.2rem, 10vw, 3.4rem);
   }
 
   #topBar .matchup {
-    gap: 8px;
+    padding: 0 14px;
   }
 }
 /* =========================
