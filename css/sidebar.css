@@ -147,3 +147,101 @@
     0 0 20px rgba(239,68,68,0.4),
     0 0 40px rgba(239,68,68,0.2);
 }
+/* =========================
+   🔀 TOP TABS
+========================= */
+.sidebar-top-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.side-tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+
+  background: #111827;
+  color: #94a3b8;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.side-tab.active {
+  background: linear-gradient(135deg, #22c55e, #38bdf8);
+  color: white;
+}
+
+/* =========================
+   📦 PANELS
+========================= */
+.sidebar-panel {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-panel.active {
+  display: flex;
+}
+
+/* =========================
+   📈 MANAGER CARD
+========================= */
+.manager-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 14px;
+  border-radius: 16px;
+
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.manager-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 13px;
+}
+
+.manager-stat span {
+  color: #94a3b8;
+}
+
+.manager-stat strong {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+/* =========================
+   🔧 MANAGER ACTIONS
+========================= */
+.manager-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.manager-actions button {
+  background: rgba(255,255,255,0.04);
+  color: #cbd5e1;
+
+  border: 1px solid rgba(255,255,255,0.05);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  box-shadow: none;
+}
+
+.manager-actions button:hover {
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
