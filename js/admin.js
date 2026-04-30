@@ -394,35 +394,6 @@ async function addAdSet(){
 
 
 
-function renderAssetList(){
-
-  const container = document.getElementById("assetList");
-  if(!container) return;
-
-  container.innerHTML = currentAssets.map((a, i) => `
-    <div style="
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:6px;
-      background:#111;
-      padding:6px;
-      border-radius:6px;
-    ">
-      
-      <span style="width:70px;">${a.type}</span>
-
-      <img src="${a.url}" style="height:40px;">
-
-      <button onclick="moveAsset(${i}, -1)">⬆️</button>
-      <button onclick="moveAsset(${i}, 1)">⬇️</button>
-
-      <button onclick="removeAsset(${i})">❌</button>
-    </div>
-  `).join("");
-}
-
-
 // =====================
 // INLINE UPDATE CAMPAIGN
 // =====================
