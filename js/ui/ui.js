@@ -716,19 +716,25 @@ function updateScore() {
   // 🏷 TEAM NAMES (UPGRADED)
   // =========================
   if (teamsEl) {
-    const current = game.match?.current;
+    const homeEl = document.getElementById("topHome");
+const awayEl = document.getElementById("topAway");
 
-    if (current) {
-      const homeName = game.match?.home?.name || current?.home?.name || "-";
+const current = game.match?.current;
 
-      const awayName = game.match?.away?.name || current?.away?.name || "-";
+if (current) {
+  const homeName =
+    game.match?.home?.name ||
+    current?.home?.name ||
+    "-";
 
-      teamsEl.innerHTML = `
-        <span class="home">${homeName}</span>
-        <span class="vs">vs</span>
-        <span class="away">${awayName}</span>
-      `;
-    }
+  const awayName =
+    game.match?.away?.name ||
+    current?.away?.name ||
+    "-";
+
+  if (homeEl) homeEl.textContent = homeName;
+  if (awayEl) awayEl.textContent = awayName;
+}
   }
 
   // =========================
