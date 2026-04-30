@@ -1800,9 +1800,6 @@ function attachDotHandlers(players) {
 let lastIconTime = 0;
 let lastSpamIconTime = 0;
 
-let lastIconTime = 0;
-let lastSpamIconTime = 0;
-
 function pushEventIcon(type) {
   const lane = document.getElementById("eventLane");
   if (!lane) return;
