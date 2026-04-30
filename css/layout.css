@@ -17,21 +17,21 @@
 }
 
 /* =========================
-🚀 TOPBAR REFINED MATCH HUD
-HOME TOP / SCORE CENTER / AWAY BOTTOM
+🚀 TOPBAR FINAL PRO HUD
+COMPACT / CENTERED / DYNAMIC
 ========================= */
 
 #topBar {
   position: relative;
 
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  padding: 22px 24px;
-  min-height: 170px;
+  padding: 18px 22px;
+  min-height: 145px;
 
-  border-radius: 24px;
+  border-radius: 22px;
 
   background:
     radial-gradient(circle at top center, rgba(34,211,238,0.10), transparent 55%),
@@ -40,65 +40,90 @@ HOME TOP / SCORE CENTER / AWAY BOTTOM
   border: 1px solid rgba(255,255,255,0.04);
 
   box-shadow:
-    0 12px 30px rgba(0,0,0,0.75),
+    0 12px 28px rgba(0,0,0,0.72),
     inset 0 1px 0 rgba(255,255,255,0.04);
 
   overflow: hidden;
 }
 
 /* =========================
-⏱ MINUTE
+⏱ MINUTE FLOATING
 ========================= */
 #topBar .minute {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
 
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 700;
 
   color: #94a3b8;
+}
 
-  align-self: center;
+/* 🔴 LIVE DOT */
+#topBar .minute::before {
+  content: "";
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+  background: #ef4444;
+
+  box-shadow:
+    0 0 8px #ef4444,
+    0 0 14px rgba(239,68,68,0.6);
+
+  animation: pulseLive 1.2s infinite;
+}
+
+@keyframes pulseLive {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.55); opacity: 0.65; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* =========================
-🏟 MATCHUP
+🏟 MATCHUP CENTER BLOCK
 ========================= */
 #topBar .matchup {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
-  gap: 10px;
+  gap: 8px;
 
-  min-width: 0;
   width: 100%;
+  max-width: 88%;
 }
 
 /* =========================
 🏠 HOME TEAM
 ========================= */
 #topBar .home {
-  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-size: clamp(0.9rem, 1.6vw, 1.15rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
 
   text-align: center;
 
   color: var(--accent);
-  text-shadow: 0 0 10px var(--accent-glow);
+  text-shadow: 0 0 8px var(--accent-glow);
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  max-width: 100%;
+  width: 100%;
 }
 
 /* =========================
-⚽ SCORE ROW
+⚽ SCORE
 ========================= */
 #topBar .scoreRow {
   display: flex;
@@ -106,42 +131,61 @@ HOME TOP / SCORE CENTER / AWAY BOTTOM
   justify-content: center;
 }
 
-/* SCORE */
 #topBar .score {
-  font-size: clamp(3rem, 6vw, 4.8rem);
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
   font-weight: 900;
-  line-height: 0.9;
+  line-height: 0.88;
 
   color: white;
 
   text-shadow:
-    0 0 12px rgba(255,255,255,0.18),
-    0 0 24px rgba(34,211,238,0.18);
-}
+    0 0 10px rgba(255,255,255,0.22),
+    0 0 20px rgba(34,211,238,0.18);
 
-/* VS komplett ausblenden */
-#topBar .vs {
-  display: none !important;
+  transition: transform 0.18s ease;
 }
 
 /* =========================
 🛡 AWAY TEAM
 ========================= */
 #topBar .away {
-  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-size: clamp(0.9rem, 1.6vw, 1.15rem);
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
 
   text-align: center;
 
   color: var(--accent-opp);
-  text-shadow: 0 0 10px var(--accent-opp-glow);
+  text-shadow: 0 0 8px var(--accent-opp-glow);
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  max-width: 100%;
+  width: 100%;
+}
+
+/* VS AUS */
+#topBar .vs {
+  display: none !important;
+}
+
+/* =========================
+🔥 GOAL SHAKE
+========================= */
+#topBar.goal #topBar .score,
+#topBar.goal .score {
+  animation: scoreShakePro 0.65s ease;
+}
+
+@keyframes scoreShakePro {
+  0% { transform: scale(1) translateX(0); }
+  15% { transform: scale(1.18) translateX(-5px); }
+  30% { transform: scale(1.22) translateX(5px); }
+  45% { transform: scale(1.18) translateX(-4px); }
+  60% { transform: scale(1.14) translateX(4px); }
+  75% { transform: scale(1.08) translateX(-2px); }
+  100% { transform: scale(1) translateX(0); }
 }
 
 /* =========================
@@ -149,17 +193,23 @@ HOME TOP / SCORE CENTER / AWAY BOTTOM
 ========================= */
 @media (max-width: 480px) {
   #topBar {
-    padding: 18px;
-    gap: 14px;
+    padding: 16px 18px;
+    min-height: 135px;
+  }
+
+  #topBar .minute {
+    top: 14px;
+    left: 16px;
+    font-size: 0.75rem;
   }
 
   #topBar .home,
   #topBar .away {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
   }
 
   #topBar .score {
-    font-size: clamp(2.5rem, 10vw, 4rem);
+    font-size: clamp(2.4rem, 10vw, 3.8rem);
   }
 }
 /* =========================
