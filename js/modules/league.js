@@ -8,11 +8,8 @@ import { initMatch } from "../matchEngine.js";
 import { generateSchedule } from "./scheduler.js";
 import { startGame } from "../ui/layout.js";
 import { handleAppVisibility } from "../main.js";
-
-import {
-  ensureManagerState,
-  recalculateSquadValue
-} from "./playerProgression.js";
+import { ensureManagerState } from "./playerProgression.js";
+import { recalculateSquadValue } from "./financeManager.js";
 // =========================
 // 🧠 HELPERS
 // =========================
