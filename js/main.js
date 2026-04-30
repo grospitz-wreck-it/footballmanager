@@ -42,7 +42,8 @@ import { updateUI } from "./ui/ui.js";
 import { initDebugOverlay } from "../debug/debugOverlay.js";
 
 console.log("🔥 IMPORTS DONE");
-
+game.ui = game.ui || {};
+game.ui.dirty = true;
 
 // =========================
 // 🔥 LOOP GUARD
@@ -1092,6 +1093,7 @@ if(live.phase === "bye"){
   if(live.running === true){
     live.running = false;
     matchLoopRunning = false;
+    game.ui.dirty = true;
     updateMainButtonText();
     return;
   }
@@ -1122,7 +1124,7 @@ setInterval(() => {
     updateUI();
     game.ui.dirty = false;
   }
-}, 250);
+}, 300);
 
 
 // =========================
