@@ -52,8 +52,8 @@ HEADER-ALIGNED / COMPACT / PREMIUM
 ========================= */
 #topBar .topbar-live {
   position: absolute;
-  left: 18px;
-  top: 50%;
+  right: 18px;
+  top: 75%;
 
   transform: translateY(-50%);
 
