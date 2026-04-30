@@ -1,0 +1,10 @@
+[33mc994b5f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Remove accidental empty league select reset
+[33m95c6ace[m Restore league dropdown initialization
+[33m66acc12[m Fix duplicate lastIconTime declaration
+[33md42f385[m Create debug.js
+[33m3a433b5[m Update main.js
+[33mf8b03ab[m Update main.js
+[33m1c73659[m Update ui.js
+[33m8550cfd[m Limit feed display to last 8 events
+[33m587fdde[m Update ui.js
+[33m5100975[m Update ui.js
