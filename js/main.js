@@ -1116,6 +1116,15 @@ document.getElementById("resetBtn")?.addEventListener("click", async () => {
 
 });
 
+
+setInterval(() => {
+  if (game.ui?.dirty) {
+    updateUI();
+    game.ui.dirty = false;
+  }
+}, 250);
+
+
 // =========================
 // ▶️ START
 // =========================
