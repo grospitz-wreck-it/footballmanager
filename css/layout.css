@@ -17,73 +17,136 @@
 }
 
 /* =========================
-🚀 TOPBAR FINAL CLEAN FIX
+🚀 TOPBAR FINAL STRUCTURE
+TARGET:
+ Team A
+12'    0:0    vs    Team B
 ========================= */
 
-/* Score mittig / linksblock sauber */
 body #topBar {
-  grid-template-columns: minmax(110px, auto) 1fr !important;
-  grid-template-rows: auto 1fr !important;
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  grid-template-rows: auto auto !important;
+
+  gap: 10px 18px !important;
+
+  padding: 18px 22px !important;
+  min-height: 140px !important;
+
   align-items: center !important;
 }
 
-/* Minute oben links */
+/* =========================
+⏱ MINUTE
+========================= */
 body #topMinute {
   grid-column: 1 !important;
-  grid-row: 1 !important;
-
-  justify-self: start !important;
-  align-self: start !important;
-
-  font-size: 13px !important;
-  font-weight: 700 !important;
-}
-
-/* Score sauber links zentriert */
-body #topScore {
-  grid-column: 1 !important;
-  grid-row: 2 !important;
+  grid-row: 1 / span 2 !important;
 
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
 
-  text-align: left !important;
+  align-self: center !important;
 
-  font-size: clamp(2.8rem, 5vw, 4.2rem) !important;
-  line-height: 0.9 !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+
+  color: #94a3b8 !important;
 }
 
-/* Teams rechter Hauptblock */
+/* =========================
+⚽ SCORE
+========================= */
+body #topScore {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: clamp(2.8rem, 5vw, 4.2rem) !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+
+  justify-self: center !important;
+}
+
+/* =========================
+🏷 WRAPPER
+========================= */
 body #scoreWrapper {
   grid-column: 2 !important;
   grid-row: 1 / span 2 !important;
 
   display: flex !important;
-  align-items: center !important;
+  flex-direction: column !important;
+
   justify-content: center !important;
+  align-items: stretch !important;
 
   width: 100% !important;
   min-width: 0 !important;
 }
 
-/* Teamnamen kompakter */
+/* =========================
+🏟 MATCHUP LAYOUT
+========================= */
 body #topTeams {
+  display: grid !important;
+
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+
   width: 100% !important;
 
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
-
   align-items: center !important;
-  gap: 12px !important;
+  row-gap: 8px !important;
+  column-gap: 14px !important;
 }
 
-/* Weniger oversized */
+/* HOME TOP */
+body #topTeams .home {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+
+  text-align: center !important;
+}
+
+/* AWAY BOTTOM */
+body #topTeams .away {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+
+  text-align: center !important;
+}
+
+/* VS CENTER */
+body #topTeams .vs {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+
+  align-self: center !important;
+  justify-self: center !important;
+
+  font-size: 1rem !important;
+  font-weight: 900 !important;
+
+  color: var(--accent) !important;
+}
+
+/* TEAM TEXT */
 body #topTeams .home,
 body #topTeams .away {
-  font-size: clamp(0.82rem, 1.35vw, 1rem) !important;
-  line-height: 1.15 !important;
+  min-width: 0 !important;
+
+  font-size: clamp(0.8rem, 1.25vw, 1rem) !important;
   font-weight: 800 !important;
+  line-height: 1.15 !important;
+
+  color: #e5e7eb !important;
+  text-shadow: none !important;
 
   white-space: normal !important;
   overflow: hidden !important;
@@ -92,30 +155,6 @@ body #topTeams .away {
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
 }
-
-/* Nur Begegnung farbig */
-body #topTeams .home,
-body #topTeams .away {
-  color: #e5e7eb !important;
-  text-shadow: none !important;
-}
-
-/* VS als Highlight */
-body #topTeams .vs {
-  color: var(--accent) !important;
-  opacity: 0.85 !important;
-  font-size: 0.95rem !important;
-}
-
-/* User Match Optional Accent */
-body #topBar.user-match #topTeams .home {
-  color: var(--accent) !important;
-}
-
-body #topBar.user-match #topTeams .away {
-  color: var(--accent-opp) !important;
-}
-
 /* =========================
 🍔 SIDEBAR
 ========================= */
