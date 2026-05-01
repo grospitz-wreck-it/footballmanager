@@ -18,6 +18,36 @@ function normalizeId(id) {
   return String(id);
 }
 
+function randomBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function initializeTeamStrength(team) {
+  if (team.strength) return team;
+
+  team.strength = randomBetween(58, 82);
+
+  team.attack = randomBetween(
+    Math.max(45, team.strength - 5),
+    Math.min(90, team.strength + 5)
+  );
+
+  team.defense = randomBetween(
+    Math.max(45, team.strength - 5),
+    Math.min(90, team.strength + 5)
+  );
+
+  team.form = randomBetween(
+    Math.max(45, team.strength - 3),
+    Math.min(90, team.strength + 3)
+  );
+
+  team.morale = randomBetween(55, 85);
+  team.fitness = randomBetween(60, 90);
+
+  return team;
+}
+
 // 🔥 Map für externes Setzen (PLZ)
 let leagueIndexMap = [];
 // 🔥 FIX: verhindert doppelte Initialisierung
@@ -141,11 +171,15 @@ function initLeague(league) {
   // =========================
   // 🆔 NORMALIZE IDS
   // =========================
-  league.teams = league.teams.map((t) => ({
+league.teams = league.teams.map((t) =>
+  initializeTeamStrength({
     ...t,
     id: normalizeId(t.id),
-  }));
+  })
+);
 
+
+  
   // =========================
   // 📊 TABLE INIT
   // =========================
