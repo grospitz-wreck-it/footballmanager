@@ -578,13 +578,16 @@ function initUI() {
     };
   }
 // 🔥 EVENT HISTORY OVERLAY
-const liveFeed = document.getElementById("liveFeed");
+// =========================
+// 🔥 EVENT HISTORY OVERLAY (eventBar Version)
+// =========================
+const eventBar = document.getElementById("eventBar");
 const eventOverlay = document.getElementById("eventHistoryOverlay");
 const closeEventBtn = document.getElementById("closeEventHistory");
 const historyList = document.getElementById("eventHistoryList");
 
-if (liveFeed && eventOverlay && historyList) {
-  liveFeed.onclick = () => {
+if (eventBar && eventOverlay && historyList) {
+  eventBar.onclick = () => {
     const events = [...(game.events?.history || [])].reverse();
 
     historyList.innerHTML = events
@@ -600,6 +603,23 @@ if (liveFeed && eventOverlay && historyList) {
 
     eventOverlay.classList.remove("hidden");
   };
+}
+
+if (closeEventBtn) {
+  closeEventBtn.onclick = () => {
+    eventOverlay.classList.add("hidden");
+  };
+}
+
+if (eventOverlay) {
+  eventOverlay.addEventListener("click", (e) => {
+    if (
+      e.target.classList.contains("event-history-backdrop") ||
+      e.target === eventOverlay
+    ) {
+      eventOverlay.classList.add("hidden");
+    }
+  });
 }
 
 if (closeEventBtn) {
