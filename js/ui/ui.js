@@ -213,6 +213,15 @@ function applyColor(color) {
     "--accent-opp-glow",
     hexToRgba(opp, 0.45)
   );
+
+  // 🔥 Gegnerfarben global neu berechnen
+  if (game.league?.current?.teams?.length) {
+    game.league.current.teams.forEach((team) => {
+      if (String(team.id) !== String(game.team?.selectedId)) {
+        team.color = generateOpponentColor(team.id, color);
+      }
+    });
+  }
 }
 
 // =========================
