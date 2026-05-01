@@ -942,7 +942,7 @@ function runMatchLoop({ onTick, onEnd } = {}) {
 
     while (accumulator >= STEP && safety < 10) {
       live.minute++;
-
+    document.body?.classList.add("match-live");
       // =========================
       // ⚡ ANDERE MATCHES LIVE
       // =========================
@@ -1050,7 +1050,7 @@ function runMatchLoop({ onTick, onEnd } = {}) {
 
           updateTable(home, away, hg, ag);
         }
-
+        document.body?.classList.remove("match-live");
         clearInterval(matchInterval);
         matchInterval = null;
 
