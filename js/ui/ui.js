@@ -224,6 +224,50 @@ function getMatchTeamColor(teamId) {
   return opponentColors[hash % opponentColors.length];
 }
 
+
+function getOppositeColor(color) {
+  const { h } = hexToHsl(color);
+
+  // 👉 maximal gegensätzlicher Farbton
+  const oppHue = (h + 180) % 360;
+
+  return hslToHex(oppHue, 78, 58);
+}
+
+function applyColor(color) {
+  const opp = getOppositeColor(color);
+
+  document.documentElement.style.setProperty("--accent", color);
+
+  document.documentElement.style.setProperty(
+    "--accent-soft",
+    hexToRgba(color, 0.2)
+  );
+
+  document.documentElement.style.setProperty(
+    "--accent-glow",
+    hexToRgba(color, 0.45)
+  );
+
+  document.documentElement.style.setProperty(
+    "--accent-secondary",
+    adjustBrightness(color, -18)
+  );
+
+  document.documentElement.style.setProperty(
+    "--accent-tertiary",
+    adjustBrightness(color, -32)
+  );
+
+  // 🔥 echte Gegnerfarbe
+  document.documentElement.style.setProperty("--accent-opp", opp);
+
+  document.documentElement.style.setProperty(
+    "--accent-opp-glow",
+    hexToRgba(opp, 0.45)
+  );
+}
+
 // =========================
 // ⚙️ TACTICS PRESETS (GLOBAL)
 // =========================
