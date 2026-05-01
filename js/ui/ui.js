@@ -824,6 +824,41 @@ function showToast(text) {
   }, 2000);
 }
 
+function getMatchTeamColor(teamId) {
+  const myTeamId = String(
+    game.team?.selectedId ||
+    game.team?.id ||
+    ""
+  );
+
+  const userColor =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent")
+      .trim() || "#22d3ee";
+
+  // 👤 User Team
+  if (String(teamId) === myTeamId) {
+    return userColor;
+  }
+
+  // 🆚 Gegner Team suchen
+  const team = game.league?.current?.teams?.find(
+    (t) => String(t.id) === String(teamId)
+  );
+
+  // 🎨 Persistente Gegnerfarbe
+  if (team) {
+    if (!team.color) {
+      team.color = generateOpponentColor(team.id, userColor);
+    }
+
+    return team.color;
+  }
+
+  // 🔄 Fallback
+  return generateOpponentColor(teamId, userColor);
+}
+
 // =========================
 // ⚽ SCORE (UPGRADED)
 // =========================
