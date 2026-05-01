@@ -1,348 +1,344 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="stylesheet" href="style.css">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Kreisliga Manager</title>
 </head>
 
 <body>
 
-     <!-- =========================
-🎮 TACTICS OVERLAY (FINAL FIX)
-========================= -->
-<div id="tacticsOverlay">
+  <!-- =========================
+  🎮 TACTICS OVERLAY
+  ========================= -->
+  <div id="tacticsOverlay">
 
-  <!-- 🔥 BACKDROP (Tap Outside Close) -->
-  <div class="tactics-backdrop"></div>
+    <div class="tactics-backdrop"></div>
 
-  <div class="tactics-sheet">
+    <div class="tactics-sheet">
 
-    <!-- 👇 HANDLE -->
-    <div class="sheet-handle"></div>
+      <div class="sheet-handle"></div>
 
-    <!-- 🧠 HEADER -->
-    <div class="tactics-header">
-      <img src="./gfx/taktik.webp" alt="Taktik" />
+      <div class="tactics-header">
+        <img src="./gfx/taktik.webp" alt="Taktik" />
+      </div>
+
+      <div class="formation-preview" id="formationPreview"></div>
+
+      <div class="tactics-stats-row">
+        <div id="tacticsStats"></div>
+        <div id="tacticsBars"></div>
+      </div>
+
+      <div class="tactics-controls">
+
+        <!-- 📐 FORMATION -->
+        <div class="tactics-dropdown" id="formationDropdown">
+          <div class="dd-selected">
+            <span class="dd-label">4-4-2</span>
+            <span class="dd-arrow">▾</span>
+          </div>
+          <div class="dd-options">
+            <div data-value="4-4-2">4-4-2</div>
+            <div data-value="4-3-3">4-3-3</div>
+            <div data-value="3-5-2">3-5-2</div>
+            <div data-value="4-2-3-1">4-2-3-1</div>
+          </div>
+        </div>
+
+        <!-- ⚙️ PRESET -->
+        <div class="tactics-dropdown" id="presetDropdown">
+          <div class="dd-selected">
+            <span class="dd-label">Balanced</span>
+            <span class="dd-arrow">▾</span>
+          </div>
+          <div class="dd-options">
+            <div data-value="offensive">Offensiv</div>
+            <div data-value="balanced">Balanced</div>
+            <div data-value="defensive">Defensiv</div>
+          </div>
+        </div>
+
+        <!-- 🎨 STYLE -->
+        <div class="tactics-dropdown" id="styleDropdown">
+          <div class="dd-selected">
+            <span class="dd-label">Ausgeglichen</span>
+            <span class="dd-arrow">▾</span>
+          </div>
+          <div class="dd-options">
+            <div data-value="balanced">Ausgeglichen</div>
+            <div data-value="possession">Ballbesitz</div>
+            <div data-value="counter">Konter</div>
+            <div data-value="longball">Lange Bälle</div>
+            <div data-value="wings">Flügelspiel</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 🎲 CTA -->
+      <button id="chanceBtn" class="chance-btn">
+        <span class="chance-title">🎲 Chance im Spiel</span>
+        <span class="chance-sub">Riskiere es!</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- =========================
+  🟡 SPLASH
+  ========================= -->
+  <div id="splash">
+    <input id="nameInput" placeholder="Dein Name" />
+
+    <div id="plzSearch">
+      <input id="plzInput" maxlength="3" placeholder="PLZ (z.B. 320)" />
+      <div id="leagueResults"></div>
     </div>
 
-    <!-- ⚽ FIELD -->
-    <div class="formation-preview" id="formationPreview"></div>
+    <select id="leagueSelect"></select>
+    <select id="teamSelect"></select>
+  </div>
+
+  <!-- =========================
+  📱 APP
+  ========================= -->
+  <div id="app">
+
+    <!-- 🔝 HEADER -->
+    <div id="header">
+      <button id="burgerBtn">☰</button>
+
+      <div>Kreisliga Manager</div>
+
+      <button id="tacticsBtn" class="tactics-btn">
+        <img src="./gfx/tacticsettings.webp" alt="Tactics" />
+      </button>
+    </div>
+
+    <!-- 🍔 SIDEBAR -->
+    <div id="sidebarWrapper" class="sidebar-wrapper">
+
+      <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+      <div id="sidebar">
+
+        <div class="sidebar-header">
+          <div class="sidebar-title">KARRIERE HUB</div>
+          <div class="sidebar-sub">Manager & System</div>
+        </div>
+
+        <div class="sidebar-top-tabs">
+          <button class="side-tab active" data-panel="manager">Manager</button>
+          <button class="side-tab" data-panel="system">System</button>
+        </div>
+
+        <!-- 📈 MANAGER -->
+        <div id="managerPanel" class="sidebar-panel active">
+
+          <div class="manager-card">
+
+            <div class="manager-stat">
+              <span>💰 Budget</span>
+              <strong id="sidebarBudget">€0</strong>
+            </div>
+
+            <div class="manager-stat">
+              <span>🔁 Transferbudget</span>
+              <strong id="sidebarTransferBudget">€0</strong>
+            </div>
+
+            <div class="manager-stat">
+              <span>⭐ Reputation</span>
+              <strong id="sidebarReputation">0</strong>
+            </div>
+
+            <div class="manager-stat">
+              <span>👥 Kaderwert</span>
+              <strong id="sidebarSquadValue">€0</strong>
+            </div>
+
+            <div class="manager-stat">
+              <span>🏆 Liga</span>
+              <strong id="sidebarLeague">-</strong>
+            </div>
+
+            <div class="manager-stat">
+              <span>📅 Saison</span>
+              <strong id="sidebarSeason">-</strong>
+            </div>
+
+          </div>
+
+          <div class="manager-actions">
+            <button id="transferMarketBtn">🔄 Transfermarkt</button>
+            <button id="sponsorBtn">🤝 Sponsoren</button>
+            <button id="squadBtn">📋 Kaderanalyse</button>
+          </div>
+
+        </div>
+
+        <!-- ⚙️ SYSTEM -->
+        <div id="systemPanel" class="sidebar-panel">
+
+          <button id="saveBtn">💾 Speichern</button>
+          <button id="loadBtn">📂 Laden</button>
+          <button id="resetBtn">🗑 Reset</button>
+
+          <div class="sidebar-section">
+            <div class="sidebar-label">Team Farbe</div>
+            <input type="color" id="colorPicker" value="#22d3ee" />
+          </div>
+
+        </div>
+
+      </div>
+    </div>
 
     <!-- =========================
-    📊 STATS (FIXED STRUCTURE)
+    📦 MAIN CONTAINER
     ========================= -->
-    <div class="tactics-stats-row">
+    <div class="container">
 
-      <div id="tacticsStats"></div>
-      <div id="tacticsBars"></div>
+      <!-- 🔝 TOPBAR -->
+      <div id="topBar">
 
-    </div>
-
-    <!-- =========================
-    🎛 CONTROLS
-    ========================= -->
-   <div class="tactics-controls">
-
-  <!-- 📐 FORMATION -->
-  <div class="tactics-dropdown" id="formationDropdown">
-    <div class="dd-selected">
-      <span class="dd-label">4-4-2</span>
-      <span class="dd-arrow">▾</span>
-    </div>
-    <div class="dd-options">
-      <div data-value="4-4-2">4-4-2</div>
-      <div data-value="4-3-3">4-3-3</div>
-      <div data-value="3-5-2">3-5-2</div>
-      <div data-value="4-2-3-1">4-2-3-1</div>
-    </div>
-  </div>
-
-  <!-- ⚙️ PRESET -->
-  <div class="tactics-dropdown" id="presetDropdown">
-    <div class="dd-selected">
-      <span class="dd-label">Balanced</span>
-      <span class="dd-arrow">▾</span>
-    </div>
-    <div class="dd-options">
-      <div data-value="offensive">Offensiv</div>
-      <div data-value="balanced">Balanced</div>
-      <div data-value="defensive">Defensiv</div>
-    </div>
-  </div>
-
-  <!-- 🎨 STYLE -->
-  <div class="tactics-dropdown" id="styleDropdown">
-    <div class="dd-selected">
-      <span class="dd-label">Ausgeglichen</span>
-      <span class="dd-arrow">▾</span>
-    </div>
-    <div class="dd-options">
-      <div data-value="balanced">Ausgeglichen</div>
-      <div data-value="possession">Ballbesitz</div>
-      <div data-value="counter">Konter</div>
-      <div data-value="longball">Lange Bälle</div>
-      <div data-value="wings">Flügelspiel</div>
-    </div>
-  </div>
-
-</div>
-
-<!-- 🎲 CTA -->
-<button id="chanceBtn" class="chance-btn">
-  <span class="chance-title">🎲 Chance im Spiel</span>
-  <span class="chance-sub">Riskiere es!</span>
-</button>
-</div> 
-     </div>
-<!-- =========================
-🟡 SPLASH
-========================= -->
-<div id="splash">
-  <input id="nameInput" placeholder="Dein Name">
-
-  <div id="plzSearch">
-    <input id="plzInput" maxlength="3" placeholder="PLZ (z.B. 320)" />
-    <div id="leagueResults"></div>
-  </div>
-
-  <select id="leagueSelect"></select>
-  <select id="teamSelect"></select>
-</div>
-
-<!-- =========================
-📱 APP
-========================= -->
-<div id="app">
-
-  <!-- 🔝 HEADER -->
-  <div id="header">
-    <button id="burgerBtn">☰</button>
-
-    <div>Kreisliga Manager</div>
-
-    <button id="tacticsBtn" class="tactics-btn">
-      <img src="./gfx/tacticsettings.webp" alt="Tactics" />
-    </button>
-  </div>
-
-  <!-- 🍔 SIDEBAR -->
-  <div id="sidebarWrapper" class="sidebar-wrapper">
-    <div id="sidebarOverlay" class="sidebar-overlay"></div>
-
-    <div id="sidebar">
-
-      <!-- ========================= -->
-      <!-- 🧠 HEADER -->
-      <!-- ========================= -->
-      <div class="sidebar-header">
-        <div class="sidebar-title">KARRIERE HUB</div>
-        <div class="sidebar-sub">Manager & System</div>
-      </div>
-
-      <!-- ========================= -->
-      <!-- 🔀 TOP TABS -->
-      <!-- ========================= -->
-      <div class="sidebar-top-tabs">
-        <button class="side-tab active" data-panel="manager">Manager</button>
-        <button class="side-tab" data-panel="system">System</button>
-      </div>
-
-      <!-- ========================= -->
-      <!-- 📈 MANAGER PANEL -->
-      <!-- ========================= -->
-      <div id="managerPanel" class="sidebar-panel active">
-
-        <div class="manager-card">
-
-          <div class="manager-stat">
-            <span>💰 Budget</span>
-            <strong id="sidebarBudget">€0</strong>
-          </div>
-
-          <div class="manager-stat">
-            <span>🔁 Transferbudget</span>
-            <strong id="sidebarTransferBudget">€0</strong>
-          </div>
-
-          <div class="manager-stat">
-            <span>⭐ Reputation</span>
-            <strong id="sidebarReputation">0</strong>
-          </div>
-
-          <div class="manager-stat">
-            <span>👥 Kaderwert</span>
-            <strong id="sidebarSquadValue">€0</strong>
-          </div>
-
-          <div class="manager-stat">
-            <span>🏆 Liga</span>
-            <strong id="sidebarLeague">-</strong>
-          </div>
-
-          <div class="manager-stat">
-            <span>📅 Saison</span>
-            <strong id="sidebarSeason">-</strong>
-          </div>
-
+        <div class="topbar-live">
+          <div id="topMinute" class="minute">0'</div>
         </div>
 
-        <!-- 🔧 SUB ACTIONS -->
-        <div class="manager-actions">
-          <button id="transferMarketBtn">🔄 Transfermarkt</button>
-          <button id="sponsorBtn">🤝 Sponsoren</button>
-          <button id="squadBtn">📋 Kaderanalyse</button>
+        <div class="matchup">
+
+          <div id="topHome" class="home">Home Team</div>
+
+          <div class="scoreRow">
+            <span id="topScore" class="score">0:0</span>
+          </div>
+
+          <div id="topAway" class="away">Away Team</div>
+
         </div>
 
       </div>
 
-      <!-- ========================= -->
-      <!-- ⚙️ SYSTEM PANEL -->
-      <!-- ========================= -->
-      <div id="systemPanel" class="sidebar-panel">
+      <!-- ⏱ PROGRESS -->
+      <div id="progressWrapper">
+        <div id="progressBar">
+          <div id="progressFill"></div>
+        </div>
+      </div>
 
-        <button id="saveBtn">💾 Speichern</button>
-        <button id="loadBtn">📂 Laden</button>
-        <button id="resetBtn">🗑 Reset</button>
+      <!-- 🎮 GAME -->
+      <div id="gameCanvas">
 
-        <div class="sidebar-section">
-          <div class="sidebar-label">Team Farbe</div>
-          <input type="color" id="colorPicker" value="#22d3ee">
+        <canvas id="gameCanvasInner"></canvas>
+
+        <div id="gameEventOverlay" class="hidden">
+          <img id="gameEventImage" />
+        </div>
+
+        <div id="matchOverlay" class="hidden">
+          <img id="overlayImage" />
+          <div id="overlayText"></div>
         </div>
 
       </div>
 
+      <!-- 📰 EVENT BAR -->
+      <div id="eventBar">
+        <div id="eventText">Willkommen im Spiel</div>
+      </div>
+
+      <!-- ▶️ MAIN BUTTON -->
+      <button id="mainButton" class="main-btn">Spiel starten</button>
+
+      <div id="adContainer"></div>
+
+      <!-- 📊 TABS -->
+      <div class="tabs">
+        <button class="tab active" data-tab="table">Tabelle</button>
+        <button class="tab" data-tab="schedule">Spieltage</button>
+        <button class="tab" data-tab="team">Team</button>
+      </div>
+
+      <!-- =========================
+      📊 TAB CONTENT
+      ========================= -->
+      <div id="tabContent">
+
+        <!-- 📈 TABLE -->
+        <div id="tableView" class="tab-view">
+          <div id="table">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Team</th>
+                  <th>SP</th>
+                  <th>S</th>
+                  <th>U</th>
+                  <th>N</th>
+                  <th>Tore</th>
+                  <th>Diff</th>
+                  <th>Pkt</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 📅 SCHEDULE -->
+        <div id="scheduleView" class="tab-view" style="display:none;"></div>
+
+        <!-- 👥 TEAM -->
+        <div id="teamView" class="tab-view" style="display:none;"></div>
+
+      </div>
     </div>
   </div>
-
-  <!-- 📦 MAIN -->
-  <div class="container">
-
-<div id="topBar">
-  <div class="topbar-live">
-    <div id="topMinute" class="minute">0'</div>
-  </div>
-
-  <div class="matchup">
-    <div id="topHome" class="home">Home Team</div>
-
-    <div class="scoreRow">
-      <span id="topScore" class="score">0:0</span>
-    </div>
-
-    <div id="topAway" class="away">Away Team</div>
-  </div>
-</div>
-
-    <!-- ⏱ PROGRESS -->
-   <div id="progressWrapper">
-  <div id="progressBar">
-    <div id="progressFill"></div>
-  </div>
-</div>
-
-    <!-- 🎮 GAME -->
- <div id="gameCanvas">
-
-  <canvas id="gameCanvasInner"></canvas>
-
-  <!-- 🔥 GAME EVENT IMAGE (NEU) -->
-  <div id="gameEventOverlay" class="hidden">
-    <img id="gameEventImage" />
-  </div>
-
-  <div id="matchOverlay" class="hidden">
-    <img id="overlayImage" />
-    <div id="overlayText"></div>
-  </div>
-
-</div>
-
-    <!-- 📰 EVENTS -->
-    <div id="eventBar">
-      <div id="eventText">Willkommen im Spiel</div>
-    </div>
-
-    <!-- ▶️ MAIN BUTTON -->
-     <button id="mainButton" class="main-btn">Spiel starten</button>
-       
-    <div id="adContainer"></div>
-
-    <!-- 📊 TABS -->
-    <div class="tabs">
-      <button class="tab active" data-tab="table">Tabelle</button>
-      <button class="tab" data-tab="schedule">Spieltage</button>
-      <button class="tab" data-tab="team">Team</button>
-    </div>
-
-    <!-- 📊 CONTENT -->
-    <!-- =========================
-📊 CONTENT
-========================= -->
-<div id="tabContent">
-
-  <!-- 📈 TABELLE -->
-  <div id="tableView" class="tab-view">
-    <div id="table">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Team</th>
-            <th>SP</th>
-            <th>S</th>
-            <th>U</th>
-            <th>N</th>
-            <th>Tore</th>
-            <th>Diff</th>
-            <th>Pkt</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 📅 SPIELTAGE -->
-  <div id="scheduleView" class="tab-view" style="display:none;"></div>
-
-  <!-- 👥 TEAM -->
-  <div id="teamView" class="tab-view" style="display:none;"></div>
 
   <!-- =========================
   📅 MATCH DETAIL OVERLAY
   ========================= -->
   <div id="matchDetailOverlay" class="hidden">
+
     <div class="match-detail-backdrop"></div>
 
     <div class="match-detail-card">
+
       <button id="closeMatchDetail">✕</button>
 
-      <div id="matchDetailContent">
-        <!-- Dynamisch via JS -->
-      </div>
+      <div id="matchDetailContent"></div>
+
     </div>
+
   </div>
 
-</div>
+  <!-- =========================
+  📰 EVENT HISTORY OVERLAY
+  ========================= -->
+  <div id="eventHistoryOverlay" class="hidden">
 
-<div id="eventHistoryOverlay" class="hidden">
-  <div class="event-history-backdrop"></div>
+    <div class="event-history-backdrop"></div>
 
-  <div class="event-history-card">
-    <button id="closeEventHistory">✕</button>
+    <div class="event-history-card">
 
-    <h2>Match Ereignisse</h2>
+      <button id="closeEventHistory">✕</button>
 
-    <div id="eventHistoryList"></div>
+      <h2>Match Ereignisse</h2>
+
+      <div id="eventHistoryList"></div>
+
+    </div>
+
   </div>
-</div>
 
-       
-<!-- SCRIPT -->
-<script type="module" src="js/main.js"></script>
+  <!-- =========================
+  🚀 SCRIPT
+  ========================= -->
+  <script type="module" src="js/main.js"></script>
 
 </body>
 </html>
