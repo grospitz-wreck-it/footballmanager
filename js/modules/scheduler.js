@@ -515,7 +515,7 @@ function renderSchedule() {
   // 🔥 Safety Clamp
   window.scheduleViewIndex = Math.max(
     0,
-    Math.min(window.scheduleViewIndex, schedule.length - 1),
+Math.min(window.scheduleViewIndex, schedule.length - 1)
   );
 
   let selectedRound = window.scheduleViewIndex;
