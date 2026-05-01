@@ -41,6 +41,25 @@ let selectedPlayerId = null;
 let lastTacticHash = null;
 
 // =========================
+// 🎮 MATCH LIVE BODY STATE
+// =========================
+function syncMatchLiveState() {
+  if (!document.body) return;
+
+  const live = game.match?.live;
+
+  const isRunning =
+    live &&
+    live.running === true &&
+    live.phase !== "bye" &&
+    live.phase !== "halftime" &&
+    live.minute >= 1 &&
+    live.minute < 90;
+
+  document.body.classList.toggle("match-live", !!isRunning);
+}
+
+// =========================
 // 🖱 Color Picker
 // =========================
 function initColorPicker() {
@@ -367,6 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function updateUI() {
   initUI();
+  syncMatchLiveState();
   // =========================
   // 💀 GAME OVER
   // =========================
