@@ -1,12 +1,17 @@
-<div class="penalty-game" data-penalty-root>
-  <div class="penalty-hud">
-    <span data-penalty-round>Round 1/5</span>
-    <span data-penalty-score>0 : 0</span>
-    <span data-penalty-feedback>Tap or swipe to shoot</span>
-  </div>
-  <div class="penalty-pitch" data-penalty-pitch>
-    <div class="penalty-goal"></div>
-    <div class="penalty-keeper" data-penalty-keeper data-direction="center"></div>
-    <div class="penalty-ball" data-penalty-ball></div>
-  </div>
-</div>
+export class PenaltyUI {
+  constructor(root) {
+    this.root = root;
+    this.scoreEl = root.querySelector('[data-penalty-score]');
+    this.roundEl = root.querySelector('[data-penalty-round]');
+    this.feedbackEl = root.querySelector('[data-penalty-feedback]');
+  }
+
+  updateScore(score, rounds, currentRound) {
+    if (this.scoreEl) this.scoreEl.textContent = `${score.goals} : ${score.saves}`;
+    if (this.roundEl) this.roundEl.textContent = `Round ${currentRound}/${rounds}`;
+  }
+
+  setFeedback(text) {
+    if (this.feedbackEl) this.feedbackEl.textContent = text;
+  }
+}
