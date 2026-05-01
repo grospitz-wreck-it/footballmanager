@@ -1,13 +1,9 @@
 export const PENALTY_ASSETS = {
   keeper: {
-    idle: './assets/keeper/keeper_idle_center.png',
-    bounce: './assets/keeper/keeper_idle_bounce.png',
-    diveLeft1: './assets/keeper/keeper_dive_left_1.png',
-    diveLeft2: './assets/keeper/keeper_dive_left_2.png',
-    saveLeft: './assets/keeper/keeper_save_left.png',
-    miss: './assets/keeper/keeper_miss.png',
-    shadow: './assets/keeper/keeper_shadow.png'
-  },
+  idle: './assets/keeper/keeper_idle_center.png',
+  bounce: './assets/keeper/keeper_idle_bounce.png',
+  diveLeft1: './assets/keeper/keeper_dive_left_1.png'
+}
 
   ball: {
     default: './assets/ball/ball_default.png',
