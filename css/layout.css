@@ -384,29 +384,6 @@ body:not(.match-live) #topMinute::before {
 }
 
 /* =========================
-📊 TABS
-========================= */
-.tabs {
-  display: flex;
-  gap: 8px;
-  background: #020617;
-  padding: 6px;
-  border-radius: 12px;
-}
-
-.tab {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  color: #94a3b8;
-}
-
-.tab.active {
-  background: #22C55E;
-  color: #04130A;
-}
-
-/* =========================
 🎮 GAME FIELD
 ========================= */
 #gameCanvas {
