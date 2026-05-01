@@ -499,32 +499,50 @@ function renderSchedule() {
     return;
   }
 
-  let selectedRound =
-    typeof window.scheduleViewIndex === "number"
-      ? window.scheduleViewIndex
-      : game.league?.current?.currentRound || 0;
+  // =========================
+// 📅 HEADER + ROUND SYNC FIX (FULL DROP-IN)
+// Direkt in renderSchedule() ersetzen
+// =========================
 
-  selectedRound = Math.max(0, Math.min(selectedRound, schedule.length - 1));
-  window.scheduleViewIndex = selectedRound;
+// 🔥 Echter aktiver Liga-Spieltag
+const activeRound = Number(game.league?.current?.currentRound ?? 0);
 
-  const round = schedule[selectedRound];
-  const myMatch = game.match?.current || null;
+// 🔥 View Index sauber initialisieren
+if (typeof window.scheduleViewIndex !== "number") {
+  window.scheduleViewIndex = activeRound;
+}
 
-  let html = `
-    <div class="schedule-card">
-      <div class="schedule-header">
-        <button class="prev-day" ${selectedRound === 0 ? "disabled" : ""}>‹</button>
-        <h3>${
-          selectedRound === (game.league?.current?.currentRound || 0)
-            ? `Aktueller Spieltag ${selectedRound + 1}`
-            : `Spieltag ${selectedRound + 1}`
-        }</h3>
-        <button class="next-day" ${
-          selectedRound === schedule.length - 1 ? "disabled" : ""
-        }>›</button>
-      </div>
-      <div class="schedule-list">
-  `;
+// 🔥 Safety Clamp
+window.scheduleViewIndex = Math.max(
+  0,
+  Math.min(window.scheduleViewIndex, schedule.length - 1)
+);
+
+let selectedRound = window.scheduleViewIndex;
+
+// =========================
+// 📦 HTML BUILD
+// =========================
+let html = `
+  <div class="schedule-card">
+    <div class="schedule-header">
+      <button class="prev-day" ${
+        selectedRound <= 0 ? "disabled" : ""
+      }>‹</button>
+
+      <h3>${
+        selectedRound === activeRound
+          ? `Aktueller Spieltag ${activeRound + 1}`
+          : `Spieltag ${selectedRound + 1}`
+      }</h3>
+
+      <button class="next-day" ${
+        selectedRound >= schedule.length - 1 ? "disabled" : ""
+      }>›</button>
+    </div>
+
+    <div class="schedule-list">
+`;
 
   round.forEach((match, mIndex) => {
     const isUserMatch = isMyMatch(match);
