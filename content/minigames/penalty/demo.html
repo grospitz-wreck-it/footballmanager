@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Penalty Minigame Demo</title>
+    <link rel="stylesheet" href="./penalty.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #111;
+        color: #fff;
+        font-family: system-ui, sans-serif;
+      }
+
+      .demo-wrap {
+        width: min(96vw, 1200px);
+        display: grid;
+        gap: 12px;
+      }
+
+      .demo-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button, select {
+        font: inherit;
+        padding: 8px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo-wrap">
+      <div class="demo-controls">
+        <button id="start">Start</button>
+        <button id="reset">Reset</button>
+        <button id="destroy">Destroy</button>
+        <label>
+          Difficulty:
+          <select id="difficulty">
+            <option value="easy">easy</option>
+            <option value="normal" selected>normal</option>
+            <option value="hard">hard</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="mount"></div>
+    </div>
+
+    <script type="module">
+      import { startPenaltyGame, resetPenaltyGame, setPenaltyDifficulty, destroyPenaltyGame } from './penaltyGame.js';
+
+      const mount = document.getElementById('mount');
+      const startBtn = document.getElementById('start');
+      const resetBtn = document.getElementById('reset');
+      const destroyBtn = document.getElementById('destroy');
+      const difficultySelect = document.getElementById('difficulty');
+
+      const template = `
+        <div class="penalty-game" data-penalty-root>
+          <div class="penalty-hud">
+            <span data-penalty-round>Round 1/5</span>
+            <span data-penalty-score>0 : 0</span>
+            <span data-penalty-feedback>Tap or swipe to shoot</span>
+          </div>
+          <div class="penalty-pitch" data-penalty-pitch>
+            <div class="penalty-goal"></div>
+            <div class="penalty-keeper" data-penalty-keeper data-direction="center"></div>
+            <div class="penalty-ball" data-penalty-ball></div>
+          </div>
+        </div>
+      `;
+
+      function buildRoot() {
+        mount.innerHTML = template;
+        return mount.querySelector('[data-penalty-root]');
+      }
+
+      function start() {
+        const root = buildRoot();
+        startPenaltyGame({
+          rootElement: root,
+          difficulty: difficultySelect.value,
+          hooks: {
+            onGameEnd: (score) => {
+              console.log('Penalty game ended:', score);
+            }
+          }
+        });
+      }
+
+      startBtn.addEventListener('click', start);
+      resetBtn.addEventListener('click', () => resetPenaltyGame());
+      destroyBtn.addEventListener('click', () => {
+        destroyPenaltyGame();
+        mount.innerHTML = '';
+      });
+      difficultySelect.addEventListener('change', (event) => {
+        setPenaltyDifficulty(event.target.value);
+      });
+
+      start();
+    </script>
+  </body>
+</html>
