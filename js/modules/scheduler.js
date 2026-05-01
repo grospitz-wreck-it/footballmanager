@@ -729,4 +729,9 @@ export {
   simulateMatchday,
   updateTable,
   simulateLiveMatchMinute,
+
+  // 📅 MATCH DETAIL
+  openMatchDetail,
+  closeMatchDetail,
+  initMatchDetailOverlay,
 };
