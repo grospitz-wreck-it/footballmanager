@@ -565,8 +565,8 @@ let html = `
       : `<span class="vs">vs</span>`;
 
     html += `
-      <div class="${matchClasses}">
-        <span class="home">${getTeamName(match.homeTeamId)}</span>
+         <div class="${matchClasses}" data-match-index="${mIndex}">
+         <span class="home">${getTeamName(match.homeTeamId)}</span>
         ${centerDisplay}
         <span class="away">${getTeamName(match.awayTeamId)}</span>
       </div>
@@ -580,28 +580,43 @@ let html = `
 
   container.innerHTML = html;
 
-  const prevBtn = container.querySelector(".prev-day");
-  const nextBtn = container.querySelector(".next-day");
+// =========================
+// 🎯 MATCH CLICK EVENTS
+// =========================
+container.querySelectorAll(".match").forEach((el) => {
+  el.addEventListener("click", () => {
+    const idx = Number(el.dataset.matchIndex);
+    const selectedMatch = round[idx];
 
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      if (window.scheduleViewIndex > 0) {
-        window.scheduleViewIndex--;
-        renderSchedule();
-      }
-    });
-  }
+    if (selectedMatch) {
+      openMatchDetail(selectedMatch);
+    }
+  });
+});
 
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      if (window.scheduleViewIndex < schedule.length - 1) {
-        window.scheduleViewIndex++;
-        renderSchedule();
-      }
-    });
-  }
+// =========================
+// ◀ ▶ NAVIGATION
+// =========================
+const prevBtn = container.querySelector(".prev-day");
+const nextBtn = container.querySelector(".next-day");
+
+if (prevBtn) {
+  prevBtn.addEventListener("click", () => {
+    if (window.scheduleViewIndex > 0) {
+      window.scheduleViewIndex--;
+      renderSchedule();
+    }
+  });
 }
 
+if (nextBtn) {
+  nextBtn.addEventListener("click", () => {
+    if (window.scheduleViewIndex < schedule.length - 1) {
+      window.scheduleViewIndex++;
+      renderSchedule();
+    }
+  });
+}
 // =========================
 // 📅 MATCH DETAIL OVERLAY
 // =========================
