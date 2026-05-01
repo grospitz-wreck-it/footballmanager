@@ -55,32 +55,52 @@ export class PenaltyRenderer {
   }
 
   renderKeeper(pose, direction, saved = false, missed = false) {
-    if (!this.keeper || !this.keeperAnimator) return;
+  if (!this.keeper || !this.keeperAnimator) return;
 
-    this.keeper.style.left = `${pose.x * 100}%`;
-    this.keeper.style.top = `${pose.y * 100}%`;
+  // Position
+  this.keeper.style.left = `${pose.x * 100}%`;
+  this.keeper.style.top = `${pose.y * 100}%`;
 
-    const spriteDirection =
-      direction === 'right' ? 'left' : direction;
+  // Nur Left-Sprites vorhanden → Right wird gespiegelt
+  const spriteDirection =
+    direction === 'right' ? 'left' : direction;
 
-    const frame = this.keeperAnimator.getFrame(
-      spriteDirection,
-      pose.progress,
-      saved,
-      missed
-    );
+  // Frame bestimmen
+  const frame = this.keeperAnimator.getFrame(
+    spriteDirection,
+    pose.progress || 0,
+    saved,
+    missed
+  );
 
+  // Sprite anwenden
+  if (frame?.src) {
     this.keeper.style.backgroundImage = `url('${frame.src}')`;
-
-    const flipX = direction === 'right' ? -1 : 1;
-
-    this.keeper.style.transform = `
-      translate(-50%, -50%)
-      scaleX(${flipX})
-    `;
-
-    this.keeper.dataset.direction = direction;
   }
+
+  // Spiegelung rechts
+  const flipX = direction === 'right' ? -1 : 1;
+
+  // Zusätzliche Dive-Rotation
+  let rotation = 0;
+
+  if (direction === 'left') rotation = -12;
+  if (direction === 'right') rotation = 12;
+
+  // Finale Transformation
+  this.keeper.style.transform = `
+    translate(-50%, -50%)
+    scaleX(${flipX})
+    rotate(${rotation}deg)
+  `;
+
+  // Optional Shadow FX / Depth
+  this.keeper.style.filter = `
+    drop-shadow(0 4px 3px rgba(0,0,0,0.35))
+  `;
+
+  this.keeper.dataset.direction = direction;
+}
 
   resetActors() {
     this.renderBall({
