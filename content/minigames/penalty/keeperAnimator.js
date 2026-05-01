@@ -9,17 +9,15 @@ export class KeeperAnimator {
     }
 
     if (saved) {
-      return this.assets.saveLeft || this.assets.diveLeft2;
+      return this.assets.diveLeft1;
     }
 
     if (direction === 'left' || direction === 'right') {
-      if (progress < 0.35) return this.assets.diveLeft1;
-      if (progress < 0.7) return this.assets.diveLeft2;
-      return this.assets.diveLeft2;
+      return this.assets.diveLeft1;
     }
 
     return progress < 0.5
       ? this.assets.idle
-      : this.assets.bounce;
+      : this.assets.bounce || this.assets.idle;
   }
 }
