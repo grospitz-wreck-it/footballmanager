@@ -671,7 +671,7 @@ function initUI() {
         text: "🔥 Große Chance durch taktische Umstellung!",
       });
 
-     requestUIUpdate();
+      requestUIUpdate();
     };
   }
 }
@@ -741,10 +741,7 @@ function updateScore() {
   ========================= */
   const isGoal =
     lastScoreState.home !== null &&
-    (
-      home !== lastScoreState.home ||
-      away !== lastScoreState.away
-    );
+    (home !== lastScoreState.home || away !== lastScoreState.away);
 
   /* =========================
   🧱 FULL MODERN TOPBAR RENDER
@@ -793,7 +790,7 @@ function updateScore() {
   ========================= */
   lastScoreState = {
     home,
-    away
+    away,
   };
 
   /* =========================
@@ -803,9 +800,7 @@ function updateScore() {
     const preset = game.tactics.preset || "balanced";
 
     tacticsEl.textContent =
-      preset === "custom"
-        ? "CUSTOM"
-        : preset.toUpperCase();
+      preset === "custom" ? "CUSTOM" : preset.toUpperCase();
   }
 }
 
@@ -982,13 +977,16 @@ export function showOverlay(imageUrl, text, duration = 2500) {
   });
 
   // 🔥 AUTO HIDE (guarded)
-  overlayTimeout = setTimeout(() => {
-    overlayEl.classList.remove("show");
+  overlayTimeout = setTimeout(
+    () => {
+      overlayEl.classList.remove("show");
 
-    overlayHideTimeout = setTimeout(() => {
-      overlayEl.classList.add("hidden");
-    }, 250);
-  }, Math.max(0, duration || 0));
+      overlayHideTimeout = setTimeout(() => {
+        overlayEl.classList.add("hidden");
+      }, 250);
+    },
+    Math.max(0, duration || 0),
+  );
 }
 
 // =========================
@@ -1355,34 +1353,51 @@ function renderTeam() {
   // 🧠 AUTO BEST XI
   // =========================
   if (lineup?.slots) {
-  starters = Object.values(lineup.slots)
-    .map((id) =>
-      allPlayers.find(
+    starters = Object.values(lineup.slots)
+      .map((id) =>
+        allPlayers.find(
+          (p) => String(p.id) === String(id) && isPlayerAvailable(p.id),
+        ),
+      )
+      .filter(Boolean);
+
+    const remaining = availablePlayers.filter(
+      (p) => !starters.some((s) => String(s.id) === String(p.id)),
+    );
+
+    while (starters.length < 11 && remaining.length) {
+      starters.push(remaining.shift());
+    }
+  } else {
+    const lineup = game.team?.lineup;
+
+    if (lineup?.slots) {
+      assigned = Object.values(lineup.slots)
+        .map((id) =>
+          players.find(
+            (p) => String(p.id) === String(id) && isPlayerAvailable(p.id),
+          ),
+        )
+        .filter(Boolean);
+
+      const remaining = players.filter(
         (p) =>
-          String(p.id) === String(id) &&
-          isPlayerAvailable(p.id),
-      ),
-    )
-    .filter(Boolean);
+          isPlayerAvailable(p.id) &&
+          !assigned.some((sp) => String(sp.id) === String(p.id)),
+      );
 
-  const remaining = availablePlayers.filter(
-    (p) =>
-      !starters.some(
-        (s) => String(s.id) === String(p.id),
-      ),
-  );
-
-  while (starters.length < 11 && remaining.length) {
-    starters.push(remaining.shift());
+      while (assigned.length < 11 && remaining.length) {
+        assigned.push(remaining.shift());
+      }
+    } else {
+      try {
+        assigned = getBestXI(players, formation);
+      } catch (e) {
+        console.error("❌ getBestXI failed in preview:", e);
+        assigned = players;
+      }
+    }
   }
-} else {
-  try {
-    starters = getBestXI(players, formation);
-  } catch (e) {
-    console.error("❌ getBestXI failed:", e);
-    starters = players.slice(0, 11);
-  }
-}
 
   // =========================
   // 🪑 BENCH CLEAN
