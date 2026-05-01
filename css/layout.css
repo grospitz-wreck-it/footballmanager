@@ -239,11 +239,14 @@ DROP-IN READY
   }
 }
 /* =========================
-⏱ FORCE LIVE INDICATOR
-TOP RIGHT CORNER FIX
+⏱ HARD RESET LIVE WIDGET
+ABSOLUTE TOP RIGHT
 ========================= */
 
-#topBar .topbar-live {
+/* 🔥 RESET ALL POSITIONING */
+#topBar .topbar-live,
+#topMinute,
+#topBar #topMinute {
   position: absolute !important;
 
   top: clamp(8px, 2vw, 14px) !important;
@@ -253,25 +256,28 @@ TOP RIGHT CORNER FIX
   bottom: auto !important;
 
   transform: none !important;
+  translate: none !important;
 
   display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
   justify-content: flex-end !important;
 
   width: auto !important;
   height: auto !important;
 
-  z-index: 20 !important;
-
   margin: 0 !important;
   padding: 0 !important;
+
+  z-index: 50 !important;
 
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-/* 🔴 DOT */
+/* 🔴 LIVE DOT */
+#topMinute::before,
 #topBar .topbar-live::before {
   content: "";
 
@@ -279,7 +285,10 @@ TOP RIGHT CORNER FIX
   height: clamp(6px, 1.5vw, 9px);
 
   border-radius: 50%;
+
   background: #ef4444;
+
+  margin-right: 6px;
 
   box-shadow:
     0 0 8px rgba(239,68,68,0.85),
@@ -288,7 +297,8 @@ TOP RIGHT CORNER FIX
   animation: livePulse 1.4s infinite ease-in-out;
 }
 
-/* MINUTE */
+/* ⏱ TEXT */
+#topMinute,
 #topBar .minute {
   font-size: clamp(0.58rem, 1.4vw, 0.78rem) !important;
   font-weight: 850 !important;
@@ -296,22 +306,46 @@ TOP RIGHT CORNER FIX
 
   color: #f8fafc !important;
 
-  display: flex !important;
-  align-items: center !important;
+  white-space: nowrap !important;
+  text-align: right !important;
+}
+
+/* =========================
+🔴 PULSE
+========================= */
+@keyframes livePulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.35);
+    opacity: 0.75;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* =========================
 📱 MOBILE
 ========================= */
 @media (max-width: 480px) {
-  #topBar .topbar-live {
+  #topBar .topbar-live,
+  #topMinute,
+  #topBar #topMinute {
     top: 8px !important;
     right: 10px !important;
   }
 }
 
 @media (max-width: 360px) {
-  #topBar .topbar-live {
+  #topBar .topbar-live,
+  #topMinute,
+  #topBar #topMinute {
     top: 6px !important;
     right: 8px !important;
   }
