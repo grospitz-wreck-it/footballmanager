@@ -114,8 +114,8 @@ DROP-IN READY
   font-weight: 850;
   line-height: 1.05;
 
-  color: var(--accent);
-
+color: var(--accent-secondary);
+  
   text-shadow:
     0 0 7px var(--accent-glow),
     0 0 14px rgba(34,211,238,0.12);
@@ -163,8 +163,8 @@ DROP-IN READY
   font-weight: 850;
   line-height: 1.05;
 
-  color: var(--accent-opp);
-
+color: var(--accent-tertiary);
+  
   text-shadow:
     0 0 7px var(--accent-opp-glow),
     0 0 14px rgba(167,139,250,0.12);
@@ -1089,12 +1089,12 @@ layout.css
 
 .match-stat-home {
   left: 0;
-  background: #22d3ee;
+  background: var(--accent-secondary);
 }
 
 .match-stat-away {
   right: 0;
-  background: #a78bfa;
+  background: var(--accent-tertiary);
 }
 
 /* =========================
