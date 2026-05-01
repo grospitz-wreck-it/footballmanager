@@ -206,8 +206,13 @@ function renderTable(customTable) {
     const tr = document.createElement("tr");
     const diff = team.goalsFor - team.goalsAgainst;
 
-    if (index === 0) tr.classList.add("table-promoted");
-    if (index >= 14) tr.classList.add("table-relegated");
+if (index <= 1) {
+  tr.classList.add("table-promoted");
+}
+
+if (index >= sorted.length - 2) {
+  tr.classList.add("table-relegated");
+}
 
     if (String(team.id) === myTeamId) {
       tr.classList.add("table-myteam");
