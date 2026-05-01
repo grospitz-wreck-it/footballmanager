@@ -270,8 +270,8 @@
    ========================= */
 
 .penalty-keeper {
-  width: 128px;
-  height: 128px;
+  width: 200px;
+  height: 200px;
   z-index: 12;
 
   position: absolute;
