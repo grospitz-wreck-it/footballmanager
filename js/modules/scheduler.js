@@ -500,31 +500,31 @@ function renderSchedule() {
   }
 
   // =========================
-// 📅 HEADER + ROUND SYNC FIX (FULL DROP-IN)
-// Direkt in renderSchedule() ersetzen
-// =========================
+  // 📅 HEADER + ROUND SYNC FIX (FULL DROP-IN)
+  // Direkt in renderSchedule() ersetzen
+  // =========================
 
-// 🔥 Echter aktiver Liga-Spieltag
-const activeRound = Number(game.league?.current?.currentRound ?? 0);
+  // 🔥 Echter aktiver Liga-Spieltag
+  const activeRound = Number(game.league?.current?.currentRound ?? 0);
 
-// 🔥 View Index sauber initialisieren
-if (typeof window.scheduleViewIndex !== "number") {
-  window.scheduleViewIndex = activeRound;
-}
+  // 🔥 View Index sauber initialisieren
+  if (typeof window.scheduleViewIndex !== "number") {
+    window.scheduleViewIndex = activeRound;
+  }
 
-// 🔥 Safety Clamp
-window.scheduleViewIndex = Math.max(
-  0,
-  Math.min(window.scheduleViewIndex, schedule.length - 1)
-);
+  // 🔥 Safety Clamp
+  window.scheduleViewIndex = Math.max(
+    0,
+    Math.min(window.scheduleViewIndex, schedule.length - 1),
+  );
 
-let selectedRound = window.scheduleViewIndex;
-const round = schedule[selectedRound];
-if (!round) return;
-// =========================
-// 📦 HTML BUILD
-// =========================
-let html = `
+  let selectedRound = window.scheduleViewIndex;
+  const round = schedule[selectedRound];
+  if (!round) return;
+  // =========================
+  // 📦 HTML BUILD
+  // =========================
+  let html = `
   <div class="schedule-card">
     <div class="schedule-header">
       <button class="prev-day" ${
@@ -580,43 +580,45 @@ let html = `
 
   container.innerHTML = html;
 
-// =========================
-// 🎯 MATCH CLICK EVENTS
-// =========================
-container.querySelectorAll(".match").forEach((el) => {
-  el.addEventListener("click", () => {
-    const idx = Number(el.dataset.matchIndex);
-    const selectedMatch = round[idx];
+  // =========================
+  // 🎯 MATCH CLICK EVENTS
+  // =========================
+  container.querySelectorAll(".match").forEach((el) => {
+    el.addEventListener("click", () => {
+      const idx = Number(el.dataset.matchIndex);
+      const selectedMatch = round[idx];
 
-    if (selectedMatch) {
-      openMatchDetail(selectedMatch);
-    }
+      if (selectedMatch) {
+        openMatchDetail(selectedMatch);
+      }
+    });
   });
-});
 
-// =========================
-// ◀ ▶ NAVIGATION
-// =========================
-const prevBtn = container.querySelector(".prev-day");
-const nextBtn = container.querySelector(".next-day");
+  // =========================
+  // ◀ ▶ NAVIGATION
+  // =========================
+  const prevBtn = container.querySelector(".prev-day");
+  const nextBtn = container.querySelector(".next-day");
 
-if (prevBtn) {
-  prevBtn.addEventListener("click", () => {
-    if (window.scheduleViewIndex > 0) {
-      window.scheduleViewIndex--;
-      renderSchedule();
-    }
-  });
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (window.scheduleViewIndex > 0) {
+        window.scheduleViewIndex--;
+        renderSchedule();
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      if (window.scheduleViewIndex < schedule.length - 1) {
+        window.scheduleViewIndex++;
+        renderSchedule();
+      }
+    });
+  }
 }
 
-if (nextBtn) {
-  nextBtn.addEventListener("click", () => {
-    if (window.scheduleViewIndex < schedule.length - 1) {
-      window.scheduleViewIndex++;
-      renderSchedule();
-    }
-  });
-}
 // =========================
 // 📅 MATCH DETAIL OVERLAY
 // =========================
@@ -625,9 +627,7 @@ function getTeamStrengthById(teamId) {
   const league = game.league?.current;
   if (!league?.teams) return 50;
 
-  const team = league.teams.find(
-    (t) => String(t.id) === String(teamId)
-  );
+  const team = league.teams.find((t) => String(t.id) === String(teamId));
 
   return team?.strength || team?.rating || team?.overall || 50;
 }
@@ -717,7 +717,6 @@ function initMatchDetailOverlay() {
   }
 }
 
-
 // =========================
 // 📦 EXPORTS
 // =========================
@@ -735,4 +734,3 @@ export {
   closeMatchDetail,
   initMatchDetailOverlay,
 };
-}
