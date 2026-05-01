@@ -17,8 +17,8 @@
 }
 
 /* =========================
-🎯 TOPBAR ABSOLUTE TRUE CENTER
-HEADER-ALIGNED / COMPACT / PREMIUM
+🎯 TOPBAR RESPONSIVE PREMIUM FIX
+DROP-IN READY
 ========================= */
 
 #topBar {
@@ -28,10 +28,12 @@ HEADER-ALIGNED / COMPACT / PREMIUM
   align-items: center;
   justify-content: center;
 
-  min-height: 60px;
-  padding: 12px 18px;
+  height: clamp(72px, 11vw, 108px);
+  min-height: unset;
 
-  border-radius: 20px;
+  padding: clamp(6px, 1.8vw, 14px) clamp(12px, 3vw, 22px);
+
+  border-radius: clamp(14px, 2vw, 20px);
 
   background:
     radial-gradient(circle at top center, rgba(34,211,238,0.08), transparent 48%),
@@ -52,26 +54,26 @@ HEADER-ALIGNED / COMPACT / PREMIUM
 ========================= */
 #topBar .topbar-live {
   position: absolute;
-  right: 18px;
-  top: 75%;
+  right: clamp(10px, 2vw, 18px);
+  top: 50%;
 
   transform: translateY(-50%);
-
   z-index: 5;
 }
 
 #topBar .minute {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: clamp(4px, 1vw, 7px);
 
-  font-size: 0.74rem;
+  font-size: clamp(0.58rem, 1.5vw, 0.78rem);
   font-weight: 800;
 
   color: #cbd5e1;
+
+  line-height: 1;
 }
 
-/* no chip */
 #topBar .minute,
 #topBar .topbar-live {
   background: transparent;
@@ -90,14 +92,14 @@ HEADER-ALIGNED / COMPACT / PREMIUM
 
   transform: translate(-50%, -50%);
 
-  width: min(92%, 520px);
+  width: min(88%, 520px);
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  gap: 4px;
+  gap: clamp(2px, 0.8vw, 5px);
 }
 
 /* =========================
@@ -108,9 +110,9 @@ HEADER-ALIGNED / COMPACT / PREMIUM
 
   text-align: center;
 
-  font-size: clamp(0.78rem, 1.25vw, 0.98rem);
+  font-size: clamp(0.62rem, 1.7vw, 0.98rem);
   font-weight: 850;
-  line-height: 1.1;
+  line-height: 1.05;
 
   color: var(--accent);
 
@@ -135,14 +137,13 @@ HEADER-ALIGNED / COMPACT / PREMIUM
 }
 
 #topBar .score {
-  font-size: clamp(2.3rem, 4vw, 3.5rem);
+  font-size: clamp(1.6rem, 6vw, 3.4rem);
   font-weight: 950;
-  line-height: 0.86;
+  line-height: 0.9;
 
   color: white;
 
   letter-spacing: -0.05em;
-
   text-align: center;
 
   text-shadow:
@@ -158,9 +159,9 @@ HEADER-ALIGNED / COMPACT / PREMIUM
 
   text-align: center;
 
-  font-size: clamp(0.78rem, 1.25vw, 0.98rem);
+  font-size: clamp(0.62rem, 1.7vw, 0.98rem);
   font-weight: 850;
-  line-height: 1.1;
+  line-height: 1.05;
 
   color: var(--accent-opp);
 
@@ -174,35 +175,68 @@ HEADER-ALIGNED / COMPACT / PREMIUM
 }
 
 /* =========================
-📱 MOBILE
+📱 SMALL MOBILE
 ========================= */
 @media (max-width: 480px) {
   #topBar {
-    min-height: 86px;
-    padding: 10px 14px;
+    height: clamp(64px, 18vw, 84px);
+    min-height: unset;
+
+    padding: 6px 12px;
+    border-radius: 14px;
   }
 
   #topBar .topbar-live {
-    left: 14px;
+    right: 10px;
   }
 
   #topBar .minute {
-    font-size: 0.68rem;
+    font-size: 0.56rem;
   }
 
   #topBar .home,
   #topBar .away {
-    font-size: 0.76rem;
+    font-size: 0.66rem;
   }
 
   #topBar .score {
-    font-size: clamp(2rem, 9vw, 3rem);
+    font-size: clamp(1.45rem, 8vw, 2.5rem);
+    line-height: 0.92;
   }
 
   #topBar .matchup {
-    width: min(88%, 420px);
+    width: min(84%, 360px);
+    gap: 2px;
   }
 }
+
+/* =========================
+📱 EXTRA SMALL DEVICES
+========================= */
+@media (max-width: 360px) {
+  #topBar {
+    height: 60px;
+    padding: 5px 10px;
+  }
+
+  #topBar .minute {
+    font-size: 0.5rem;
+  }
+
+  #topBar .home,
+  #topBar .away {
+    font-size: 0.58rem;
+  }
+
+  #topBar .score {
+    font-size: 1.3rem;
+  }
+
+  #topBar .matchup {
+    width: min(82%, 300px);
+  }
+}
+
 /* =========================
 🍔 SIDEBAR
 ========================= */
