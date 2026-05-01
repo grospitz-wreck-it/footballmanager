@@ -18,6 +18,10 @@ function normalizeId(id) {
   return String(id);
 }
 
+function randomBetween(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function hexToHsl(hex) {
   hex = hex.replace("#", "");
 
