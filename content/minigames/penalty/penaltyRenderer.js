@@ -46,12 +46,12 @@ export class PenaltyRenderer {
     this.ball.style.left = `${position.x * 100}%`;
     this.ball.style.top = `${position.y * 100}%`;
 
-    const scale = Math.max(0.35, 1 - position.y * 0.55);
-
+    const scale = Math.max(0.35, 0.3 + position.y * 0.85);
+    
     this.ball.style.transform = `
-      translate(-50%, -50%)
-      scale(${scale})
-    `;
+  translate(-50%, -50%)
+  scale(${scale})
+`;
   }
 
   renderKeeper(pose, direction, saved = false, missed = false) {
