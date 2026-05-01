@@ -655,45 +655,38 @@ LAYOUT.CSS ONLY
 
   animation: fadeIn 0.25s ease;
 }
+/* =========================
+📅 CLEAN USER MATCH STYLE
+========================= */
 
 .match.my-match {
-  position: relative;
-
-  border: 2px solid var(--accent);
+  border: 1.5px solid var(--accent);
 
   box-shadow:
-    0 0 20px rgba(34,211,238,0.18),
-    inset 0 0 0 1px rgba(255,255,255,0.03);
+    0 0 10px rgba(34,211,238,0.08);
 
-  transform: scale(1.02);
+  transform: none;
 }
 
 .match.my-match:hover {
-  transform: scale(1.03);
+  transform: translateY(-1px);
 }
 
+/* ❌ Kein Badge */
 .match.my-match::before {
-  content: "DEIN SPIEL";
+  display: none !important;
+  content: none !important;
+}
 
-  position: absolute;
-  top: 6px;
-  right: 8px;
-
-  font-size: 9px;
-  font-weight: 800;
-
-  color: white;
-
-  background: linear-gradient(
-    135deg,
-    var(--accent),
-    var(--accent-opp)
-  );
-
-  padding: 2px 6px;
-  border-radius: 999px;
-
-  letter-spacing: 0.04em;
+/* ❌ Keine Teamfarben */
+#scheduleView .match .home,
+#scheduleView .match .away,
+#scheduleView .match.active .home,
+#scheduleView .match.active .away,
+#scheduleView .match.my-match .home,
+#scheduleView .match.my-match .away {
+  color: #e5e7eb !important;
+  text-shadow: none !important;
 }
 
 /* =========================
@@ -824,25 +817,6 @@ LAYOUT.CSS ONLY
     0 6px 18px rgba(0,0,0,0.35);
 }
 
-/* Active User Match */
-.match.active {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(34,211,238,0.22),
-      rgba(167,139,250,0.16)
-    );
-
-  border: 1px solid rgba(34,211,238,0.25);
-
-  color: white;
-  font-weight: 700;
-
-  box-shadow:
-    0 0 18px rgba(34,211,238,0.12);
-
-  transform: scale(1.015);
-}
 
 /* =========================
 🏠 TEAMS
@@ -870,15 +844,6 @@ LAYOUT.CSS ONLY
   text-align: left;
   color: #e5e7eb;
   text-shadow: none;
-}
-
-/* Nur User Match bleibt Brand-Style */
-.match.active .home {
-  color: var(--accent);
-}
-
-.match.active .away {
-  color: var(--accent-opp);
 }
 
 /* =========================
