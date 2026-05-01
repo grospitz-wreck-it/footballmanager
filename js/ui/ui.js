@@ -161,45 +161,37 @@ function hslToHex(h, s, l) {
     .map((x) => x.toString(16).padStart(2, "0"))
     .join("")}`;
 }
-
-function applyColor(color) {
-  const opp = getComplementaryColor(color);
-
-  // 👉 Hauptfarbe
-  document.documentElement.style.setProperty("--accent", color);
-  document.documentElement.style.setProperty(
-    "--accent-soft",
-    hexToRgba(color, 0.2),
-  );
-  document.documentElement.style.setProperty(
-    "--accent-glow",
-    hexToRgba(color, 0.5),
-  );
-
-  // 👉 Gegnerfarbe (SMART complement)
-  document.documentElement.style.setProperty("--accent-opp", opp);
-  document.documentElement.style.setProperty(
-    "--accent-opp-glow",
-    hexToRgba(opp, 0.45),
-  );
-}
-
-// =========================
-// 🎨 SMART COMPLEMENT COLOR
-// =========================
-
-function getComplementaryColor(hex) {
+function adjustBrightness(hex, percent) {
   const { h, s, l } = hexToHsl(hex);
 
-  // 🔥 nicht 180°, sondern softer shift
-  let newHue = (h + 150) % 360;
+  const newLight = Math.max(
+    15,
+    Math.min(85, l + percent)
+  );
 
-  // leichte Anpassung für UI Harmonie
-  const newSat = Math.min(100, s * 0.9);
-  const newLight = Math.min(85, l * 1.05);
-
-  return hslToHex(newHue, newSat, newLight);
+  return hslToHex(h, s, newLight);
 }
+
+function applyColor(color) {
+  document.documentElement.style.setProperty("--accent", color);
+
+  document.documentElement.style.setProperty(
+    "--accent-soft",
+    hexToRgba(color, 0.2)
+  );
+
+  document.documentElement.style.setProperty(
+    "--accent-glow",
+    hexToRgba(color, 0.45)
+  );
+
+  // 🔥 dunklere Zweitfarbe statt Gegnerfarbe
+  document.documentElement.style.setProperty(
+    "--accent-secondary",
+    adjustBrightness(color, -18)
+  );
+}
+
 
 // =========================
 // ⚙️ TACTICS PRESETS (GLOBAL)
