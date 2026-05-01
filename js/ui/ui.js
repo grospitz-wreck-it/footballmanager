@@ -172,58 +172,6 @@ function adjustBrightness(hex, percent) {
   return hslToHex(h, s, newLight);
 }
 
-const { h } = hexToHsl(color);
-
-// 👉 maximal entfernter Hue Shift
-const oppHue = (h + 180) % 360;
-
-const opp = hslToHex(oppHue, 78, 58);
-
-document.documentElement.style.setProperty("--accent-opp", opp);
-
-document.documentElement.style.setProperty(
-  "--accent-opp-glow",
-  hexToRgba(opp, 0.45)
-);
-
-
-function getMatchTeamColor(teamId) {
-  const myTeamId = String(game.team?.selectedId || game.team?.id || "");
-
-  // 👉 User-Team immer Clubfarbe
-  if (String(teamId) === myTeamId) {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue("--accent")
-      .trim();
-  }
-
-  // 👉 Gegnerfarben Pool
-  const opponentColors = [
-    "#ef4444", // Rot
-    "#3b82f6", // Blau
-    "#22c55e", // Grün
-    "#f59e0b", // Gold
-    "#8b5cf6", // Lila
-    "#ec4899", // Pink
-    "#14b8a6", // Türkis
-    "#f97316", // Orange
-    "#e11d48", // Crimson
-    "#06b6d4", // Cyan
-    "#84cc16", // Lime
-    "#a855f7", // Violet
-  ];
-
-  let hash = 0;
-
-  String(teamId)
-    .split("")
-    .forEach((char) => {
-      hash += char.charCodeAt(0);
-    });
-
-  return opponentColors[hash % opponentColors.length];
-}
-
 
 function getOppositeColor(color) {
   const { h } = hexToHsl(color);
@@ -259,7 +207,6 @@ function applyColor(color) {
     adjustBrightness(color, -32)
   );
 
-  // 🔥 echte Gegnerfarbe
   document.documentElement.style.setProperty("--accent-opp", opp);
 
   document.documentElement.style.setProperty(
