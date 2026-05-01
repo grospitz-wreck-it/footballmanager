@@ -577,7 +577,44 @@ function initUI() {
       requestUIUpdate();
     };
   }
+// 🔥 EVENT HISTORY OVERLAY
+const liveFeed = document.getElementById("liveFeed");
+const eventOverlay = document.getElementById("eventHistoryOverlay");
+const closeEventBtn = document.getElementById("closeEventHistory");
+const historyList = document.getElementById("eventHistoryList");
 
+if (liveFeed && eventOverlay && historyList) {
+  liveFeed.onclick = () => {
+    const events = [...(game.events?.history || [])].reverse();
+
+    historyList.innerHTML = events
+      .map(
+        (event) => `
+          <div class="event-history-item">
+            <span class="event-history-minute">${event.minute || 0}'</span>
+            <span>${event.text || buildCommentary(event) || "-"}</span>
+          </div>
+        `
+      )
+      .join("");
+
+    eventOverlay.classList.remove("hidden");
+  };
+}
+
+if (closeEventBtn) {
+  closeEventBtn.onclick = () => {
+    eventOverlay.classList.add("hidden");
+  };
+}
+
+if (eventOverlay) {
+  eventOverlay.addEventListener("click", (e) => {
+    if (e.target === eventOverlay) {
+      eventOverlay.classList.add("hidden");
+    }
+  });
+}
 const closeMatchBtn = document.getElementById("closeMatchDetail");
 
 if (closeMatchBtn) {
