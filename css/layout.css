@@ -239,29 +239,39 @@ DROP-IN READY
   }
 }
 /* =========================
-⏱ TOPBAR LIVE INDICATOR
-RED DOT + MATCH MINUTE
-DROP-IN READY
+⏱ FORCE LIVE INDICATOR
+TOP RIGHT CORNER FIX
 ========================= */
 
 #topBar .topbar-live {
-  position: absolute;
-  top: clamp(8px, 2vw, 14px);
-  right: clamp(10px, 3vw, 18px);
+  position: absolute !important;
 
-  display: flex;
-  align-items: center;
-  gap: clamp(4px, 1vw, 6px);
+  top: clamp(8px, 2vw, 14px) !important;
+  right: clamp(10px, 3vw, 18px) !important;
 
-  z-index: 8;
+  left: auto !important;
+  bottom: auto !important;
 
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
+  transform: none !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  width: auto !important;
+  height: auto !important;
+
+  z-index: 20 !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-/* 🔴 LIVE DOT */
+/* 🔴 DOT */
 #topBar .topbar-live::before {
   content: "";
 
@@ -269,7 +279,6 @@ DROP-IN READY
   height: clamp(6px, 1.5vw, 9px);
 
   border-radius: 50%;
-
   background: #ef4444;
 
   box-shadow:
@@ -279,69 +288,32 @@ DROP-IN READY
   animation: livePulse 1.4s infinite ease-in-out;
 }
 
-/* ⏱ MINUTE TEXT */
+/* MINUTE */
 #topBar .minute {
-  display: flex;
-  align-items: center;
+  font-size: clamp(0.58rem, 1.4vw, 0.78rem) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
 
-  font-size: clamp(0.58rem, 1.4vw, 0.78rem);
-  font-weight: 850;
-  line-height: 1;
+  color: #f8fafc !important;
 
-  color: #f8fafc;
-
-  letter-spacing: 0.04em;
-
-  text-shadow:
-    0 0 6px rgba(255,255,255,0.15);
+  display: flex !important;
+  align-items: center !important;
 }
 
 /* =========================
-🔴 LIVE PULSE ANIMATION
-========================= */
-@keyframes livePulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.35);
-    opacity: 0.75;
-  }
-
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* =========================
-📱 SMALL MOBILE
+📱 MOBILE
 ========================= */
 @media (max-width: 480px) {
   #topBar .topbar-live {
-    top: 8px;
-    right: 10px;
-    gap: 4px;
-  }
-
-  #topBar .minute {
-    font-size: 0.56rem;
+    top: 8px !important;
+    right: 10px !important;
   }
 }
 
-/* =========================
-📱 EXTRA SMALL DEVICES
-========================= */
 @media (max-width: 360px) {
   #topBar .topbar-live {
-    top: 6px;
-    right: 8px;
-  }
-
-  #topBar .minute {
-    font-size: 0.5rem;
+    top: 6px !important;
+    right: 8px !important;
   }
 }
 /* =========================
