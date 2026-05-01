@@ -381,6 +381,7 @@ league.teams = league.teams.map((t) => {
   // =========================
   // 📊 TABLE INIT
   // =========================
+  if (!league.table || !league.table.length) {
   league.table = league.teams.map((team) => ({
     id: normalizeId(team.id),
     name: team.name,
@@ -390,6 +391,7 @@ league.teams = league.teams.map((t) => {
     goalsAgainst: 0,
     strength: team.strength || 50,
   }));
+}
 
   console.log("📊 Tabelle erstellt");
 
