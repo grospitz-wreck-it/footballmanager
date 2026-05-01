@@ -205,8 +205,7 @@ function createAnalyticsState(){
 // =========================
 // 🧹 RESET GAME
 // =========================
-function resetGame(){
-
+function resetGame() {
   localStorage.clear();
 
   game.player.name = "";
@@ -215,27 +214,76 @@ function resetGame(){
     current: null,
     schedule: [],
     currentRound: 0,
-    currentMatchIndex: 0
+    currentMatchIndex: 0,
   };
 
-  game.team.selected = null;
-  game.team.selectedId = null;
+  game.team = {
+    selected: null,
+    selectedId: null,
 
-  game.match.current = null;
-  game.match.live = createLiveMatchState();
+    availability: {
+      suspended: {},
+      injured: {},
+    },
 
-  // 🔥 TACTICS RESET (WICHTIG!)
+    discipline: {
+      yellowCards: {},
+    },
+
+    lineup: {
+      formation: "4-4-2",
+      slots: {
+        GK: null,
+
+        DEF_1: null,
+        DEF_2: null,
+        DEF_3: null,
+        DEF_4: null,
+
+        MID_1: null,
+        MID_2: null,
+        MID_3: null,
+        MID_4: null,
+
+        ST_1: null,
+        ST_2: null,
+      },
+    },
+  };
+
+  game.match = {
+    current: null,
+    live: createLiveMatchState(),
+  };
+
   game.tactics = createTacticsState();
-
   game.events = createEventsState();
   game.ads = createAdsState();
   game.analytics = createAnalyticsState();
-
-  // 🔥 UI RESET
   game.ui = createUIState();
 
   game.phase = "setup";
-  game.season.year = 1;
+
+  game.season = {
+    year: 1,
+  };
+
+  // 🔥 DOM RESET
+  const eventText = document.getElementById("eventText");
+  if (eventText) {
+    eventText.textContent = "Willkommen im Spiel";
+  }
+
+  const historyList = document.getElementById("eventHistoryList");
+  if (historyList) {
+    historyList.innerHTML = "";
+  }
+
+  const overlay = document.getElementById("matchOverlay");
+  if (overlay) {
+    overlay.classList.add("hidden");
+    overlay.classList.remove("show");
+  }
 
   console.log("🧹 Game komplett zurückgesetzt");
 }
