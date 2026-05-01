@@ -1,5 +1,5 @@
 import { KeeperAnimator } from './keeperAnimator.js';
-import { loadPenaltyAssets } from './assetsLoader.js';
+import { loadPenaltyAssets } from './assetLoader.js';
 
 export class PenaltyRenderer {
   constructor(root) {
