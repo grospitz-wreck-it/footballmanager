@@ -172,29 +172,19 @@ function adjustBrightness(hex, percent) {
   return hslToHex(h, s, newLight);
 }
 
-function applyColor(color) {
-  document.documentElement.style.setProperty("--accent", color);
+const { h } = hexToHsl(color);
 
-  document.documentElement.style.setProperty(
-    "--accent-soft",
-    hexToRgba(color, 0.2)
-  );
+// 👉 maximal entfernter Hue Shift
+const oppHue = (h + 180) % 360;
 
-  document.documentElement.style.setProperty(
-    "--accent-glow",
-    hexToRgba(color, 0.45)
-  );
+const opp = hslToHex(oppHue, 78, 58);
 
-  document.documentElement.style.setProperty(
-    "--accent-secondary",
-    adjustBrightness(color, -18)
-  );
+document.documentElement.style.setProperty("--accent-opp", opp);
 
-  document.documentElement.style.setProperty(
-    "--accent-tertiary",
-    adjustBrightness(color, -32)
-  );
-}
+document.documentElement.style.setProperty(
+  "--accent-opp-glow",
+  hexToRgba(opp, 0.45)
+);
 
 
 function getMatchTeamColor(teamId) {
