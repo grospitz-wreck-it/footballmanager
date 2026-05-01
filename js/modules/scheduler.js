@@ -6,17 +6,17 @@ import { decrementAvailability } from "../modules/playerAvailability.js";
 // =========================
 // 🧠 ID HELPERS
 // =========================
-function normalizeId(val){
-  if(val === null || val === undefined) return null;
+function normalizeId(val) {
+  if (val === null || val === undefined) return null;
   return String(val);
 }
 
-function resolveTeamId(team){
-  if(!team) return null;
+function resolveTeamId(team) {
+  if (!team) return null;
 
-  if(typeof team === "number") return normalizeId(team);
+  if (typeof team === "number") return normalizeId(team);
 
-  if(typeof team === "object"){
+  if (typeof team === "object") {
     return normalizeId(team.id);
   }
 
@@ -26,37 +26,28 @@ function resolveTeamId(team){
 // =========================
 // 🧠 HELPERS (UI)
 // =========================
-function getTeamName(teamOrId){
+function getTeamName(teamOrId) {
+  if (!teamOrId) return "Unbekannt";
 
-  if(!teamOrId) return "Unbekannt";
-
-  const id =
-    typeof teamOrId === "object"
-      ? teamOrId.id
-      : teamOrId;
+  const id = typeof teamOrId === "object" ? teamOrId.id : teamOrId;
 
   const league = game.league?.current;
 
-  if(!league?.teams) return "Unbekannt";
+  if (!league?.teams) return "Unbekannt";
 
-  const team = league.teams.find(
-    t => String(t.id) === String(id)
-  );
+  const team = league.teams.find((t) => String(t.id) === String(id));
 
   return team?.name ?? team?.Name ?? "Unbekannt";
 }
-function hydrateMatchTeams(match){
-
+function hydrateMatchTeams(match) {
   const league = game.league?.current;
-  if(!league) return match;
+  if (!league) return match;
 
-  match.home = league.teams.find(
-    t => String(t.id) === String(match.homeTeamId)
-  ) || null;
+  match.home =
+    league.teams.find((t) => String(t.id) === String(match.homeTeamId)) || null;
 
-  match.away = league.teams.find(
-    t => String(t.id) === String(match.awayTeamId)
-  ) || null;
+  match.away =
+    league.teams.find((t) => String(t.id) === String(match.awayTeamId)) || null;
 
   return match;
 }
@@ -64,19 +55,18 @@ function hydrateMatchTeams(match){
 // =========================
 // 📅 GENERATE SCHEDULE
 // =========================
-function generateSchedule(league){
-
-  if(!league || !Array.isArray(league.teams) || league.teams.length < 2){
+function generateSchedule(league) {
+  if (!league || !Array.isArray(league.teams) || league.teams.length < 2) {
     console.error("❌ Ungültige Liga / zu wenig Teams");
     return null;
   }
 
   // 🔥 Schedule behalten nur wenn Teamzahl identisch
-  if(
+  if (
     league.schedule &&
     league.schedule.length > 0 &&
     league._teamCount === league.teams.length
-  ){
+  ) {
     console.log("ℹ️ Spielplan existiert bereits");
     return league.schedule;
   }
@@ -87,16 +77,15 @@ function generateSchedule(league){
   const seen = new Set();
   let teams = [];
 
-  league.teams.forEach(t => {
-
+  league.teams.forEach((t) => {
     const id = t?.id ? String(t.id) : null;
 
-    if(!id){
+    if (!id) {
       console.error("❌ Team ohne ID:", t);
       return;
     }
 
-    if(seen.has(id)){
+    if (seen.has(id)) {
       console.warn("⚠️ Duplicate Team ID:", id);
       return;
     }
@@ -105,7 +94,7 @@ function generateSchedule(league){
     teams.push(t);
   });
 
-  if(teams.length < 2){
+  if (teams.length < 2) {
     console.error("❌ Zu wenig gültige Teams");
     return null;
   }
@@ -115,116 +104,110 @@ function generateSchedule(league){
   // =========================
   // 🔁 BYE
   // =========================
-  if(teams.length % 2 !== 0){
+  if (teams.length % 2 !== 0) {
     teams.push({ id: "BYE", name: "BYE" });
   }
 
-  const effectiveTeamCount = teams.filter(t => t.id !== "BYE").length;
+  const effectiveTeamCount = teams.filter((t) => t.id !== "BYE").length;
 
   const totalRounds = teams.length - 1;
   const half = teams.length / 2;
 
   const rounds = [];
-let rotation = [...teams];
+  let rotation = [...teams];
 
-// =========================
-// ⚖️ HOME/AWAY BALANCE (NEU)
-// =========================
-const homeAwayBalance = {};
+  // =========================
+  // ⚖️ HOME/AWAY BALANCE (NEU)
+  // =========================
+  const homeAwayBalance = {};
 
-function getBalance(id){
-  return homeAwayBalance[id] || 0;
-}
+  function getBalance(id) {
+    return homeAwayBalance[id] || 0;
+  }
 
-function updateBalance(home, away){
-  homeAwayBalance[home] = getBalance(home) + 1;
-  homeAwayBalance[away] = getBalance(away) - 1;
-}
+  function updateBalance(home, away) {
+    homeAwayBalance[home] = getBalance(home) + 1;
+    homeAwayBalance[away] = getBalance(away) - 1;
+  }
 
   // =========================
   // 🔥 HINRUNDE
   // =========================
-  for(let r = 0; r < totalRounds; r++){
+  for (let r = 0; r < totalRounds; r++) {
+    const round = [];
 
-  const round = [];
+    for (let i = 0; i < half; i++) {
+      const teamA = rotation[i];
+      const teamB = rotation[rotation.length - 1 - i];
 
-  for(let i = 0; i < half; i++){
+      let home = teamA;
+      let away = teamB;
 
-    const teamA = rotation[i];
-    const teamB = rotation[rotation.length - 1 - i];
+      // 🔥 Balance prüfen
+      const balanceA = getBalance(teamA.id);
+      const balanceB = getBalance(teamB.id);
 
-    let home = teamA;
-let away = teamB;
+      // 👉 Team mit mehr Heimspielen wird Auswärts
+      if (balanceA > balanceB) {
+        home = teamB;
+        away = teamA;
+      }
 
-// 🔥 Balance prüfen
-const balanceA = getBalance(teamA.id);
-const balanceB = getBalance(teamB.id);
+      updateBalance(home.id, away.id);
 
-// 👉 Team mit mehr Heimspielen wird Auswärts
-if(balanceA > balanceB){
-  home = teamB;
-  away = teamA;
-}
+      if (home.id === "BYE" || away.id === "BYE") continue;
 
-updateBalance(home.id, away.id);
+      round.push({
+        id: crypto.randomUUID(),
+        homeTeamId: String(home.id),
+        awayTeamId: String(away.id),
 
-    if(home.id === "BYE" || away.id === "BYE") continue;
+        // 🔥 FIX: KEINE TEAM OBJEKTE MEHR
+        home: null,
+        away: null,
 
-    round.push({
-      id: crypto.randomUUID(),
-      homeTeamId: String(home.id),
-      awayTeamId: String(away.id),
+        result: null,
+        _processed: false,
+      });
+    }
 
-      // 🔥 FIX: KEINE TEAM OBJEKTE MEHR
-      home: null,
-      away: null,
+    rounds.push(round);
 
-      result: null,
-      _processed: false
-    });
+    const fixed = rotation[0];
+    const rest = rotation.slice(1);
+
+    rest.unshift(rest.pop());
+    rotation = [fixed, ...rest];
   }
-
-  rounds.push(round);
-
-  const fixed = rotation[0];
-  const rest = rotation.slice(1);
-
-  rest.unshift(rest.pop());
-  rotation = [fixed, ...rest];
-}
 
   // =========================
   // 🔁 RÜCKRUNDE
   // =========================
-  const returnRounds = rounds.map(round => {
+  const returnRounds = rounds.map((round) => {
+    const newRound = round.map((match) => {
+      return {
+        id: crypto.randomUUID(),
+        homeTeamId: String(match.awayTeamId),
+        awayTeamId: String(match.homeTeamId),
 
-  const newRound = round.map(match => {
+        // 🔥 FIX: KEINE FAKE TEAMS
+        home: null,
+        away: null,
 
-    return {
-      id: crypto.randomUUID(),
-      homeTeamId: String(match.awayTeamId),
-      awayTeamId: String(match.homeTeamId),
+        result: null,
+        _processed: false,
+      };
+    });
 
-      // 🔥 FIX: KEINE FAKE TEAMS
-      home: null,
-      away: null,
-
-      result: null,
-      _processed: false
-    };
+    return newRound;
   });
-
-
-
-  return newRound;
-});
 
   // =========================
   // 📊 FINAL
   // =========================
   league.schedule = [...rounds, ...returnRounds];
 
-  league.schedule.forEach(r => {
+  league.schedule.forEach((r) => {
     r._simulated = false;
   });
 
@@ -240,16 +223,15 @@ updateBalance(home.id, away.id);
 // =========================
 // 🧪 VALIDATION
 // =========================
-function validateSchedule(expectedTeamCount){
-
+function validateSchedule(expectedTeamCount) {
   const schedule = game.league.current?.schedule;
-  if(!schedule?.length) return;
+  if (!schedule?.length) return;
 
   const firstRound = schedule[0];
 
   const teams = [];
 
-  firstRound.forEach(match => {
+  firstRound.forEach((match) => {
     teams.push(normalizeId(match.homeTeamId));
     teams.push(normalizeId(match.awayTeamId));
   });
@@ -257,28 +239,26 @@ function validateSchedule(expectedTeamCount){
   const unique = new Set(teams);
   const expectedMatches = Math.floor(expectedTeamCount / 2);
 
-  if(teams.length !== unique.size){
+  if (teams.length !== unique.size) {
     console.error("❌ DUPLIKATE IM SPIELTAG!");
   }
 
-  if(firstRound.length !== expectedMatches){
+  if (firstRound.length !== expectedMatches) {
     console.error("❌ Falsche Spielanzahl:", firstRound.length);
   }
 }
-
 
 // =========================
 // 🎯 MATCHDAY SIMULATION (HIER EINFÜGEN)
 // =========================
 
-function simulateMatchFast(match){
-
+function simulateMatchFast(match) {
   const homeGoals = Math.floor(Math.random() * 5);
   const awayGoals = Math.floor(Math.random() * 5);
 
   match.result = {
     home: homeGoals,
-    away: awayGoals
+    away: awayGoals,
   };
 
   match._processed = true;
@@ -286,29 +266,27 @@ function simulateMatchFast(match){
   updateTable(match.homeTeamId, match.awayTeamId, homeGoals, awayGoals);
 }
 
-
 // =========================
 // 📊 TABLE UPDATE
 // =========================
-function updateTable(homeId, awayId, homeGoals, awayGoals){
-
+function updateTable(homeId, awayId, homeGoals, awayGoals) {
   const table = game.league?.current?.table;
-  if(!table) return;
+  if (!table) return;
 
-  const home = table.find(t => String(t.id) === String(homeId));
-  const away = table.find(t => String(t.id) === String(awayId));
+  const home = table.find((t) => String(t.id) === String(homeId));
+  const away = table.find((t) => String(t.id) === String(awayId));
 
-  if(!home || !away) return;
+  if (!home || !away) return;
 
-  if(!home._counted){
-  home.played++;
-  home._counted = true;
-}
+  if (!home._counted) {
+    home.played++;
+    home._counted = true;
+  }
 
-if(!away._counted){
-  away.played++;
-  away._counted = true;
-}
+  if (!away._counted) {
+    away.played++;
+    away._counted = true;
+  }
 
   home.goalsFor += homeGoals;
   home.goalsAgainst += awayGoals;
@@ -316,9 +294,9 @@ if(!away._counted){
   away.goalsFor += awayGoals;
   away.goalsAgainst += homeGoals;
 
-  if(homeGoals > awayGoals){
+  if (homeGoals > awayGoals) {
     home.points += 3;
-  } else if(awayGoals > homeGoals){
+  } else if (awayGoals > homeGoals) {
     away.points += 3;
   } else {
     home.points += 1;
@@ -326,32 +304,27 @@ if(!away._counted){
   }
 }
 
-
 // =========================
 // 🎯 SIMULATE MATCHDAY
 // =========================
-function simulateMatchday(){
-
+function simulateMatchday() {
   const league = game.league?.current;
-  if(!league) return;
+  if (!league) return;
 
   const roundIndex = league.currentRound ?? 0;
   const round = league.schedule?.[roundIndex];
-  if(!round) return;
+  if (!round) return;
 
   const myTeamId = String(game.team?.selectedId || "");
 
-  round.forEach(match => {
-
+  round.forEach((match) => {
     const isMyMatch =
       myTeamId &&
-      (
-        String(match.homeTeamId) === myTeamId ||
-        String(match.awayTeamId) === myTeamId
-      );
+      (String(match.homeTeamId) === myTeamId ||
+        String(match.awayTeamId) === myTeamId);
 
-    if(isMyMatch) return;
-    if(match._processed) return;
+    if (isMyMatch) return;
+    if (match._processed) return;
 
     simulateMatchFast(match);
   });
@@ -359,118 +332,114 @@ function simulateMatchday(){
   console.log("⚡ Spieltag simuliert (AI Matches)");
 }
 
-
 // =========================
 // ⚡ LIVE SIMULATION ANDERE MATCHES
 // =========================
-function simulateLiveMatchMinute(round, currentMinute){
+function simulateLiveMatchMinute(round, minute) {
+  if (!round?.length) return;
 
-  if(!round) return;
+  const myTeamId = String(game.team?.selectedId || game.team?.id || "");
 
-  const myTeamId = String(game.team?.selectedId || "");
-
-  round.forEach(match => {
+  round.forEach((match) => {
+    if (!match) return;
 
     const isMyMatch =
-      myTeamId &&
-      (
-        String(match.homeTeamId) === myTeamId ||
-        String(match.awayTeamId) === myTeamId
-      );
+      String(match.homeTeamId) === myTeamId ||
+      String(match.awayTeamId) === myTeamId;
 
-    if(isMyMatch) return;
-    if(match._processed) return;
+    // =========================
+    // 🎮 DEIN SPIEL:
+    // Weiterhin echte Live-Simulation
+    // =========================
+    if (isMyMatch) return;
 
-    // 👉 einfache Torchance pro Minute
-    if(Math.random() < 0.03){
+    // =========================
+    // ⚽ FREMDMATCHES:
+    // Nur grobe Statusupdates
+    // =========================
 
-      if(!match.result){
-        match.result = { home: 0, away: 0 };
-      }
-
-      const isHome = Math.random() < 0.5;
-
-      if(isHome){
-  match.result.home++;
-
-  updateTable(match.homeTeamId, match.awayTeamId, 1, 0);
-
-} else {
-  match.result.away++;
-
-  updateTable(match.homeTeamId, match.awayTeamId, 0, 1);
-}
-
-      console.log("⚡ Live Tor:", match.homeTeamId, match.result.home, "-", match.result.away, match.awayTeamId);
+    // INIT
+    if (minute === 0) {
+      match.live = true;
+      match.status = "LIVE";
+      return;
     }
 
-if(currentMinute >= 90){
+    // HALBZEIT
+    if (minute === 45) {
+      match.status = "HT";
+      return;
+    }
 
-  match._processed = true;
+    // ENDSTAND
+    if (minute >= 90) {
+      if (match.finished) return;
 
-  const table = game.league?.current?.table;
-  if(!table) return;
+      match.finished = true;
+      match.live = false;
+      match.status = "FT";
 
-  const home = table.find(t => String(t.id) === String(match.homeTeamId));
-  const away = table.find(t => String(t.id) === String(match.awayTeamId));
+      // 🔥 Einmalige Ergebnis-Simulation
+      if (match.homeGoals === undefined || match.awayGoals === undefined) {
+        const homeStrength = getTeamStrength(match.homeTeamId);
+        const awayStrength = getTeamStrength(match.awayTeamId);
 
-  if(home) delete home._counted;
-  if(away) delete away._counted;
-}
+        const baseHome = Math.round(Math.random() * 2 + homeStrength / 40);
+        const baseAway = Math.round(Math.random() * 2 + awayStrength / 45);
+
+        match.homeGoals = Math.max(0, baseHome);
+        match.awayGoals = Math.max(0, baseAway);
+      }
+    }
   });
 }
-
 
 // =========================
 // ▶️ NEXT MATCH
 // =========================
-function nextMatch(){
-
+function nextMatch() {
   const schedule = game.league?.current?.schedule;
-  if(!schedule?.length) return null;
+  if (!schedule?.length) return null;
 
   const myTeamId = normalizeId(game.team?.selectedId);
 
   let fallback = null;
 
-  for(let r = 0; r < schedule.length; r++){
-    for(let m = 0; m < schedule[r].length; m++){
-
+  for (let r = 0; r < schedule.length; r++) {
+    for (let m = 0; m < schedule[r].length; m++) {
       const match = schedule[r][m];
 
-      if(match._processed) continue;
+      if (match._processed) continue;
 
-      if(!fallback){
+      if (!fallback) {
         fallback = match;
       }
 
-      if(
+      if (
         normalizeId(match.homeTeamId) === myTeamId ||
         normalizeId(match.awayTeamId) === myTeamId
-      ){
+      ) {
         game.league.currentRound = r;
         game.league.currentMatchIndex = m;
         return hydrateMatchTeams(match); // 🔥 FIX
-
       }
     }
   }
 
-  if(!fallback){
+  if (!fallback) {
     console.warn("⚠️ Keine offenen Matches mehr");
     return null;
   }
 
-return hydrateMatchTeams(fallback); 
+  return hydrateMatchTeams(fallback);
 }
 
 // =========================
 // ⏭ ADVANCE
 // =========================
-function advanceSchedule(){
-
+function advanceSchedule() {
   const schedule = game.league?.current?.schedule;
-  if(!schedule?.length) return;
+  if (!schedule?.length) return;
   decrementAvailability();
   let r = game.league.currentRound ?? 0;
   let m = game.league.currentMatchIndex ?? 0;
@@ -479,13 +448,13 @@ function advanceSchedule(){
   m++;
 
   // 👉 nächster Spieltag
-  if(m >= (schedule[r]?.length || 0)){
+  if (m >= (schedule[r]?.length || 0)) {
     m = 0;
     r++;
   }
 
   // 👉 Saison Ende Guard
-  if(r >= schedule.length){
+  if (r >= schedule.length) {
     console.log("🏁 Saison beendet");
     game.league.currentRound = schedule.length - 1;
     game.league.currentMatchIndex = 0;
@@ -497,14 +466,14 @@ function advanceSchedule(){
   game.league.currentMatchIndex = m;
 
   // 👉 UI SYNC (🔥 wichtig für deinen Swipe-View)
-  if(typeof window !== "undefined"){
+  if (typeof window !== "undefined") {
     window.scheduleViewIndex = r;
   }
 
   // 👉 optional Debug
   console.log("➡️ Advance:", {
     round: r,
-    match: m
+    match: m,
   });
 }
 
@@ -545,9 +514,7 @@ function renderSchedule() {
   `;
 
   round.forEach((match, mIndex) => {
-    const isUserMatch =
-      myMatch &&
-      match.id === myMatch.id;
+    const isUserMatch = myMatch && match.id === myMatch.id;
 
     const isCurrent =
       selectedRound === game.league.currentRound &&
@@ -556,7 +523,7 @@ function renderSchedule() {
     const matchClasses = [
       "match",
       isUserMatch ? "active" : "",
-      isCurrent ? "current" : ""
+      isCurrent ? "current" : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -613,5 +580,5 @@ export {
   renderSchedule,
   simulateMatchday,
   updateTable,
-  simulateLiveMatchMinute
+  simulateLiveMatchMinute,
 };
