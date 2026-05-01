@@ -872,12 +872,15 @@ function updateScore() {
   /* =========================
   🧱 FULL MODERN TOPBAR RENDER
   ========================= */
-  topBar.innerHTML = `
+const homeColor = getMatchTeamColor(current.homeTeamId);
+const awayColor = getMatchTeamColor(current.awayTeamId);
+
+topBar.innerHTML = `
   <div id="topMinute" class="minute">${minute}'</div>
 
   <div class="matchup">
-    <div 
-      id="topHome" 
+    <div
+      id="topHome"
       class="home"
       style="color:${homeColor}"
     >
@@ -888,8 +891,8 @@ function updateScore() {
       <span id="topScore" class="score">${home}:${away}</span>
     </div>
 
-    <div 
-      id="topAway" 
+    <div
+      id="topAway"
       class="away"
       style="color:${awayColor}"
     >
