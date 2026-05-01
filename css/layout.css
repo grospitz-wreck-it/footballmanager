@@ -973,12 +973,14 @@ layout.css
   border: none;
   border-radius: 12px;
 
+ #closeMatchDetail {
   background:
     linear-gradient(
-      135deg,
-      var(--accent-secondary),
-      var(--accent-tertiary)
+      145deg,
+      #111827,
+      #1f2937
     );
+}
 
   color: white;
   font-size: 18px;
