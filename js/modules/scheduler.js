@@ -486,7 +486,6 @@ function isMyMatch(match) {
   );
 }
 
-
 // =========================
 // 📅 RENDER
 // =========================
@@ -501,9 +500,9 @@ function renderSchedule() {
   }
 
   let selectedRound =
-  typeof window.scheduleViewIndex === "number"
-    ? window.scheduleViewIndex
-    : game.league?.current?.currentRound || 0;
+    typeof window.scheduleViewIndex === "number"
+      ? window.scheduleViewIndex
+      : game.league?.current?.currentRound || 0;
 
   selectedRound = Math.max(0, Math.min(selectedRound, schedule.length - 1));
   window.scheduleViewIndex = selectedRound;
@@ -516,10 +515,10 @@ function renderSchedule() {
       <div class="schedule-header">
         <button class="prev-day" ${selectedRound === 0 ? "disabled" : ""}>‹</button>
         <h3>${
-  selectedRound === (game.league?.current?.currentRound || 0)
-    ? `Aktueller Spieltag ${selectedRound + 1}`
-    : `Spieltag ${selectedRound + 1}`
-}</h3>
+          selectedRound === (game.league?.current?.currentRound || 0)
+            ? `Aktueller Spieltag ${selectedRound + 1}`
+            : `Spieltag ${selectedRound + 1}`
+        }</h3>
         <button class="next-day" ${
           selectedRound === schedule.length - 1 ? "disabled" : ""
         }>›</button>
@@ -528,15 +527,15 @@ function renderSchedule() {
   `;
 
   round.forEach((match, mIndex) => {
- const isUserMatch = isMyMatch(match);
-    
+    const isUserMatch = isMyMatch(match);
+
     const isCurrent =
       selectedRound === game.league.currentRound &&
       mIndex === game.league.currentMatchIndex;
 
     const matchClasses = [
       "match",
-      isUserMatch ? "active" : "",
+      isUserMatch ? "active my-match" : "",
       isCurrent ? "current" : "",
     ]
       .filter(Boolean)
