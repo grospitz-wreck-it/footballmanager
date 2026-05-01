@@ -129,7 +129,7 @@ function colorDistance(a, b) {
   return Math.min(diff, 360 - diff);
 }
 
-function generateOpponentColor(teamId, userColor) {
+export function generateOpponentColor(teamId, userColor) {
   const basePalette = [
     "#ef4444", // rot
     "#3b82f6", // blau
