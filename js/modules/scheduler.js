@@ -603,6 +603,107 @@ let html = `
 }
 
 // =========================
+// 📅 MATCH DETAIL OVERLAY
+// =========================
+
+function getTeamStrengthById(teamId) {
+  const league = game.league?.current;
+  if (!league?.teams) return 50;
+
+  const team = league.teams.find(
+    (t) => String(t.id) === String(teamId)
+  );
+
+  return team?.strength || team?.rating || team?.overall || 50;
+}
+
+function createStatRow(label, homeValue, awayValue) {
+  const total = homeValue + awayValue || 1;
+
+  const homePercent = (homeValue / total) * 100;
+  const awayPercent = (awayValue / total) * 100;
+
+  return `
+    <div class="match-stat-row">
+      <div>${homeValue}</div>
+
+      <div class="match-stat-bar">
+        <div class="match-stat-home" style="width:${homePercent}%"></div>
+        <div class="match-stat-away" style="width:${awayPercent}%"></div>
+      </div>
+
+      <div>${awayValue}</div>
+    </div>
+
+    <div class="match-stat-label">${label}</div>
+  `;
+}
+
+function openMatchDetail(match) {
+  const overlay = document.getElementById("matchDetailOverlay");
+  const content = document.getElementById("matchDetailContent");
+
+  if (!overlay || !content || !match) return;
+
+  const homeName = getTeamName(match.homeTeamId);
+  const awayName = getTeamName(match.awayTeamId);
+
+  const homeStrength = getTeamStrengthById(match.homeTeamId);
+  const awayStrength = getTeamStrengthById(match.awayTeamId);
+
+  content.innerHTML = `
+    <div class="match-detail-header">
+      <div class="match-detail-title">${homeName} vs ${awayName}</div>
+      <div class="match-detail-sub">Teamvergleich</div>
+    </div>
+
+    <div class="match-detail-versus">
+      <div class="match-team">
+        <div class="match-team-name">${homeName}</div>
+        <div class="match-team-rating">${homeStrength}</div>
+      </div>
+
+      <div class="match-vs">VS</div>
+
+      <div class="match-team">
+        <div class="match-team-name">${awayName}</div>
+        <div class="match-team-rating">${awayStrength}</div>
+      </div>
+    </div>
+
+    <div class="match-stats">
+      ${createStatRow("Gesamt", homeStrength, awayStrength)}
+      ${createStatRow("Angriff", Math.round(homeStrength * 1.05), Math.round(awayStrength * 1.05))}
+      ${createStatRow("Defensive", Math.round(homeStrength * 0.95), Math.round(awayStrength * 0.95))}
+      ${createStatRow("Form", Math.round(homeStrength * 0.9), Math.round(awayStrength * 0.9))}
+    </div>
+  `;
+
+  overlay.classList.remove("hidden");
+}
+
+function closeMatchDetail() {
+  const overlay = document.getElementById("matchDetailOverlay");
+  if (!overlay) return;
+
+  overlay.classList.add("hidden");
+}
+
+function initMatchDetailOverlay() {
+  const closeBtn = document.getElementById("closeMatchDetail");
+  const backdrop = document.querySelector(".match-detail-backdrop");
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeMatchDetail);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", closeMatchDetail);
+  }
+}
+
+
+// =========================
 // 📦 EXPORTS
 // =========================
 export {
