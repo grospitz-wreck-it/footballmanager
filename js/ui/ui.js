@@ -599,7 +599,15 @@ if (closeMatchBtn) {
     }
   };
 }
-  
+  const matchDetailOverlay = document.getElementById("matchDetailOverlay");
+
+if (matchDetailOverlay) {
+  matchDetailOverlay.addEventListener("click", (e) => {
+    if (e.target === matchDetailOverlay) {
+      matchDetailOverlay.classList.add("hidden");
+    }
+  });
+}
   // =========================
   // 🎮 OVERLAY CLOSE
   // =========================
