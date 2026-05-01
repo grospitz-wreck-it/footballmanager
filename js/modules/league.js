@@ -172,7 +172,7 @@ export function generateOpponentColor(teamId, userColor) {
   return candidate;
 }
 
-function getMatchTeamColor(teamId) {
+export function getMatchTeamColor(teamId) {
   const myTeamId = String(
     game.team?.selectedId ||
     game.team?.id ||
@@ -861,7 +861,11 @@ function selectTeamById(teamId) {
   // =========================
   game.team.selected = team.name;
   game.team.selectedId = normalizeId(team.id);
+  const userColor =
+  localStorage.getItem("userColor") ||
+  "#22d3ee";
 
+team.color = userColor;
   // =========================
   // 💼 MANAGER SYSTEM INIT
   // =========================
@@ -872,14 +876,54 @@ function selectTeamById(teamId) {
   // =========================
   // 👥 SPIELER AUFBAU
   // =========================
-  let players = ensureTeamPlayers(team);
+let players = ensureTeamPlayers(team);
 
-  // 🔥 FALLBACK
-  if (!players || players.length === 0) {
-    console.warn("⚠️ Team hatte keine Spieler → retry build");
-    players = ensureTeamPlayers(team);
-  }
+// 🔥 FALLBACK
+if (!players || players.length === 0) {
+  console.warn("⚠️ Team hatte keine Spieler → retry build");
+  players = ensureTeamPlayers(team);
+}
 
+// =========================
+// 🧠 SAUBERE STARTELF INIT
+// =========================
+if (players?.length) {
+  const gk = players.find((p) =>
+    (p.position_type || "").toUpperCase().includes("GK")
+  );
+
+  const defs = players.filter((p) =>
+    (p.position_type || "").toUpperCase().includes("DEF")
+  );
+
+  const mids = players.filter((p) =>
+    (p.position_type || "").toUpperCase().includes("MID")
+  );
+
+  const sts = players.filter((p) =>
+    (p.position_type || "").toUpperCase().includes("ST")
+  );
+
+  game.team.lineup = game.team.lineup || {};
+  game.team.lineup.formation = game.team.lineup.formation || "4-4-2";
+
+  game.team.lineup.slots = {
+    GK: gk?.id || null,
+
+    DEF_1: defs[0]?.id || null,
+    DEF_2: defs[1]?.id || null,
+    DEF_3: defs[2]?.id || null,
+    DEF_4: defs[3]?.id || null,
+
+    MID_1: mids[0]?.id || null,
+    MID_2: mids[1]?.id || null,
+    MID_3: mids[2]?.id || null,
+    MID_4: mids[3]?.id || null,
+
+    ST_1: sts[0]?.id || null,
+    ST_2: sts[1]?.id || null,
+  };
+}
   // =========================
   // 🧠 TEAM BINDING
   // =========================
