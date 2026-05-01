@@ -656,6 +656,46 @@ LAYOUT.CSS ONLY
   animation: fadeIn 0.25s ease;
 }
 
+.match.my-match {
+  position: relative;
+
+  border: 2px solid var(--accent);
+
+  box-shadow:
+    0 0 20px rgba(34,211,238,0.18),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
+
+  transform: scale(1.02);
+}
+
+.match.my-match:hover {
+  transform: scale(1.03);
+}
+
+.match.my-match::before {
+  content: "DEIN SPIEL";
+
+  position: absolute;
+  top: 6px;
+  right: 8px;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  color: white;
+
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-opp)
+  );
+
+  padding: 2px 6px;
+  border-radius: 999px;
+
+  letter-spacing: 0.04em;
+}
+
 /* =========================
 📍 HEADER
 ========================= */
