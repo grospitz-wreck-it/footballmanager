@@ -1,19 +1,26 @@
 // =========================
-// 📊 TABLE MODULE (ID ONLY CLEAN)
+// 📊 TABLE MODULE OPTIMIZED
+// STABLE LIVE TABLE
+// ONLY MY MATCH LIVE
 // =========================
+
 import { game } from "../core/state.js";
+
+// =========================
+// 🧠 INTERNAL CACHE
+// =========================
+let lastTableHash = null;
 
 // =========================
 // 🧱 INIT TABLE
 // =========================
-function initTable(){
-
+function initTable() {
   const league = game.league?.current;
   const teams = league?.teams;
 
-  if(!league || !teams) return;
+  if (!league || !teams) return;
 
-  league.table = teams.map(team => ({
+  league.table = teams.map((team) => ({
     id: String(team.id),
     name: team.name,
     played: 0,
@@ -22,50 +29,49 @@ function initTable(){
     losses: 0,
     goalsFor: 0,
     goalsAgainst: 0,
-    points: 0
+    points: 0,
   }));
-
-  console.log("📊 Table initialized (ID mode)");
 }
 
 // =========================
-// 📊 SORT TABLE
+// 📊 SORT
 // =========================
-function sortTable(table){
-
+function sortTable(table) {
   return [...table].sort((a, b) => {
-
-    if(b.points !== a.points){
-      return b.points - a.points;
-    }
+    if (b.points !== a.points) return b.points - a.points;
 
     const diffA = a.goalsFor - a.goalsAgainst;
     const diffB = b.goalsFor - b.goalsAgainst;
 
-    if(diffB !== diffA){
-      return diffB - diffA;
-    }
-
-    if(b.goalsFor !== a.goalsFor){
-      return b.goalsFor - a.goalsFor;
-    }
+    if (diffB !== diffA) return diffB - diffA;
+    if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
 
     return 0;
   });
 }
 
 // =========================
-// 📈 LIVE TABLE (FIXED)
+// 🧠 HASH
 // =========================
-function getLiveTable(){
+function buildTableHash(sorted) {
+  return sorted
+    .map(
+      (t) =>
+        `${t.id}-${t.points}-${t.goalsFor}-${t.goalsAgainst}-${t.played}`,
+    )
+    .join("|");
+}
 
+// =========================
+// 📈 LIVE TABLE (CALM MODE)
+// =========================
+function getLiveTable() {
   const league = game.league?.current;
-  if(!league) return [];
+  if (!league) return [];
 
   const teams = league.teams || [];
 
-  // 🔥 IMMER FRISCH STARTEN
-  const table = teams.map(team => ({
+  const table = teams.map((team) => ({
     id: String(team.id),
     name: team.name,
     played: 0,
@@ -74,49 +80,61 @@ function getLiveTable(){
     losses: 0,
     goalsFor: 0,
     goalsAgainst: 0,
-    points: 0
+    points: 0,
   }));
 
   const schedule = league.schedule || [];
+  const myMatchId = game.match?.current?.id || null;
 
-  schedule.forEach(round => {
+  schedule.forEach((round) => {
+    round.forEach((match) => {
+      const home = table.find(
+        (t) => t.id === String(match.homeTeamId),
+      );
 
-    round.forEach(match => {
+      const away = table.find(
+        (t) => t.id === String(match.awayTeamId),
+      );
 
-      const home = table.find(t => t.id === String(match.homeTeamId));
-      const away = table.find(t => t.id === String(match.awayTeamId));
+      if (!home || !away) return;
 
-      if(!home || !away) return;
+      let h = null;
+      let a = null;
 
-      let h = 0;
-      let a = 0;
+      const isMyMatch = myMatchId && match.id === myMatchId;
 
-      // 🔴 dein Match
-      if(
-        game.match?.current &&
-        match.id === game.match.current.id
-      ){
-        h = game.match.live?.score?.home ?? 0;
-        a = game.match.live?.score?.away ?? 0;
+      // =========================
+      // 🔴 NUR DEIN SPIEL LIVE
+      // =========================
+      if (isMyMatch) {
+        h = game.match?.live?.score?.home ?? 0;
+        a = game.match?.live?.score?.away ?? 0;
       }
 
-      // 🟡 live matches
-      else if(match.live){
-        h = match.live.score?.home ?? 0;
-        a = match.live.score?.away ?? 0;
-      }
-
-      // 🟢 finished
-      else if(match._processed && match.result){
+      // =========================
+      // 🟢 ANDERE SPIELE:
+      // NUR FIXE STATUS
+      // =========================
+      else if (match.finished && match.result) {
         h = match.result.home;
         a = match.result.away;
       }
 
-      else{
+      else if (
+        game.match?.live?.minute >= 90 &&
+        match.homeGoals !== undefined
+      ) {
+        h = match.homeGoals;
+        a = match.awayGoals;
+      }
+
+      else {
         return;
       }
 
-      // APPLY (safe, weil fresh table!)
+      // =========================
+      // 📊 APPLY
+      // =========================
       home.goalsFor += h;
       home.goalsAgainst += a;
 
@@ -126,46 +144,58 @@ function getLiveTable(){
       home.played++;
       away.played++;
 
-      if(h > a){
+      if (h > a) {
         home.points += 3;
         home.wins++;
         away.losses++;
       }
-      else if(a > h){
+
+      else if (a > h) {
         away.points += 3;
         away.wins++;
         home.losses++;
       }
-      else{
+
+      else {
         home.points++;
         away.points++;
+
         home.draws++;
         away.draws++;
       }
-
     });
-
   });
 
   return table;
 }
+
 // =========================
 // 🧾 RENDER TABLE
 // =========================
-function renderTable(customTable){
-
+function renderTable(customTable) {
   const league = game.league?.current;
-  if(!league) return;
+  if (!league) return;
 
-  if(!league.table || league.table.length === 0){
+  if (!league.table?.length) {
     initTable();
   }
 
   const base = customTable || league.table;
   const sorted = sortTable(base);
 
+  // =========================
+  // 🔥 DIFF RENDER
+  // =========================
+  const newHash = buildTableHash(sorted);
+
+  if (newHash === lastTableHash) {
+    return;
+  }
+
+  lastTableHash = newHash;
+
   const tbody = document.getElementById("tableBody");
-  if(!tbody) return;
+  if (!tbody) return;
 
   tbody.innerHTML = "";
 
@@ -173,26 +203,24 @@ function renderTable(customTable){
   const myTeamId = String(game.team?.selectedId);
 
   sorted.forEach((team, index) => {
-
     const tr = document.createElement("tr");
     const diff = team.goalsFor - team.goalsAgainst;
 
-    if(index === 0) tr.classList.add("table-promoted");
-    if(index >= 14) tr.classList.add("table-relegated");
+    if (index === 0) tr.classList.add("table-promoted");
+    if (index >= 14) tr.classList.add("table-relegated");
 
-    // ⭐ MY TEAM
-    if(String(team.id) === myTeamId){
+    if (String(team.id) === myTeamId) {
       tr.classList.add("table-myteam");
     }
 
-    // 🎯 ACTIVE MATCH
-    if(match){
-      if(
+    if (
+      match &&
+      (
         String(team.id) === String(match.homeTeamId) ||
         String(team.id) === String(match.awayTeamId)
-      ){
-        tr.classList.add("table-active");
-      }
+      )
+    ) {
+      tr.classList.add("table-active");
     }
 
     tr.innerHTML = `
@@ -214,7 +242,7 @@ function renderTable(customTable){
 // =========================
 // ⚡ LIVE RENDER
 // =========================
-function renderLiveTable(){
+function renderLiveTable() {
   renderTable(getLiveTable());
 }
 
