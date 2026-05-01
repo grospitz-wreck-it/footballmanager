@@ -867,18 +867,30 @@ function updateScore() {
   🧱 FULL MODERN TOPBAR RENDER
   ========================= */
   topBar.innerHTML = `
-    <div id="topMinute" class="minute">${minute}'</div>
+  <div id="topMinute" class="minute">${minute}'</div>
 
-    <div class="matchup">
-      <div id="topHome" class="home">${homeName}</div>
-
-      <div class="scoreRow">
-        <span id="topScore" class="score">${home}:${away}</span>
-      </div>
-
-      <div id="topAway" class="away">${awayName}</div>
+  <div class="matchup">
+    <div 
+      id="topHome" 
+      class="home"
+      style="color:${homeColor}"
+    >
+      ${homeName}
     </div>
-  `;
+
+    <div class="scoreRow">
+      <span id="topScore" class="score">${home}:${away}</span>
+    </div>
+
+    <div 
+      id="topAway" 
+      class="away"
+      style="color:${awayColor}"
+    >
+      ${awayName}
+    </div>
+  </div>
+`;
 
   /* =========================
   🎯 GOAL FX
