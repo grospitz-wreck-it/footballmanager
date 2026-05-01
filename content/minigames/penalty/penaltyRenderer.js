@@ -61,9 +61,9 @@ export class PenaltyRenderer {
   this.keeper.style.left = `${pose.x * 100}%`;
   this.keeper.style.top = `${pose.y * 100}%`;
 
-  // Nur Left-Sprites vorhanden → Right wird gespiegelt
+  // Nur Right-Sprites vorhanden → Left wird gespiegelt
   const spriteDirection =
-    direction === 'right' ? 'left' : direction;
+    direction === 'left' ? 'right' : direction;
 
   // Frame bestimmen
   const frame = this.keeperAnimator.getFrame(
