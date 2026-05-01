@@ -59,16 +59,15 @@
   transition: transform 0.15s ease;
 }
 
-.penalty-keeper::before {
-  content: '';
-  position: absolute;
-  top: -28px;
-  left: 50%;
-  width: 38px;
-  height: 38px;
-  background: #f1c27d;
-  border-radius: 50%;
-  transform: translateX(-50%);
+.penalty-keeper {
+  width: 128px;
+  height: 128px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  image-rendering: pixelated;
+  border: none;
+  background-color: transparent;
 }
 
 .penalty-keeper::after {
