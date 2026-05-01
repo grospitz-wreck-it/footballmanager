@@ -519,7 +519,8 @@ window.scheduleViewIndex = Math.max(
 );
 
 let selectedRound = window.scheduleViewIndex;
-
+const round = schedule[selectedRound];
+if (!round) return;
 // =========================
 // 📦 HTML BUILD
 // =========================
