@@ -735,3 +735,4 @@ export {
   closeMatchDetail,
   initMatchDetailOverlay,
 };
+}
