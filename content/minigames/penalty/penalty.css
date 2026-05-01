@@ -247,8 +247,8 @@
    ========================= */
 
 .penalty-ball {
-  width: 28px;
-  height: 28px;
+  width: 56px;
+  height: 56px;
   z-index: 15;
 
   position: absolute;
