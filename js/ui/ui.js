@@ -1354,12 +1354,35 @@ function renderTeam() {
   // =========================
   // 🧠 AUTO BEST XI
   // =========================
+  if (lineup?.slots) {
+  starters = Object.values(lineup.slots)
+    .map((id) =>
+      allPlayers.find(
+        (p) =>
+          String(p.id) === String(id) &&
+          isPlayerAvailable(p.id),
+      ),
+    )
+    .filter(Boolean);
+
+  const remaining = availablePlayers.filter(
+    (p) =>
+      !starters.some(
+        (s) => String(s.id) === String(p.id),
+      ),
+  );
+
+  while (starters.length < 11 && remaining.length) {
+    starters.push(remaining.shift());
+  }
+} else {
   try {
     starters = getBestXI(players, formation);
   } catch (e) {
     console.error("❌ getBestXI failed:", e);
     starters = players.slice(0, 11);
   }
+}
 
   // =========================
   // 🪑 BENCH CLEAN
