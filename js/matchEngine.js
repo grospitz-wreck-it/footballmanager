@@ -10,7 +10,11 @@ import {
   EVENT_OUTCOMES,
 } from "./core/events.constants.js";
 import { RULES } from "./core/rules.js";
-import { addSuspension, addInjury } from "./modules/playerAvailability.js";
+import {
+  addSuspension,
+  addInjury,
+  isPlayerAvailable,
+} from "./modules/playerAvailability.js";
 import { updateEvents, rollRandomEvents } from "./engine/eventSystem.js";
 
 import { saveGame } from "./services/storage.js"; // 🔥 FIXED
@@ -542,7 +546,23 @@ function initMatch(round) {
       // 🔥 HIER IST FIX 3
       const pool = game.players || [];
 
-      return pool.filter((p) => ids.includes(normalizeId(p.id)));
+      let selected = pool.filter(
+        (p) => ids.includes(normalizeId(p.id)) && isPlayerAvailable(p.id),
+      );
+
+      if (selected.length < 11) {
+        const fallback = getPlayersOfTeam(teamId).filter(
+          (p) =>
+            isPlayerAvailable(p.id) &&
+            !selected.some((sp) => normalizeId(sp.id) === normalizeId(p.id)),
+        );
+
+        while (selected.length < 11 && fallback.length) {
+          selected.push(fallback.shift());
+        }
+      }
+
+      return selected;
     }
 
     game.match.current.homePlayers = getPlayersFromLineup(homeId);
