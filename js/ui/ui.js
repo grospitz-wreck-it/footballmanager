@@ -185,10 +185,14 @@ function applyColor(color) {
     hexToRgba(color, 0.45)
   );
 
-  // 🔥 dunklere Zweitfarbe statt Gegnerfarbe
   document.documentElement.style.setProperty(
     "--accent-secondary",
     adjustBrightness(color, -18)
+  );
+
+  document.documentElement.style.setProperty(
+    "--accent-tertiary",
+    adjustBrightness(color, -32)
   );
 }
 
