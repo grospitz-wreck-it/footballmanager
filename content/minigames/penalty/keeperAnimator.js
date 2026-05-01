@@ -12,7 +12,7 @@ export class KeeperAnimator {
       return this.assets.diveLeft1;
     }
 
-    if (direction === 'left' || const flipX = direction === 'left' ? -1 : 1;) {
+    if (direction === 'left' || direction === 'right') {
       return this.assets.diveLeft1;
     }
 
