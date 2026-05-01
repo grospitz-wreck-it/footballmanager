@@ -588,6 +588,18 @@ function initUI() {
     };
   }
 
+const closeMatchBtn = document.getElementById("closeMatchDetail");
+
+if (closeMatchBtn) {
+  closeMatchBtn.onclick = () => {
+    const overlay = document.getElementById("matchDetailOverlay");
+
+    if (overlay) {
+      overlay.classList.add("hidden");
+    }
+  };
+}
+  
   // =========================
   // 🎮 OVERLAY CLOSE
   // =========================
