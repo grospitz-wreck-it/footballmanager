@@ -1,9 +1,43 @@
+import { KeeperAnimator } from './keeperAnimator.js';
+import { loadPenaltyAssets } from './assetsLoader.js';
+
 export class PenaltyRenderer {
   constructor(root) {
     this.root = root;
     this.pitch = root.querySelector('[data-penalty-pitch]');
     this.ball = root.querySelector('[data-penalty-ball]');
     this.keeper = root.querySelector('[data-penalty-keeper]');
+
+    this.assets = null;
+    this.keeperAnimator = null;
+
+    this.initializeAssets();
+  }
+
+  async initializeAssets() {
+    this.assets = await loadPenaltyAssets();
+    this.keeperAnimator = new KeeperAnimator(this.assets.keeper);
+    this.applyStaticAssets();
+  }
+
+  applyStaticAssets() {
+    if (this.keeper && this.assets?.keeper?.idle) {
+      this.keeper.style.backgroundImage = `url('${this.assets.keeper.idle.src}')`;
+      this.keeper.style.backgroundSize = 'contain';
+      this.keeper.style.backgroundRepeat = 'no-repeat';
+      this.keeper.style.backgroundPosition = 'center';
+      this.keeper.style.backgroundColor = 'transparent';
+      this.keeper.style.border = 'none';
+    }
+
+    if (this.ball && this.assets?.ball?.default) {
+      this.ball.style.backgroundImage = `url('${this.assets.ball.default.src}')`;
+      this.ball.style.backgroundSize = 'contain';
+      this.ball.style.backgroundRepeat = 'no-repeat';
+      this.ball.style.backgroundPosition = 'center';
+      this.ball.style.backgroundColor = 'transparent';
+      this.ball.style.border = 'none';
+    }
   }
 
   renderBall(position) {
@@ -13,19 +47,54 @@ export class PenaltyRenderer {
     this.ball.style.top = `${position.y * 100}%`;
 
     const scale = Math.max(0.35, 1 - position.y * 0.55);
-    this.ball.style.transform = `translate(-50%, -50%) scale(${scale})`;
+
+    this.ball.style.transform = `
+      translate(-50%, -50%)
+      scale(${scale})
+    `;
   }
 
-  renderKeeper(pose, direction) {
-    if (!this.keeper) return;
+  renderKeeper(pose, direction, saved = false, missed = false) {
+    if (!this.keeper || !this.keeperAnimator) return;
 
     this.keeper.style.left = `${pose.x * 100}%`;
     this.keeper.style.top = `${pose.y * 100}%`;
+
+    const spriteDirection =
+      direction === 'right' ? 'left' : direction;
+
+    const frame = this.keeperAnimator.getFrame(
+      spriteDirection,
+      pose.progress,
+      saved,
+      missed
+    );
+
+    this.keeper.style.backgroundImage = `url('${frame.src}')`;
+
+    const flipX = direction === 'right' ? -1 : 1;
+
+    this.keeper.style.transform = `
+      translate(-50%, -50%)
+      scaleX(${flipX})
+    `;
+
     this.keeper.dataset.direction = direction;
   }
 
   resetActors() {
-    this.renderBall({ x: 0.5, y: 0.96 });
-    this.renderKeeper({ x: 0.5, y: 0.9 }, 'center');
+    this.renderBall({
+      x: 0.5,
+      y: 0.96
+    });
+
+    this.renderKeeper(
+      {
+        x: 0.5,
+        y: 0.9,
+        progress: 0
+      },
+      'center'
+    );
   }
 }
