@@ -517,9 +517,6 @@ html, body {
 }
 
 /* =========================
-📡 LIVE FEED
-========================= */
-/* =========================
 📰 LIVE EVENT BAR PREMIUM
 ========================= */
 #liveFeed {
@@ -585,6 +582,70 @@ html, body {
   font-weight: 800;
   margin-right: 8px;
 }
+
+/* =========================
+
+  border-radius: 22px;
+
+  background:
+    radial-gradient(circle at top center, rgba(34,211,238,0.08), transparent 55%),
+    linear-gradient(180deg, #020617, #0f172a);
+
+  border: 1px solid rgba(255,255,255,0.05);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.65);
+}
+
+#eventHistoryList {
+  margin-top: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.event-history-item {
+  padding: 12px 14px;
+
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.04);
+
+  font-size: 0.9rem;
+  line-height: 1.4;
+
+  color: #e2e8f0;
+}
+
+.event-history-minute {
+  color: var(--accent);
+  font-weight: 900;
+  margin-right: 8px;
+}
+
+#closeEventHistory {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+
+  width: 44px;
+  height: 44px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.04);
+
+  color: white;
+  font-size: 18px;
+  font-weight: 900;
+}
+
 /* =========================
 ▶️ BUTTONS
 ========================= */
