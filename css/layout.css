@@ -659,21 +659,28 @@ LAYOUT.CSS ONLY
 📅 CLEAN USER MATCH STYLE
 ========================= */
 
-.match.my-match {
-  border: 1.5px solid var(--accent);
+/* =========================
+📅 CLEAN USER MATCH STYLE
+========================= */
+
+.match.my-match,
+.match.my-match.active {
+  border: 1.5px solid var(--accent) !important;
 
   box-shadow:
-    0 0 10px rgba(34,211,238,0.08);
+    0 0 10px rgba(34,211,238,0.08) !important;
 
-  transform: none;
+  transform: none !important;
 }
 
-.match.my-match:hover {
-  transform: translateY(-1px);
+.match.my-match:hover,
+.match.my-match.active:hover {
+  transform: translateY(-1px) !important;
 }
 
 /* ❌ Kein Badge */
-.match.my-match::before {
+.match.my-match::before,
+.match.my-match.active::before {
   display: none !important;
   content: none !important;
 }
