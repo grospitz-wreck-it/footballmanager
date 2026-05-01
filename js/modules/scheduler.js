@@ -380,9 +380,11 @@ function simulateLiveMatchMinute(round, minute) {
       match.status = "FT";
 
       // 🔥 Einmalige Ergebnis-Simulation
+      // 📍 Exakter Austausch:
+
       if (match.homeGoals === undefined || match.awayGoals === undefined) {
-        const homeStrength = getTeamStrength(match.homeTeamId);
-        const awayStrength = getTeamStrength(match.awayTeamId);
+        const homeStrength = getTeamDataById(match.homeTeamId).strength;
+        const awayStrength = getTeamDataById(match.awayTeamId).strength;
 
         const baseHome = Math.round(Math.random() * 2 + homeStrength / 40);
         const baseAway = Math.round(Math.random() * 2 + awayStrength / 45);
@@ -515,7 +517,7 @@ function renderSchedule() {
   // 🔥 Safety Clamp
   window.scheduleViewIndex = Math.max(
     0,
-Math.min(window.scheduleViewIndex, schedule.length - 1)
+    Math.min(window.scheduleViewIndex, schedule.length - 1),
   );
 
   let selectedRound = window.scheduleViewIndex;
@@ -623,13 +625,34 @@ Math.min(window.scheduleViewIndex, schedule.length - 1)
 // 📅 MATCH DETAIL OVERLAY
 // =========================
 
-function getTeamStrengthById(teamId) {
+function getTeamDataById(teamId) {
   const league = game.league?.current;
-  if (!league?.teams) return 50;
+  if (!league?.teams) {
+    return {
+      strength: 50,
+      attack: 50,
+      defense: 50,
+      form: 50,
+    };
+  }
 
   const team = league.teams.find((t) => String(t.id) === String(teamId));
 
-  return team?.strength || team?.rating || team?.overall || 50;
+  if (!team) {
+    return {
+      strength: 50,
+      attack: 50,
+      defense: 50,
+      form: 50,
+    };
+  }
+
+  return {
+    strength: team.strength || 50,
+    attack: team.attack || team.strength || 50,
+    defense: team.defense || team.strength || 50,
+    form: team.form || team.strength || 50,
+  };
 }
 
 function createStatRow(label, homeValue, awayValue) {
@@ -663,8 +686,9 @@ function openMatchDetail(match) {
   const homeName = getTeamName(match.homeTeamId);
   const awayName = getTeamName(match.awayTeamId);
 
-  const homeStrength = getTeamStrengthById(match.homeTeamId);
-  const awayStrength = getTeamStrengthById(match.awayTeamId);
+  // 🔥 NEU:
+  const homeData = getTeamDataById(match.homeTeamId);
+  const awayData = getTeamDataById(match.awayTeamId);
 
   content.innerHTML = `
     <div class="match-detail-header">
@@ -673,25 +697,25 @@ function openMatchDetail(match) {
     </div>
 
     <div class="match-detail-versus">
-      <div class="match-team">
-        <div class="match-team-name">${homeName}</div>
-        <div class="match-team-rating">${homeStrength}</div>
-      </div>
+  <div class="match-team">
+    <div class="match-team-name">${homeName}</div>
+    <div class="match-team-rating">${homeData.strength}</div>
+  </div>
 
-      <div class="match-vs">VS</div>
+  <div class="match-vs">VS</div>
 
-      <div class="match-team">
-        <div class="match-team-name">${awayName}</div>
-        <div class="match-team-rating">${awayStrength}</div>
-      </div>
-    </div>
+  <div class="match-team">
+    <div class="match-team-name">${awayName}</div>
+    <div class="match-team-rating">${awayData.strength}</div>
+  </div>
+</div>
 
-    <div class="match-stats">
-      ${createStatRow("Gesamt", homeStrength, awayStrength)}
-      ${createStatRow("Angriff", Math.round(homeStrength * 1.05), Math.round(awayStrength * 1.05))}
-      ${createStatRow("Defensive", Math.round(homeStrength * 0.95), Math.round(awayStrength * 0.95))}
-      ${createStatRow("Form", Math.round(homeStrength * 0.9), Math.round(awayStrength * 0.9))}
-    </div>
+ <div class="match-stats">
+  ${createStatRow("Gesamt", homeData.strength, awayData.strength)}
+  ${createStatRow("Angriff", homeData.attack, awayData.attack)}
+  ${createStatRow("Defensive", homeData.defense, awayData.defense)}
+  ${createStatRow("Form", homeData.form, awayData.form)}
+</div>
   `;
 
   overlay.classList.remove("hidden");
