@@ -121,43 +121,67 @@ function hslToHex(h, s, l) {
     .slice(1)}`;
 }
 
-function generateOpponentColor(
-  myColor,
-  teamId
-) {
-  const userHsl = hexToHsl(myColor);
+function colorDistance(a, b) {
+  const ah = hexToHsl(a).h;
+  const bh = hexToHsl(b).h;
 
-  let seed = 0;
+  let diff = Math.abs(ah - bh);
+  return Math.min(diff, 360 - diff);
+}
+
+function generateOpponentColor(teamId, userColor) {
+  const basePalette = [
+    "#ef4444", // rot
+    "#3b82f6", // blau
+    "#22c55e", // grün
+    "#f59e0b", // amber
+    "#8b5cf6", // violet
+    "#ec4899", // pink
+    "#14b8a6", // teal
+    "#f97316", // orange
+    "#e11d48", // crimson
+    "#06b6d4", // cyan
+    "#84cc16", // lime
+    "#a855f7", // purple
+  ];
+
+  let hash = 0;
 
   String(teamId)
     .split("")
-    .forEach((c) => {
-      seed += c.charCodeAt(0);
+    .forEach((char) => {
+      hash += char.charCodeAt(0);
     });
 
-  let hue =
-    (userHsl.h +
-      60 +
-      (seed * 37) % 300) %
-    360;
+  // 👉 Startfarbe per Team-ID
+  let candidate = basePalette[hash % basePalette.length];
 
-  if (
-    Math.abs(hue - userHsl.h) < 40
-  ) {
-    hue = (hue + 90) % 360;
+  // 👉 Falls zu nah an Userfarbe → weiter springen
+  let attempts = 0;
+
+  while (colorDistance(candidate, userColor) < 70 && attempts < basePalette.length) {
+    hash++;
+    candidate = basePalette[hash % basePalette.length];
+    attempts++;
   }
 
-  const saturation =
-    65 + (seed % 20);
+  return candidate;
+}
 
-  const lightness =
-    45 + (seed % 15);
+function getMatchTeamColor(teamId) {
+  const myTeamId = String(game.team?.selectedId || game.team?.id || "");
 
-  return hslToHex(
-    hue,
-    saturation,
-    lightness
-  );
+  const userColor = getComputedStyle(document.documentElement)
+    .getPropertyValue("--accent")
+    .trim();
+
+  // 👉 Home/User-Team
+  if (String(teamId) === myTeamId) {
+    return userColor;
+  }
+
+  // 👉 Dynamische Gegnerfarbe
+  return generateOpponentColor(teamId, userColor);
 }
 
 function randomBetween(min, max) {
@@ -314,7 +338,7 @@ function initLeague(league) {
   // 🆔 NORMALIZE IDS
   // =========================
 const myColor =
-  localStorage.getItem("userTeamColor") ||
+  localStorage.getItem("userColor") ||
   "#22d3ee";
 
 league.teams = league.teams.map((t) => {
@@ -325,8 +349,8 @@ league.teams = league.teams.map((t) => {
 
   if (!team.color) {
     team.color = generateOpponentColor(
-      myColor,
-      team.id
+      team.id,
+      myColor
     );
   }
 
