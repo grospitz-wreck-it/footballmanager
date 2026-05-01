@@ -278,35 +278,54 @@
     </div>
 
     <!-- 📊 CONTENT -->
-    <div id="tabContent">
+    <!-- =========================
+📊 CONTENT
+========================= -->
+<div id="tabContent">
 
-      <div id="tableView" class="tab-view">
-        <div id="table">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Team</th>
-                <th>SP</th>
-                <th>S</th>
-                <th>U</th>
-                <th>N</th>
-                <th>Tore</th>
-                <th>Diff</th>
-                <th>Pkt</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="scheduleView" class="tab-view" style="display:none;"></div>
-      <div id="teamView" class="tab-view" style="display:none;"></div>
-
+  <!-- 📈 TABELLE -->
+  <div id="tableView" class="tab-view">
+    <div id="table">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Team</th>
+            <th>SP</th>
+            <th>S</th>
+            <th>U</th>
+            <th>N</th>
+            <th>Tore</th>
+            <th>Diff</th>
+            <th>Pkt</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
     </div>
-
   </div>
+
+  <!-- 📅 SPIELTAGE -->
+  <div id="scheduleView" class="tab-view" style="display:none;"></div>
+
+  <!-- 👥 TEAM -->
+  <div id="teamView" class="tab-view" style="display:none;"></div>
+
+  <!-- =========================
+  📅 MATCH DETAIL OVERLAY
+  ========================= -->
+  <div id="matchDetailOverlay" class="hidden">
+    <div class="match-detail-backdrop"></div>
+
+    <div class="match-detail-card">
+      <button id="closeMatchDetail">✕</button>
+
+      <div id="matchDetailContent">
+        <!-- Dynamisch via JS -->
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- SCRIPT -->
