@@ -1,0 +1,56 @@
+.penalty-game {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: linear-gradient(#355f2f, #2f4f2a);
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  touch-action: none;
+  user-select: none;
+}
+
+.penalty-hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.95rem;
+}
+
+.penalty-pitch {
+  position: relative;
+  overflow: hidden;
+}
+
+.penalty-goal {
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  width: 70%;
+  height: 30%;
+  border: 4px solid rgba(255, 255, 255, 0.85);
+}
+
+.penalty-ball,
+.penalty-keeper {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+}
+
+.penalty-ball {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+.penalty-keeper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50% 50% 40% 40%;
+  background: #ffbf47;
+}
