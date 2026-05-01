@@ -79,7 +79,7 @@ export class PenaltyRenderer {
   }
 
   // Spiegelung rechts
-  const flipX = direction === 'right' ? -1 : 1;
+  const flipX = direction === 'left' ? -1 : 1;
 
   // Zusätzliche Dive-Rotation
   let rotation = 0;
