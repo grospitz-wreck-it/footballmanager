@@ -109,12 +109,8 @@ export class PenaltyRenderer {
     });
 
     this.renderKeeper(
-      {
-        x: 0.5,
-        y: 0.9,
-        progress: 0
-      },
-      'center'
-    );
+  { x: 0.5, y: 0.34, progress: 0 },
+  'center'
+);
   }
 }
