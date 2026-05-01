@@ -655,10 +655,17 @@ function getTeamDataById(teamId) {
   };
 }
 
-function createStatRow(label, homeValue, awayValue) {
+function createStatRow(
+  label,
+  homeValue,
+  awayValue,
+  homeColor = "#3b82f6",
+  awayColor = "#ef4444",
+) {
   const total = homeValue + awayValue || 1;
 
   const homePercent = (homeValue / total) * 100;
+
   const awayPercent = (awayValue / total) * 100;
 
   return `
@@ -666,8 +673,21 @@ function createStatRow(label, homeValue, awayValue) {
       <div>${homeValue}</div>
 
       <div class="match-stat-bar">
-        <div class="match-stat-home" style="width:${homePercent}%"></div>
-        <div class="match-stat-away" style="width:${awayPercent}%"></div>
+        <div
+          class="match-stat-home"
+          style="
+            width:${homePercent}%;
+            background:${homeColor};
+          "
+        ></div>
+
+        <div
+          class="match-stat-away"
+          style="
+            width:${awayPercent}%;
+            background:${awayColor};
+          "
+        ></div>
       </div>
 
       <div>${awayValue}</div>
@@ -690,6 +710,28 @@ function openMatchDetail(match) {
   const homeData = getTeamDataById(match.homeTeamId);
   const awayData = getTeamDataById(match.awayTeamId);
 
+  const myTeamId = String(game.team?.selectedId || "");
+
+  const userColor = localStorage.getItem("userTeamColor") || "#22d3ee";
+
+  const homeTeam = game.league.current.teams.find(
+    (t) => String(t.id) === String(match.homeTeamId),
+  );
+
+  const awayTeam = game.league.current.teams.find(
+    (t) => String(t.id) === String(match.awayTeamId),
+  );
+
+  const homeColor =
+    String(match.homeTeamId) === myTeamId
+      ? userColor
+      : homeTeam?.color || "#888";
+
+  const awayColor =
+    String(match.awayTeamId) === myTeamId
+      ? userColor
+      : awayTeam?.color || "#888";
+
   content.innerHTML = `
     <div class="match-detail-header">
       <div class="match-detail-title">${homeName} vs ${awayName}</div>
@@ -710,11 +752,32 @@ function openMatchDetail(match) {
   </div>
 </div>
 
- <div class="match-stats">
-  ${createStatRow("Gesamt", homeData.strength, awayData.strength)}
-  ${createStatRow("Angriff", homeData.attack, awayData.attack)}
-  ${createStatRow("Defensive", homeData.defense, awayData.defense)}
-  ${createStatRow("Form", homeData.form, awayData.form)}
+<div class="match-stats">
+  ${createStatRow(
+    "Gesamt",
+    homeData.strength,
+    awayData.strength,
+    homeColor,
+    awayColor,
+  )}
+
+  ${createStatRow(
+    "Angriff",
+    homeData.attack,
+    awayData.attack,
+    homeColor,
+    awayColor,
+  )}
+
+  ${createStatRow(
+    "Defensive",
+    homeData.defense,
+    awayData.defense,
+    homeColor,
+    awayColor,
+  )}
+
+  ${createStatRow("Form", homeData.form, awayData.form, homeColor, awayColor)}
 </div>
   `;
 
