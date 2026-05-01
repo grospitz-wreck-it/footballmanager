@@ -519,7 +519,7 @@ html, body {
 /* =========================
 📰 LIVE EVENT BAR PREMIUM
 ========================= */
-#liveFeed {
+#eventBar {
   position: relative;
 
   display: flex;
@@ -551,7 +551,7 @@ html, body {
     background 0.18s ease;
 }
 
-#liveFeed:hover {
+#eventBar:hover {
   transform: translateY(-1px);
 
   background:
@@ -561,7 +561,7 @@ html, body {
     0 12px 28px rgba(0,0,0,0.42);
 }
 
-#liveFeed div {
+#eventText {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -575,12 +575,6 @@ html, body {
   font-weight: 600;
 
   color: #f8fafc;
-}
-
-#liveFeed span:first-child {
-  color: #94a3b8 !important;
-  font-weight: 800;
-  margin-right: 8px;
 }
 
 /* =========================
