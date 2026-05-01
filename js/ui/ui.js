@@ -216,12 +216,18 @@ function applyColor(color) {
 
   // 🔥 Gegnerfarben global neu berechnen
   if (game.league?.current?.teams?.length) {
-    game.league.current.teams.forEach((team) => {
-      if (String(team.id) !== String(game.team?.selectedId)) {
-        team.color = generateOpponentColor(team.id, color);
-      }
-    });
-  }
+  game.league.current.teams.forEach((team) => {
+    // 👤 USER TEAM
+    if (String(team.id) === String(game.team?.selectedId)) {
+      team.color = color;
+    }
+
+    // 🆚 OPPONENTS
+    else {
+      team.color = generateOpponentColor(team.id, color);
+    }
+  });
+}
 }
 
 // =========================
