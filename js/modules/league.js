@@ -18,6 +18,148 @@ function normalizeId(id) {
   return String(id);
 }
 
+function hexToHsl(hex) {
+  hex = hex.replace("#", "");
+
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+
+  let h, s, l;
+  l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0;
+  } else {
+    const d = max - min;
+
+    s =
+      l > 0.5
+        ? d / (2 - max - min)
+        : d / (max + min);
+
+    switch (max) {
+      case r:
+        h =
+          (g - b) / d +
+          (g < b ? 6 : 0);
+        break;
+
+      case g:
+        h = (b - r) / d + 2;
+        break;
+
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+
+    h /= 6;
+  }
+
+  return {
+    h: h * 360,
+    s: s * 100,
+    l: l * 100,
+  };
+}
+
+function hslToHex(h, s, l) {
+  s /= 100;
+  l /= 100;
+
+  const c =
+    (1 - Math.abs(2 * l - 1)) * s;
+
+  const x =
+    c *
+    (1 -
+      Math.abs(
+        ((h / 60) % 2) - 1
+      ));
+
+  const m = l - c / 2;
+
+  let r = 0,
+    g = 0,
+    b = 0;
+
+  if (h < 60) {
+    r = c;
+    g = x;
+  } else if (h < 120) {
+    r = x;
+    g = c;
+  } else if (h < 180) {
+    g = c;
+    b = x;
+  } else if (h < 240) {
+    g = x;
+    b = c;
+  } else if (h < 300) {
+    r = x;
+    b = c;
+  } else {
+    r = c;
+    b = x;
+  }
+
+  r = Math.round((r + m) * 255);
+  g = Math.round((g + m) * 255);
+  b = Math.round((b + m) * 255);
+
+  return `#${(
+    (1 << 24) +
+    (r << 16) +
+    (g << 8) +
+    b
+  )
+    .toString(16)
+    .slice(1)}`;
+}
+
+function generateOpponentColor(
+  myColor,
+  teamId
+) {
+  const userHsl = hexToHsl(myColor);
+
+  let seed = 0;
+
+  String(teamId)
+    .split("")
+    .forEach((c) => {
+      seed += c.charCodeAt(0);
+    });
+
+  let hue =
+    (userHsl.h +
+      60 +
+      (seed * 37) % 300) %
+    360;
+
+  if (
+    Math.abs(hue - userHsl.h) < 40
+  ) {
+    hue = (hue + 90) % 360;
+  }
+
+  const saturation =
+    65 + (seed % 20);
+
+  const lightness =
+    45 + (seed % 15);
+
+  return hslToHex(
+    hue,
+    saturation,
+    lightness
+  );
+}
+
 function randomBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -171,13 +313,25 @@ function initLeague(league) {
   // =========================
   // 🆔 NORMALIZE IDS
   // =========================
-league.teams = league.teams.map((t) =>
-  initializeTeamStrength({
+const myColor =
+  localStorage.getItem("userTeamColor") ||
+  "#22d3ee";
+
+league.teams = league.teams.map((t) => {
+  const team = initializeTeamStrength({
     ...t,
     id: normalizeId(t.id),
-  })
-);
+  });
 
+  if (!team.color) {
+    team.color = generateOpponentColor(
+      myColor,
+      team.id
+    );
+  }
+
+  return team;
+});
 
   
   // =========================
