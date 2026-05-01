@@ -169,23 +169,39 @@ export function generateOpponentColor(teamId, userColor) {
 }
 
 function getMatchTeamColor(teamId) {
-  const myTeamId = String(game.team?.selectedId || game.team?.id || "");
+  const myTeamId = String(
+    game.team?.selectedId ||
+    game.team?.id ||
+    ""
+  );
 
-  const userColor = getComputedStyle(document.documentElement)
-    .getPropertyValue("--accent")
-    .trim();
+  // 🎨 aktuelle User-Farbe
+  const userColor =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent")
+      .trim() || "#22d3ee";
 
-  // 👉 Home/User-Team
+  // 👤 Eigenes Team
   if (String(teamId) === myTeamId) {
     return userColor;
   }
 
-  // 👉 Dynamische Gegnerfarbe
-  return generateOpponentColor(teamId, userColor);
-}
+  // 📦 Teamdaten aus Liga
+  const team = game.league?.current?.teams?.find(
+    (t) => String(t.id) === String(teamId)
+  );
 
-function randomBetween(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  // 🆚 Gegnerfarbe dynamisch + persistiert
+  if (team) {
+    if (!team.color) {
+      team.color = generateOpponentColor(teamId, userColor);
+    }
+
+    return team.color;
+  }
+
+  // 🔄 Fallback
+  return generateOpponentColor(teamId, userColor);
 }
 
 function initializeTeamStrength(team) {
