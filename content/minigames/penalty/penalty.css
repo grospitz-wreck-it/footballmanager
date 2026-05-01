@@ -49,41 +49,22 @@
 }
 
 .penalty-keeper {
-  width: 90px;
-  height: 110px;
-  background: linear-gradient(#ffcc00, #d89b00);
-  border-radius: 20px;
-  border: 3px solid #222;
-  position: absolute;
-  transform: translate(-50%, -50%);
-  transition: transform 0.15s ease;
-}
-
-.penalty-keeper {
   width: 128px;
   height: 128px;
+  position: absolute;
+  transform: translate(-50%, -50%);
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  image-rendering: pixelated;
-  border: none;
   background-color: transparent;
+  border: none;
+  image-rendering: pixelated;
+  transition: transform 0.12s ease;
+  filter: drop-shadow(0 4px 3px rgba(0,0,0,0.35));
 }
 
+.penalty-keeper::before,
 .penalty-keeper::after {
-  content: '';
-  position: absolute;
-  top: 28px;
-  left: -22px;
-  width: 134px;
-  height: 18px;
-  border-top: 8px solid #f1c27d;
-}
-
-.penalty-keeper[data-direction='left'] {
-  transform: translate(-50%, -50%) rotate(-15deg);
-}
-
-.penalty-keeper[data-direction='right'] {
-  transform: translate(-50%, -50%) rotate(15deg);
+  display: none;
+  content: none;
 }
