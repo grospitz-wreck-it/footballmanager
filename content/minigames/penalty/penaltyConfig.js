@@ -20,7 +20,7 @@ export const PENALTY_ZONES = Object.freeze({
    ========================= */
 
 export const DEFAULT_PENALTY_CONFIG = Object.freeze({
-  rounds: 5,
+  rounds: 1,
 
   difficulty: 'normal',
 
