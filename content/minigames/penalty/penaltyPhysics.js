@@ -331,11 +331,11 @@ export function resolveShot(
       ? 0.68
       : 1;
 
-  const effectiveSaveRadius =
-    keeperDecision.saveRadius *
-    timingBonus *
-    difficultyMultiplier;
-
+const effectiveSaveRadius =
+  keeperDecision.saveRadius *
+  timingBonus *
+  difficultyMultiplier *
+  0.72;
   /* =====================================================
      REAL TORRAUM (NACH ZOOM)
      ===================================================== */
