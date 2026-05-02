@@ -21,13 +21,14 @@ export const EVENT_REGISTRY = {
   },
 
   penalty: {
-    id: "penalty",
-    label: "Elfmeter",
-    duration: 0,
-    chanceNext: [
-      { event: "goal", chance: 0.75 }
-    ]
-  },
+  id: "penalty",
+  label: "Elfmeter",
+  duration: 1,
+
+  effect(context) {
+    window.startPenaltySequence?.(context);
+  }
+},
 
   offside: {
     id: "offside",
