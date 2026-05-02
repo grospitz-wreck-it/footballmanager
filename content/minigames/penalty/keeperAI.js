@@ -1,13 +1,7 @@
-/* =========================
-   ADVANCED KEEPER AI SYSTEM
-   - smarter anticipation
-   - bluff mistakes
-   - humanized errors
-   - difficulty scaling
-   - perfect saves
-   - fake commits
-   - immersive arcade intelligence
-   ========================= */
+/* =========================================================
+   KeeperAI.js – FULL DROP-IN UPGRADE
+   Neue Splines + bessere Keeperlogik
+   ========================================================= */
 
 import {
   getKeeperCurve,
@@ -60,7 +54,7 @@ export class KeeperAI {
   }
 
   /* =========================
-     SHOT READING
+     SHOT DECISION
      ========================= */
 
   decide(shotIntent) {
@@ -96,10 +90,6 @@ export class KeeperAI {
 
     let direction;
 
-    /* =========================
-       HUMAN ERROR
-       ========================= */
-
     if (
       Math.random() <
       mistakeChance
@@ -111,7 +101,6 @@ export class KeeperAI {
     } else if (
       shouldRead
     ) {
-      /* Sometimes commit aggressively */
       direction =
         Math.random() <
         commitBias
@@ -122,7 +111,6 @@ export class KeeperAI {
         this.randomDirection();
     }
 
-    /* Reaction */
     const reactionMs =
       randomRange(
         ...keeperCfg.reactionMs[
@@ -130,7 +118,6 @@ export class KeeperAI {
         ]
       );
 
-    /* Save radius slight randomness */
     const saveRadius =
       keeperCfg.saveRadius[
         diff
@@ -140,7 +127,6 @@ export class KeeperAI {
         1.08
       );
 
-    /* Dive speed variation */
     const diveSpeed =
       keeperCfg.diveSpeed[
         diff
@@ -166,7 +152,7 @@ export class KeeperAI {
   }
 
   /* =========================
-     DIRECTION LOGIC
+     RANDOM DIRECTION
      ========================= */
 
   randomDirection() {
@@ -204,29 +190,75 @@ export class KeeperAI {
   }
 
   /* =========================
+     SHOT HEIGHT
+     ========================= */
+
+  determineShotHeight(
+    shotTargetY
+  ) {
+    if (shotTargetY <= 0.36) {
+      return 'high';
+    }
+
+    if (shotTargetY >= 0.47) {
+      return 'low';
+    }
+
+    return 'mid';
+  }
+
+  /* =========================
      POSE COMPUTATION
      ========================= */
 
   computePose(
     decision,
     elapsedMs,
-    shotDurationMs
+    shotDurationMs,
+    shotIntent = null
   ) {
-    /* Before reaction = idle */
+    /* =====================
+       PRE-SHOT SHUFFLE
+       ===================== */
     if (
       elapsedMs <
       decision.reactionMs
     ) {
+      const preProgress =
+        clamp01(
+          elapsedMs /
+            decision.reactionMs
+        );
+
+      const preCurve =
+        getKeeperCurve(
+          decision.direction,
+          'mid',
+          'pre'
+        );
+
       return {
-        x: 0.5,
-        y: 0.355,
-        rotation: 0,
-        stretch: 1,
+        ...sampleCurve(
+          preCurve,
+          preProgress
+        ),
         progress: 0
       };
     }
 
-    /* Dive progression */
+    /* =====================
+       SHOT HEIGHT
+       ===================== */
+    const shotHeight =
+      shotIntent?.target?.y
+        ? this.determineShotHeight(
+            shotIntent.target.y
+          )
+        : 'mid';
+
+    /* =====================
+       DIVE PHASE
+       ===================== */
     const rawProgress =
       (elapsedMs -
         decision.reactionMs) /
@@ -238,7 +270,9 @@ export class KeeperAI {
 
     const curve =
       getKeeperCurve(
-        decision.direction
+        decision.direction,
+        shotHeight,
+        'dive'
       );
 
     const pose =
