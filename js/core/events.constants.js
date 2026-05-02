@@ -30,9 +30,13 @@ export const EVENT_TYPES = {
   SHOT_MISS: "SHOT_MISS",
 
   PASS: "PASS",
+  DRIBBLE: "DRIBBLE",
   DUEL: "DUEL",
   TACKLE: "TACKLE",
   INTERCEPTION: "INTERCEPTION",
+  BALL_LOSS: "BALL_LOSS",
+  BALL_RECOVERY: "BALL_RECOVERY",
+  CLEARANCE: "CLEARANCE",
 
   // =========================
   // 🚫 FOULS & CARDS
@@ -46,16 +50,10 @@ export const EVENT_TYPES = {
   // =========================
   CORNER: "CORNER",
   FREE_KICK: "FREE_KICK",
+
   PENALTY: "PENALTY",
-// =========================
-// 🆕 MICRO EVENTS
-// =========================
-PASS: "PASS",
-DRIBBLE: "DRIBBLE",
-INTERCEPTION: "INTERCEPTION",
-BALL_LOSS: "BALL_LOSS",
-BALL_RECOVERY: "BALL_RECOVERY",
-CLEARANCE: "CLEARANCE",
+  PENALTY_SCORED: "PENALTY_SCORED",
+  MISSED_PENALTY: "MISSED_PENALTY",
 
   // =========================
   // 📦 OTHER
@@ -73,7 +71,7 @@ CLEARANCE: "CLEARANCE",
   FULLTIME: "FULLTIME",
 
   // =========================
-  // 🔧 TACTICS (NEU)
+  // 🔧 TACTICS
   // =========================
   TACTIC_CHANGE: "TACTIC_CHANGE"
 };
