@@ -187,69 +187,51 @@ export class PenaltyGame {
     this.runShotAnimation();
   }
 
-   runShotAnimation() {
+  runShotAnimation() {
     const tick = () => {
       if (!this.state.currentShot) {
         return;
       }
 
-      const {
-        shot,
-        keeperDecision,
-        startedAt,
-      } = this.state.currentShot;
+      const { shot, keeperDecision, startedAt } = this.state.currentShot;
 
       /* =========================
          TIMING
          ========================= */
 
-      const elapsed =
-        performance.now() -
-        startedAt;
+      const elapsed = performance.now() - startedAt;
 
-      const progress =
-        Math.min(
-          1,
-          elapsed /
-            shot.durationMs
-        );
+      const progress = Math.min(1, elapsed / shot.durationMs);
 
       /* =========================
          BALL FLIGHT
          ========================= */
 
-      const ballPos =
-        getBallPosition(
-          shot,
-          progress
-        );
+      const ballPos = getBallPosition(shot, progress);
 
       /* =========================
          KEEPER MOVEMENT
          ========================= */
 
-      const keeperPose =
-        this.keeper.computePose(
-          keeperDecision,
-          elapsed,
-          shot.durationMs,
-          shot
-        );
+      const keeperPose = this.keeper.computePose(
+        keeperDecision,
+        elapsed,
+        shot.durationMs,
+        shot,
+      );
 
       /* =========================
          RENDER LIVE PHASE
          ========================= */
 
-      this.renderer.renderBall(
-        ballPos
-      );
+      this.renderer.renderBall(ballPos);
 
       this.renderer.renderKeeper(
         keeperPose,
         keeperDecision.direction,
         false,
         false,
-        "normal"
+        "normal",
       );
 
       /* =========================
@@ -257,19 +239,9 @@ export class PenaltyGame {
          ========================= */
 
       if (progress >= 1) {
-        const result =
-          resolveShot(
-            shot,
-            keeperPose,
-            keeperDecision
-          );
+        const result = resolveShot(shot, keeperPose, keeperDecision);
 
-        this.runFollowThrough(
-          shot,
-          keeperPose,
-          keeperDecision,
-          result
-        );
+        this.runFollowThrough(shot, keeperPose, keeperDecision, result);
 
         return;
       }
@@ -278,10 +250,7 @@ export class PenaltyGame {
          LOOP CONTINUE
          ========================= */
 
-      this.rafId =
-        requestAnimationFrame(
-          tick
-        );
+      this.rafId = requestAnimationFrame(tick);
     };
 
     /* =========================
@@ -290,10 +259,7 @@ export class PenaltyGame {
 
     this.stopLoop();
 
-    this.rafId =
-      requestAnimationFrame(
-        tick
-      );
+    this.rafId = requestAnimationFrame(tick);
   }
 
   /* =========================================================
@@ -311,32 +277,31 @@ export class PenaltyGame {
       const progress = Math.min(1, elapsed / duration);
 
       const ballPos = getBallFollowThrough(shot, result, progress);
-      if (
-  result.saved &&
-  (
-    result.saveQuality === "perfect" ||
-    result.saveQuality === "strong"
-  )
-) {
-  if (this.renderer.ball) {
-  this.renderer.ball.style.opacity = "0";
-}
-} else {
-  if (this.renderer.ball) {
-  this.renderer.ball.style.opacity = "1";
-}
-}
-       
-if (
-  !result.saved ||
-  (
-    result.saveQuality !== "perfect" &&
-    result.saveQuality !== "strong"
-  )
-) {
-  this.renderer.renderBall(ballPos);
-}
-       
+
+      /* =========================
+         KEEPER HOLDS BALL
+         ========================= */
+
+      const keeperHasBall =
+        result.saved &&
+        (result.saveQuality === "perfect" || result.saveQuality === "strong");
+
+      if (this.renderer.ball) {
+        this.renderer.ball.style.opacity = keeperHasBall ? "0" : "1";
+      }
+
+      /* =========================
+         BALL ONLY IF NOT CAUGHT
+         ========================= */
+
+      if (!keeperHasBall) {
+        this.renderer.renderBall(ballPos);
+      }
+
+      /* =========================
+         KEEPER FOLLOW THROUGH
+         ========================= */
+
       this.renderer.renderKeeper(
         keeperPose,
         keeperDecision.direction,
@@ -344,6 +309,10 @@ if (
         false,
         result.saveQuality,
       );
+
+      /* =========================
+         END FOLLOW THROUGH
+         ========================= */
 
       if (progress >= 1) {
         this.resolveShotEvent(shot, keeperPose, keeperDecision);
@@ -362,6 +331,14 @@ if (
   resolveShotEvent(shot, keeperPose, keeperDecision) {
     const result = resolveShot(shot, keeperPose, keeperDecision);
 
+    /* =========================
+       IMMEDIATE BALL RESET
+       ========================= */
+
+    if (this.renderer.ball) {
+      this.renderer.ball.style.opacity = "1";
+    }
+
     this.state.currentShot = null;
 
     this.state.resolved = true;
@@ -371,12 +348,7 @@ if (
       shot,
       keeperDecision,
 
-      outcome:
-  result.goal
-    ? "goal"
-    : result.saved
-    ? "saved"
-    : "missed",
+      outcome: result.goal ? "goal" : result.saved ? "saved" : "missed",
     };
 
     this.config.hooks.onRoundResolved?.({
@@ -385,39 +357,39 @@ if (
     });
 
     /* =========================
-     GOAL FX
-     ========================= */
+       GOAL FX
+       ========================= */
 
     if (result.goal) {
-  if (this.renderer.pitch) {
-    this.renderer.pitch.classList.add("penalty-goal-hit");
+      if (this.renderer.pitch) {
+        this.renderer.pitch.classList.add("penalty-goal-hit");
 
-    setTimeout(() => {
-      this.renderer.pitch.classList.remove("penalty-goal-hit");
-    }, 500);
-  }
+        setTimeout(() => {
+          this.renderer.pitch.classList.remove("penalty-goal-hit");
+        }, 500);
+      }
 
-  this.root.classList.add("goal-shake");
+      this.root.classList.add("goal-shake");
 
-  setTimeout(() => {
-    this.root.classList.remove("goal-shake");
-  }, 420);
+      setTimeout(() => {
+        this.root.classList.remove("goal-shake");
+      }, 420);
 
-  /* =========================
-     BALL DEEPER INTO NET
-     ========================= */
+      /* =========================
+         BALL INTO NET
+         ========================= */
 
-  this.renderer.renderBall({
-    x: shot.target.x,
-    y: shot.target.y + 0.05,
-  });
+      this.renderer.renderBall({
+        x: shot.target.x,
+        y: shot.target.y + 0.05,
+      });
 
-  this.ui.setFeedback("GOAL!");
-} else if (result.saved) {
+      this.ui.setFeedback("GOAL!");
+    } else if (result.saved) {
 
     /* =========================
-     SAVE FX
-     ========================= */
+       SAVE FX
+       ========================= */
       this.root.classList.add("save-shake");
 
       setTimeout(() => {
@@ -428,22 +400,22 @@ if (
     } else {
 
     /* =========================
-     MISS FX
-     ========================= */
+       MISS FX
+       ========================= */
       this.ui.setFeedback("MISSED!");
     }
 
     /* =========================
-     BALL RESET
-     ========================= */
+       FINAL BALL RESET
+       ========================= */
 
     if (this.renderer.ball) {
       this.renderer.ball.style.opacity = "1";
     }
 
     /* =========================
-     CLOSE EVENT
-     ========================= */
+       CLOSE EVENT
+       ========================= */
 
     setTimeout(() => {
       this.end();
@@ -458,7 +430,6 @@ if (
     this.rafId = null;
   }
 }
-
 let penaltyGameInstance = null;
 
 export function startPenaltyGame(config = {}) {
