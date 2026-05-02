@@ -43,8 +43,9 @@ const TARGET_MAP = {
 
 const START_POINT = {
   x: 0.5,
-  y: 0.86
+  y: 0.78
 };
+
 
 /* =========================
    SHOT CREATION
