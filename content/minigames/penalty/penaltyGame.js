@@ -296,75 +296,133 @@ export class PenaltyGame {
      FINAL RESULT
      ========================= */
 
-  resolveShotEvent(
+ /* =========================================================
+   penaltyGame.js – GOAL IMPACT VISUAL UPGRADE
+   NUR resolveShotEvent() ERSETZEN
+   ========================================================= */
+
+resolveShotEvent(
+  shot,
+  keeperPose,
+  keeperDecision
+) {
+  const result =
+    resolveShot(
+      shot,
+      keeperPose,
+      keeperDecision
+    );
+
+  this.state.currentShot =
+    null;
+
+  this.state.resolved =
+    true;
+
+  this.state.result = {
+    ...result,
+
     shot,
-    keeperPose,
-    keeperDecision
-  ) {
-    const result =
-      resolveShot(
-        shot,
-        keeperPose,
-        keeperDecision
-      );
+    keeperDecision,
 
-    this.state.currentShot =
-      null;
-
-    this.state.resolved =
-      true;
-
-    this.state.result =
-      {
-        ...result,
-
-        shot,
-        keeperDecision,
-
-        outcome:
-          result.goal
-            ? 'goal'
-            : result.saved
-            ? 'saved'
-            : 'missed'
-      };
-
-    this.config.hooks.onRoundResolved?.({
-      round: 1,
-      result:
-        this.state.result
-    });
-
-    /* =====================
-       FEEDBACK
-       ===================== */
-
-    if (
+    outcome:
       result.goal
+        ? 'goal'
+        : result.saved
+        ? 'saved'
+        : 'missed'
+  };
+
+  this.config.hooks.onRoundResolved?.({
+    round: 1,
+    result:
+      this.state.result
+  });
+
+  /* =====================================================
+     GOAL IMPACT FX
+     ===================================================== */
+
+  if (result.goal) {
+    /* Net ripple */
+    if (
+      this.renderer.pitch
     ) {
-      this.ui.setFeedback(
-        'GOAL!'
+      this.renderer.pitch.classList.add(
+        'penalty-goal-hit'
       );
-    } else if (
-      result.saved
-    ) {
-      this.ui.setFeedback(
-        'SAVED!'
-      );
-    } else {
-      this.ui.setFeedback(
-        'MISSED!'
-      );
+
+      setTimeout(() => {
+        this.renderer.pitch.classList.remove(
+          'penalty-goal-hit'
+        );
+      }, 500);
     }
 
-    /* =====================
-       FINAL VISUAL HOLD
-       ===================== */
+    /* Ball continues slightly deeper */
+    this.renderer.renderBall({
+      x: shot.target.x,
+      y:
+        shot.target.y +
+        0.045
+    });
+
+    /* Screen shake */
+    this.root.classList.add(
+      'goal-shake'
+    );
 
     setTimeout(() => {
-      this.end();
-    }, 1800);
+      this.root.classList.remove(
+        'goal-shake'
+      );
+    }, 420);
+
+    this.ui.setFeedback(
+      'GOAL!'
+    );
   }
+
+  /* =====================================================
+     SAVE FX
+     ===================================================== */
+
+  else if (
+    result.saved
+  ) {
+    this.root.classList.add(
+      'save-shake'
+    );
+
+    setTimeout(() => {
+      this.root.classList.remove(
+        'save-shake'
+      );
+    }, 280);
+
+    this.ui.setFeedback(
+      'SAVED!'
+    );
+  }
+
+  /* =====================================================
+     MISS FX
+     ===================================================== */
+
+  else {
+    this.ui.setFeedback(
+      'MISSED!'
+    );
+  }
+
+  /* =====================================================
+     FINAL HOLD
+     ===================================================== */
+
+  setTimeout(() => {
+    this.end();
+  }, 1800);
+}
 
   /* =========================
      LOOP STOP
