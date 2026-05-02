@@ -16,8 +16,9 @@ import { KeeperAI } from './keeperAI.js';
 import {
   calculateShot,
   getBallPosition,
+  getBallFollowThrough,
   resolveShot
-} from './penaltyPhysics.js';
+} from "./penaltyPhysics.js";
 
 export class PenaltyGame {
   constructor(
@@ -217,80 +218,108 @@ export class PenaltyGame {
      ANIMATION LOOP
      ========================= */
 
-  runShotAnimation() {
-    const tick = () => {
-      if (
-        !this.state.currentShot
-      ) {
-        return;
-      }
+ runShotAnimation() {
+  const tick = () => {
+    if (
+      !this.state.currentShot
+    ) {
+      return;
+    }
 
-      const {
+    const {
+      shot,
+      keeperDecision,
+      startedAt
+    } =
+      this.state.currentShot;
+
+    const elapsed =
+      performance.now() -
+      startedAt;
+
+    const progress =
+      Math.min(
+        1,
+        elapsed /
+          shot.durationMs
+      );
+
+    /* =========================
+       MAIN BALL FLIGHT
+       ========================= */
+
+    const ballPos =
+      getBallPosition(
         shot,
+        progress
+      );
+
+    /* =========================
+       KEEPER POSE
+       ========================= */
+
+    const keeperPose =
+      this.keeper.computePose(
         keeperDecision,
-        startedAt
-      } =
-        this.state.currentShot;
-
-      const elapsed =
-        performance.now() -
-        startedAt;
-
-      const progress =
-        Math.min(
-          1,
-          elapsed /
-            shot.durationMs
-        );
-
-      const ballPos =
-        getBallPosition(
-          shot,
-          progress
-        );
-
-      const keeperPose =
-        this.keeper.computePose(
-          keeperDecision,
-          elapsed,
-          shot.durationMs,
-          shot
-        );
-
-      this.renderer.renderBall(
-        ballPos
+        elapsed,
+        shot.durationMs,
+        shot
       );
 
-      this.renderer.renderKeeper(
-        keeperPose,
-        keeperDecision.direction
-      );
+    /* =========================
+       RENDER
+       ========================= */
 
-      if (
-        progress >= 1
-      ) {
-        this.resolveShotEvent(
+    this.renderer.renderBall(
+      ballPos
+    );
+
+    this.renderer.renderKeeper(
+      keeperPose,
+      keeperDecision.direction
+    );
+
+    /* =========================
+       SHOT IMPACT
+       ========================= */
+
+    if (
+      progress >= 1
+    ) {
+      const result =
+        resolveShot(
           shot,
           keeperPose,
           keeperDecision
         );
 
-        return;
-      }
+      this.runFollowThrough(
+        shot,
+        keeperPose,
+        keeperDecision,
+        result
+      );
 
-      this.rafId =
-        requestAnimationFrame(
-          tick
-        );
-    };
+      return;
+    }
 
-    this.stopLoop();
+    /* =========================
+       CONTINUE LOOP
+       ========================= */
 
     this.rafId =
       requestAnimationFrame(
         tick
       );
-  }
+  };
+
+  this.stopLoop();
+
+  this.rafId =
+    requestAnimationFrame(
+      tick
+    );
+}
 
   /* =========================
      FINAL RESULT
