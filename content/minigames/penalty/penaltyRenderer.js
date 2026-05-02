@@ -146,83 +146,88 @@ export class PenaltyRenderer {
   }
 
   renderKeeper(
-    pose,
-    direction,
-    saved = false,
-    missed = false
+  pose,
+  direction,
+  saved = false,
+  missed = false,
+  saveQuality = 'normal'
+) {
+  if (
+    !this.keeper ||
+    !this.keeperAnimator
   ) {
-    if (
-      !this.keeper ||
-      !this.keeperAnimator
-    )
-      return;
-
-    this.keeper.style.left =
-      `${pose.x * 100}%`;
-
-    this.keeper.style.top =
-      `${pose.y * 100}%`;
-
-    // Nur Left-Sprites vorhanden,
-    // Right wird gespiegelt
-    const spriteDirection =
-      direction === 'right'
-        ? 'left'
-        : direction;
-
-    const frame =
-      this.keeperAnimator.getFrame(
-        spriteDirection,
-        pose.progress || 0,
-        saved,
-        missed
-      );
-
-    if (frame?.src) {
-      this.keeper.style.backgroundImage =
-        `url('${frame.src}')`;
-    }
-
-    // Perspektivisch korrekt:
-    // Keeper links = Sprite flip
-    const flipX =
-      direction === 'left' ? -1 : 1;
-
-    let rotation = 0;
-
-    if (direction === 'left')
-      rotation = -10;
-
-    if (direction === 'right')
-      rotation = 10;
-
-    this.keeper.style.transform = `
-      translate(-50%, -50%)
-      scaleX(${flipX})
-      rotate(${rotation}deg)
-    `;
-
-    this.keeper.dataset.direction =
-      direction;
+    return;
   }
 
-  resetActors() {
-    this.renderBall({
-  x: 0.5,
-  y: 0.78
-});
+  /* =========================
+     POSITION
+     ========================= */
 
-    this.renderKeeper(
-      {
-        x: 0.5,
-        y: 0.36,
-        progress: 0
-      },
-      'center'
+  this.keeper.style.left =
+    `${pose.x * 100}%`;
+
+  this.keeper.style.top =
+    `${pose.y * 100}%`;
+
+  /* =========================
+     FRAME
+     ========================= */
+
+  const frame =
+    this.keeperAnimator.getFrame(
+      direction,
+      pose.progress || 0,
+      saved,
+      missed,
+      saveQuality
     );
-  }
 
-  reset() {
-    this.resetActors();
-  }
+  /* =========================
+     SPRITE SHEET
+     ========================= */
+
+  this.keeper.style.backgroundImage =
+    `url('${frame.src}')`;
+
+  this.keeper.style.backgroundSize =
+    `${frame.cols * 100}% ${frame.rows * 100}%`;
+
+  this.keeper.style.backgroundPosition =
+    `${(frame.x / (frame.cols - 1)) * 100}% ${(frame.y / (frame.rows - 1)) * 100}%`;
+
+  this.keeper.style.backgroundRepeat =
+    'no-repeat';
+
+  /* =========================
+     DIRECTION FLIP
+     ========================= */
+
+  const flipX =
+    direction === 'right'
+      ? -1
+      : 1;
+
+  /* =========================
+     ROTATION
+     ========================= */
+
+  const rotation =
+    pose.rotation || 0;
+
+  /* =========================
+     STRETCH
+     ========================= */
+
+  const stretch =
+    pose.stretch || 1;
+
+  this.keeper.style.transform = `
+    translate(-50%, -50%)
+    scaleX(${flipX})
+    rotate(${rotation}deg)
+    scale(${stretch})
+  `;
+
+  this.keeper.dataset.direction =
+    direction;
 }
