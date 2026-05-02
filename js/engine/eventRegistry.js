@@ -12,13 +12,10 @@ export const EVENT_REGISTRY = {
   },
 
   foul: {
-    id: "foul",
-    label: "Foul",
-    duration: 0,
-    chanceNext: [
-      { event: "penalty", chance: 0.2 }
-    ]
-  },
+  id: "foul",
+  label: "Foul",
+  duration: 0
+},
 
   penalty: {
   id: "penalty",
