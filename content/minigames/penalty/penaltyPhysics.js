@@ -305,7 +305,10 @@ export function resolveShot(
     keeperPose.y;
 
   const distance =
-    Math.hypot(dx, dy);
+    Math.hypot(
+      dx,
+      dy
+    );
 
   /* =========================
      KEEPER TIMING
@@ -314,8 +317,7 @@ export function resolveShot(
   const timingBonus =
     keeperPose.progress >= 0.7
       ? 1
-      : keeperPose.progress >=
-        0.5
+      : keeperPose.progress >= 0.5
       ? 0.76
       : 0.48;
 
@@ -345,13 +347,13 @@ export function resolveShot(
      REALISTIC GOAL FRAME
      ========================= */
 
- const insideGoalWidth =
-  shot.target.x >= 0.20 &&
-  shot.target.x <= 0.80;
+  const insideGoalWidth =
+    shot.target.x >= 0.20 &&
+    shot.target.x <= 0.80;
 
-const insideGoalHeight =
-  shot.target.y >= 0.22 &&
-  shot.target.y <= 0.60;
+  const insideGoalHeight =
+    shot.target.y >= 0.22 &&
+    shot.target.y <= 0.60;
 
   const validGoalZone =
     insideGoalWidth &&
@@ -377,7 +379,7 @@ const insideGoalHeight =
     sufficientPower;
 
   /* =========================
-     WRONG SIDE DIVES MISS
+     WRONG SIDE DIVE CHECK
      ========================= */
 
   const keeperWrongSide =
@@ -393,7 +395,7 @@ const insideGoalHeight =
     );
 
   /* =========================
-     CENTER JUMPS MISS CORNERS
+     CENTER TOO SLOW FOR CORNERS
      ========================= */
 
   const keeperOutmatched =
@@ -403,6 +405,37 @@ const insideGoalHeight =
       shot.target.x < 0.4 ||
       shot.target.x > 0.6
     );
+
+  /* =========================
+     GUARANTEED GOAL OVERRIDE
+     If ball is valid + keeper guessed wrong:
+     ALWAYS GOAL
+     ========================= */
+
+  if (
+    validGoal &&
+    (
+      keeperWrongSide ||
+      keeperOutmatched
+    )
+  ) {
+    return {
+      saved: false,
+      goal: true,
+      missed: false,
+      distance,
+      saveQuality: "none",
+      effectiveSaveRadius,
+      validGoal,
+      keeperCanAttempt: false,
+      insideGoalWidth,
+      insideGoalHeight,
+      crossedLine,
+      sufficientPower,
+      keeperWrongSide,
+      keeperOutmatched
+    };
+  }
 
   /* =========================
      SAVE CHECK
@@ -473,7 +506,6 @@ const insideGoalHeight =
     keeperOutmatched
   };
 }
-
 /* =========================
    HELPERS
    ========================= */
