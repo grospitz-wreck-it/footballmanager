@@ -281,22 +281,31 @@ export class PenaltyRenderer {
        DYNAMIC SCALE
        ========================= */
 
-    let spriteScale = 1;
+   let spriteScale = 1.66;
 
-    if (
-      pose.progress >
-      0.15
-    ) {
-      spriteScale = 1.22;
-    }
+/* Bewegung größer */
+if (
+  pose.progress > 0.15
+) {
+  spriteScale = 1.85;
+}
 
-    if (saved) {
-      spriteScale = 1.28;
-    }
+/* Save Frames heroisch */
+if (saved) {
+  spriteScale = 2.05;
+}
 
-    if (missed) {
-      spriteScale = 1.18;
-    }
+/* Missed Dives ebenfalls größer */
+if (missed) {
+  spriteScale = 1.9;
+}
+
+/* Idle minimal größer */
+if (
+  pose.progress <= 0.05
+) {
+  spriteScale = 1.66;
+}
 
     /* =========================
        FINAL TRANSFORM
