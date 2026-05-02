@@ -122,31 +122,63 @@ export function getKeeperCurve(
   shotHeight = 'mid',
   phase = 'dive'
 ) {
+  /* =====================
+     PRE SHOT
+     ===================== */
   if (phase === 'pre') {
-    return PRE_SHOT_CURVES[
+    return (
+      PRE_SHOT_CURVES?.[
+        direction
+      ] ||
+      PRE_SHOT_CURVES?.center ||
+      HIGH_DIVE_CURVES?.center ||
+      FALLBACK_CURVE
+    );
+  }
+
+  /* =====================
+     LOW SHOTS
+     ===================== */
+  if (
+    phase === 'dive' &&
+    shotHeight === 'low'
+  ) {
+    return (
+      LOW_DIVE_CURVES?.[
+        direction
+      ] ||
+      LOW_DIVE_CURVES?.center ||
+      HIGH_DIVE_CURVES?.center ||
+      FALLBACK_CURVE
+    );
+  }
+
+  /* =====================
+     HIGH SHOTS
+     ===================== */
+  if (
+    phase === 'dive' &&
+    shotHeight === 'high'
+  ) {
+    return (
+      HIGH_DIVE_CURVES?.[
+        direction
+      ] ||
+      HIGH_DIVE_CURVES?.center ||
+      FALLBACK_CURVE
+    );
+  }
+
+  /* =====================
+     MID SHOTS
+     ===================== */
+  return (
+    HIGH_DIVE_CURVES?.[
       direction
     ] ||
-      PRE_SHOT_CURVES.center;
-  }
-
-  if (phase === 'dive') {
-    if (shotHeight === 'low') {
-      return LOW_DIVE_CURVES[
-        direction
-      ];
-    }
-
-    if (shotHeight === 'high') {
-      return HIGH_DIVE_CURVES[
-        direction
-      ];
-    }
-  }
-
-  return HIGH_DIVE_CURVES[
-    direction
-  ] ||
-    PRE_SHOT_CURVES.center;
+    HIGH_DIVE_CURVES?.center ||
+    FALLBACK_CURVE
+  );
 }
 
 /* =========================
@@ -157,6 +189,20 @@ export function sampleCurve(
   curve,
   t
 ) {
+  /* =====================
+     FAILSAFE
+     ===================== */
+  if (
+    !curve ||
+    !Array.isArray(
+      curve
+    ) ||
+    curve.length < 2
+  ) {
+    curve =
+      FALLBACK_CURVE;
+  }
+
   const clamped =
     clamp01(t);
 
@@ -185,7 +231,10 @@ export function sampleCurve(
     curve[seg];
 
   const p1 =
-    curve[seg + 1];
+    curve[
+      seg + 1
+    ] ||
+    curve[seg];
 
   const smoothT =
     smoothStep(
@@ -206,21 +255,25 @@ export function sampleCurve(
     ),
 
     rotation: lerp(
-      p0.rotation || 0,
-      p1.rotation || 0,
+      p0.rotation ||
+        0,
+      p1.rotation ||
+        0,
       smoothT
     ),
 
     stretch: lerp(
-      p0.stretch || 1,
-      p1.stretch || 1,
+      p0.stretch ||
+        1,
+      p1.stretch ||
+        1,
       smoothT
     ),
 
-    progress: clamped
+    progress:
+      clamped
   };
 }
-
 /* =========================
    HELPERS
    ========================= */
