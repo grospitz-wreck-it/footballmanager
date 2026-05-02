@@ -316,8 +316,8 @@ export function resolveShot(
       ? 1
       : keeperPose.progress >=
         0.5
-      ? 0.78
-      : 0.52;
+      ? 0.76
+      : 0.48;
 
   /* =========================
      TOP CORNERS HARDER
@@ -328,78 +328,109 @@ export function resolveShot(
       PENALTY_ZONES.TOP_LEFT ||
     shot.zone ===
       PENALTY_ZONES.TOP_RIGHT
-      ? 0.68
+      ? 0.62
       : 1;
 
-const effectiveSaveRadius =
-  keeperDecision.saveRadius *
-  timingBonus *
-  difficultyMultiplier *
-  0.72;
-  /* =====================================================
-     REAL TORRAUM (NACH ZOOM)
-     ===================================================== */
+  /* =========================
+     FAIRER SAVE RADIUS
+     ========================= */
+
+  const effectiveSaveRadius =
+    keeperDecision.saveRadius *
+    timingBonus *
+    difficultyMultiplier *
+    0.58;
+
+  /* =========================
+     REALISTIC GOAL FRAME
+     ========================= */
 
   const insideGoalWidth =
-    shot.target.x >= 0.27 &&
-    shot.target.x <= 0.73;
+    shot.target.x >= 0.24 &&
+    shot.target.x <= 0.76;
 
   const insideGoalHeight =
-    shot.target.y >= 0.28 &&
-    shot.target.y <= 0.53;
+    shot.target.y >= 0.25 &&
+    shot.target.y <= 0.56;
 
   const validGoalZone =
     insideGoalWidth &&
     insideGoalHeight;
 
-  /* =====================================================
-     BALL MUSS TORLINIE ERREICHEN
-     SEHR WICHTIG:
-     y darf NICHT zu tief sein
-     ===================================================== */
+  /* =========================
+     BALL REACHES LINE
+     ========================= */
 
   const crossedLine =
-    shot.target.y <= 0.53;
+    shot.target.y <= 0.56;
 
-  /* =====================================================
-     SCHWACHE SCHÜSSE KÖNNEN
-     VORHER VERENDEN
-     ===================================================== */
+  /* =========================
+     POWER FLOOR
+     ========================= */
 
   const sufficientPower =
-    shot.power >= 0.22;
+    shot.power >= 0.16;
 
   const validGoal =
     validGoalZone &&
     crossedLine &&
     sufficientPower;
 
-  /* =====================================================
-     KEEPER REACH
-     ===================================================== */
+  /* =========================
+     WRONG SIDE DIVES MISS
+     ========================= */
 
-  const keeperCanReach =
-    shot.target.y <= 0.5;
+  const keeperWrongSide =
+    (
+      keeperDecision.direction ===
+        "left" &&
+      shot.target.x > 0.57
+    ) ||
+    (
+      keeperDecision.direction ===
+        "right" &&
+      shot.target.x < 0.43
+    );
+
+  /* =========================
+     CENTER JUMPS MISS CORNERS
+     ========================= */
+
+  const keeperOutmatched =
+    keeperDecision.direction ===
+      "center" &&
+    (
+      shot.target.x < 0.4 ||
+      shot.target.x > 0.6
+    );
+
+  /* =========================
+     SAVE CHECK
+     ========================= */
+
+  const keeperCanAttempt =
+    !keeperWrongSide &&
+    !keeperOutmatched;
 
   const rawSaved =
+    keeperCanAttempt &&
     distance <=
-      effectiveSaveRadius &&
-    keeperCanReach;
+      effectiveSaveRadius;
 
   const saved =
     rawSaved &&
     validGoal;
 
   const goal =
-    !rawSaved &&
+    !saved &&
     validGoal;
 
   const missed =
     !validGoal;
 
-  /* =====================================================
+  /* =========================
      SAVE QUALITY
-     ===================================================== */
+     ========================= */
 
   let saveQuality =
     "miss";
@@ -408,14 +439,14 @@ const effectiveSaveRadius =
     if (
       distance <
       effectiveSaveRadius *
-        0.38
+        0.34
     ) {
       saveQuality =
         "perfect";
     } else if (
       distance <
       effectiveSaveRadius *
-        0.72
+        0.66
     ) {
       saveQuality =
         "strong";
@@ -433,11 +464,13 @@ const effectiveSaveRadius =
     saveQuality,
     effectiveSaveRadius,
     validGoal,
-    keeperCanReach,
+    keeperCanAttempt,
     insideGoalWidth,
     insideGoalHeight,
     crossedLine,
-    sufficientPower
+    sufficientPower,
+    keeperWrongSide,
+    keeperOutmatched
   };
 }
 
