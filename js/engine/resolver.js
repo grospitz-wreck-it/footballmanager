@@ -11,8 +11,7 @@ import { EVENT_TYPES, EVENT_OUTCOMES } from "../core/events.constants.js";
 import { getAttackStrength, getGoalkeeperStrength } from "./playerEngine.js";
 
 export function resolveShot({ shooter, keeper }) {
-
-  if(!shooter || !keeper){
+  if (!shooter || !keeper) {
     return EVENT_TYPES.SHOT_MISS;
   }
 
@@ -35,11 +34,11 @@ export function resolveShot({ shooter, keeper }) {
 
   const r = Math.random();
 
-  if(r < goalChance){
+  if (r < goalChance) {
     return EVENT_TYPES.GOAL;
   }
 
-  if(r < goalChance + saveChance){
+  if (r < goalChance + saveChance) {
     return EVENT_TYPES.SHOT_SAVED;
   }
 
@@ -49,15 +48,39 @@ export function resolveShot({ shooter, keeper }) {
 // =========================
 // 🚫 FOUL RESOLUTION
 // =========================
-export function resolveFoul() {
+// =========================
+// 🚫 FOUL RESOLUTION
+// =========================
+export function resolveFoul(context = {}) {
+  const attackPosition = context.attackPosition || {
+    x: 0.5,
+    y: 0.5,
+  };
+
+  /* =========================
+     PENALTY CHECK
+     ========================= */
+
+  const inPenaltyBox =
+    attackPosition.x >= 0.18 &&
+    attackPosition.x <= 0.82 &&
+    attackPosition.y <= 0.32;
+
+  if (inPenaltyBox) {
+    return EVENT_TYPES.PENALTY;
+  }
+
+  /* =========================
+     CARD LOGIC
+     ========================= */
 
   const r = Math.random();
 
-  if(r < RULES.foul.red){
+  if (r < RULES.foul.red) {
     return EVENT_TYPES.RED_CARD;
   }
 
-  if(r < RULES.foul.red + RULES.foul.yellow){
+  if (r < RULES.foul.red + RULES.foul.yellow) {
     return EVENT_TYPES.YELLOW_CARD;
   }
 
@@ -67,10 +90,9 @@ export function resolveFoul() {
 // =========================
 // ⚔️ DUEL RESOLUTION
 // =========================
-export function resolveDuel(p1, p2){
-
+export function resolveDuel(p1, p2) {
   const a = p1?.attributes?.defense || 50;
   const b = p2?.attributes?.defense || 50;
 
-  return Math.random() < (a / (a + b)) ? p1 : p2;
+  return Math.random() < a / (a + b) ? p1 : p2;
 }
