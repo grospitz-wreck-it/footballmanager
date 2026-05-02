@@ -283,20 +283,22 @@ export class PenaltyGame {
          ========================= */
 
       const keeperHasBall =
-        result.saved &&
-        (result.saveQuality === "perfect" || result.saveQuality === "strong");
+  result.saved &&
+  (
+    result.saveQuality === "perfect" ||
+    result.saveQuality === "strong"
+  );
 
-      if (this.renderer.ball) {
-        this.renderer.ball.style.opacity = keeperHasBall ? "0" : "1";
-      }
+if (this.renderer.ball) {
+  this.renderer.ball.style.opacity =
+    keeperHasBall
+      ? "0"
+      : "1";
+}
 
-      /* =========================
-         BALL ONLY IF NOT CAUGHT
-         ========================= */
-
-      if (!keeperHasBall) {
-        this.renderer.renderBall(ballPos);
-      }
+if (!keeperHasBall) {
+  this.renderer.renderBall(ballPos);
+}
 
       /* =========================
          KEEPER FOLLOW THROUGH
