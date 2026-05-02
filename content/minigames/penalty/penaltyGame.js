@@ -187,45 +187,113 @@ export class PenaltyGame {
     this.runShotAnimation();
   }
 
-  runShotAnimation() {
+   runShotAnimation() {
     const tick = () => {
       if (!this.state.currentShot) {
         return;
       }
 
-      const { shot, keeperDecision, startedAt } = this.state.currentShot;
-
-      const elapsed = performance.now() - startedAt;
-
-      const progress = Math.min(1, elapsed / shot.durationMs);
-
-      const ballPos = getBallPosition(shot, progress);
-
-      const keeperPose = this.keeper.computePose(
-        keeperDecision,
-        elapsed,
-        shot.durationMs,
+      const {
         shot,
+        keeperDecision,
+        startedAt,
+      } = this.state.currentShot;
+
+      /* =========================
+         TIMING
+         ========================= */
+
+      const elapsed =
+        performance.now() -
+        startedAt;
+
+      const progress =
+        Math.min(
+          1,
+          elapsed /
+            shot.durationMs
+        );
+
+      /* =========================
+         BALL FLIGHT
+         ========================= */
+
+      const ballPos =
+        getBallPosition(
+          shot,
+          progress
+        );
+
+      /* =========================
+         KEEPER MOVEMENT
+         ========================= */
+
+      const keeperPose =
+        this.keeper.computePose(
+          keeperDecision,
+          elapsed,
+          shot.durationMs,
+          shot
+        );
+
+      /* =========================
+         RENDER LIVE PHASE
+         ========================= */
+
+      this.renderer.renderBall(
+        ballPos
       );
 
-      this.renderer.renderBall(ballPos);
+      this.renderer.renderKeeper(
+        keeperPose,
+        keeperDecision.direction,
+        false,
+        false,
+        "normal"
+      );
 
-      this.renderer.renderKeeper(keeperPose, keeperDecision.direction);
+      /* =========================
+         SHOT IMPACT
+         ========================= */
 
       if (progress >= 1) {
-        const result = resolveShot(shot, keeperPose, keeperDecision);
+        const result =
+          resolveShot(
+            shot,
+            keeperPose,
+            keeperDecision
+          );
 
-        this.runFollowThrough(shot, keeperPose, keeperDecision, result);
+        this.runFollowThrough(
+          shot,
+          keeperPose,
+          keeperDecision,
+          result
+        );
 
         return;
       }
 
-      this.rafId = requestAnimationFrame(tick);
+      /* =========================
+         LOOP CONTINUE
+         ========================= */
+
+      this.rafId =
+        requestAnimationFrame(
+          tick
+        );
     };
+
+    /* =========================
+       RESET LOOP
+       ========================= */
 
     this.stopLoop();
 
-    this.rafId = requestAnimationFrame(tick);
+    this.rafId =
+      requestAnimationFrame(
+        tick
+      );
   }
 
   /* =========================================================
