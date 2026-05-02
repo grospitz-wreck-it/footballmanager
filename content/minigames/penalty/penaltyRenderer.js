@@ -311,6 +311,11 @@ if (
        FINAL TRANSFORM
        ========================= */
 
+      const spriteScale =
+      pose.progress > 0.05
+        ? 1.38
+        : 1.12;
+
     this.keeper.style.transform = `
       translate(-50%, -50%)
       rotate(${rotation}deg)
@@ -320,7 +325,6 @@ if (
 
     this.keeper.dataset.direction =
       direction;
-  }
 
   /* =========================
      RESET
