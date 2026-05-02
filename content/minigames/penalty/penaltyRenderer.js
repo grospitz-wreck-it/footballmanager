@@ -46,73 +46,82 @@ export class PenaltyRenderer {
   }
 
   applyStaticAssets() {
-    // Stadium Background
-    if (
-      this.pitch &&
-      this.assets?.stadium?.background
-    ) {
-      this.pitch.style.backgroundImage =
-        `url('${this.assets.stadium.background.src}')`;
+  /* =========================
+     STADIUM BACKGROUND
+     15% Zoom-In
+     ========================= */
+  if (
+    this.pitch &&
+    this.assets?.stadium?.background
+  ) {
+    this.pitch.style.backgroundImage =
+      `url('${this.assets.stadium.background.src}')`;
 
-      this.pitch.style.backgroundSize =
-        'cover';
+    this.pitch.style.backgroundSize =
+      '115% auto';
 
-      this.pitch.style.backgroundPosition =
-        'center';
+    this.pitch.style.backgroundPosition =
+      'center center';
 
-      this.pitch.style.backgroundRepeat =
-        'no-repeat';
+    this.pitch.style.backgroundRepeat =
+      'no-repeat';
 
-      this.pitch.style.backgroundColor =
-        '#111';
-    }
-
-    // Keeper Idle Sprite
-    if (
-      this.keeper &&
-      this.assets?.keeper?.idle
-    ) {
-      this.keeper.style.backgroundImage =
-        `url('${this.assets.keeper.idle.src}')`;
-
-      this.keeper.style.backgroundSize =
-        'contain';
-
-      this.keeper.style.backgroundRepeat =
-        'no-repeat';
-
-      this.keeper.style.backgroundPosition =
-        'center';
-
-      this.keeper.style.backgroundColor =
-        'transparent';
-
-      this.keeper.style.border = 'none';
-    }
-
-    // Ball Sprite
-    if (
-      this.ball &&
-      this.assets?.ball?.default
-    ) {
-      this.ball.style.backgroundImage =
-        `url('${this.assets.ball.default.src}')`;
-
-      this.ball.style.backgroundSize =
-        'contain';
-
-      this.ball.style.backgroundRepeat =
-        'no-repeat';
-
-      this.ball.style.backgroundPosition =
-        'center';
-
-      this.ball.style.backgroundColor =
-        'transparent';
-
-      this.ball.style.border = 'none';
-    }
+    this.pitch.style.backgroundColor =
+      '#111';
   }
+
+  /* =========================
+     KEEPER IDLE SPRITE
+     ========================= */
+  if (
+    this.keeper &&
+    this.assets?.keeper?.idle
+  ) {
+    this.keeper.style.backgroundImage =
+      `url('${this.assets.keeper.idle.src}')`;
+
+    this.keeper.style.backgroundSize =
+      'contain';
+
+    this.keeper.style.backgroundRepeat =
+      'no-repeat';
+
+    this.keeper.style.backgroundPosition =
+      'center';
+
+    this.keeper.style.backgroundColor =
+      'transparent';
+
+    this.keeper.style.border =
+      'none';
+  }
+
+  /* =========================
+     BALL SPRITE
+     ========================= */
+  if (
+    this.ball &&
+    this.assets?.ball?.default
+  ) {
+    this.ball.style.backgroundImage =
+      `url('${this.assets.ball.default.src}')`;
+
+    this.ball.style.backgroundSize =
+      'contain';
+
+    this.ball.style.backgroundRepeat =
+      'no-repeat';
+
+    this.ball.style.backgroundPosition =
+      'center';
+
+    this.ball.style.backgroundColor =
+      'transparent';
+
+    this.ball.style.border =
+      'none';
+  }
+}
 
   renderBall(position) {
     if (!this.ball) return;
