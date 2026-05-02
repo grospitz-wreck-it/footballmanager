@@ -129,3 +129,10 @@
     transform: scale(1);
   }
 }
+.penalty-ball.fast-shot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  filter: blur(4px);
+  opacity: 0.35;
+}
