@@ -19,6 +19,7 @@ import {
 } from "../core/football/position.js";
 import { FORMATIONS, getFormationProfile } from "../core/football/formation.js";
 import { openPlayerModal } from "../modal.js";
+import { startPenaltyGame } from "../content/minigames/penalty/penaltyGame.js";
 import {
   isPlayerAvailable,
   isPlayerSuspended,
