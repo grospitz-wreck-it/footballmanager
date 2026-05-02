@@ -1,63 +1,156 @@
 /* =========================================================
-   keeperSpline.js – FULL DROP-IN REPLACEMENT
-   Keeper bleibt IM Torbereich
-   keine unrealistischen Flüge aus dem Tor
+   keeperSpline.js – PHASE 2 PRODUCTION UPGRADE
+   Neue Splines:
+   - preShot
+   - lowDive
+   - highDive
+   - recovery
    ========================================================= */
 
-const BASE_CURVES = {
+/* =========================
+   PRE-SHOT SHUFFLE
+   ========================= */
+
+const PRE_SHOT_CURVES = {
   left: [
-    { x: 0.50, y: 0.355, rotation: 0, stretch: 1.00 },
-
-    { x: 0.48, y: 0.352, rotation: -3, stretch: 1.02 },
-
-    { x: 0.44, y: 0.348, rotation: -7, stretch: 1.06 },
-
-    { x: 0.38, y: 0.344, rotation: -12, stretch: 1.12 },
-
-    { x: 0.31, y: 0.340, rotation: -18, stretch: 1.18 },
-
-    { x: 0.24, y: 0.336, rotation: -22, stretch: 1.22 }
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 },
+    { x: 0.495, y: 0.462, rotation: -1, stretch: 1.01 },
+    { x: 0.49, y: 0.46, rotation: -2, stretch: 1.02 }
   ],
 
   right: [
-    { x: 0.50, y: 0.355, rotation: 0, stretch: 1.00 },
-
-    { x: 0.52, y: 0.352, rotation: 3, stretch: 1.02 },
-
-    { x: 0.56, y: 0.348, rotation: 7, stretch: 1.06 },
-
-    { x: 0.62, y: 0.344, rotation: 12, stretch: 1.12 },
-
-    { x: 0.69, y: 0.340, rotation: 18, stretch: 1.18 },
-
-    { x: 0.76, y: 0.336, rotation: 22, stretch: 1.22 }
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 },
+    { x: 0.505, y: 0.462, rotation: 1, stretch: 1.01 },
+    { x: 0.51, y: 0.46, rotation: 2, stretch: 1.02 }
   ],
 
   center: [
-    { x: 0.50, y: 0.355, rotation: 0, stretch: 1.00 },
-
-    { x: 0.50, y: 0.350, rotation: 0, stretch: 1.03 },
-
-    { x: 0.50, y: 0.345, rotation: 0, stretch: 1.08 },
-
-    { x: 0.50, y: 0.338, rotation: 0, stretch: 1.14 }
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 },
+    { x: 0.50, y: 0.458, rotation: 0, stretch: 1.02 },
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 }
   ]
 };
 
 /* =========================
-   CURVE ACCESS
+   LOW DIVES
    ========================= */
 
-export function getKeeperCurve(
-  direction = 'center'
+const LOW_DIVE_CURVES = {
+  left: [
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 },
+    { x: 0.47, y: 0.462, rotation: -5, stretch: 1.04 },
+    { x: 0.41, y: 0.468, rotation: -12, stretch: 1.12 },
+    { x: 0.34, y: 0.475, rotation: -20, stretch: 1.18 }
+  ],
+
+  right: [
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 },
+    { x: 0.53, y: 0.462, rotation: 5, stretch: 1.04 },
+    { x: 0.59, y: 0.468, rotation: 12, stretch: 1.12 },
+    { x: 0.66, y: 0.475, rotation: 20, stretch: 1.18 }
+  ]
+};
+
+/* =========================
+   HIGH DIVES
+   ========================= */
+
+const HIGH_DIVE_CURVES = {
+  left: [
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 },
+    { x: 0.48, y: 0.44, rotation: -4, stretch: 1.05 },
+    { x: 0.42, y: 0.41, rotation: -10, stretch: 1.14 },
+    { x: 0.34, y: 0.37, rotation: -18, stretch: 1.24 }
+  ],
+
+  right: [
+    { x: 0.50, y: 0.46, rotation: 0, stretch: 1.00 },
+    { x: 0.52, y: 0.44, rotation: 4, stretch: 1.05 },
+    { x: 0.58, y: 0.41, rotation: 10, stretch: 1.14 },
+    { x: 0.66, y: 0.37, rotation: 18, stretch: 1.24 }
+  ]
+};
+
+/* =========================
+   RECOVERY
+   ========================= */
+
+export function getRecoveryPose(
+  pose,
+  recoveryT
 ) {
-  return BASE_CURVES[direction]
-    ? [...BASE_CURVES[direction]]
-    : [...BASE_CURVES.center];
+  const t =
+    easeOutQuad(
+      clamp01(recoveryT)
+    );
+
+  return {
+    x: lerp(
+      pose.x,
+      0.5,
+      t
+    ),
+
+    y: lerp(
+      pose.y,
+      0.46,
+      t
+    ),
+
+    rotation: lerp(
+      pose.rotation || 0,
+      0,
+      t
+    ),
+
+    stretch: lerp(
+      pose.stretch || 1,
+      1,
+      t
+    ),
+
+    progress: 1
+  };
 }
 
 /* =========================
-   CURVE SAMPLING
+   CURVE PICKER
+   ========================= */
+
+export function getKeeperCurve(
+  direction = 'center',
+  shotHeight = 'mid',
+  phase = 'dive'
+) {
+  if (phase === 'pre') {
+    return PRE_SHOT_CURVES[
+      direction
+    ] ||
+      PRE_SHOT_CURVES.center;
+  }
+
+  if (phase === 'dive') {
+    if (shotHeight === 'low') {
+      return LOW_DIVE_CURVES[
+        direction
+      ];
+    }
+
+    if (shotHeight === 'high') {
+      return HIGH_DIVE_CURVES[
+        direction
+      ];
+    }
+  }
+
+  return HIGH_DIVE_CURVES[
+    direction
+  ] ||
+    PRE_SHOT_CURVES.center;
+}
+
+/* =========================
+   SAMPLE CURVE
    ========================= */
 
 export function sampleCurve(
@@ -132,47 +225,25 @@ export function sampleCurve(
    HELPERS
    ========================= */
 
-function lerp(
-  a,
-  b,
-  t
-) {
-  return (
-    a +
-    (b - a) * t
-  );
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
 
-function clamp01(
-  value
-) {
+function clamp01(value) {
   return Math.max(
     0,
-    Math.min(
-      1,
-      value
-    )
+    Math.min(1, value)
   );
 }
 
-function smoothStep(
-  t
-) {
-  return (
-    t *
-    t *
-    (3 - 2 * t)
-  );
+function smoothStep(t) {
+  return t * t * (3 - 2 * t);
 }
 
-function easeOutCubic(
-  t
-) {
-  return (
-    1 -
-    Math.pow(
-      1 - t,
-      3
-    )
-  );
+function easeOutCubic(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function easeOutQuad(t) {
+  return 1 - (1 - t) * (1 - t);
 }
