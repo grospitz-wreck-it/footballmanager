@@ -203,39 +203,39 @@ export function getBallPosition(
    Ball muss wirklich Torraum erreichen
    ========================= */
 
+/* =========================================================
+   penaltyPhysics.js
+   NUR resolveShot() ERSETZEN
+   ========================================================= */
+
 export function resolveShot(
   shot,
   keeperPose,
   keeperDecision
 ) {
   const dx =
-    shot.target.x -
-    keeperPose.x;
+    shot.target.x - keeperPose.x;
 
   const dy =
-    shot.target.y -
-    keeperPose.y;
+    shot.target.y - keeperPose.y;
 
-  const distance =
-    Math.hypot(
-      dx,
-      dy
-    );
+  const distance = Math.hypot(
+    dx,
+    dy
+  );
 
+  /* Keeper timing */
   const timingBonus =
-    keeperPose.progress >=
-    0.55
+    keeperPose.progress >= 0.55
       ? 1
-      : keeperPose.progress >=
-        0.35
+      : keeperPose.progress >= 0.35
       ? 0.82
       : 0.58;
 
+  /* Top corners harder */
   const difficultyMultiplier =
-    shot.zone ===
-      PENALTY_ZONES.TOP_LEFT ||
-    shot.zone ===
-      PENALTY_ZONES.TOP_RIGHT
+    shot.zone === PENALTY_ZONES.TOP_LEFT ||
+    shot.zone === PENALTY_ZONES.TOP_RIGHT
       ? 0.72
       : 1;
 
@@ -245,47 +245,52 @@ export function resolveShot(
     difficultyMultiplier;
 
   const rawSaved =
-    distance <=
-    effectiveSaveRadius;
+    distance <= effectiveSaveRadius;
 
-  /* WICHTIG:
-     Goal zählt nur,
-     wenn Ball tatsächlich
-     Torbereich erreicht
-  */
+  /* =====================================================
+     KRITISCHER FIX:
+     Goal zählt NUR im echten Torraum
+     stadium.webp Goal liegt etwa:
+     y <= 0.34
+     ===================================================== */
+
   const crossedGoalLine =
-    shot.target.y <=
-    0.68;
+    shot.target.y <= 0.34;
+
+  /* Optional:
+     Pfostentreffer / drüber = kein Tor
+  */
+  const insideGoalWidth =
+    shot.target.x >= 0.17 &&
+    shot.target.x <= 0.83;
+
+  const validGoal =
+    crossedGoalLine &&
+    insideGoalWidth;
 
   const saved =
     rawSaved &&
-    crossedGoalLine;
+    validGoal;
 
   const goal =
     !rawSaved &&
-    crossedGoalLine;
+    validGoal;
 
-  let saveQuality =
-    'miss';
+  let saveQuality = 'miss';
 
   if (saved) {
     if (
       distance <
-      effectiveSaveRadius *
-        0.45
+      effectiveSaveRadius * 0.45
     ) {
-      saveQuality =
-        'perfect';
+      saveQuality = 'perfect';
     } else if (
       distance <
-      effectiveSaveRadius *
-        0.8
+      effectiveSaveRadius * 0.8
     ) {
-      saveQuality =
-        'strong';
+      saveQuality = 'strong';
     } else {
-      saveQuality =
-        'weak';
+      saveQuality = 'weak';
     }
   }
 
@@ -295,7 +300,9 @@ export function resolveShot(
     distance,
     saveQuality,
     effectiveSaveRadius,
-    crossedGoalLine
+    crossedGoalLine,
+    insideGoalWidth,
+    validGoal
   };
 }
 
