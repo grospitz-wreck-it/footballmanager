@@ -1,27 +1,38 @@
 import { PENALTY_ASSETS } from './penaltySprites.js';
 
 export async function loadPenaltyAssets() {
-  const loaded = {};
+  const loadedAssets = {};
 
-  async function loadCategory(category, assets) {
-    loaded[category] = {};
+  for (const [category, assets] of Object.entries(
+    PENALTY_ASSETS
+  )) {
+    loadedAssets[category] = {};
 
-    for (const [key, src] of Object.entries(assets)) {
+    for (const [key, path] of Object.entries(
+      assets
+    )) {
       const img = new Image();
-      img.src = src;
 
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
+      img.src = path;
 
-      loaded[category][key] = img;
+      await new Promise(
+        (resolve, reject) => {
+          img.onload = () =>
+            resolve();
+
+          img.onerror = () =>
+            reject(
+              new Error(
+                `Failed loading asset: ${path}`
+              )
+            );
+        }
+      );
+
+      loadedAssets[category][key] =
+        img;
     }
   }
 
-  for (const [category, assets] of Object.entries(PENALTY_ASSETS)) {
-    await loadCategory(category, assets);
-  }
-
-  return loaded;
+  return loadedAssets;
 }
