@@ -99,7 +99,7 @@ function processMatchEvent(event){
   // =========================
   if(event.type === EVENT_TYPES.FOUL){
 
-    const result = resolveFoul();
+    const result = resolveFoul(event);
 
     if (result === EVENT_TYPES.PENALTY) {
       if (game.match?.live) {
