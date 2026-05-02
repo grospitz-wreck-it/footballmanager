@@ -1,113 +1,219 @@
-/* penalty.css */
+import { KeeperAnimator } from './keeperAnimator.js';
+import { loadPenaltyAssets } from './assetsLoader.js';
 
-.penalty-game {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  position: relative;
-  overflow: hidden;
-  font-family: 'Courier New', monospace;
-  image-rendering: pixelated;
-  background: #000;
-}
+export class PenaltyRenderer {
+  constructor(root) {
+    this.root = root;
 
-/* HUD bleibt */
-.penalty-hud {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 22px;
-  z-index: 20;
-  position: relative;
+    this.pitch = root.querySelector('[data-penalty-pitch]');
+    this.ball = root.querySelector('[data-penalty-ball]');
+    this.keeper = root.querySelector('[data-penalty-keeper]');
 
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(5,10,40,0.96),
-      rgba(15,20,60,0.88)
+    this.assets = null;
+    this.keeperAnimator = null;
+
+    // Sofort korrekte Startposition setzen
+    this.applyImmediateBasePositions();
+
+    this.initializeAssets();
+  }
+
+  applyImmediateBasePositions() {
+    if (this.keeper) {
+      this.keeper.style.left = '50%';
+      this.keeper.style.top = '36%';
+      this.keeper.style.transform =
+        'translate(-50%, -50%)';
+    }
+
+    if (this.ball) {
+      this.ball.style.left = '50%';
+      this.ball.style.top = '92%';
+      this.ball.style.transform =
+        'translate(-50%, -50%) scale(1)';
+    }
+  }
+
+  async initializeAssets() {
+    this.assets = await loadPenaltyAssets();
+
+    this.keeperAnimator = new KeeperAnimator(
+      this.assets.keeper
     );
 
-  border-bottom: 3px solid #00f7ff;
+    this.applyStaticAssets();
+    this.resetActors();
+  }
 
-  color: #ffe66d;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
+  applyStaticAssets() {
+    // Stadium Background
+    if (
+      this.pitch &&
+      this.assets?.stadium?.background
+    ) {
+      this.pitch.style.backgroundImage =
+        `url('${this.assets.stadium.background.src}')`;
 
-/* Stadium.webp übernimmt alles */
-.penalty-pitch {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+      this.pitch.style.backgroundSize =
+        'cover';
 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: #111;
-}
+      this.pitch.style.backgroundPosition =
+        'center';
 
-/* Alle alten generierten Feldlayer deaktivieren */
-.penalty-pitch::before,
-.penalty-pitch::after,
-.penalty-goal,
-.penalty-spot,
-.stadium-crowd {
-  display: none !important;
-}
+      this.pitch.style.backgroundRepeat =
+        'no-repeat';
 
-/* Keeper */
-.penalty-keeper {
-  width: 150px;
-  height: 150px;
+      this.pitch.style.backgroundColor =
+        '#111';
+    }
 
-  position: absolute;
-  z-index: 15;
+    // Keeper Idle Sprite
+    if (
+      this.keeper &&
+      this.assets?.keeper?.idle
+    ) {
+      this.keeper.style.backgroundImage =
+        `url('${this.assets.keeper.idle.src}')`;
 
-  transform: translate(-50%, -50%);
+      this.keeper.style.backgroundSize =
+        'contain';
 
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+      this.keeper.style.backgroundRepeat =
+        'no-repeat';
 
-  background-color: transparent;
-  border: none;
+      this.keeper.style.backgroundPosition =
+        'center';
 
-  image-rendering: pixelated;
+      this.keeper.style.backgroundColor =
+        'transparent';
 
-  transition:
-    transform 0.1s ease,
-    left 0.08s linear,
-    top 0.08s linear;
+      this.keeper.style.border = 'none';
+    }
 
-  filter:
-    drop-shadow(0 5px 4px rgba(0,0,0,0.45));
-}
+    // Ball Sprite
+    if (
+      this.ball &&
+      this.assets?.ball?.default
+    ) {
+      this.ball.style.backgroundImage =
+        `url('${this.assets.ball.default.src}')`;
 
-.penalty-keeper::before,
-.penalty-keeper::after {
-  display: none;
-  content: none;
-}
+      this.ball.style.backgroundSize =
+        'contain';
 
-/* Ball */
-.penalty-ball {
-  width: 58px;
-  height: 58px;
+      this.ball.style.backgroundRepeat =
+        'no-repeat';
 
-  position: absolute;
-  z-index: 18;
+      this.ball.style.backgroundPosition =
+        'center';
 
-  transform: translate(-50%, -50%);
+      this.ball.style.backgroundColor =
+        'transparent';
 
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+      this.ball.style.border = 'none';
+    }
+  }
 
-  background-color: transparent;
-  border: none;
+  renderBall(position) {
+    if (!this.ball) return;
 
-  image-rendering: pixelated;
+    this.ball.style.left =
+      `${position.x * 100}%`;
 
-  filter:
-    drop-shadow(0 4px 4px rgba(0,0,0,0.35));
+    this.ball.style.top =
+      `${position.y * 100}%`;
+
+    // Perspektive:
+    // Unten groß / oben klein
+    const scale = Math.max(
+      0.35,
+      0.3 + position.y * 0.85
+    );
+
+    this.ball.style.transform = `
+      translate(-50%, -50%)
+      scale(${scale})
+    `;
+  }
+
+  renderKeeper(
+    pose,
+    direction,
+    saved = false,
+    missed = false
+  ) {
+    if (
+      !this.keeper ||
+      !this.keeperAnimator
+    )
+      return;
+
+    this.keeper.style.left =
+      `${pose.x * 100}%`;
+
+    this.keeper.style.top =
+      `${pose.y * 100}%`;
+
+    // Nur Left-Sprites vorhanden,
+    // Right wird gespiegelt
+    const spriteDirection =
+      direction === 'right'
+        ? 'left'
+        : direction;
+
+    const frame =
+      this.keeperAnimator.getFrame(
+        spriteDirection,
+        pose.progress || 0,
+        saved,
+        missed
+      );
+
+    if (frame?.src) {
+      this.keeper.style.backgroundImage =
+        `url('${frame.src}')`;
+    }
+
+    // Perspektivisch korrekt:
+    // Keeper links = Sprite flip
+    const flipX =
+      direction === 'left' ? -1 : 1;
+
+    let rotation = 0;
+
+    if (direction === 'left')
+      rotation = -10;
+
+    if (direction === 'right')
+      rotation = 10;
+
+    this.keeper.style.transform = `
+      translate(-50%, -50%)
+      scaleX(${flipX})
+      rotate(${rotation}deg)
+    `;
+
+    this.keeper.dataset.direction =
+      direction;
+  }
+
+  resetActors() {
+    this.renderBall({
+      x: 0.5,
+      y: 0.92
+    });
+
+    this.renderKeeper(
+      {
+        x: 0.5,
+        y: 0.36,
+        progress: 0
+      },
+      'center'
+    );
+  }
+
+  reset() {
+    this.resetActors();
+  }
 }
