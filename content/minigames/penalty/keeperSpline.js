@@ -113,6 +113,37 @@ export function getRecoveryPose(
   };
 }
 
+const FALLBACK_CURVE = [
+  {
+    x: 0.5,
+    y: 0.46,
+    rotation: 0,
+    stretch: 1
+  },
+
+  {
+    x: 0.5,
+    y: 0.455,
+    rotation: 0,
+    stretch: 1.02
+  },
+
+  {
+    x: 0.5,
+    y: 0.45,
+    rotation: 0,
+    stretch: 1.04
+  },
+
+  {
+    x: 0.5,
+    y: 0.445,
+    rotation: 0,
+    stretch: 1.02
+  }
+];
+
+
 /* =========================
    CURVE PICKER
    ========================= */
