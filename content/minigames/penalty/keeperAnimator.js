@@ -5,28 +5,43 @@ export class KeeperAnimator {
     this.sheet =
       assets.spriteSheet;
 
+    /* =========================
+       SPRITE SHEET LAYOUT
+       4 x 3
+       ========================= */
+
     this.cols = 4;
     this.rows = 3;
 
+    /* =========================
+       FRAME MAP
+       ========================= */
+
     this.frames = {
+      /* Row 1 */
       idle: [0, 0],
       bounce: [1, 0],
       idleWide: [2, 0],
       diveEarly: [3, 0],
 
+      /* Row 2 */
       diveMid: [0, 1],
       diveFull: [1, 1],
       saveStrong: [2, 1],
       savePerfect: [3, 1],
 
+      /* Row 3 */
       jumpCenter: [0, 2],
       conceded: [1, 2],
-      celebrate: [2, 2]
+      celebrate: [2, 2],
+
+      /* Safety fallback */
+      fallback: [0, 0]
     };
   }
 
   /* =========================
-     FRAME SELECTOR
+     MAIN FRAME SELECTOR
      ========================= */
 
   getFrame(
@@ -34,114 +49,155 @@ export class KeeperAnimator {
     progress,
     saved = false,
     missed = false,
-    saveQuality = 'normal'
+    saveQuality = "normal"
   ) {
     const t =
       clamp01(progress);
 
-    /* Missed goal */
+    /* =====================
+       GOAL CONCEDED
+       ===================== */
     if (missed) {
       return this.resolveFrame(
-        'conceded'
+        "conceded"
       );
     }
 
-    /* Successful save */
+    /* =====================
+       SAVES
+       ===================== */
     if (saved) {
+      /* Perfect catch */
       if (
         saveQuality ===
-        'perfect'
+        "perfect"
       ) {
         return this.resolveFrame(
-          'savePerfect'
+          "savePerfect"
         );
       }
 
+      /* Strong save */
       if (
         saveQuality ===
-        'strong'
+        "strong"
       ) {
+        if (t < 0.35) {
+          return this.resolveFrame(
+            "diveMid"
+          );
+        }
+
         return this.resolveFrame(
-          'saveStrong'
+          "saveStrong"
         );
       }
 
-      if (t < 0.35) {
-        return this.resolveFrame(
-          'diveEarly'
-        );
-      }
-
-      if (t < 0.65) {
-        return this.resolveFrame(
-          'diveMid'
-        );
-      }
-
-      return this.resolveFrame(
-        'saveStrong'
-      );
-    }
-
-    /* Left / Right dive */
-    if (
-      direction === 'left' ||
-      direction === 'right'
-    ) {
+      /* Weak save */
       if (t < 0.25) {
         return this.resolveFrame(
-          'diveEarly'
+          "diveEarly"
         );
       }
 
       if (t < 0.55) {
         return this.resolveFrame(
-          'diveMid'
+          "diveMid"
         );
       }
 
       return this.resolveFrame(
-        'diveFull'
+        "saveStrong"
       );
     }
 
-    /* Center jump */
+    /* =====================
+       LEFT / RIGHT DIVES
+       ===================== */
     if (
       direction ===
-        'center' &&
-      t > 0.42
+        "left" ||
+      direction ===
+        "right"
     ) {
+      if (t < 0.18) {
+        return this.resolveFrame(
+          "idleWide"
+        );
+      }
+
+      if (t < 0.35) {
+        return this.resolveFrame(
+          "diveEarly"
+        );
+      }
+
+      if (t < 0.62) {
+        return this.resolveFrame(
+          "diveMid"
+        );
+      }
+
       return this.resolveFrame(
-        'jumpCenter'
+        "diveFull"
       );
     }
 
-    /* Idle loop */
+    /* =====================
+       CENTER SHOTS
+       ===================== */
+    if (
+      direction ===
+      "center"
+    ) {
+      if (t < 0.25) {
+        return this.resolveFrame(
+          "idle"
+        );
+      }
+
+      if (t < 0.48) {
+        return this.resolveFrame(
+          "bounce"
+        );
+      }
+
+      return this.resolveFrame(
+        "jumpCenter"
+      );
+    }
+
+    /* =====================
+       IDLE LOOP
+       ===================== */
     if (t < 0.25) {
       return this.resolveFrame(
-        'idle'
+        "idle"
       );
     }
 
     if (t < 0.55) {
       return this.resolveFrame(
-        'bounce'
+        "bounce"
       );
     }
 
     return this.resolveFrame(
-      'idleWide'
+      "idleWide"
     );
   }
 
   /* =========================
-     FRAME MAPPING
+     FRAME RESOLUTION
      ========================= */
 
   resolveFrame(name) {
     const frame =
-      this.frames[name] ||
-      this.frames.idle;
+      this.frames[
+        name
+      ] ||
+      this.frames
+        .fallback;
 
     return {
       src:
@@ -160,9 +216,14 @@ export class KeeperAnimator {
    HELPERS
    ========================= */
 
-function clamp01(value) {
+function clamp01(
+  value
+) {
   return Math.max(
     0,
-    Math.min(1, value)
+    Math.min(
+      1,
+      value
+    )
   );
 }
