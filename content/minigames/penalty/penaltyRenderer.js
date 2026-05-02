@@ -5,161 +5,160 @@ export class PenaltyRenderer {
   constructor(root) {
     this.root = root;
 
-    this.pitch = root.querySelector('[data-penalty-pitch]');
-    this.ball = root.querySelector('[data-penalty-ball]');
-    this.keeper = root.querySelector('[data-penalty-keeper]');
+    this.pitch = root.querySelector(
+      '[data-penalty-pitch]'
+    );
+
+    this.ball = root.querySelector(
+      '[data-penalty-ball]'
+    );
+
+    this.keeper = root.querySelector(
+      '[data-penalty-keeper]'
+    );
 
     this.assets = null;
     this.keeperAnimator = null;
 
-    // Sofort korrekte Startposition setzen
     this.applyImmediateBasePositions();
 
     this.initializeAssets();
   }
 
+  /* =========================
+     BASE POSITIONS
+     ========================= */
+
   applyImmediateBasePositions() {
     if (this.keeper) {
-      this.keeper.style.left = '50%';
-      this.keeper.style.top = '36%';
+      this.keeper.style.left =
+        '50%';
+
+      this.keeper.style.top =
+        '46%';
+
       this.keeper.style.transform =
         'translate(-50%, -50%)';
     }
 
     if (this.ball) {
-      this.ball.style.left = '50%';
-      this.ball.style.top = '78%';
+      this.ball.style.left =
+        '50%';
+
+      this.ball.style.top =
+        '78%';
+
       this.ball.style.transform =
         'translate(-50%, -50%) scale(1)';
     }
   }
 
-  async initializeAssets() {
-    this.assets = await loadPenaltyAssets();
+  /* =========================
+     ASSET INIT
+     ========================= */
 
-    this.keeperAnimator = new KeeperAnimator(
-      this.assets.keeper
-    );
+  async initializeAssets() {
+    this.assets =
+      await loadPenaltyAssets();
+
+    this.keeperAnimator =
+      new KeeperAnimator(
+        this.assets.keeper
+      );
 
     this.applyStaticAssets();
     this.resetActors();
   }
 
+  /* =========================
+     STATIC VISUALS
+     ========================= */
+
   applyStaticAssets() {
-  /* =========================
-     STADIUM BACKGROUND
-     15% Zoom-In
-     ========================= */
-  if (
-    this.pitch &&
-    this.assets?.stadium?.background
-  ) {
-    this.pitch.style.backgroundImage =
-      `url('${this.assets.stadium.background.src}')`;
+    /* Stadium */
+    if (
+      this.pitch &&
+      this.assets?.stadium
+        ?.background
+    ) {
+      this.pitch.style.backgroundImage =
+        `url('${this.assets.stadium.background.src}')`;
 
-    this.pitch.style.backgroundSize =
-      '115% auto';
+      this.pitch.style.backgroundSize =
+        '115% auto';
 
-    this.pitch.style.backgroundPosition =
-      'center center';
+      this.pitch.style.backgroundPosition =
+        'center center';
 
-    this.pitch.style.backgroundRepeat =
-      'no-repeat';
+      this.pitch.style.backgroundRepeat =
+        'no-repeat';
 
-    this.pitch.style.backgroundColor =
-      '#111';
+      this.pitch.style.backgroundColor =
+        '#111';
+    }
+
+    /* Keeper sprite sheet */
+    if (
+      this.keeper &&
+      this.assets?.keeper
+        ?.spriteSheet
+    ) {
+      this.keeper.style.backgroundImage =
+        `url('${this.assets.keeper.spriteSheet.src}')`;
+
+      this.keeper.style.backgroundSize =
+        '400% 300%';
+
+      this.keeper.style.backgroundPosition =
+        '0% 0%';
+
+      this.keeper.style.backgroundRepeat =
+        'no-repeat';
+
+      this.keeper.style.backgroundColor =
+        'transparent';
+
+      this.keeper.style.border =
+        'none';
+
+      this.keeper.style.top =
+        '46%';
+    }
+
+    /* Ball */
+    if (
+      this.ball &&
+      this.assets?.ball
+        ?.default
+    ) {
+      this.ball.style.backgroundImage =
+        `url('${this.assets.ball.default.src}')`;
+
+      this.ball.style.backgroundSize =
+        'contain';
+
+      this.ball.style.backgroundRepeat =
+        'no-repeat';
+
+      this.ball.style.backgroundPosition =
+        'center';
+
+      this.ball.style.backgroundColor =
+        'transparent';
+
+      this.ball.style.border =
+        'none';
+    }
   }
 
- /* =========================================================
-   NUR DIESEN BLOCK ERSETZEN:
-   =========================
-   KEEPER IDLE SPRITE
-   ========================================================= */
-
-if (
-  this.keeper &&
-  this.assets?.keeper?.spriteSheet
-) {
-  this.keeper.style.backgroundImage =
-    `url('${this.assets.keeper.spriteSheet.src}')`;
-
-  this.keeper.style.backgroundSize =
-    '400% 300%';
-
-  this.keeper.style.backgroundPosition =
-    '0% 0%';
-
-  this.keeper.style.backgroundRepeat =
-    'no-repeat';
-
-  this.keeper.style.backgroundColor =
-    'transparent';
-
-  this.keeper.style.border =
-    'none';
-}
-
-
-/* =========================================================
-   OPTIONAL FEINJUSTIERUNG:
-   Keeper minimal tiefer
-   ========================================================= */
-
-this.keeper.style.top = '46%';
-
-
-/* =========================================================
-   ALSO:
-   applyImmediateBasePositions():
-   ========================================================= */
-
-this.keeper.style.top = '46%';
-
-
-/* =========================================================
-   resetActors():
-   ========================================================= */
-
-this.renderKeeper(
-  {
-    x: 0.5,
-    y: 0.46,
-    progress: 0,
-    rotation: 0,
-    stretch: 1
-  },
-  'center'
-);
-
   /* =========================
-     BALL SPRITE
+     BALL RENDER
      ========================= */
-  if (
-    this.ball &&
-    this.assets?.ball?.default
-  ) {
-    this.ball.style.backgroundImage =
-      `url('${this.assets.ball.default.src}')`;
-
-    this.ball.style.backgroundSize =
-      'contain';
-
-    this.ball.style.backgroundRepeat =
-      'no-repeat';
-
-    this.ball.style.backgroundPosition =
-      'center';
-
-    this.ball.style.backgroundColor =
-      'transparent';
-
-    this.ball.style.border =
-      'none';
-  }
-}
 
   renderBall(position) {
-    if (!this.ball) return;
+    if (!this.ball) {
+      return;
+    }
 
     this.ball.style.left =
       `${position.x * 100}%`;
@@ -167,12 +166,12 @@ this.renderKeeper(
     this.ball.style.top =
       `${position.y * 100}%`;
 
-    // Perspektive:
-    // Unten groß / oben klein
-    const scale = Math.max(
-      0.35,
-      0.3 + position.y * 0.85
-    );
+    const scale =
+      Math.max(
+        0.35,
+        0.3 +
+          position.y * 0.85
+      );
 
     this.ball.style.transform = `
       translate(-50%, -50%)
@@ -180,7 +179,11 @@ this.renderKeeper(
     `;
   }
 
-  renderKeeper(
+  /* =========================
+     KEEPER RENDER
+     ========================= */
+
+ renderKeeper(
   pose,
   direction,
   saved = false,
@@ -233,6 +236,15 @@ this.renderKeeper(
   this.keeper.style.backgroundRepeat =
     'no-repeat';
 
+  this.keeper.style.imageRendering =
+    'pixelated';
+
+  this.keeper.style.willChange =
+    'transform, background-position';
+
+  this.keeper.style.filter =
+    'drop-shadow(0 6px 5px rgba(0,0,0,0.45))';
+
   /* =========================
      DIRECTION FLIP
      ========================= */
@@ -256,10 +268,14 @@ this.renderKeeper(
   const stretch =
     pose.stretch || 1;
 
+  /* =========================
+     FIXED TRANSFORM ORDER
+     ========================= */
+
   this.keeper.style.transform = `
     translate(-50%, -50%)
-    scaleX(${flipX})
     rotate(${rotation}deg)
+    scaleX(${flipX})
     scale(${stretch})
   `;
 
