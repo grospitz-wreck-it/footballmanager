@@ -1,12 +1,15 @@
 /* =========================
-   PENALTY MINIGAME – 80s ARCADE VISUAL OVERHAUL
+   PENALTY MINIGAME – FINAL STADIUM INTEGRATION
+   stadium.webp übernimmt kompletten Platz + Torraum
    ========================= */
 
 .penalty-game {
   width: 100%;
   aspect-ratio: 16 / 9;
+
   display: grid;
   grid-template-rows: auto 1fr;
+
   position: relative;
   overflow: hidden;
 
@@ -17,19 +20,7 @@
 
   image-rendering: pixelated;
 
-  background:
-    linear-gradient(
-      to bottom,
-      #06101d 0%,
-      #0f2448 22%,
-      #1b5e20 23%,
-      #2d8a3d 100%
-    );
-
-  box-shadow:
-    inset 0 0 80px rgba(0, 255, 255, 0.08),
-    inset 0 0 120px rgba(255, 0, 200, 0.05),
-    0 0 25px rgba(0,255,255,0.12);
+  background: #000;
 }
 
 /* CRT Scanlines */
@@ -49,7 +40,7 @@
       transparent 4px
     );
 
-  opacity: 0.35;
+  opacity: 0.32;
 }
 
 /* Screen Vignette */
@@ -63,8 +54,8 @@
   background:
     radial-gradient(
       circle at center,
-      transparent 55%,
-      rgba(0,0,0,0.38) 100%
+      transparent 58%,
+      rgba(0,0,0,0.42) 100%
     );
 }
 
@@ -78,6 +69,8 @@
   align-items: center;
 
   padding: 14px 22px;
+
+  position: relative;
   z-index: 20;
 
   background:
@@ -87,8 +80,7 @@
       rgba(15,20,60,0.88)
     );
 
-  border-bottom:
-    3px solid #00f7ff;
+  border-bottom: 3px solid #00f7ff;
 
   box-shadow:
     0 0 12px rgba(0,255,255,0.18),
@@ -104,142 +96,28 @@
 }
 
 /* =========================
-   PITCH
+   STADIUM BACKGROUND
    ========================= */
 
 .penalty-pitch {
   position: relative;
   overflow: hidden;
 
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(255,255,255,0.04),
-      rgba(0,0,0,0.08)
-    );
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #111;
 }
 
-/* Field stripes */
-.penalty-pitch::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  background:
-    repeating-linear-gradient(
-      to right,
-      rgba(255,255,255,0.025) 0%,
-      rgba(255,255,255,0.025) 8%,
-      transparent 8%,
-      transparent 16%
-    );
-}
-
-/* Floodlights + crowd glow */
-.penalty-pitch::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-
-  background:
-    radial-gradient(circle at 15% 8%, rgba(255,255,255,0.18), transparent 18%),
-    radial-gradient(circle at 85% 8%, rgba(255,255,255,0.18), transparent 18%),
-    linear-gradient(to bottom, rgba(255,255,255,0.05), transparent 28%);
-}
-
-/* =========================
-   STADIUM CROWD
-   ========================= */
-
-.penalty-pitch .stadium-crowd {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 16%;
-  z-index: 1;
-
-  background:
-    repeating-linear-gradient(
-      to right,
-      #ff00d4 0%,
-      #ff00d4 1%,
-      #00f7ff 1%,
-      #00f7ff 2%,
-      #ffe66d 2%,
-      #ffe66d 3%,
-      #111 3%,
-      #111 4%
-    );
-
-  opacity: 0.7;
-}
-
-/* =========================
-   GOAL
-   ========================= */
-
-.penalty-goal {
-  position: absolute;
-  top: 7%;
-  left: 18%;
-  width: 64%;
-  height: 24%;
-  z-index: 5;
-
-  border: 5px solid #ffffff;
-
-  background:
-    repeating-linear-gradient(
-      to right,
-      rgba(255,255,255,0.10) 0%,
-      rgba(255,255,255,0.10) 4%,
-      transparent 4%,
-      transparent 8%
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,0.10) 0%,
-      rgba(255,255,255,0.10) 8%,
-      transparent 8%,
-      transparent 16%
-    );
-
-  box-shadow:
-    0 0 12px rgba(255,255,255,0.55),
-    0 0 28px rgba(0,255,255,0.22);
-}
-
-/* Goal depth illusion */
-.penalty-goal::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-top: 4px solid rgba(255,255,255,0.25);
-  border-left: 4px solid rgba(255,255,255,0.18);
-  border-right: 4px solid rgba(255,255,255,0.18);
-}
-
-/* =========================
-   PENALTY SPOT
-   ========================= */
-
-.penalty-pitch .penalty-spot {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-
-  background: #ffffff;
-
-  left: 50%;
-  top: 82%;
-
-  transform: translate(-50%, -50%);
-
-  box-shadow:
-    0 0 8px rgba(255,255,255,0.35);
+/* Alte generierte Pitch-/Goal-Elemente deaktiviert */
+.penalty-pitch::before,
+.penalty-pitch::after,
+.penalty-goal,
+.penalty-goal::before,
+.penalty-spot,
+.stadium-crowd {
+  display: none !important;
+  content: none !important;
 }
 
 /* =========================
@@ -247,22 +125,25 @@
    ========================= */
 
 .penalty-ball {
-  width: 56px;
-  height: 56px;
-  z-index: 15;
+  width: 58px;
+  height: 58px;
 
   position: absolute;
+  z-index: 18;
+
   transform: translate(-50%, -50%);
 
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
 
+  background-color: transparent;
+  border: none;
+
   image-rendering: pixelated;
 
   filter:
-    drop-shadow(0 3px 3px rgba(0,0,0,0.35))
-    drop-shadow(0 0 8px rgba(255,255,255,0.18));
+    drop-shadow(0 4px 4px rgba(0,0,0,0.35));
 }
 
 /* =========================
@@ -270,29 +151,30 @@
    ========================= */
 
 .penalty-keeper {
-  width: 200px;
-  height: 200px;
-  z-index: 12;
+  width: 150px;
+  height: 150px;
 
   position: absolute;
+  z-index: 15;
+
   transform: translate(-50%, -50%);
 
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: transparent;
 
+  background-color: transparent;
   border: none;
 
   image-rendering: pixelated;
 
   transition:
-    transform 0.12s ease,
+    transform 0.10s ease,
     left 0.08s linear,
     top 0.08s linear;
 
   filter:
-    drop-shadow(0 5px 4px rgba(0,0,0,0.42));
+    drop-shadow(0 5px 4px rgba(0,0,0,0.45));
 }
 
 .penalty-keeper::before,
@@ -338,12 +220,12 @@
   }
 
   .penalty-keeper {
-    width: 96px;
-    height: 96px;
+    width: 108px;
+    height: 108px;
   }
 
   .penalty-ball {
-    width: 20px;
-    height: 20px;
+    width: 42px;
+    height: 42px;
   }
 }
