@@ -3,63 +3,38 @@
    FULL DROP-IN REPLACEMENT
    ========================================================= */
 
-import {
-  DEFAULT_PENALTY_CONFIG,
-  mergePenaltyConfig
-} from './penaltyConfig.js';
+import { DEFAULT_PENALTY_CONFIG, mergePenaltyConfig } from "./penaltyConfig.js";
 
-import { PenaltyInput } from './penaltyInput.js';
-import { PenaltyRenderer } from './penaltyRenderer.js';
-import { PenaltyUI } from './penaltyUI.js';
-import { KeeperAI } from './keeperAI.js';
+import { PenaltyInput } from "./penaltyInput.js";
+import { PenaltyRenderer } from "./penaltyRenderer.js";
+import { PenaltyUI } from "./penaltyUI.js";
+import { KeeperAI } from "./keeperAI.js";
 
 import {
   calculateShot,
   getBallPosition,
   getBallFollowThrough,
-  resolveShot
+  resolveShot,
 } from "./penaltyPhysics.js";
 
 export class PenaltyGame {
-  constructor(
-    rootElement,
-    config = {}
-  ) {
-    this.root =
-      rootElement;
+  constructor(rootElement, config = {}) {
+    this.root = rootElement;
 
-    this.config =
-      mergePenaltyConfig(
-        DEFAULT_PENALTY_CONFIG,
-        {
-          ...config,
-          rounds: 1
-        }
-      );
+    this.config = mergePenaltyConfig(DEFAULT_PENALTY_CONFIG, {
+      ...config,
+      rounds: 1,
+    });
 
-    this.input =
-      new PenaltyInput(
-        rootElement,
-        this.config
-      );
+    this.input = new PenaltyInput(rootElement, this.config);
 
-    this.renderer =
-      new PenaltyRenderer(
-        rootElement
-      );
+    this.renderer = new PenaltyRenderer(rootElement);
 
-    this.ui =
-      new PenaltyUI(
-        rootElement
-      );
+    this.ui = new PenaltyUI(rootElement);
 
-    this.keeper =
-      new KeeperAI(
-        this.config
-      );
+    this.keeper = new KeeperAI(this.config);
 
-    this.rafId =
-      null;
+    this.rafId = null;
 
     this.resetState();
   }
@@ -73,7 +48,7 @@ export class PenaltyGame {
       active: false,
       resolved: false,
       result: null,
-      currentShot: null
+      currentShot: null,
     };
   }
 
@@ -82,43 +57,65 @@ export class PenaltyGame {
      ========================= */
 
   start() {
+    /* =========================
+     ACTIVATE GAME
+     ========================= */
+
     this.state.active = true;
+
+    this.state.resolved = false;
+
+    this.state.result = null;
+
+    this.state.currentShot = null;
+
+    /* =========================
+     RESET VISUALS
+     ========================= */
 
     this.renderer.resetActors();
 
+    /* =========================
+     RESET UI
+     ========================= */
+
     this.ui.updateScore(
-      { goals: 0, saves: 0 },
+      {
+        goals: 0,
+        saves: 0,
+      },
       1,
-      1
+      1,
     );
 
-    this.ui.setFeedback(
-      'PENALTY AWARDED'
-    );
+    /* =========================
+     INTRO
+     ========================= */
+
+    this.ui.setFeedback("PENALTY AWARDED");
+
+    /* =========================
+     ROUND START HOOK
+     ========================= */
 
     this.config.hooks.onRoundStart?.({
-      round: 1
+      round: 1,
     });
 
+    /* =========================
+     INPUT DELAY
+     ========================= */
+
     setTimeout(() => {
-      if (!this.state.active)
+      if (!this.state.active) {
         return;
+      }
 
-      this.ui.setFeedback(
-        'Tap or swipe to shoot'
-      );
+      this.ui.setFeedback("Tap or swipe to shoot");
 
-      this.input.mount(
-        (
-          inputData
-        ) =>
-          this.handleShot(
-            inputData
-          )
-      );
+      this.input.mount((inputData) => this.handleShot(inputData));
     }, 900);
   }
-
   /* =========================
      RESET
      ========================= */
@@ -138,12 +135,9 @@ export class PenaltyGame {
     this.stopLoop();
     this.input.unmount();
 
-    this.state.active =
-      false;
+    this.state.active = false;
 
-    this.config.hooks.onGameEnd?.(
-      this.state.result
-    );
+    this.config.hooks.onGameEnd?.(this.state.result);
   }
 
   /* =========================
@@ -151,425 +145,234 @@ export class PenaltyGame {
      ========================= */
 
   setDifficulty(level) {
-    this.config.difficulty =
-      level;
+    this.config.difficulty = level;
 
-    this.keeper.setDifficulty(
-      level
-    );
+    this.keeper.setDifficulty(level);
   }
 
   /* =========================
      SHOT INPUT
      ========================= */
 
-  handleShot(
-    inputData
-  ) {
-    if (
-      !this.state.active ||
-      this.state.currentShot ||
-      this.state.resolved
-    ) {
+  handleShot(inputData) {
+    if (!this.state.active || this.state.currentShot || this.state.resolved) {
       return;
     }
 
     this.input.unmount();
 
-    const shot =
-      calculateShot(
-        inputData,
-        this.config
-      );
+    const shot = calculateShot(inputData, this.config);
 
-    const keeperDecision =
-      this.keeper.decide({
-        zone:
-          shot.zone,
-        power:
-          shot.power,
-        target:
-          shot.target
-      });
+    const keeperDecision = this.keeper.decide({
+      zone: shot.zone,
+      power: shot.power,
+      target: shot.target,
+    });
 
-    const startedAt =
-      performance.now();
+    const startedAt = performance.now();
 
-    this.state.currentShot =
-      {
-        shot,
-        keeperDecision,
-        startedAt
-      };
+    this.state.currentShot = {
+      shot,
+      keeperDecision,
+      startedAt,
+    };
 
     this.config.hooks.onShotTaken?.({
       shot,
-      keeperDecision
+      keeperDecision,
     });
 
-    this.ui.setFeedback(
-      'Shot in flight...'
-    );
+    this.ui.setFeedback("Shot in flight...");
 
     this.runShotAnimation();
   }
 
-  /* =========================
-     ANIMATION LOOP
-     ========================= */
+  runShotAnimation() {
+    const tick = () => {
+      if (!this.state.currentShot) {
+        return;
+      }
 
- runShotAnimation() {
-  const tick = () => {
-    if (
-      !this.state.currentShot
-    ) {
-      return;
-    }
+      const { shot, keeperDecision, startedAt } = this.state.currentShot;
 
-    const {
-      shot,
-      keeperDecision,
-      startedAt
-    } =
-      this.state.currentShot;
+      const elapsed = performance.now() - startedAt;
 
-    const elapsed =
-      performance.now() -
-      startedAt;
+      const progress = Math.min(1, elapsed / shot.durationMs);
 
-    const progress =
-      Math.min(
-        1,
-        elapsed /
-          shot.durationMs
-      );
+      const ballPos = getBallPosition(shot, progress);
 
-runFollowThrough(
-  shot,
-  keeperPose,
-  keeperDecision,
-  result
-) {
-  const followStart =
-    performance.now();
-
-  const duration =
-    result.goal
-      ? 550
-      : result.saved
-      ? 380
-      : 500;
-
-  const tick = () => {
-    const elapsed =
-      performance.now() -
-      followStart;
-
-    const progress =
-      Math.min(
-        1,
-        elapsed /
-          duration
-      );
-
-    const ballPos =
-      getBallFollowThrough(
-        shot,
-        result,
-        progress
-      );
-
-    this.renderer.renderBall(
-      ballPos
-    );
-
-    this.renderer.renderKeeper(
-      keeperPose,
-      keeperDecision.direction,
-      result.saved,
-      result.missed,
-      result.saveQuality
-    );
-
-    if (
-      progress >= 1
-    ) {
-      this.resolveShotEvent(
-        shot,
-        keeperPose,
-        keeperDecision
-      );
-
-      return;
-    }
-
-    this.rafId =
-      requestAnimationFrame(
-        tick
-      );
-  };
-
-  this.stopLoop();
-
-  this.rafId =
-    requestAnimationFrame(
-      tick
-    );
-}
-     
-    /* =========================
-       MAIN BALL FLIGHT
-       ========================= */
-
-    const ballPos =
-      getBallPosition(
-        shot,
-        progress
-      );
-
-    /* =========================
-       KEEPER POSE
-       ========================= */
-
-    const keeperPose =
-      this.keeper.computePose(
+      const keeperPose = this.keeper.computePose(
         keeperDecision,
         elapsed,
         shot.durationMs,
-        shot
-      );
-
-    /* =========================
-       RENDER
-       ========================= */
-
-    this.renderer.renderBall(
-      ballPos
-    );
-
-    this.renderer.renderKeeper(
-      keeperPose,
-      keeperDecision.direction
-    );
-
-    /* =========================
-       SHOT IMPACT
-       ========================= */
-
-    if (
-      progress >= 1
-    ) {
-      const result =
-        resolveShot(
-          shot,
-          keeperPose,
-          keeperDecision
-        );
-
-      this.runFollowThrough(
         shot,
-        keeperPose,
-        keeperDecision,
-        result
       );
 
-      return;
-    }
+      this.renderer.renderBall(ballPos);
 
-    /* =========================
-       CONTINUE LOOP
-       ========================= */
+      this.renderer.renderKeeper(keeperPose, keeperDecision.direction);
 
-    this.rafId =
-      requestAnimationFrame(
-        tick
-      );
-  };
+      if (progress >= 1) {
+        const result = resolveShot(shot, keeperPose, keeperDecision);
 
-  this.stopLoop();
+        this.runFollowThrough(shot, keeperPose, keeperDecision, result);
 
-  this.rafId =
-    requestAnimationFrame(
-      tick
-    );
-}
+        return;
+      }
 
-  /* =========================
-     FINAL RESULT
-     ========================= */
+      this.rafId = requestAnimationFrame(tick);
+    };
 
- /* =========================================================
-   penaltyGame.js – GOAL IMPACT VISUAL UPGRADE
-   NUR resolveShotEvent() ERSETZEN
+    this.stopLoop();
+
+    this.rafId = requestAnimationFrame(tick);
+  }
+
+  /* =========================================================
+   DIREKT DARUNTER EINFÜGEN:
    ========================================================= */
 
-resolveShotEvent(
-  shot,
-  keeperPose,
-  keeperDecision
-) {
-  const result =
-    resolveShot(
-      shot,
-      keeperPose,
-      keeperDecision
-    );
+  runFollowThrough(shot, keeperPose, keeperDecision, result) {
+    const followStart = performance.now();
 
-  this.state.currentShot =
-    null;
+    const duration = result.goal ? 550 : result.saved ? 380 : 500;
 
-  this.state.resolved =
-    true;
+    const tick = () => {
+      const elapsed = performance.now() - followStart;
 
-  this.state.result = {
-    ...result,
+      const progress = Math.min(1, elapsed / duration);
 
-    shot,
-    keeperDecision,
+      const ballPos = getBallFollowThrough(shot, result, progress);
+      if (
+        result.saved &&
+        (result.saveQuality === "perfect" || result.saveQuality === "strong")
+      ) {
+        this.renderer.ball.style.opacity = "0";
+      } else {
+        this.renderer.ball.style.opacity = "1";
+      }
+      this.renderer.renderBall(ballPos);
 
-    outcome:
-      result.goal
-        ? 'goal'
-        : result.saved
-        ? 'saved'
-        : 'missed'
-  };
-
-  this.config.hooks.onRoundResolved?.({
-    round: 1,
-    result:
-      this.state.result
-  });
-
-  /* =====================================================
-     GOAL IMPACT FX
-     ===================================================== */
-
-  if (result.goal) {
-    /* Net ripple */
-    if (
-      this.renderer.pitch
-    ) {
-      this.renderer.pitch.classList.add(
-        'penalty-goal-hit'
+      this.renderer.renderKeeper(
+        keeperPose,
+        keeperDecision.direction,
+        result.saved,
+        result.missed,
+        result.saveQuality,
       );
 
-      setTimeout(() => {
-        this.renderer.pitch.classList.remove(
-          'penalty-goal-hit'
-        );
-      }, 500);
-    }
+      if (progress >= 1) {
+        this.resolveShotEvent(shot, keeperPose, keeperDecision);
 
-    /* Ball continues slightly deeper */
-    this.renderer.renderBall({
-      x: shot.target.x,
-      y:
-        shot.target.y +
-        0.045
+        return;
+      }
+
+      this.rafId = requestAnimationFrame(tick);
+    };
+
+    this.stopLoop();
+
+    this.rafId = requestAnimationFrame(tick);
+  }
+
+  resolveShotEvent(shot, keeperPose, keeperDecision) {
+    const result = resolveShot(shot, keeperPose, keeperDecision);
+
+    this.state.currentShot = null;
+
+    this.state.resolved = true;
+
+    this.state.result = {
+      ...result,
+      shot,
+      keeperDecision,
+
+      outcome: result.goal ? "goal" : result.saved ? "saved" : "missed",
+    };
+
+    this.config.hooks.onRoundResolved?.({
+      round: 1,
+      result: this.state.result,
     });
 
-    /* Screen shake */
-    this.root.classList.add(
-      'goal-shake'
-    );
-
-    setTimeout(() => {
-      this.root.classList.remove(
-        'goal-shake'
-      );
-    }, 420);
-
-    this.ui.setFeedback(
-      'GOAL!'
-    );
-  }
-
-  /* =====================================================
-     SAVE FX
-     ===================================================== */
-
-  else if (
-    result.saved
-  ) {
-    this.root.classList.add(
-      'save-shake'
-    );
-
-    setTimeout(() => {
-      this.root.classList.remove(
-        'save-shake'
-      );
-    }, 280);
-
-    this.ui.setFeedback(
-      'SAVED!'
-    );
-  }
-
-  /* =====================================================
-     MISS FX
-     ===================================================== */
-
-  else {
-    this.ui.setFeedback(
-      'MISSED!'
-    );
-  }
-
-  /* =====================================================
-     FINAL HOLD
-     ===================================================== */
-
-  setTimeout(() => {
-    this.end();
-  }, 1800);
-}
-
-  /* =========================
-     LOOP STOP
+    /* =========================
+     GOAL FX
      ========================= */
 
-  stopLoop() {
-    if (
-      this.rafId
-    ) {
-      cancelAnimationFrame(
-        this.rafId
-      );
+    if (result.goal) {
+      if (this.renderer.pitch) {
+        this.renderer.pitch.classList.add("penalty-goal-hit");
+
+        setTimeout(() => {
+          this.renderer.pitch.classList.remove("penalty-goal-hit");
+        }, 500);
+      }
+
+      this.root.classList.add("goal-shake");
+
+      setTimeout(() => {
+        this.root.classList.remove("goal-shake");
+      }, 420);
+
+      this.ui.setFeedback("GOAL!");
+    } else if (result.saved) {
+
+    /* =========================
+     SAVE FX
+     ========================= */
+      this.root.classList.add("save-shake");
+
+      setTimeout(() => {
+        this.root.classList.remove("save-shake");
+      }, 280);
+
+      this.ui.setFeedback("SAVED!");
+    } else {
+
+    /* =========================
+     MISS FX
+     ========================= */
+      this.ui.setFeedback("MISSED!");
     }
 
-    this.rafId =
-      null;
+    /* =========================
+     BALL RESET
+     ========================= */
+
+    if (this.renderer.ball) {
+      this.renderer.ball.style.opacity = "1";
+    }
+
+    /* =========================
+     CLOSE EVENT
+     ========================= */
+
+    setTimeout(() => {
+      this.end();
+    }, 1800);
+  }
+
+  stopLoop() {
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+    }
+
+    this.rafId = null;
   }
 }
 
-/* =========================================================
-   GLOBAL INSTANCE CONTROL
-   ========================================================= */
+let penaltyGameInstance = null;
 
-let penaltyGameInstance =
-  null;
-
-export function startPenaltyGame(
-  config = {}
-) {
-  const root =
-    config.rootElement;
+export function startPenaltyGame(config = {}) {
+  const root = config.rootElement;
 
   if (!root) {
-    throw new Error(
-      'startPenaltyGame requires config.rootElement'
-    );
+    throw new Error("startPenaltyGame requires config.rootElement");
   }
 
   penaltyGameInstance?.end();
 
-  penaltyGameInstance =
-    new PenaltyGame(
-      root,
-      config
-    );
+  penaltyGameInstance = new PenaltyGame(root, config);
 
   penaltyGameInstance.start();
 
@@ -580,23 +383,16 @@ export function resetPenaltyGame() {
   penaltyGameInstance?.reset();
 }
 
-export function setPenaltyDifficulty(
-  level
-) {
-  penaltyGameInstance?.setDifficulty(
-    level
-  );
+export function setPenaltyDifficulty(level) {
+  penaltyGameInstance?.setDifficulty(level);
 }
 
 export function destroyPenaltyGame() {
-  if (
-    !penaltyGameInstance
-  ) {
+  if (!penaltyGameInstance) {
     return;
   }
 
   penaltyGameInstance.end();
 
-  penaltyGameInstance =
-    null;
+  penaltyGameInstance = null;
 }
