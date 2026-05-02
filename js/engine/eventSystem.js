@@ -106,8 +106,12 @@ function processMatchEvent(event){
         game.match.live.running = false;
       }
 
-      window.startPenaltySequence?.(event);
-
+window.startPenaltySequence?.({
+  ...event,
+  team:
+    event.team ||
+    "home"
+});
       return true;
     }
     const assets =
