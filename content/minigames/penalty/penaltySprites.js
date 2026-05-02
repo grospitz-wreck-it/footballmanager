@@ -5,7 +5,7 @@ export const PENALTY_ASSETS = {
   diveLeft1: './assets/keeper/keeper_dive_left_1.png'
 },
 ball: {
-  default: './assets/ball/ball_default.png'
+  default: './assets/ball/ball_default.webp'
 }
   
 };
