@@ -672,10 +672,19 @@ function createFoul(ctx) {
   const player = getRandomPlayer(teamId);
 
   emitMatchEvent(EVENT_TYPES.FOUL, {
-    teamId,
-    playerId: player?.id,
-    outcome: EVENT_OUTCOMES.NEUTRAL,
-  });
+  teamId,
+  playerId: player?.id,
+  outcome: EVENT_OUTCOMES.NEUTRAL,
+
+  attackPosition: {
+    x:
+      Math.random() * 0.7 +
+      0.15,
+
+    y:
+      Math.random() * 0.6
+  }
+});
 }
 
 function createCorner(ctx) {
