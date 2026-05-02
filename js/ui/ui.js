@@ -2139,14 +2139,14 @@ window.startPenaltySequence = function (context = {}) {
             id: Date.now(),
             minute: live.minute,
             type: "GOAL",
-            text: "⚽ Penalty scored!",
+            text: "⚽ Da verwandelt er das Ding!!!",
           });
         } else {
           game.events.history.push({
             id: Date.now(),
             minute: live.minute,
             type: "SHOT_MISS",
-            text: "❌ Penalty missed!",
+            text: "❌ Und er verschießt!!! Das kann doch nicht sein!",
           });
         }
 
