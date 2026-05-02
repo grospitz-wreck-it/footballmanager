@@ -70,31 +70,66 @@ export class PenaltyRenderer {
       '#111';
   }
 
-  /* =========================
-     KEEPER IDLE SPRITE
-     ========================= */
-  if (
-    this.keeper &&
-    this.assets?.keeper?.idle
-  ) {
-    this.keeper.style.backgroundImage =
-      `url('${this.assets.keeper.idle.src}')`;
+ /* =========================================================
+   NUR DIESEN BLOCK ERSETZEN:
+   =========================
+   KEEPER IDLE SPRITE
+   ========================================================= */
 
-    this.keeper.style.backgroundSize =
-      'contain';
+if (
+  this.keeper &&
+  this.assets?.keeper?.spriteSheet
+) {
+  this.keeper.style.backgroundImage =
+    `url('${this.assets.keeper.spriteSheet.src}')`;
 
-    this.keeper.style.backgroundRepeat =
-      'no-repeat';
+  this.keeper.style.backgroundSize =
+    '400% 300%';
 
-    this.keeper.style.backgroundPosition =
-      'center';
+  this.keeper.style.backgroundPosition =
+    '0% 0%';
 
-    this.keeper.style.backgroundColor =
-      'transparent';
+  this.keeper.style.backgroundRepeat =
+    'no-repeat';
 
-    this.keeper.style.border =
-      'none';
-  }
+  this.keeper.style.backgroundColor =
+    'transparent';
+
+  this.keeper.style.border =
+    'none';
+}
+
+
+/* =========================================================
+   OPTIONAL FEINJUSTIERUNG:
+   Keeper minimal tiefer
+   ========================================================= */
+
+this.keeper.style.top = '46%';
+
+
+/* =========================================================
+   ALSO:
+   applyImmediateBasePositions():
+   ========================================================= */
+
+this.keeper.style.top = '46%';
+
+
+/* =========================================================
+   resetActors():
+   ========================================================= */
+
+this.renderKeeper(
+  {
+    x: 0.5,
+    y: 0.46,
+    progress: 0,
+    rotation: 0,
+    stretch: 1
+  },
+  'center'
+);
 
   /* =========================
      BALL SPRITE
