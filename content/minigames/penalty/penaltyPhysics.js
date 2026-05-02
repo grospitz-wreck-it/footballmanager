@@ -347,13 +347,13 @@ export function resolveShot(
      REALISTIC GOAL FRAME
      ========================= */
 
-  const insideGoalWidth =
-    shot.target.x >= 0.20 &&
-    shot.target.x <= 0.80;
+const insideGoalWidth =
+  shot.target.x >= 0.24 &&
+  shot.target.x <= 0.76;
 
-  const insideGoalHeight =
-    shot.target.y >= 0.22 &&
-    shot.target.y <= 0.60;
+const insideGoalHeight =
+  shot.target.y >= 0.28 &&
+  shot.target.y <= 0.60;
 
   const validGoalZone =
     insideGoalWidth &&
@@ -363,15 +363,15 @@ export function resolveShot(
      BALL REACHES LINE
      ========================= */
 
-  const crossedLine =
-    shot.target.y <= 0.56;
+ const crossedLine =
+  shot.target.y <= 0.60;
 
   /* =========================
      POWER FLOOR
      ========================= */
 
   const sufficientPower =
-    shot.power >= 0.16;
+  shot.power >= 0.08;
 
   const validGoal =
     validGoalZone &&
