@@ -345,13 +345,13 @@ export function resolveShot(
      REALISTIC GOAL FRAME
      ========================= */
 
-  const insideGoalWidth =
-    shot.target.x >= 0.24 &&
-    shot.target.x <= 0.76;
+ const insideGoalWidth =
+  shot.target.x >= 0.20 &&
+  shot.target.x <= 0.80;
 
-  const insideGoalHeight =
-    shot.target.y >= 0.25 &&
-    shot.target.y <= 0.56;
+const insideGoalHeight =
+  shot.target.y >= 0.22 &&
+  shot.target.y <= 0.60;
 
   const validGoalZone =
     insideGoalWidth &&
