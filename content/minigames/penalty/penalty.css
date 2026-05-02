@@ -1,77 +1,23 @@
-/* =========================
-   PENALTY MINIGAME – FINAL STADIUM INTEGRATION
-   stadium.webp übernimmt kompletten Platz + Torraum
-   ========================= */
+/* penalty.css */
 
 .penalty-game {
   width: 100%;
   aspect-ratio: 16 / 9;
-
-  display: grid;
-  grid-template-rows: auto 1fr;
-
   position: relative;
   overflow: hidden;
-
   font-family: 'Courier New', monospace;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: #ffe66d;
-
   image-rendering: pixelated;
-
   background: #000;
 }
 
-/* CRT Scanlines */
-.penalty-game::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 50;
-
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,0.02) 0px,
-      rgba(255,255,255,0.02) 2px,
-      transparent 2px,
-      transparent 4px
-    );
-
-  opacity: 0.32;
-}
-
-/* Screen Vignette */
-.penalty-game::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 49;
-
-  background:
-    radial-gradient(
-      circle at center,
-      transparent 58%,
-      rgba(0,0,0,0.42) 100%
-    );
-}
-
-/* =========================
-   HUD / SCOREBOARD
-   ========================= */
-
+/* HUD bleibt */
 .penalty-hud {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   padding: 14px 22px;
-
-  position: relative;
   z-index: 20;
+  position: relative;
 
   background:
     linear-gradient(
@@ -82,25 +28,16 @@
 
   border-bottom: 3px solid #00f7ff;
 
-  box-shadow:
-    0 0 12px rgba(0,255,255,0.18),
-    inset 0 -2px 8px rgba(255,0,255,0.08);
-
-  text-shadow:
-    0 0 4px #00f7ff,
-    0 0 10px #ff00d4;
+  color: #ffe66d;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
-.penalty-hud span {
-  font-size: 1rem;
-}
-
-/* =========================
-   STADIUM BACKGROUND
-   ========================= */
-
+/* Stadium.webp übernimmt alles */
 .penalty-pitch {
   position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 
   background-size: cover;
@@ -109,21 +46,50 @@
   background-color: #111;
 }
 
-/* Alte generierte Pitch-/Goal-Elemente deaktiviert */
+/* Alle alten generierten Feldlayer deaktivieren */
 .penalty-pitch::before,
 .penalty-pitch::after,
 .penalty-goal,
-.penalty-goal::before,
 .penalty-spot,
 .stadium-crowd {
   display: none !important;
-  content: none !important;
 }
 
-/* =========================
-   BALL
-   ========================= */
+/* Keeper */
+.penalty-keeper {
+  width: 150px;
+  height: 150px;
 
+  position: absolute;
+  z-index: 15;
+
+  transform: translate(-50%, -50%);
+
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  background-color: transparent;
+  border: none;
+
+  image-rendering: pixelated;
+
+  transition:
+    transform 0.1s ease,
+    left 0.08s linear,
+    top 0.08s linear;
+
+  filter:
+    drop-shadow(0 5px 4px rgba(0,0,0,0.45));
+}
+
+.penalty-keeper::before,
+.penalty-keeper::after {
+  display: none;
+  content: none;
+}
+
+/* Ball */
 .penalty-ball {
   width: 58px;
   height: 58px;
@@ -144,88 +110,4 @@
 
   filter:
     drop-shadow(0 4px 4px rgba(0,0,0,0.35));
-}
-
-/* =========================
-   KEEPER
-   ========================= */
-
-.penalty-keeper {
-  width: 150px;
-  height: 150px;
-
-  position: absolute;
-  z-index: 15;
-
-  transform: translate(-50%, -50%);
-
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-
-  background-color: transparent;
-  border: none;
-
-  image-rendering: pixelated;
-
-  transition:
-    transform 0.10s ease,
-    left 0.08s linear,
-    top 0.08s linear;
-
-  filter:
-    drop-shadow(0 5px 4px rgba(0,0,0,0.45));
-}
-
-.penalty-keeper::before,
-.penalty-keeper::after {
-  display: none;
-  content: none;
-}
-
-/* =========================
-   FEEDBACK FX
-   ========================= */
-
-.penalty-feedback-goal {
-  animation: goalFlash 0.55s ease-out;
-}
-
-.penalty-feedback-save {
-  animation: saveShake 0.35s ease-in-out;
-}
-
-@keyframes goalFlash {
-  0% { filter: brightness(1); }
-  25% { filter: brightness(2.3); }
-  100% { filter: brightness(1); }
-}
-
-@keyframes saveShake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  50% { transform: translateX(6px); }
-  75% { transform: translateX(-4px); }
-  100% { transform: translateX(0); }
-}
-
-/* =========================
-   RESPONSIVE
-   ========================= */
-
-@media (max-width: 900px) {
-  .penalty-hud {
-    font-size: 0.82rem;
-    padding: 10px 14px;
-  }
-
-  .penalty-keeper {
-    width: 108px;
-    height: 108px;
-  }
-
-  .penalty-ball {
-    width: 42px;
-    height: 42px;
-  }
 }
