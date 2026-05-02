@@ -1,77 +1,314 @@
 import { PENALTY_ZONES } from './penaltyConfig.js';
 
+/* =========================
+   ADVANCED PENALTY INPUT SYSTEM
+   - präzisere Swipe-Erkennung
+   - bessere Power-Kurve
+   - Deadzone
+   - realistischere Zielwahl
+   - immersive Arcade-Control
+   ========================= */
+
 export class PenaltyInput {
   constructor(root, config) {
     this.root = root;
     this.config = config;
+
     this.activePointer = null;
     this.bindings = [];
+
+    this.lastAimPreview = null;
   }
 
+  /* =========================
+     MOUNT
+     ========================= */
+
   mount(onShot) {
+    this.unmount();
+
     const onPointerDown = (event) => {
       if (this.activePointer) return;
-      this.root.setPointerCapture?.(event.pointerId);
+
+      this.root.setPointerCapture?.(
+        event.pointerId
+      );
+
       this.activePointer = {
         id: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
+        currentX: event.clientX,
+        currentY: event.clientY,
         startTime: performance.now()
       };
     };
 
-    const commitShot = (event) => {
-      if (!this.activePointer || event.pointerId !== this.activePointer.id) return;
-      const elapsed = performance.now() - this.activePointer.startTime;
-      const dx = event.clientX - this.activePointer.startX;
-      const dy = event.clientY - this.activePointer.startY;
-      const swipeDistance = Math.hypot(dx, dy);
-      const power = this.computePower(elapsed, swipeDistance);
-      const zone = this.detectZone(event.clientX, event.clientY);
-      this.activePointer = null;
-      onShot({ power, zone, elapsed, swipeDistance });
+    const onPointerMove = (event) => {
+      if (
+        !this.activePointer ||
+        event.pointerId !==
+          this.activePointer.id
+      )
+        return;
+
+      this.activePointer.currentX =
+        event.clientX;
+
+      this.activePointer.currentY =
+        event.clientY;
     };
 
-    const onPointerUp = (event) => commitShot(event);
+    const commitShot = (event) => {
+      if (
+        !this.activePointer ||
+        event.pointerId !==
+          this.activePointer.id
+      )
+        return;
+
+      const elapsed =
+        performance.now() -
+        this.activePointer.startTime;
+
+      const dx =
+        event.clientX -
+        this.activePointer.startX;
+
+      const dy =
+        event.clientY -
+        this.activePointer.startY;
+
+      const swipeDistance =
+        Math.hypot(dx, dy);
+
+      const swipeAngle = Math.atan2(
+        dy,
+        dx
+      );
+
+      const power = this.computePower(
+        elapsed,
+        swipeDistance,
+        dy
+      );
+
+      const zone = this.detectZone(
+        dx,
+        dy,
+        event.clientX,
+        event.clientY
+      );
+
+      const shotData = {
+        power,
+        zone,
+        elapsed,
+        swipeDistance,
+        swipeAngle,
+        dx,
+        dy
+      };
+
+      this.activePointer = null;
+
+      onShot(shotData);
+    };
+
+    const onPointerUp = (event) =>
+      commitShot(event);
+
     const onPointerCancel = () => {
       this.activePointer = null;
     };
 
-    this.root.addEventListener('pointerdown', onPointerDown);
-    this.root.addEventListener('pointerup', onPointerUp);
-    this.root.addEventListener('pointercancel', onPointerCancel);
-    this.root.addEventListener('lostpointercapture', onPointerCancel);
-    this.bindings.push(
-      ['pointerdown', onPointerDown],
-      ['pointerup', onPointerUp],
-      ['pointercancel', onPointerCancel],
-      ['lostpointercapture', onPointerCancel]
+    this.addBinding(
+      'pointerdown',
+      onPointerDown
+    );
+
+    this.addBinding(
+      'pointermove',
+      onPointerMove
+    );
+
+    this.addBinding(
+      'pointerup',
+      onPointerUp
+    );
+
+    this.addBinding(
+      'pointercancel',
+      onPointerCancel
+    );
+
+    this.addBinding(
+      'lostpointercapture',
+      onPointerCancel
     );
   }
 
+  /* =========================
+     HELPERS
+     ========================= */
+
+  addBinding(type, handler) {
+    this.root.addEventListener(
+      type,
+      handler
+    );
+
+    this.bindings.push([
+      type,
+      handler
+    ]);
+  }
+
   unmount() {
-    this.bindings.forEach(([type, handler]) => this.root.removeEventListener(type, handler));
+    this.bindings.forEach(
+      ([type, handler]) => {
+        this.root.removeEventListener(
+          type,
+          handler
+        );
+      }
+    );
+
     this.bindings.length = 0;
     this.activePointer = null;
   }
 
-  computePower(holdMs, swipeDistance) {
-    const physics = this.config.physics;
-    const holdPower = holdMs / physics.holdToPowerScale;
-    const swipePower = swipeDistance / physics.swipeToPowerScale;
-    const blended = holdPower * 0.4 + swipePower * 0.6;
-    return Math.max(physics.minPower, Math.min(physics.maxPower, blended));
+  /* =========================
+     POWER SYSTEM
+     ========================= */
+
+  computePower(
+    holdMs,
+    swipeDistance,
+    verticalDelta
+  ) {
+    const physics =
+      this.config.physics;
+
+    /* Hold contributes charge */
+    const holdPower =
+      holdMs /
+      physics.holdToPowerScale;
+
+    /* Swipe distance */
+    const swipePower =
+      swipeDistance /
+      physics.swipeToPowerScale;
+
+    /* Upward swipe bonus */
+    const liftBonus =
+      Math.max(
+        0,
+        -verticalDelta
+      ) / 400;
+
+    /* Deadzone */
+    const deadzonePenalty =
+      swipeDistance < 18
+        ? 0.55
+        : 1;
+
+    /* Weighted arcade blend */
+    let blended =
+      holdPower * 0.28 +
+      swipePower * 0.52 +
+      liftBonus * 0.20;
+
+    blended *= deadzonePenalty;
+
+    /* Slight skill curve */
+    blended = easeOutQuad(blended);
+
+    return clamp(
+      blended,
+      physics.minPower,
+      physics.maxPower
+    );
   }
 
-  detectZone(clientX, clientY) {
-    const rect = this.root.getBoundingClientRect();
-    const x = (clientX - rect.left) / rect.width;
-    const y = (clientY - rect.top) / rect.height;
+  /* =========================
+     TARGETING SYSTEM
+     ========================= */
 
-    if (x < 0.35 && y < 0.5) return PENALTY_ZONES.TOP_LEFT;
-    if (x > 0.65 && y < 0.5) return PENALTY_ZONES.TOP_RIGHT;
-    if (x < 0.35 && y >= 0.5) return PENALTY_ZONES.BOTTOM_LEFT;
-    if (x > 0.65 && y >= 0.5) return PENALTY_ZONES.BOTTOM_RIGHT;
+  detectZone(
+    dx,
+    dy,
+    clientX,
+    clientY
+  ) {
+    const rect =
+      this.root.getBoundingClientRect();
+
+    const normalizedX =
+      (clientX - rect.left) /
+      rect.width;
+
+    const normalizedY =
+      (clientY - rect.top) /
+      rect.height;
+
+    const horizontalBias = dx;
+    const verticalBias = dy;
+
+    /* Aggressive upward shots */
+    const isTopShot =
+      verticalBias < -25 ||
+      normalizedY < 0.48;
+
+    const isBottomShot =
+      verticalBias >= -25 &&
+      normalizedY >= 0.48;
+
+    const isLeft =
+      horizontalBias < -18 ||
+      normalizedX < 0.38;
+
+    const isRight =
+      horizontalBias > 18 ||
+      normalizedX > 0.62;
+
+    /* Top corners */
+    if (isTopShot && isLeft) {
+      return PENALTY_ZONES.TOP_LEFT;
+    }
+
+    if (isTopShot && isRight) {
+      return PENALTY_ZONES.TOP_RIGHT;
+    }
+
+    /* Bottom corners */
+    if (isBottomShot && isLeft) {
+      return PENALTY_ZONES.BOTTOM_LEFT;
+    }
+
+    if (isBottomShot && isRight) {
+      return PENALTY_ZONES.BOTTOM_RIGHT;
+    }
+
     return PENALTY_ZONES.CENTER;
   }
+}
+
+/* =========================
+   UTILITIES
+   ========================= */
+
+function clamp(
+  value,
+  min,
+  max
+) {
+  return Math.max(
+    min,
+    Math.min(max, value)
+  );
+}
+
+function easeOutQuad(t) {
+  return 1 - (1 - t) * (1 - t);
 }
