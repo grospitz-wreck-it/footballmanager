@@ -1,6 +1,5 @@
 /* =========================================================
-   KeeperAI.js – FULL DROP-IN UPGRADE
-   Neue Splines + bessere Keeperlogik
+   KeeperAI.js – FINAL PRODUCTION DROP-IN
    ========================================================= */
 
 import {
@@ -88,8 +87,19 @@ export class KeeperAI {
       Math.random() <
       anticipation;
 
+    /* Center harder to predict */
+    if (
+      shotDirection ===
+      'center'
+    ) {
+      shouldRead =
+        shouldRead &&
+        Math.random() < 0.55;
+    }
+
     let direction;
 
+    /* Human error */
     if (
       Math.random() <
       mistakeChance
@@ -159,10 +169,13 @@ export class KeeperAI {
     const roll =
       Math.random();
 
-    if (roll < 0.33)
+    /* More realistic:
+       less center spam
+    */
+    if (roll < 0.42)
       return 'left';
 
-    if (roll < 0.66)
+    if (roll < 0.84)
       return 'right';
 
     return 'center';
@@ -257,16 +270,34 @@ export class KeeperAI {
         : 'mid';
 
     /* =====================
+       LOW SHOTS SLIGHTLY SLOWER
+       ===================== */
+    const adjustedDiveSpeed =
+      shotHeight === 'low'
+        ? decision.diveSpeed *
+          0.92
+        : decision.diveSpeed;
+
+    /* =====================
        DIVE PHASE
        ===================== */
     const rawProgress =
       (elapsedMs -
         decision.reactionMs) /
       (shotDurationMs /
-        decision.diveSpeed);
+        adjustedDiveSpeed);
 
+    /* Center dives more compact */
     const progress =
-      clamp01(rawProgress);
+      clamp01(
+        Math.min(
+          rawProgress,
+          decision.direction ===
+            'center'
+            ? 0.88
+            : 1
+        )
+      );
 
     const curve =
       getKeeperCurve(
