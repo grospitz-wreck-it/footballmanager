@@ -28,7 +28,7 @@ export class PenaltyRenderer {
 
     if (this.ball) {
       this.ball.style.left = '50%';
-      this.ball.style.top = '92%';
+      this.ball.style.top = '78%';
       this.ball.style.transform =
         'translate(-50%, -50%) scale(1)';
     }
@@ -199,9 +199,9 @@ export class PenaltyRenderer {
 
   resetActors() {
     this.renderBall({
-      x: 0.5,
-      y: 0.92
-    });
+  x: 0.5,
+  y: 0.78
+});
 
     this.renderKeeper(
       {
