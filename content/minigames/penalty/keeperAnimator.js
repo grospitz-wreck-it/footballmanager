@@ -1,20 +1,32 @@
-/* =========================
-   ADVANCED KEEPER ANIMATOR
-   - Multi-frame support
-   - Better immersion
-   - Save quality states
-   - Miss states
-   - Recovery states
-   - Sprite sheet scalable
-   ========================= */
-
 export class KeeperAnimator {
   constructor(assets) {
     this.assets = assets;
+
+    this.sheet =
+      assets.spriteSheet;
+
+    this.cols = 4;
+    this.rows = 3;
+
+    this.frames = {
+      idle: [0, 0],
+      bounce: [1, 0],
+      idleWide: [2, 0],
+      diveEarly: [3, 0],
+
+      diveMid: [0, 1],
+      diveFull: [1, 1],
+      saveStrong: [2, 1],
+      savePerfect: [3, 1],
+
+      jumpCenter: [0, 2],
+      conceded: [1, 2],
+      celebrate: [2, 2]
+    };
   }
 
   /* =========================
-     FRAME RESOLUTION
+     FRAME SELECTOR
      ========================= */
 
   getFrame(
@@ -24,141 +36,123 @@ export class KeeperAnimator {
     missed = false,
     saveQuality = 'normal'
   ) {
-    const t = clamp01(progress);
+    const t =
+      clamp01(progress);
 
-    /* =========================
-       MISSED SHOT
-       ========================= */
-
+    /* Missed goal */
     if (missed) {
-      if (
-        t > 0.72 &&
-        this.assets.miss
-      ) {
-        return this.assets.miss;
-      }
-
-      if (
-        t > 0.4 &&
-        this.assets.diveLeft2
-      ) {
-        return this.assets.diveLeft2;
-      }
-
-      return (
-        this.assets.diveLeft1 ||
-        this.assets.idle
+      return this.resolveFrame(
+        'conceded'
       );
     }
 
-    /* =========================
-       SUCCESSFUL SAVE
-       ========================= */
-
+    /* Successful save */
     if (saved) {
       if (
-        saveQuality === 'perfect' &&
-        this.assets.savePerfect
+        saveQuality ===
+        'perfect'
       ) {
-        return this.assets.savePerfect;
+        return this.resolveFrame(
+          'savePerfect'
+        );
       }
 
       if (
-        saveQuality === 'strong' &&
-        this.assets.saveStrong
+        saveQuality ===
+        'strong'
       ) {
-        return this.assets.saveStrong;
+        return this.resolveFrame(
+          'saveStrong'
+        );
       }
 
-      if (
-        t > 0.65 &&
-        this.assets.saveLeft
-      ) {
-        return this.assets.saveLeft;
+      if (t < 0.35) {
+        return this.resolveFrame(
+          'diveEarly'
+        );
       }
 
-      if (
-        t > 0.38 &&
-        this.assets.diveLeft2
-      ) {
-        return this.assets.diveLeft2;
+      if (t < 0.65) {
+        return this.resolveFrame(
+          'diveMid'
+        );
       }
 
-      return (
-        this.assets.diveLeft1 ||
-        this.assets.idle
+      return this.resolveFrame(
+        'saveStrong'
       );
     }
 
-    /* =========================
-       ACTIVE DIVE
-       ========================= */
-
+    /* Left / Right dive */
     if (
       direction === 'left' ||
       direction === 'right'
     ) {
-      if (
-        t > 0.62 &&
-        this.assets.diveLeft2
-      ) {
-        return this.assets.diveLeft2;
+      if (t < 0.25) {
+        return this.resolveFrame(
+          'diveEarly'
+        );
       }
 
-      if (
-        t > 0.25 &&
-        this.assets.diveLeft1
-      ) {
-        return this.assets.diveLeft1;
+      if (t < 0.55) {
+        return this.resolveFrame(
+          'diveMid'
+        );
       }
 
-      return (
-        this.assets.idle ||
-        this.assets.bounce
+      return this.resolveFrame(
+        'diveFull'
       );
     }
 
-    /* =========================
-       CENTER JUMP
-       ========================= */
-
+    /* Center jump */
     if (
-      direction === 'center' &&
-      t > 0.45 &&
-      this.assets.jumpCenter
+      direction ===
+        'center' &&
+      t > 0.42
     ) {
-      return this.assets.jumpCenter;
-    }
-
-    /* =========================
-       IDLE LOOP
-       ========================= */
-
-    if (t < 0.28) {
-      return (
-        this.assets.idle ||
-        this.assets.bounce
+      return this.resolveFrame(
+        'jumpCenter'
       );
     }
 
-    if (t < 0.58) {
-      return (
-        this.assets.bounce ||
-        this.assets.idle
+    /* Idle loop */
+    if (t < 0.25) {
+      return this.resolveFrame(
+        'idle'
       );
     }
 
-    if (
-      t < 0.82 &&
-      this.assets.idleBlink
-    ) {
-      return this.assets.idleBlink;
+    if (t < 0.55) {
+      return this.resolveFrame(
+        'bounce'
+      );
     }
 
-    return (
-      this.assets.idle ||
-      this.assets.bounce
+    return this.resolveFrame(
+      'idleWide'
     );
+  }
+
+  /* =========================
+     FRAME MAPPING
+     ========================= */
+
+  resolveFrame(name) {
+    const frame =
+      this.frames[name] ||
+      this.frames.idle;
+
+    return {
+      src:
+        this.sheet.src,
+
+      x: frame[0],
+      y: frame[1],
+
+      cols: this.cols,
+      rows: this.rows
+    };
   }
 }
 
