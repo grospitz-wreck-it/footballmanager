@@ -220,6 +220,11 @@ export function getBallPosition(
    FINAL SHOT RESOLUTION
    ========================= */
 
+/* =========================================================
+   penaltyPhysics.js
+   NUR resolveShot() KOMPLETT ERSETZEN
+   ========================================================= */
+
 export function resolveShot(
   shot,
   keeperPose,
@@ -234,27 +239,23 @@ export function resolveShot(
     keeperPose.y;
 
   const distance =
-    Math.hypot(
-      dx,
-      dy
-    );
+    Math.hypot(dx, dy);
 
-  /* =====================
-     REACTION BONUS
-     ===================== */
+  /* =========================
+     KEEPER TIMING
+     ========================= */
 
   const timingBonus =
-    keeperPose.progress >=
-    0.7
+    keeperPose.progress >= 0.7
       ? 1
       : keeperPose.progress >=
-          0.5
-        ? 0.78
-        : 0.52;
+        0.5
+      ? 0.78
+      : 0.52;
 
-  /* =====================
+  /* =========================
      TOP CORNERS HARDER
-     ===================== */
+     ========================= */
 
   const difficultyMultiplier =
     shot.zone ===
@@ -269,35 +270,50 @@ export function resolveShot(
     timingBonus *
     difficultyMultiplier;
 
-  /* =====================
-     TRUE GOAL CHECK
-     ===================== */
+  /* =====================================================
+     REAL TORRAUM (NACH ZOOM)
+     ===================================================== */
 
   const insideGoalWidth =
-    shot.target.x >=
-      GOAL_ZONE.left &&
-    shot.target.x <=
-      GOAL_ZONE.right;
+    shot.target.x >= 0.27 &&
+    shot.target.x <= 0.73;
 
   const insideGoalHeight =
-    shot.target.y >=
-      GOAL_ZONE.top &&
-    shot.target.y <=
-      GOAL_ZONE.bottom;
+    shot.target.y >= 0.28 &&
+    shot.target.y <= 0.53;
 
-  const validGoal =
+  const validGoalZone =
     insideGoalWidth &&
     insideGoalHeight;
 
-  /* =====================
-     KEEPER LIMITATION
-     Keeper cannot save
-     impossible deep net balls
-     ===================== */
+  /* =====================================================
+     BALL MUSS TORLINIE ERREICHEN
+     SEHR WICHTIG:
+     y darf NICHT zu tief sein
+     ===================================================== */
+
+  const crossedLine =
+    shot.target.y <= 0.53;
+
+  /* =====================================================
+     SCHWACHE SCHÜSSE KÖNNEN
+     VORHER VERENDEN
+     ===================================================== */
+
+  const sufficientPower =
+    shot.power >= 0.22;
+
+  const validGoal =
+    validGoalZone &&
+    crossedLine &&
+    sufficientPower;
+
+  /* =====================================================
+     KEEPER REACH
+     ===================================================== */
 
   const keeperCanReach =
-    shot.target.y <=
-    0.5;
+    shot.target.y <= 0.5;
 
   const rawSaved =
     distance <=
@@ -315,12 +331,12 @@ export function resolveShot(
   const missed =
     !validGoal;
 
-  /* =====================
+  /* =====================================================
      SAVE QUALITY
-     ===================== */
+     ===================================================== */
 
   let saveQuality =
-    'miss';
+    "miss";
 
   if (saved) {
     if (
@@ -329,17 +345,17 @@ export function resolveShot(
         0.38
     ) {
       saveQuality =
-        'perfect';
+        "perfect";
     } else if (
       distance <
       effectiveSaveRadius *
         0.72
     ) {
       saveQuality =
-        'strong';
+        "strong";
     } else {
       saveQuality =
-        'weak';
+        "weak";
     }
   }
 
@@ -347,20 +363,15 @@ export function resolveShot(
     saved,
     goal,
     missed,
-
     distance,
-
     saveQuality,
-
     effectiveSaveRadius,
-
     validGoal,
-
     keeperCanReach,
-
     insideGoalWidth,
-
-    insideGoalHeight
+    insideGoalHeight,
+    crossedLine,
+    sufficientPower
   };
 }
 
