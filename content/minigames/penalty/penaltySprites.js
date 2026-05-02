@@ -6,6 +6,9 @@ export const PENALTY_ASSETS = {
 },
 ball: {
   default: './assets/ball/ball_default.webp'
-}
+},
+  stadium: {
+    background: './assets/stadium/stadium.webp'
+  }
   
 };
