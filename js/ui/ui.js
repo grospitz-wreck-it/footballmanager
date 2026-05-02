@@ -394,6 +394,8 @@ function setDonut(el, value) {
   el.style.transition = "none";
   el.style.setProperty("--val", current + "%");
 
+
+  
   requestAnimationFrame(() => {
     el.style.transition = "all 0.6s ease";
     el.style.setProperty("--val", val + "%");
@@ -2047,6 +2049,173 @@ let lastSpamIconTime = 0;
 function pushEventIcon(type) {
   return;
 }
+
+/* =========================
+   ⚽ GLOBAL PENALTY SEQUENCE
+   ========================= */
+
+window.startPenaltySequence = function (context = {}) {
+  const live = game.match?.live;
+
+  if (!live) return;
+
+  /* =========================
+     MATCH PAUSE
+     ========================= */
+  live.running = false;
+
+  /* =========================
+     OVERLAY ROOT
+     ========================= */
+  const matchOverlay =
+    document.getElementById("matchOverlay");
+
+  const overlayImage =
+    document.getElementById("overlayImage");
+
+  const overlayText =
+    document.getElementById("overlayText");
+
+  if (
+    matchOverlay &&
+    overlayImage &&
+    overlayText
+  ) {
+    overlayImage.src =
+      "./gfx/events/penalty.webp";
+
+    overlayText.innerText =
+      "PENALTY AWARDED";
+
+    matchOverlay.classList.remove(
+      "hidden"
+    );
+
+    matchOverlay.classList.add(
+      "show"
+    );
+  }
+
+  /* =========================
+     PENALTY ROOT
+     ========================= */
+  let penaltyRoot =
+    document.getElementById(
+      "penaltyGameContainer"
+    );
+
+  if (!penaltyRoot) {
+    penaltyRoot =
+      document.createElement("div");
+
+    penaltyRoot.id =
+      "penaltyGameContainer";
+
+    penaltyRoot.style.position =
+      "fixed";
+
+    penaltyRoot.style.inset =
+      "0";
+
+    penaltyRoot.style.zIndex =
+      "9999";
+
+    penaltyRoot.style.display =
+      "flex";
+
+    penaltyRoot.style.alignItems =
+      "center";
+
+    penaltyRoot.style.justifyContent =
+      "center";
+
+    penaltyRoot.style.background =
+      "rgba(0,0,0,0.82)";
+
+    document.body.appendChild(
+      penaltyRoot
+    );
+  }
+
+  penaltyRoot.innerHTML = `
+    <div
+      data-penalty-root
+      style="
+        width:100%;
+        max-width:900px;
+        aspect-ratio:16/9;
+        position:relative;
+      "
+    ></div>
+  `;
+
+  const rootElement =
+    penaltyRoot.querySelector(
+      "[data-penalty-root]"
+    );
+
+  /* =========================
+     START MINIGAME
+     ========================= */
+  startPenaltyGame({
+    rootElement,
+
+    hooks: {
+      onGameEnd: (result) => {
+        /* =========================
+           GOAL = REAL SCORE
+           ========================= */
+        if (result?.goal) {
+          if (
+            context.team === "home"
+          ) {
+            live.score.home += 1;
+          } else {
+            live.score.away += 1;
+          }
+
+          game.events.history.push({
+            id: Date.now(),
+            minute:
+              live.minute,
+            type: "GOAL",
+            text: "⚽ Penalty scored!",
+          });
+        } else {
+          game.events.history.push({
+            id: Date.now(),
+            minute:
+              live.minute,
+            type: "SHOT_MISS",
+            text: "❌ Penalty missed!",
+          });
+        }
+
+        /* =========================
+           CLEANUP
+           ========================= */
+        penaltyRoot.remove();
+
+        if (matchOverlay) {
+          matchOverlay.classList.remove(
+            "show"
+          );
+
+          matchOverlay.classList.add(
+            "hidden"
+          );
+        }
+
+        /* =========================
+           RESUME MATCH
+           ========================= */
+        live.running = true;
+
+        requestUIUpdate();
+      },
+    },
+  });
+};
 
 requestAnimationFrame(() => {
   if (window.DEBUG) console.log("🚀 initial UI render");
