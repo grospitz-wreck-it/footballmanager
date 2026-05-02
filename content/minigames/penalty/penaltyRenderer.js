@@ -183,7 +183,10 @@ export class PenaltyRenderer {
      DIRECTION FLIP
      ========================= */
 
-    const flipX = direction === "right" ? -1 : 1;
+const flipX =
+  direction === 'left'
+    ? -1
+    : 1;
 
     /* =========================
      ROTATION
