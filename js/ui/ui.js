@@ -165,14 +165,10 @@ function hslToHex(h, s, l) {
 function adjustBrightness(hex, percent) {
   const { h, s, l } = hexToHsl(hex);
 
-  const newLight = Math.max(
-    15,
-    Math.min(85, l + percent)
-  );
+  const newLight = Math.max(15, Math.min(85, l + percent));
 
   return hslToHex(h, s, newLight);
 }
-
 
 function getOppositeColor(color) {
   const { h } = hexToHsl(color);
@@ -190,45 +186,45 @@ function applyColor(color) {
 
   document.documentElement.style.setProperty(
     "--accent-soft",
-    hexToRgba(color, 0.2)
+    hexToRgba(color, 0.2),
   );
 
   document.documentElement.style.setProperty(
     "--accent-glow",
-    hexToRgba(color, 0.45)
+    hexToRgba(color, 0.45),
   );
 
   document.documentElement.style.setProperty(
     "--accent-secondary",
-    adjustBrightness(color, -18)
+    adjustBrightness(color, -18),
   );
 
   document.documentElement.style.setProperty(
     "--accent-tertiary",
-    adjustBrightness(color, -32)
+    adjustBrightness(color, -32),
   );
 
   document.documentElement.style.setProperty("--accent-opp", opp);
 
   document.documentElement.style.setProperty(
     "--accent-opp-glow",
-    hexToRgba(opp, 0.45)
+    hexToRgba(opp, 0.45),
   );
 
   // 🔥 Gegnerfarben global neu berechnen
   if (game.league?.current?.teams?.length) {
-  game.league.current.teams.forEach((team) => {
-    // 👤 USER TEAM
-    if (String(team.id) === String(game.team?.selectedId)) {
-      team.color = color;
-    }
+    game.league.current.teams.forEach((team) => {
+      // 👤 USER TEAM
+      if (String(team.id) === String(game.team?.selectedId)) {
+        team.color = color;
+      }
 
-    // 🆚 OPPONENTS
-    else {
-      team.color = generateOpponentColor(team.id, color);
-    }
-  });
-}
+      // 🆚 OPPONENTS
+      else {
+        team.color = generateOpponentColor(team.id, color);
+      }
+    });
+  }
 }
 
 // =========================
@@ -394,8 +390,6 @@ function setDonut(el, value) {
   el.style.transition = "none";
   el.style.setProperty("--val", current + "%");
 
-
-  
   requestAnimationFrame(() => {
     el.style.transition = "all 0.6s ease";
     el.style.setProperty("--val", val + "%");
@@ -586,84 +580,84 @@ function initUI() {
       requestUIUpdate();
     };
   }
-// 🔥 EVENT HISTORY OVERLAY
-// =========================
-// 🔥 EVENT HISTORY OVERLAY (eventBar Version)
-// =========================
-const eventBar = document.getElementById("eventBar");
-const eventOverlay = document.getElementById("eventHistoryOverlay");
-const closeEventBtn = document.getElementById("closeEventHistory");
-const historyList = document.getElementById("eventHistoryList");
+  // 🔥 EVENT HISTORY OVERLAY
+  // =========================
+  // 🔥 EVENT HISTORY OVERLAY (eventBar Version)
+  // =========================
+  const eventBar = document.getElementById("eventBar");
+  const eventOverlay = document.getElementById("eventHistoryOverlay");
+  const closeEventBtn = document.getElementById("closeEventHistory");
+  const historyList = document.getElementById("eventHistoryList");
 
-if (eventBar && eventOverlay && historyList) {
-  eventBar.onclick = () => {
-    const events = [...(game.events?.history || [])].reverse();
+  if (eventBar && eventOverlay && historyList) {
+    eventBar.onclick = () => {
+      const events = [...(game.events?.history || [])].reverse();
 
-    historyList.innerHTML = events
-      .map(
-        (event) => `
+      historyList.innerHTML = events
+        .map(
+          (event) => `
           <div class="event-history-item">
             <span class="event-history-minute">${event.minute || 0}'</span>
             <span>${event.text || buildCommentary(event) || "-"}</span>
           </div>
-        `
-      )
-      .join("");
+        `,
+        )
+        .join("");
 
-    eventOverlay.classList.remove("hidden");
-  };
-}
+      eventOverlay.classList.remove("hidden");
+    };
+  }
 
-if (closeEventBtn) {
-  closeEventBtn.onclick = () => {
-    eventOverlay.classList.add("hidden");
-  };
-}
-
-if (eventOverlay) {
-  eventOverlay.addEventListener("click", (e) => {
-    if (
-      e.target.classList.contains("event-history-backdrop") ||
-      e.target === eventOverlay
-    ) {
+  if (closeEventBtn) {
+    closeEventBtn.onclick = () => {
       eventOverlay.classList.add("hidden");
-    }
-  });
-}
+    };
+  }
 
-if (closeEventBtn) {
-  closeEventBtn.onclick = () => {
-    eventOverlay.classList.add("hidden");
-  };
-}
+  if (eventOverlay) {
+    eventOverlay.addEventListener("click", (e) => {
+      if (
+        e.target.classList.contains("event-history-backdrop") ||
+        e.target === eventOverlay
+      ) {
+        eventOverlay.classList.add("hidden");
+      }
+    });
+  }
 
-if (eventOverlay) {
-  eventOverlay.addEventListener("click", (e) => {
-    if (e.target === eventOverlay) {
+  if (closeEventBtn) {
+    closeEventBtn.onclick = () => {
       eventOverlay.classList.add("hidden");
-    }
-  });
-}
-const closeMatchBtn = document.getElementById("closeMatchDetail");
+    };
+  }
 
-if (closeMatchBtn) {
-  closeMatchBtn.onclick = () => {
-    const overlay = document.getElementById("matchDetailOverlay");
+  if (eventOverlay) {
+    eventOverlay.addEventListener("click", (e) => {
+      if (e.target === eventOverlay) {
+        eventOverlay.classList.add("hidden");
+      }
+    });
+  }
+  const closeMatchBtn = document.getElementById("closeMatchDetail");
 
-    if (overlay) {
-      overlay.classList.add("hidden");
-    }
-  };
-}
+  if (closeMatchBtn) {
+    closeMatchBtn.onclick = () => {
+      const overlay = document.getElementById("matchDetailOverlay");
+
+      if (overlay) {
+        overlay.classList.add("hidden");
+      }
+    };
+  }
   const matchDetailOverlay = document.getElementById("matchDetailOverlay");
 
-if (matchDetailOverlay) {
-  matchDetailOverlay.addEventListener("click", (e) => {
-    if (e.target === matchDetailOverlay) {
-      matchDetailOverlay.classList.add("hidden");
-    }
-  });
-}
+  if (matchDetailOverlay) {
+    matchDetailOverlay.addEventListener("click", (e) => {
+      if (e.target === matchDetailOverlay) {
+        matchDetailOverlay.classList.add("hidden");
+      }
+    });
+  }
   // =========================
   // 🎮 OVERLAY CLOSE
   // =========================
@@ -828,11 +822,7 @@ function showToast(text) {
 }
 
 function getMatchTeamColor(teamId) {
-  const myTeamId = String(
-    game.team?.selectedId ||
-    game.team?.id ||
-    ""
-  );
+  const myTeamId = String(game.team?.selectedId || game.team?.id || "");
 
   const userColor =
     getComputedStyle(document.documentElement)
@@ -846,7 +836,7 @@ function getMatchTeamColor(teamId) {
 
   // 🆚 Gegner Team suchen
   const team = game.league?.current?.teams?.find(
-    (t) => String(t.id) === String(teamId)
+    (t) => String(t.id) === String(teamId),
   );
 
   // 🎨 Persistente Gegnerfarbe
@@ -910,10 +900,10 @@ function updateScore() {
   /* =========================
   🧱 FULL MODERN TOPBAR RENDER
   ========================= */
-const homeColor = getMatchTeamColor(current.homeTeamId);
-const awayColor = getMatchTeamColor(current.awayTeamId);
+  const homeColor = getMatchTeamColor(current.homeTeamId);
+  const awayColor = getMatchTeamColor(current.awayTeamId);
 
-topBar.innerHTML = `
+  topBar.innerHTML = `
   <div id="topMinute" class="minute">${minute}'</div>
 
   <div class="matchup">
@@ -2067,74 +2057,47 @@ window.startPenaltySequence = function (context = {}) {
   /* =========================
      OVERLAY ROOT
      ========================= */
-  const matchOverlay =
-    document.getElementById("matchOverlay");
+  const matchOverlay = document.getElementById("matchOverlay");
 
-  const overlayImage =
-    document.getElementById("overlayImage");
+  const overlayImage = document.getElementById("overlayImage");
 
-  const overlayText =
-    document.getElementById("overlayText");
+  const overlayText = document.getElementById("overlayText");
 
-  if (
-    matchOverlay &&
-    overlayImage &&
-    overlayText
-  ) {
-    overlayImage.src =
-      "./gfx/events/penalty.webp";
+  if (matchOverlay && overlayImage && overlayText) {
+    overlayImage.src = "./gfx/events/penalty.webp";
 
-    overlayText.innerText =
-      "PENALTY AWARDED";
+    overlayText.innerText = "PENALTY AWARDED";
 
-    matchOverlay.classList.remove(
-      "hidden"
-    );
+    matchOverlay.classList.remove("hidden");
 
-    matchOverlay.classList.add(
-      "show"
-    );
+    matchOverlay.classList.add("show");
   }
 
   /* =========================
      PENALTY ROOT
      ========================= */
-  let penaltyRoot =
-    document.getElementById(
-      "penaltyGameContainer"
-    );
+  let penaltyRoot = document.getElementById("penaltyGameContainer");
 
   if (!penaltyRoot) {
-    penaltyRoot =
-      document.createElement("div");
+    penaltyRoot = document.createElement("div");
 
-    penaltyRoot.id =
-      "penaltyGameContainer";
+    penaltyRoot.id = "penaltyGameContainer";
 
-    penaltyRoot.style.position =
-      "fixed";
+    penaltyRoot.style.position = "fixed";
 
-    penaltyRoot.style.inset =
-      "0";
+    penaltyRoot.style.inset = "0";
 
-    penaltyRoot.style.zIndex =
-      "9999";
+    penaltyRoot.style.zIndex = "9999";
 
-    penaltyRoot.style.display =
-      "flex";
+    penaltyRoot.style.display = "flex";
 
-    penaltyRoot.style.alignItems =
-      "center";
+    penaltyRoot.style.alignItems = "center";
 
-    penaltyRoot.style.justifyContent =
-      "center";
+    penaltyRoot.style.justifyContent = "center";
 
-    penaltyRoot.style.background =
-      "rgba(0,0,0,0.82)";
+    penaltyRoot.style.background = "rgba(0,0,0,0.82)";
 
-    document.body.appendChild(
-      penaltyRoot
-    );
+    document.body.appendChild(penaltyRoot);
   }
 
   penaltyRoot.innerHTML = `
@@ -2149,10 +2112,7 @@ window.startPenaltySequence = function (context = {}) {
     ></div>
   `;
 
-  const rootElement =
-    penaltyRoot.querySelector(
-      "[data-penalty-root]"
-    );
+  const rootElement = penaltyRoot.querySelector("[data-penalty-root]");
 
   /* =========================
      START MINIGAME
@@ -2166,9 +2126,10 @@ window.startPenaltySequence = function (context = {}) {
            GOAL = REAL SCORE
            ========================= */
         if (result?.goal) {
-          if (
-            context.team === "home"
-          ) {
+          const isHome =
+            String(context.teamId) === String(game.match.current?.homeTeamId);
+
+          if (isHome) {
             live.score.home += 1;
           } else {
             live.score.away += 1;
@@ -2176,16 +2137,14 @@ window.startPenaltySequence = function (context = {}) {
 
           game.events.history.push({
             id: Date.now(),
-            minute:
-              live.minute,
+            minute: live.minute,
             type: "GOAL",
             text: "⚽ Penalty scored!",
           });
         } else {
           game.events.history.push({
             id: Date.now(),
-            minute:
-              live.minute,
+            minute: live.minute,
             type: "SHOT_MISS",
             text: "❌ Penalty missed!",
           });
@@ -2197,13 +2156,9 @@ window.startPenaltySequence = function (context = {}) {
         penaltyRoot.remove();
 
         if (matchOverlay) {
-          matchOverlay.classList.remove(
-            "show"
-          );
+          matchOverlay.classList.remove("show");
 
-          matchOverlay.classList.add(
-            "hidden"
-          );
+          matchOverlay.classList.add("hidden");
         }
 
         /* =========================
