@@ -216,9 +216,75 @@ export function getBallPosition(
   };
 }
 
-/* =========================
-   FINAL SHOT RESOLUTION
-   ========================= */
+export function getBallFollowThrough(
+  shot,
+  result,
+  extraProgress
+) {
+  const t =
+    Math.max(
+      0,
+      Math.min(
+        1,
+        extraProgress
+      )
+    );
+
+  const start =
+    shot.target;
+
+  /* =====================
+     GOAL
+     ===================== */
+  if (result.goal) {
+    return {
+      x:
+        shot.target.x +
+        shot.lateralCurve *
+          1.8 *
+          t,
+
+      y:
+        shot.target.y +
+        0.12 * t
+    };
+  }
+
+  /* =====================
+     MISS
+     ===================== */
+  if (result.missed) {
+    return {
+      x:
+        shot.target.x +
+        shot.lateralCurve *
+          2.4 *
+          t,
+
+      y:
+        shot.target.y +
+        0.18 * t
+    };
+  }
+
+  /* =====================
+     SAVE REBOUND
+     ===================== */
+  return {
+    x:
+      shot.target.x +
+      (shot.target.x - 0.5) *
+        0.22 *
+        t,
+
+    y:
+      shot.target.y +
+      0.08 * t
+  };
+}
+
+
+
 
 /* =========================================================
    penaltyPhysics.js
