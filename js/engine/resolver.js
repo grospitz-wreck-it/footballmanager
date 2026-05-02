@@ -52,10 +52,12 @@ export function resolveShot({ shooter, keeper }) {
 // 🚫 FOUL RESOLUTION
 // =========================
 export function resolveFoul(context = {}) {
-  const attackPosition = context.attackPosition || {
-    x: 0.5,
-    y: 0.5,
-  };
+  const attackPosition =
+  context.attackPosition;
+
+if (!attackPosition) {
+  return EVENT_TYPES.FOUL;
+}
 
   /* =========================
      PENALTY CHECK
