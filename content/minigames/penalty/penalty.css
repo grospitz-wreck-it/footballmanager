@@ -111,3 +111,21 @@
   filter:
     drop-shadow(0 4px 4px rgba(0,0,0,0.35));
 }
+.penalty-goal-hit {
+  animation: netRipple 0.45s ease-out;
+}
+
+@keyframes netRipple {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.03, 0.96);
+  }
+  60% {
+    transform: scale(0.99, 1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
