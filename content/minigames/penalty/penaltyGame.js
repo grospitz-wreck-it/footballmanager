@@ -244,6 +244,79 @@ export class PenaltyGame {
           shot.durationMs
       );
 
+runFollowThrough(
+  shot,
+  keeperPose,
+  keeperDecision,
+  result
+) {
+  const followStart =
+    performance.now();
+
+  const duration =
+    result.goal
+      ? 550
+      : result.saved
+      ? 380
+      : 500;
+
+  const tick = () => {
+    const elapsed =
+      performance.now() -
+      followStart;
+
+    const progress =
+      Math.min(
+        1,
+        elapsed /
+          duration
+      );
+
+    const ballPos =
+      getBallFollowThrough(
+        shot,
+        result,
+        progress
+      );
+
+    this.renderer.renderBall(
+      ballPos
+    );
+
+    this.renderer.renderKeeper(
+      keeperPose,
+      keeperDecision.direction,
+      result.saved,
+      result.missed,
+      result.saveQuality
+    );
+
+    if (
+      progress >= 1
+    ) {
+      this.resolveShotEvent(
+        shot,
+        keeperPose,
+        keeperDecision
+      );
+
+      return;
+    }
+
+    this.rafId =
+      requestAnimationFrame(
+        tick
+      );
+  };
+
+  this.stopLoop();
+
+  this.rafId =
+    requestAnimationFrame(
+      tick
+    );
+}
+     
     /* =========================
        MAIN BALL FLIGHT
        ========================= */
