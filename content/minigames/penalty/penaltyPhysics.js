@@ -1,12 +1,12 @@
+/* =========================================================
+   penaltyPhysics.js – FULL DROP-IN REPLACEMENT
+   KOMPLETT ERSETZEN
+   ========================================================= */
+
 import { PENALTY_ZONES } from './penaltyConfig.js';
 
 /* =========================
    ADVANCED ARCADE PENALTY PHYSICS
-   - realistischere Flugkurven
-   - bessere Zielvarianz
-   - mehr Immersion
-   - härtere Torwartreads
-   - bessere Arcade-Dramatik
    ========================= */
 
 const TARGET_MAP = {
@@ -36,66 +36,94 @@ const TARGET_MAP = {
   }
 };
 
+/* =========================
+   BALL START POSITION
+   Höher setzen -> besser sichtbar
+   ========================= */
+
 const START_POINT = {
   x: 0.5,
-  y: 0.94
+  y: 0.86
 };
 
 /* =========================
    SHOT CREATION
    ========================= */
 
-export function calculateShot(input, config) {
-  const physics = config.physics;
+export function calculateShot(
+  input,
+  config
+) {
+  const physics =
+    config.physics;
+
   const zone = input.zone;
 
   const targetBase =
     TARGET_MAP[zone] ||
-    TARGET_MAP[PENALTY_ZONES.CENTER];
+    TARGET_MAP[
+      PENALTY_ZONES.CENTER
+    ];
 
-  /* Power-sensitive inaccuracy */
   const precisionFactor =
-    1 - Math.pow(input.power, 1.35);
+    1 -
+    Math.pow(
+      input.power,
+      1.35
+    );
 
   const jitter =
     physics.errorJitter *
-    (0.35 + precisionFactor);
+    (0.35 +
+      precisionFactor);
 
-  /* Horizontal spread stronger than vertical */
   const target = {
     x: clamp01(
       targetBase.x +
-        randomSpread(jitter * 1.15)
+        randomSpread(
+          jitter * 1.15
+        )
     ),
 
     y: clamp01(
       targetBase.y +
-        randomSpread(jitter * 0.75)
+        randomSpread(
+          jitter * 0.75
+        )
     )
   };
 
-  /* Strong shots travel faster */
   const durationMs = lerp(
     physics.shotDurationMaxMs,
     physics.shotDurationMinMs,
-    easeOutQuad(input.power)
+    easeOutQuad(
+      input.power
+    )
   );
 
-  /* Dynamic arc */
   const curveHeight =
-    zone === PENALTY_ZONES.TOP_LEFT ||
-    zone === PENALTY_ZONES.TOP_RIGHT
-      ? 0.34 + input.power * 0.18
-      : 0.18 + input.power * 0.12;
+    zone ===
+      PENALTY_ZONES.TOP_LEFT ||
+    zone ===
+      PENALTY_ZONES.TOP_RIGHT
+      ? 0.34 +
+        input.power * 0.18
+      : 0.18 +
+        input.power * 0.12;
 
-  /* Shot bend */
   const lateralCurve =
-    zone === PENALTY_ZONES.TOP_LEFT ||
-    zone === PENALTY_ZONES.BOTTOM_LEFT
-      ? -0.025 * input.power
-      : zone === PENALTY_ZONES.TOP_RIGHT ||
-        zone === PENALTY_ZONES.BOTTOM_RIGHT
-      ? 0.025 * input.power
+    zone ===
+      PENALTY_ZONES.TOP_LEFT ||
+    zone ===
+      PENALTY_ZONES.BOTTOM_LEFT
+      ? -0.025 *
+        input.power
+      : zone ===
+          PENALTY_ZONES.TOP_RIGHT ||
+        zone ===
+          PENALTY_ZONES.BOTTOM_RIGHT
+      ? 0.025 *
+        input.power
       : 0;
 
   return {
@@ -116,37 +144,52 @@ export function getBallPosition(
   shot,
   progress
 ) {
-  const t = clamp01(progress);
+  const t =
+    clamp01(progress);
 
-  const start = START_POINT;
-  const end = shot.target;
+  const start =
+    START_POINT;
 
-  /* Main trajectory */
+  const end =
+    shot.target;
+
   const peakY =
-    Math.min(start.y, end.y) -
+    Math.min(
+      start.y,
+      end.y
+    ) -
     shot.curveHeight;
 
-  /* Horizontal base */
-  let x = lerp(start.x, end.x, t);
+  let x = lerp(
+    start.x,
+    end.x,
+    t
+  );
 
-  /* Add bend/spin */
   x +=
-    Math.sin(t * Math.PI) *
+    Math.sin(
+      t * Math.PI
+    ) *
     shot.lateralCurve;
 
-  /* Vertical */
   const yLinear = lerp(
     start.y,
     end.y,
     t
   );
 
-  const arc = 4 * t * (1 - t);
+  const arc =
+    4 *
+    t *
+    (1 - t);
 
   const y =
     yLinear -
     arc *
-      (Math.min(start.y, end.y) - peakY);
+      (Math.min(
+        start.y,
+        end.y
+      ) - peakY);
 
   return {
     x: clamp01(x),
@@ -156,6 +199,8 @@ export function getBallPosition(
 
 /* =========================
    SAVE RESOLUTION
+   FIX:
+   Ball muss wirklich Torraum erreichen
    ========================= */
 
 export function resolveShot(
@@ -164,25 +209,33 @@ export function resolveShot(
   keeperDecision
 ) {
   const dx =
-    shot.target.x - keeperPose.x;
+    shot.target.x -
+    keeperPose.x;
 
   const dy =
-    shot.target.y - keeperPose.y;
+    shot.target.y -
+    keeperPose.y;
 
-  const distance = Math.hypot(dx, dy);
+  const distance =
+    Math.hypot(
+      dx,
+      dy
+    );
 
-  /* Reaction timing bonus */
   const timingBonus =
-    keeperPose.progress >= 0.55
+    keeperPose.progress >=
+    0.55
       ? 1
-      : keeperPose.progress >= 0.35
+      : keeperPose.progress >=
+        0.35
       ? 0.82
       : 0.58;
 
-  /* Top corner shots harder */
   const difficultyMultiplier =
-    shot.zone === PENALTY_ZONES.TOP_LEFT ||
-    shot.zone === PENALTY_ZONES.TOP_RIGHT
+    shot.zone ===
+      PENALTY_ZONES.TOP_LEFT ||
+    shot.zone ===
+      PENALTY_ZONES.TOP_RIGHT
       ? 0.72
       : 1;
 
@@ -191,33 +244,58 @@ export function resolveShot(
     timingBonus *
     difficultyMultiplier;
 
-  const saved =
-    distance <= effectiveSaveRadius;
+  const rawSaved =
+    distance <=
+    effectiveSaveRadius;
 
-  let saveQuality = 'miss';
+  /* WICHTIG:
+     Goal zählt nur,
+     wenn Ball tatsächlich
+     Torbereich erreicht
+  */
+  const crossedGoalLine =
+    shot.target.y <=
+    0.68;
+
+  const saved =
+    rawSaved &&
+    crossedGoalLine;
+
+  const goal =
+    !rawSaved &&
+    crossedGoalLine;
+
+  let saveQuality =
+    'miss';
 
   if (saved) {
     if (
       distance <
-      effectiveSaveRadius * 0.45
+      effectiveSaveRadius *
+        0.45
     ) {
-      saveQuality = 'perfect';
+      saveQuality =
+        'perfect';
     } else if (
       distance <
-      effectiveSaveRadius * 0.8
+      effectiveSaveRadius *
+        0.8
     ) {
-      saveQuality = 'strong';
+      saveQuality =
+        'strong';
     } else {
-      saveQuality = 'weak';
+      saveQuality =
+        'weak';
     }
   }
 
   return {
     saved,
-    goal: !saved,
+    goal,
     distance,
     saveQuality,
-    effectiveSaveRadius
+    effectiveSaveRadius,
+    crossedGoalLine
   };
 }
 
@@ -226,23 +304,41 @@ export function resolveShot(
    ========================= */
 
 function lerp(a, b, t) {
-  return a + (b - a) * t;
-}
-
-function clamp01(value) {
-  return Math.max(
-    0,
-    Math.min(1, value)
+  return (
+    a +
+    (b - a) * t
   );
 }
 
-function randomSpread(amount) {
+function clamp01(
+  value
+) {
+  return Math.max(
+    0,
+    Math.min(
+      1,
+      value
+    )
+  );
+}
+
+function randomSpread(
+  amount
+) {
   return (
-    (Math.random() * 2 - 1) *
+    (Math.random() *
+      2 -
+      1) *
     amount
   );
 }
 
-function easeOutQuad(t) {
-  return 1 - (1 - t) * (1 - t);
+function easeOutQuad(
+  t
+) {
+  return (
+    1 -
+    (1 - t) *
+      (1 - t)
+  );
 }
