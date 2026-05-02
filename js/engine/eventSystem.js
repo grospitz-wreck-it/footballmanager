@@ -101,6 +101,15 @@ function processMatchEvent(event){
 
     const result = resolveFoul();
 
+    if (result === EVENT_TYPES.PENALTY) {
+      if (game.match?.live) {
+        game.match.live.running = false;
+      }
+
+      window.startPenaltySequence?.(event);
+
+      return true;
+    }
     const assets =
       Array.isArray(event.assets) && event.assets.length
         ? event.assets
