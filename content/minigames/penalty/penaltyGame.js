@@ -312,20 +312,36 @@ export class PenaltyGame {
 
       const ballPos = getBallFollowThrough(shot, result, progress);
       if (
-        result.saved &&
-        (result.saveQuality === "perfect" || result.saveQuality === "strong")
-      ) {
-        this.renderer.ball.style.opacity = "0";
-      } else {
-        this.renderer.ball.style.opacity = "1";
-      }
-      this.renderer.renderBall(ballPos);
-
+  result.saved &&
+  (
+    result.saveQuality === "perfect" ||
+    result.saveQuality === "strong"
+  )
+) {
+  if (this.renderer.ball) {
+  this.renderer.ball.style.opacity = "0";
+}
+} else {
+  if (this.renderer.ball) {
+  this.renderer.ball.style.opacity = "1";
+}
+}
+       
+if (
+  !result.saved ||
+  (
+    result.saveQuality !== "perfect" &&
+    result.saveQuality !== "strong"
+  )
+) {
+  this.renderer.renderBall(ballPos);
+}
+       
       this.renderer.renderKeeper(
         keeperPose,
         keeperDecision.direction,
         result.saved,
-        result.missed,
+        false,
         result.saveQuality,
       );
 
@@ -355,7 +371,12 @@ export class PenaltyGame {
       shot,
       keeperDecision,
 
-      outcome: result.goal ? "goal" : result.saved ? "saved" : "missed",
+      outcome:
+  result.goal
+    ? "goal"
+    : result.saved
+    ? "saved"
+    : "missed",
     };
 
     this.config.hooks.onRoundResolved?.({
@@ -368,22 +389,31 @@ export class PenaltyGame {
      ========================= */
 
     if (result.goal) {
-      if (this.renderer.pitch) {
-        this.renderer.pitch.classList.add("penalty-goal-hit");
+  if (this.renderer.pitch) {
+    this.renderer.pitch.classList.add("penalty-goal-hit");
 
-        setTimeout(() => {
-          this.renderer.pitch.classList.remove("penalty-goal-hit");
-        }, 500);
-      }
+    setTimeout(() => {
+      this.renderer.pitch.classList.remove("penalty-goal-hit");
+    }, 500);
+  }
 
-      this.root.classList.add("goal-shake");
+  this.root.classList.add("goal-shake");
 
-      setTimeout(() => {
-        this.root.classList.remove("goal-shake");
-      }, 420);
+  setTimeout(() => {
+    this.root.classList.remove("goal-shake");
+  }, 420);
 
-      this.ui.setFeedback("GOAL!");
-    } else if (result.saved) {
+  /* =========================
+     BALL DEEPER INTO NET
+     ========================= */
+
+  this.renderer.renderBall({
+    x: shot.target.x,
+    y: shot.target.y + 0.05,
+  });
+
+  this.ui.setFeedback("GOAL!");
+} else if (result.saved) {
 
     /* =========================
      SAVE FX
