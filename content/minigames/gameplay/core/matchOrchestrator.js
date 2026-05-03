@@ -300,48 +300,65 @@ export class MatchOrchestrator {
   }
 
   // Phase 1.6: smooth interpolation
-  interpolateTeamShapes(dt) {
-    const lerpFactor =
-      this.config.animation.playerLerpSpeed * dt;
+  // DATEI:
+ /gameplay/core/matchOrchestrator.js
 
-    const ballLerp =
-      this.config.animation.ballLerpSpeed * dt;
 
-    const applyInterpolation = (players) => {
-      players.forEach((player) => {
-        const staminaFactor =
-          player.stamina !== undefined
-            ? Math.max(0.72, player.stamina)
-            : 1;
+// SUCHEN:
+interpolateTeamShapes(dt) {
 
-        const adaptiveLerp =
-          lerpFactor *
-          (player.speed || 1) *
-          staminaFactor;
 
-        player.x +=
-          (player.targetX - player.x) *
-          adaptiveLerp;
+// GESAMTE METHODE KOMPLETT ERSETZEN MIT:
 
-        player.y +=
-          (player.targetY - player.y) *
-          adaptiveLerp;
-      });
-    };
+interpolateTeamShapes(dt) {
+  const playerLerpSpeed =
+    this.config.animation?.playerLerpSpeed || 4.5;
 
-    applyInterpolation(this.state.home);
-    applyInterpolation(this.state.away);
+  const ballLerpSpeed =
+    this.config.animation?.ballLerpSpeed || 6.5;
 
-    this.state.ball.x +=
-      (this.state.ball.targetX -
-        this.state.ball.x) *
-      ballLerp;
+  const lerpFactor =
+    playerLerpSpeed * dt;
 
-    this.state.ball.y +=
-      (this.state.ball.targetY -
-        this.state.ball.y) *
-      ballLerp;
-  }
+  const ballLerp =
+    ballLerpSpeed * dt;
+
+  const applyInterpolation = (players) => {
+    players.forEach((player) => {
+      const staminaFactor =
+        player.stamina !== undefined
+          ? Math.max(0.72, player.stamina)
+          : 1;
+
+      const adaptiveLerp =
+        lerpFactor *
+        (player.speed || 1) *
+        staminaFactor;
+
+      player.x +=
+        (player.targetX - player.x) *
+        adaptiveLerp;
+
+      player.y +=
+        (player.targetY - player.y) *
+        adaptiveLerp;
+    });
+  };
+
+  applyInterpolation(this.state.home);
+  applyInterpolation(this.state.away);
+
+  this.state.ball.x +=
+    (this.state.ball.targetX -
+      this.state.ball.x) *
+    ballLerp;
+
+  this.state.ball.y +=
+    (this.state.ball.targetY -
+      this.state.ball.y) *
+    ballLerp;
+}
+  
 
   // Phase 1.6: stamina system
   updatePlayerStamina(event) {
