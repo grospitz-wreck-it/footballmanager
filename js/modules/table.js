@@ -86,7 +86,9 @@ function getLiveTable() {
   const schedule = league.schedule || [];
   const myMatchId = game.match?.current?.id || null;
 
-  schedule.forEach((round) => {
+  schedule
+  .slice(0, game.league.currentRound + 1)
+  .forEach((round) => {
     round.forEach((match) => {
       if (!match) return;
 
