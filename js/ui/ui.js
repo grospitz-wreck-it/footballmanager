@@ -2045,10 +2045,19 @@ function pushEventIcon(type) {
    ========================= */
 
 window.startPenaltySequence = function (context = {}) {
+
+  /* =========================
+     DUPLICATE GUARD
+     ========================= */
+  if (window.__penaltyActive) return;
+  window.__penaltyActive = true;
+
   const live = game.match?.live;
 
-  if (!live) return;
-
+  if (!live) {
+    window.__penaltyActive = false;
+    return;
+  }
   /* =========================
      MATCH PAUSE
      ========================= */
@@ -2066,7 +2075,7 @@ window.startPenaltySequence = function (context = {}) {
   if (matchOverlay && overlayImage && overlayText) {
     overlayImage.src = "./gfx/events/penalty.webp";
 
-    overlayText.innerText = "PENALTY AWARDED";
+    `⚽ ELFMETER FÜR ${context.teamName || "TEAM"}`;
 
     matchOverlay.classList.remove("hidden");
 
@@ -2099,7 +2108,7 @@ window.startPenaltySequence = function (context = {}) {
 
     document.body.appendChild(penaltyRoot);
   }
-
+  penaltyRoot.style.display = "flex";
   penaltyRoot.innerHTML = `
     <div
       data-penalty-root
@@ -2186,6 +2195,7 @@ window.startPenaltySequence = function (context = {}) {
         /* =========================
            RESUME MATCH
            ========================= */
+        lastRenderedEventId = null;
         live.running = true;
 
         requestUIUpdate();
