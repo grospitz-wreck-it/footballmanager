@@ -1,5 +1,7 @@
 // /gameplay/render/gameplayCanvas.js
-// Produktionsupgrade mit field.svg Background Support
+// Phase 1.4 Refactor: TrailRenderer + Interpolation Ready
+
+import { TrailRenderer } from "./trailRenderer.js";
 
 export class GameplayCanvas {
   constructor(canvas, config, camera) {
@@ -10,10 +12,10 @@ export class GameplayCanvas {
 
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
 
-    this.trails = [];
+    this.trailRenderer = new TrailRenderer();
+
     this.highlightPulse = null;
 
-    // Existing SVG field asset
     this.fieldImage = new Image();
     this.fieldLoaded = false;
 
@@ -49,7 +51,7 @@ export class GameplayCanvas {
   }
 
   worldToScreen(x, y) {
-    const { cx, cy, zoom } = this.camera;
+    const { cx, cy, zoom } = this.camera.getState();
 
     const viewW = 1 / zoom;
     const viewH = 1 / zoom;
@@ -67,11 +69,10 @@ export class GameplayCanvas {
   }
 
   addTrail(from, to, type = "pass") {
-    this.trails.push({
+    this.trailRenderer.addTrail({
       from,
       to,
       type,
-      life: 1,
     });
   }
 
@@ -84,11 +85,7 @@ export class GameplayCanvas {
   }
 
   updateEffects() {
-    this.trails.forEach((trail) => {
-      trail.life -= 0.03;
-    });
-
-    this.trails = this.trails.filter((trail) => trail.life > 0);
+    this.trailRenderer.update();
 
     if (this.highlightPulse) {
       this.highlightPulse.life -= 0.04;
@@ -102,11 +99,9 @@ export class GameplayCanvas {
   renderPitch() {
     const ctx = this.ctx;
 
-    // Background fallback
     ctx.fillStyle = this.config.theme.bg;
     ctx.fillRect(0, 0, this.width, this.height);
 
-    // Main field asset
     if (this.fieldLoaded) {
       ctx.drawImage(
         this.fieldImage,
@@ -116,7 +111,6 @@ export class GameplayCanvas {
         this.pitch.h
       );
     } else {
-      // Fallback if SVG not loaded
       ctx.fillStyle = this.config.theme.pitch;
       ctx.fillRect(
         this.pitch.x,
@@ -126,7 +120,7 @@ export class GameplayCanvas {
       );
     }
 
-    // Zone overlays
+    // Tactical overlays
     ctx.fillStyle = "rgba(255,255,255,0.02)";
     ctx.fillRect(
       this.pitch.w * 0.33,
@@ -135,51 +129,41 @@ export class GameplayCanvas {
       this.pitch.h
     );
 
-    // Pressure side overlays
     ctx.fillStyle = "rgba(255,80,80,0.015)";
-    ctx.fillRect(this.pitch.w * 0.82, 0, this.pitch.w * 0.18, this.pitch.h);
+    ctx.fillRect(
+      this.pitch.w * 0.82,
+      0,
+      this.pitch.w * 0.18,
+      this.pitch.h
+    );
 
     ctx.fillStyle = "rgba(80,80,255,0.015)";
-    ctx.fillRect(0, 0, this.pitch.w * 0.18, this.pitch.h);
-  }
-
-  renderTrails() {
-    const ctx = this.ctx;
-
-    for (const trail of this.trails) {
-      const from = this.worldToScreen(trail.from[0], trail.from[1]);
-      const to = this.worldToScreen(trail.to[0], trail.to[1]);
-
-      if (trail.type === "shot") {
-        ctx.strokeStyle = `rgba(255,70,70,${trail.life})`;
-        ctx.lineWidth = 3;
-      } else {
-        ctx.strokeStyle = `rgba(255,255,255,${trail.life})`;
-        ctx.lineWidth = 2;
-      }
-
-      ctx.beginPath();
-      ctx.moveTo(from.x, from.y);
-      ctx.lineTo(to.x, to.y);
-      ctx.stroke();
-    }
+    ctx.fillRect(
+      0,
+      0,
+      this.pitch.w * 0.18,
+      this.pitch.h
+    );
   }
 
   renderHighlight() {
     if (!this.highlightPulse) return;
 
     const ctx = this.ctx;
-    const pulse = this.highlightPulse;
-    const pos = this.worldToScreen(pulse.x, pulse.y);
 
-    ctx.strokeStyle = `rgba(255,255,120,${pulse.life})`;
+    const pos = this.worldToScreen(
+      this.highlightPulse.x,
+      this.highlightPulse.y
+    );
+
+    ctx.strokeStyle = `rgba(255,255,120,${this.highlightPulse.life})`;
     ctx.lineWidth = 3;
 
     ctx.beginPath();
     ctx.arc(
       pos.x,
       pos.y,
-      12 + (1 - pulse.life) * 28,
+      12 + (1 - this.highlightPulse.life) * 28,
       0,
       Math.PI * 2
     );
@@ -190,44 +174,59 @@ export class GameplayCanvas {
     const ctx = this.ctx;
     const pos = this.worldToScreen(x, y);
 
-    // Outer glow
+    // Glow
     ctx.fillStyle = `${color}55`;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, radius + 3, 0, Math.PI * 2);
+    ctx.arc(
+      pos.x,
+      pos.y,
+      radius + 3,
+      0,
+      Math.PI * 2
+    );
     ctx.fill();
 
-    // Main body
+    // Main
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+    ctx.arc(
+      pos.x,
+      pos.y,
+      radius,
+      0,
+      Math.PI * 2
+    );
     ctx.fill();
 
-    // Contrast outline
+    // Outline
     ctx.strokeStyle = "rgba(0,0,0,0.35)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
 
   renderEntities(state) {
-    const zoomScale = Math.max(0.8, Math.min(1.25, this.camera.zoom));
+    const zoomScale = Math.max(
+      0.8,
+      Math.min(1.25, this.camera.zoom)
+    );
 
-    state.home.forEach((p) =>
+    state.home.forEach((player) => {
       this.drawDot(
-        p.x,
-        p.y,
+        player.x,
+        player.y,
         state.colors.home.color,
-        5.5 * zoomScale
-      )
-    );
+        5.4 * zoomScale
+      );
+    });
 
-    state.away.forEach((p) =>
+    state.away.forEach((player) => {
       this.drawDot(
-        p.x,
-        p.y,
+        player.x,
+        player.y,
         state.colors.away.color,
-        5.5 * zoomScale
-      )
-    );
+        5.4 * zoomScale
+      );
+    });
 
     this.drawDot(
       state.ball.x,
@@ -241,8 +240,14 @@ export class GameplayCanvas {
     this.updateEffects();
 
     this.renderPitch();
-    this.renderTrails();
+
+    this.trailRenderer.render(
+      this.ctx,
+      this.worldToScreen.bind(this)
+    );
+
     this.renderEntities(state);
+
     this.renderHighlight();
   }
 }
