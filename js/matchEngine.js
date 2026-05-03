@@ -531,11 +531,23 @@ function isMyMatch(match) {
   );
 }
 
+
+
+
 // =========================
 // 🎮 INIT MATCH (STRICT ID)
 // =========================
 function initMatch(round) {
-  // 🔥 FIX: game.match absichern
+  
+
+round = (round || []).filter(
+  (m) =>
+    m &&
+    typeof m === "object" &&
+    m.homeTeamId &&
+    m.awayTeamId,
+);
+  
   if (!game.match) {
     game.match = {};
   }
