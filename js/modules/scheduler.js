@@ -273,20 +273,22 @@ function updateTable(homeId, awayId, homeGoals, awayGoals) {
   const table = game.league?.current?.table;
   if (!table) return;
 
-  const home = table.find((t) => String(t.id) === String(homeId));
-  const away = table.find((t) => String(t.id) === String(awayId));
+  const home = table.find(
+    (t) => String(t.id) === String(homeId),
+  );
+
+  const away = table.find(
+    (t) => String(t.id) === String(awayId),
+  );
 
   if (!home || !away) return;
 
-  if (!home._counted) {
-    home.played++;
-    home._counted = true;
-  }
-
-  if (!away._counted) {
-    away.played++;
-    away._counted = true;
-  }
+  // =========================
+  // 📊 MATCHDAY COUNT
+  // Jedes Match zählt separat
+  // =========================
+  home.played++;
+  away.played++;
 
   home.goalsFor += homeGoals;
   home.goalsAgainst += awayGoals;
@@ -296,11 +298,22 @@ function updateTable(homeId, awayId, homeGoals, awayGoals) {
 
   if (homeGoals > awayGoals) {
     home.points += 3;
-  } else if (awayGoals > homeGoals) {
+    home.wins++;
+    away.losses++;
+  }
+
+  else if (awayGoals > homeGoals) {
     away.points += 3;
-  } else {
-    home.points += 1;
-    away.points += 1;
+    away.wins++;
+    home.losses++;
+  }
+
+  else {
+    home.points++;
+    away.points++;
+
+    home.draws++;
+    away.draws++;
   }
 }
 
