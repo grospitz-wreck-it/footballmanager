@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gameplay Sandbox V1</title>
+  <style>
+    body{margin:0;background:#050812;color:#dff;font-family:Inter,system-ui;padding:12px}
+    .wrap{max-width:520px;margin:0 auto}
+    .score{display:flex;justify-content:space-between;background:#0b1222;padding:8px 12px;border-radius:10px}
+    canvas{width:100%;aspect-ratio:16/9;display:block;margin-top:8px;border-radius:10px}
+    .feed{margin-top:8px;background:#0b1222;border-radius:10px;padding:8px;min-height:120px}
+    .feed p{margin:4px 0;font-size:14px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="score"><span id="home">HOME 0</span><span>56'</span><span id="away">AWAY 0</span></div>
+  <canvas id="pitch"></canvas>
+  <div class="feed" id="feed"></div>
+</div>
+<script type="module">
+import { gameplayConfig } from './config/gameplayConfig.js';
+import { GameLoop } from './core/gameLoop.js';
+import { MatchOrchestrator } from './core/matchOrchestrator.js';
+import { GameplayCanvas } from './render/gameplayCanvas.js';
+import { CameraController } from './render/cameraController.js';
+
+const orchestrator = new MatchOrchestrator();
+const camera = new CameraController();
+const renderer = new GameplayCanvas(document.getElementById('pitch'), gameplayConfig, camera);
+const feed = document.getElementById('feed');
+const home = document.getElementById('home');
+const away = document.getElementById('away');
+
+const loop = new GameLoop({
+  tickRate: gameplayConfig.tickRate,
+  onTick: (dt) => {
+    orchestrator.tick(dt);
+    const events = orchestrator.queue.drain();
+    for (const e of events) {
+      if (e.camera) camera.setFocus(e.camera);
+      const row = document.createElement('p');
+      row.textContent = `${e.timelineText} (Momentum: ${e.momentum.toFixed(2)})`;
+      feed.prepend(row);
+      home.textContent = `HOME ${orchestrator.state.score.home}`;
+      away.textContent = `AWAY ${orchestrator.state.score.away}`;
+    }
+  },
+  onRender: () => renderer.render(orchestrator.state)
+});
+loop.start();
+</script>
+</body>
+</html>
