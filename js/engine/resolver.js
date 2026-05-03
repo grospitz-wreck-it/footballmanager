@@ -45,41 +45,53 @@ export function resolveShot({ shooter, keeper }) {
   return EVENT_TYPES.SHOT_MISS;
 }
 
-// =========================
-// 🚫 FOUL RESOLUTION
-// =========================
+
 // =========================
 // 🚫 FOUL RESOLUTION
 // =========================
 export function resolveFoul(context = {}) {
-  const attackPosition =
-  context.attackPosition;
+  const attackPosition = context.attackPosition;
 
-if (!attackPosition) {
-  return EVENT_TYPES.FOUL;
-}
+  if (!attackPosition) {
+    return EVENT_TYPES.FOUL;
+  }
 
   /* =========================
-     PENALTY CHECK
+     🧪 TEST MODE: IMMER ELFMETER
      ========================= */
-
-  const inPenaltyBox =
-  attackPosition.x >= 0.14 &&
-  attackPosition.x <= 0.86 &&
-  attackPosition.y <= 0.42;
-
-if (inPenaltyBox) {
-  if (
-    Math.random() < 0.55
-  ) {
+  if (window.DEBUG_PENALTY_MODE === true) {
     return EVENT_TYPES.PENALTY;
   }
-}
+
+  /* =========================
+     PENALTY BOX CHECK
+     ========================= */
+  const inPenaltyBox =
+    attackPosition.x >= 0.12 &&
+    attackPosition.x <= 0.88 &&
+    attackPosition.y <= 0.42;
+
+  if (inPenaltyBox) {
+    let penaltyChance = 0.38;
+
+    if (context.intensity === "high") {
+      penaltyChance += 0.12;
+    }
+
+    if ((context.minute || 0) > 70) {
+      penaltyChance += 0.08;
+    }
+
+    penaltyChance = Math.max(0.2, Math.min(0.65, penaltyChance));
+
+    if (Math.random() < penaltyChance) {
+      return EVENT_TYPES.PENALTY;
+    }
+  }
 
   /* =========================
      CARD LOGIC
      ========================= */
-
   const r = Math.random();
 
   if (r < RULES.foul.red) {
@@ -92,7 +104,6 @@ if (inPenaltyBox) {
 
   return EVENT_TYPES.FOUL;
 }
-
 // =========================
 // ⚔️ DUEL RESOLUTION
 // =========================
