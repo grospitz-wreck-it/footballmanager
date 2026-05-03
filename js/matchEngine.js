@@ -303,22 +303,6 @@ function applyGameEventEffect(event, ctx) {
   );
 
   // =========================
-  // ⏱ GLOBAL FREMDMATCH SYNC
-  // Läuft unabhängig vom Eventtyp
-  // =========================
-  if (
-    liveMinute > 0 &&
-    typeof simulateLiveMatchMinute === "function"
-  ) {
-    simulateLiveMatchMinute(
-      game.league?.current?.schedule?.[
-        game.league.currentRound
-      ],
-      liveMinute,
-    );
-  }
-
-  // =========================
   // ⚽ GOAL EVENT
   // =========================
   if (type === "goal") {
@@ -329,7 +313,6 @@ function applyGameEventEffect(event, ctx) {
       : ctx.match.awayTeamId;
 
     const player = getRandomPlayer(teamId);
-    const relatedPlayer = getRandomPlayer(teamId);
 
     // =========================
     // 🔥 USER MATCH SCORE UPDATE
@@ -359,86 +342,80 @@ function applyGameEventEffect(event, ctx) {
     }
 
     // =========================
-    // 📊 POST-GOAL FREMDMATCH RESYNC
-    // =========================
-    if (
-      typeof simulateLiveMatchMinute === "function"
-    ) {
-      simulateLiveMatchMinute(
-        game.league?.current?.schedule?.[
-          game.league.currentRound
-        ],
-        liveMinute,
-      );
-    }
-
-    // =========================
     // 🔥 FINAL EVENT EMIT
     // =========================
     emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
       playerId: player?.id,
-      relatedPlayerId: relatedPlayer?.id,
+      relatedPlayerId: getRandomPlayer(teamId)?.id,
       outcome: EVENT_OUTCOMES.SUCCESS,
     });
-
-    return;
   }
 
   // =========================
   // 🚫 FOUL EVENT
   // =========================
-  if (type === "foul") {
+  else if (type === "foul") {
     emitMatchEvent(EVENT_TYPES.FOUL, {
       teamId:
         Math.random() < 0.5
           ? ctx.match.homeTeamId
           : ctx.match.awayTeamId,
     });
-
-    return;
   }
 
   // =========================
   // 📐 CORNER EVENT
   // =========================
-  if (type === "corner") {
+  else if (type === "corner") {
     emitMatchEvent(EVENT_TYPES.CORNER, {
       teamId:
         Math.random() < 0.5
           ? ctx.match.homeTeamId
           : ctx.match.awayTeamId,
     });
-
-    return;
   }
 
   // =========================
   // ⚔️ DUEL EVENT
   // =========================
-  if (type === "duel") {
+  else if (type === "duel") {
     emitMatchEvent(EVENT_TYPES.DUEL, {
       teamId:
         Math.random() < 0.5
           ? ctx.match.homeTeamId
           : ctx.match.awayTeamId,
     });
-
-    return;
   }
 
   // =========================
   // 🎯 SHOT EVENT
   // =========================
-  if (type === "shot") {
+  else if (type === "shot") {
     emitMatchEvent(EVENT_TYPES.SHOT, {
       teamId:
         Math.random() < 0.5
           ? ctx.match.homeTeamId
           : ctx.match.awayTeamId,
     });
+  }
 
-    return;
+  // =========================
+  // ⏱ GLOBAL FREMDMATCH SYNC
+  // ADDITIV / NICHT INVASIV
+  // =========================
+  if (
+    liveMinute > 0 &&
+    liveMinute <= 90 &&
+    liveMinute % 5 === 0 &&
+    typeof simulateLiveMatchMinute === "function"
+  ) {
+    simulateLiveMatchMinute(
+      game.league?.current?.schedule?.[
+        game.league.currentRound
+      ],
+      liveMinute,
+    );
   }
 }
 // =========================
