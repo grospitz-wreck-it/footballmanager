@@ -299,10 +299,6 @@ export class MatchOrchestrator {
     this.state.ball.targetY = event.ball[1];
   }
 
-  // Phase 1.6: smooth interpolation
-  // DATEI:
- /gameplay/core/matchOrchestrator.js
-
 interpolateTeamShapes(dt) {
   const playerLerpSpeed =
     this.config.animation?.playerLerpSpeed || 4.5;
