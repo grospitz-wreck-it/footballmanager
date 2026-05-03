@@ -64,13 +64,17 @@ if (!attackPosition) {
      ========================= */
 
   const inPenaltyBox =
-    attackPosition.x >= 0.18 &&
-    attackPosition.x <= 0.82 &&
-    attackPosition.y <= 0.32;
+  attackPosition.x >= 0.14 &&
+  attackPosition.x <= 0.86 &&
+  attackPosition.y <= 0.42;
 
-  if (inPenaltyBox) {
+if (inPenaltyBox) {
+  if (
+    Math.random() < 0.55
+  ) {
     return EVENT_TYPES.PENALTY;
   }
+}
 
   /* =========================
      CARD LOGIC
