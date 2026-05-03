@@ -290,12 +290,18 @@ function updateTable(homeId, awayId, homeGoals, awayGoals) {
   home.played++;
   away.played++;
 
+  // =========================
+  // ⚽ GOALS
+  // =========================
   home.goalsFor += homeGoals;
   home.goalsAgainst += awayGoals;
 
   away.goalsFor += awayGoals;
   away.goalsAgainst += homeGoals;
 
+  // =========================
+  // 🏆 RESULT
+  // =========================
   if (homeGoals > awayGoals) {
     home.points += 3;
     home.wins++;
