@@ -88,6 +88,8 @@ function getLiveTable() {
 
   schedule.forEach((round) => {
     round.forEach((match) => {
+      if (!match) return;
+
       const home = table.find(
         (t) => t.id === String(match.homeTeamId),
       );
@@ -104,32 +106,37 @@ function getLiveTable() {
       const isMyMatch = myMatchId && match.id === myMatchId;
 
       // =========================
-      // 🔴 NUR DEIN SPIEL LIVE
+      // 🔴 USER MATCH LIVE
       // =========================
-      if (isMyMatch) {
-        h = game.match?.live?.score?.home ?? 0;
-        a = game.match?.live?.score?.away ?? 0;
+      if (isMyMatch && game.match?.live) {
+        h = Number(game.match.live.score?.home ?? 0);
+        a = Number(game.match.live.score?.away ?? 0);
       }
 
       // =========================
-      // 🟢 ANDERE SPIELE:
-      // NUR FIXE STATUS
+      // ⚽ LIVE FREMDMATCH
       // =========================
-      else if (match.finished && match.result) {
-        h = match.result.home;
-        a = match.result.away;
+      else if (match.live && !match.finished) {
+        h = Number(match.homeGoals ?? 0);
+        a = Number(match.awayGoals ?? 0);
       }
 
-      else if (
-        game.match?.live?.minute >= 90 &&
-        match.homeGoals !== undefined
-      ) {
-        h = match.homeGoals;
-        a = match.awayGoals;
+      // =========================
+      // 🏁 FINISHED MATCH
+      // =========================
+      else if (match.finished || match.result || match._processed) {
+        h = Number(match.result?.home ?? match.homeGoals ?? 0);
+        a = Number(match.result?.away ?? match.awayGoals ?? 0);
       }
 
       else {
         return;
+      }
+
+      // 🔒 NaN Guard
+      if (Number.isNaN(h) || Number.isNaN(a)) {
+        h = 0;
+        a = 0;
       }
 
       // =========================
