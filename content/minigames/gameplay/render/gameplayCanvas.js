@@ -1,3 +1,6 @@
+// /gameplay/render/gameplayCanvas.js
+// Produktionsupgrade mit field.svg Background Support
+
 export class GameplayCanvas {
   constructor(canvas, config, camera) {
     this.canvas = canvas;
@@ -9,6 +12,16 @@ export class GameplayCanvas {
 
     this.trails = [];
     this.highlightPulse = null;
+
+    // Existing SVG field asset
+    this.fieldImage = new Image();
+    this.fieldLoaded = false;
+
+    this.fieldImage.onload = () => {
+      this.fieldLoaded = true;
+    };
+
+    this.fieldImage.src = "/gfx/field.svg";
 
     this.resize();
     window.addEventListener("resize", () => this.resize());
@@ -28,10 +41,10 @@ export class GameplayCanvas {
     this.height = h;
 
     this.pitch = {
-      x: 8,
-      y: 8,
-      w: w - 16,
-      h: h - 16,
+      x: 0,
+      y: 0,
+      w: w,
+      h: h,
     };
   }
 
@@ -88,41 +101,46 @@ export class GameplayCanvas {
 
   renderPitch() {
     const ctx = this.ctx;
-    const { x, y, w, h } = this.pitch;
 
-    // Background
+    // Background fallback
     ctx.fillStyle = this.config.theme.bg;
     ctx.fillRect(0, 0, this.width, this.height);
 
-    // Pitch
-    ctx.fillStyle = this.config.theme.pitch;
-    ctx.fillRect(x, y, w, h);
+    // Main field asset
+    if (this.fieldLoaded) {
+      ctx.drawImage(
+        this.fieldImage,
+        this.pitch.x,
+        this.pitch.y,
+        this.pitch.w,
+        this.pitch.h
+      );
+    } else {
+      // Fallback if SVG not loaded
+      ctx.fillStyle = this.config.theme.pitch;
+      ctx.fillRect(
+        this.pitch.x,
+        this.pitch.y,
+        this.pitch.w,
+        this.pitch.h
+      );
+    }
 
-    // Central zone shading
-    ctx.fillStyle = "rgba(255,255,255,0.03)";
-    ctx.fillRect(x + w * 0.33, y, w * 0.34, h);
+    // Zone overlays
+    ctx.fillStyle = "rgba(255,255,255,0.02)";
+    ctx.fillRect(
+      this.pitch.w * 0.33,
+      0,
+      this.pitch.w * 0.34,
+      this.pitch.h
+    );
 
-    // Borders
-    ctx.strokeStyle = this.config.theme.line;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x, y, w, h);
+    // Pressure side overlays
+    ctx.fillStyle = "rgba(255,80,80,0.015)";
+    ctx.fillRect(this.pitch.w * 0.82, 0, this.pitch.w * 0.18, this.pitch.h);
 
-    // Midline
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, y);
-    ctx.lineTo(x + w / 2, y + h);
-    ctx.stroke();
-
-    // Center circle
-    ctx.beginPath();
-    ctx.arc(x + w / 2, y + h / 2, h * 0.12, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Left penalty box
-    ctx.strokeRect(x, y + h * 0.3, w * 0.08, h * 0.4);
-
-    // Right penalty box
-    ctx.strokeRect(x + w * 0.92, y + h * 0.3, w * 0.08, h * 0.4);
+    ctx.fillStyle = "rgba(80,80,255,0.015)";
+    ctx.fillRect(0, 0, this.pitch.w * 0.18, this.pitch.h);
   }
 
   renderTrails() {
@@ -132,12 +150,13 @@ export class GameplayCanvas {
       const from = this.worldToScreen(trail.from[0], trail.from[1]);
       const to = this.worldToScreen(trail.to[0], trail.to[1]);
 
-      ctx.strokeStyle =
-        trail.type === "shot"
-          ? `rgba(255,80,80,${trail.life})`
-          : `rgba(255,255,255,${trail.life})`;
-
-      ctx.lineWidth = trail.type === "shot" ? 3 : 2;
+      if (trail.type === "shot") {
+        ctx.strokeStyle = `rgba(255,70,70,${trail.life})`;
+        ctx.lineWidth = 3;
+      } else {
+        ctx.strokeStyle = `rgba(255,255,255,${trail.life})`;
+        ctx.lineWidth = 2;
+      }
 
       ctx.beginPath();
       ctx.moveTo(from.x, from.y);
@@ -157,7 +176,13 @@ export class GameplayCanvas {
     ctx.lineWidth = 3;
 
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 12 + (1 - pulse.life) * 30, 0, Math.PI * 2);
+    ctx.arc(
+      pos.x,
+      pos.y,
+      12 + (1 - pulse.life) * 28,
+      0,
+      Math.PI * 2
+    );
     ctx.stroke();
   }
 
@@ -165,33 +190,50 @@ export class GameplayCanvas {
     const ctx = this.ctx;
     const pos = this.worldToScreen(x, y);
 
+    // Outer glow
+    ctx.fillStyle = `${color}55`;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, radius + 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Main body
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Outline for contrast
+    // Contrast outline
     ctx.strokeStyle = "rgba(0,0,0,0.35)";
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
 
   renderEntities(state) {
-    const zoomScale = Math.max(0.8, Math.min(1.3, this.camera.zoom));
+    const zoomScale = Math.max(0.8, Math.min(1.25, this.camera.zoom));
 
     state.home.forEach((p) =>
-      this.drawDot(p.x, p.y, state.colors.home.color, 6 * zoomScale)
+      this.drawDot(
+        p.x,
+        p.y,
+        state.colors.home.color,
+        5.5 * zoomScale
+      )
     );
 
     state.away.forEach((p) =>
-      this.drawDot(p.x, p.y, state.colors.away.color, 6 * zoomScale)
+      this.drawDot(
+        p.x,
+        p.y,
+        state.colors.away.color,
+        5.5 * zoomScale
+      )
     );
 
     this.drawDot(
       state.ball.x,
       state.ball.y,
       this.config.theme.ball,
-      4 * zoomScale
+      3.8 * zoomScale
     );
   }
 
