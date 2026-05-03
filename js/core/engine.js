@@ -121,37 +121,46 @@ function handleMainAction() {
 // =========================
 // 🏁 START MATCH
 // =========================
-function startMatch() {
+function startMatch(){
+
   // =========================
-  // 🔥 PREVIOUS MATCH SAVE GUARD
+  // 🔥 FORCE SAVE PREVIOUS USER MATCH
   // =========================
   if (
     game.match?._scheduleRef &&
-    !game.match._scheduleRef._processed &&
-    game.match?.score
+    game.match?.score &&
+    !game.match._scheduleRef._processed
   ) {
+    const prevMatch = game.match._scheduleRef;
+
     const hg = Number(game.match.score.home ?? 0);
     const ag = Number(game.match.score.away ?? 0);
 
-    game.match._scheduleRef.result = {
+    prevMatch.result = {
       home: hg,
       away: ag,
     };
 
-    game.match._scheduleRef.homeGoals = hg;
-    game.match._scheduleRef.awayGoals = ag;
+    prevMatch.homeGoals = hg;
+    prevMatch.awayGoals = ag;
 
-    game.match._scheduleRef.finished = true;
-    game.match._scheduleRef._processed = true;
+    prevMatch.finished = true;
+    prevMatch.live = false;
+    prevMatch.status = "FT";
+    prevMatch._processed = true;
 
     updateTable(
-      game.match._scheduleRef.homeTeamId,
-      game.match._scheduleRef.awayTeamId,
+      prevMatch.homeTeamId,
+      prevMatch.awayTeamId,
       hg,
       ag,
     );
 
-    console.log("💾 PREVIOUS MATCH FORCE-SAVED");
+    console.log("💾 USER MATCH HARD-SAVED:", {
+      home: prevMatch.homeTeamId,
+      away: prevMatch.awayTeamId,
+      score: `${hg}:${ag}`,
+    });
   }
 
   console.log("🚀 START MATCH");
