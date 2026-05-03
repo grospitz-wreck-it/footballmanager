@@ -302,26 +302,73 @@ function applyGameEventEffect(event, ctx) {
   if (type === "goal") {
     const isHome = Math.random() < 0.5;
 
-    const teamId = isHome ? ctx.match.homeTeamId : ctx.match.awayTeamId;
+    const teamId = isHome
+      ? ctx.match.homeTeamId
+      : ctx.match.awayTeamId;
 
     const player = getRandomPlayer(teamId);
 
-    // 🔥 SCORE UPDATE
+    // =========================
+    // 🔥 USER MATCH SCORE UPDATE
+    // =========================
     if (isHome) {
       game.match.live.score.home++;
-      game.match.score.home++;
-    } else {
-      game.match.live.score.away++;
-      game.match.score.away++;
+
+      if (game.match.score) {
+        game.match.score.home++;
+      }
     }
 
-    // 🔥 FINAL EMIT
+    else {
+      game.match.live.score.away++;
+
+      if (game.match.score) {
+        game.match.score.away++;
+      }
+    }
+
+    // =========================
+    // 📊 LIVE ROUND UPDATE
+    // Fremdspiele fortschreiben
+    // =========================
+    if (
+      game.match?.live?.minute % 5 === 0 &&
+      typeof simulateLiveMatchMinute === "function"
+    ) {
+      simulateLiveMatchMinute(
+        game.league?.current?.schedule?.[
+          game.league.currentRound
+        ],
+        game.match.live.minute,
+      );
+    }
+
+    // =========================
+    // 🔥 FINAL EVENT EMIT
+    // =========================
     emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
       playerId: player?.id,
       relatedPlayerId: getRandomPlayer(teamId)?.id,
       outcome: EVENT_OUTCOMES.SUCCESS,
     });
+  }
+
+  // =========================
+  // ⏱ GENERELLER MATCH TIMER SYNC
+  // Auch ohne Goal Events
+  // =========================
+  if (
+    game.match?.live?.minute > 0 &&
+    game.match.live.minute % 5 === 0 &&
+    typeof simulateLiveMatchMinute === "function"
+  ) {
+    simulateLiveMatchMinute(
+      game.league?.current?.schedule?.[
+        game.league.currentRound
+      ],
+      game.match.live.minute,
+    );
   }
 }
 // =========================
