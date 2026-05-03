@@ -248,12 +248,12 @@ function emitMatchEvent(type, payload = {}) {
   let teamName = null;
 
   if (teamId) {
-  const isHome = String(teamId) === String(match.homeTeamId);
+    const isHome = String(teamId) === String(match.homeTeamId);
 
-  teamName = isHome
-    ? (match.home?.name || getTeamNameById(teamId))
-    : (match.away?.name || getTeamNameById(teamId));
-}
+    teamName = isHome
+      ? match.home?.name || getTeamNameById(teamId)
+      : match.away?.name || getTeamNameById(teamId);
+  }
 
   // 🔥 PLAYER NAME RESOLVE
   let playerName = null;
@@ -294,16 +294,12 @@ function emitMatchEvent(type, payload = {}) {
 function applyGameEventEffect(event, ctx) {
   if (!event || !ctx?.match) return;
 
-  const type = String(
-    event.type || event.effect || "",
-  ).toLowerCase();
+  const type = String(event.type || event.effect || "").toLowerCase();
 
   // =========================
   // 🔥 LIVE MINUTE SAFE
   // =========================
-  const liveMinute = Number(
-    game.match?.live?.minute ?? 0,
-  );
+  const liveMinute = Number(game.match?.live?.minute ?? 0);
 
   // =========================
   // ⚽ GOAL EVENT
@@ -311,9 +307,7 @@ function applyGameEventEffect(event, ctx) {
   if (type === "goal") {
     const isHome = Math.random() < 0.5;
 
-    const teamId = isHome
-      ? ctx.match.homeTeamId
-      : ctx.match.awayTeamId;
+    const teamId = isHome ? ctx.match.homeTeamId : ctx.match.awayTeamId;
 
     const player = getRandomPlayer(teamId);
 
@@ -334,9 +328,7 @@ function applyGameEventEffect(event, ctx) {
     if (isHome) {
       game.match.live.score.home++;
       game.match.score.home++;
-    }
-
-    else {
+    } else {
       game.match.live.score.away++;
       game.match.score.away++;
     }
@@ -354,10 +346,7 @@ function applyGameEventEffect(event, ctx) {
   // =========================
   else if (type === "foul") {
     emitMatchEvent(EVENT_TYPES.FOUL, {
-      teamId:
-        Math.random() < 0.5
-          ? ctx.match.homeTeamId
-          : ctx.match.awayTeamId,
+      teamId: Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId,
     });
   }
 
@@ -366,10 +355,7 @@ function applyGameEventEffect(event, ctx) {
   // =========================
   else if (type === "corner") {
     emitMatchEvent(EVENT_TYPES.CORNER, {
-      teamId:
-        Math.random() < 0.5
-          ? ctx.match.homeTeamId
-          : ctx.match.awayTeamId,
+      teamId: Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId,
     });
   }
 
@@ -378,10 +364,7 @@ function applyGameEventEffect(event, ctx) {
   // =========================
   else if (type === "duel") {
     emitMatchEvent(EVENT_TYPES.DUEL, {
-      teamId:
-        Math.random() < 0.5
-          ? ctx.match.homeTeamId
-          : ctx.match.awayTeamId,
+      teamId: Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId,
     });
   }
 
@@ -390,10 +373,7 @@ function applyGameEventEffect(event, ctx) {
   // =========================
   else if (type === "shot") {
     emitMatchEvent(EVENT_TYPES.SHOT, {
-      teamId:
-        Math.random() < 0.5
-          ? ctx.match.homeTeamId
-          : ctx.match.awayTeamId,
+      teamId: Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId,
     });
   }
 
@@ -407,9 +387,7 @@ function applyGameEventEffect(event, ctx) {
     typeof simulateLiveMatchMinute === "function"
   ) {
     simulateLiveMatchMinute(
-      game.league?.current?.schedule?.[
-        game.league.currentRound
-      ],
+      game.league?.current?.schedule?.[game.league.currentRound],
       liveMinute,
     );
   }
@@ -531,23 +509,14 @@ function isMyMatch(match) {
   );
 }
 
-
-
-
 // =========================
 // 🎮 INIT MATCH (STRICT ID)
 // =========================
 function initMatch(round) {
-  
+  round = (round || []).filter(
+    (m) => m && typeof m === "object" && m.homeTeamId && m.awayTeamId,
+  );
 
-round = (round || []).filter(
-  (m) =>
-    m &&
-    typeof m === "object" &&
-    m.homeTeamId &&
-    m.awayTeamId,
-);
-  
   if (!game.match) {
     game.match = {};
   }
@@ -770,15 +739,13 @@ function createShot(ctx) {
   });
 }
 
-  /* =========================
+/* =========================
      EMIT EVENT
      ========================= */
 
-  function createFoul(ctx) {
+function createFoul(ctx) {
   const teamId =
-    Math.random() < 0.5
-      ? ctx.match.homeTeamId
-      : ctx.match.awayTeamId;
+    Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId;
 
   const player = getRandomPlayer(teamId);
 
@@ -799,10 +766,7 @@ function createShot(ctx) {
   const resolvedType = resolveFoul({
     attackPosition,
     minute: game.match?.live?.minute || 0,
-    intensity:
-      Math.random() < 0.35
-        ? "high"
-        : "normal",
+    intensity: Math.random() < 0.35 ? "high" : "normal",
   });
 
   console.log("📦 createFoul resolved:", resolvedType);
@@ -1079,7 +1043,7 @@ function runMatchLoop({ onTick, onEnd } = {}) {
 
     while (accumulator >= STEP && safety < 10) {
       live.minute++;
-    document.body?.classList.add("match-live");
+      document.body?.classList.add("match-live");
       // =========================
       // ⚡ ANDERE MATCHES LIVE
       // =========================
@@ -1185,7 +1149,7 @@ function runMatchLoop({ onTick, onEnd } = {}) {
           const hg = game.match.score.home;
           const ag = game.match.score.away;
 
-          updateTable(home, away, hg, ag);
+          updateTable(match.homeTeamId, match.awayTeamId, hg, ag);
         }
         document.body?.classList.remove("match-live");
         clearInterval(matchInterval);
