@@ -1282,11 +1282,16 @@ function ensureLiveTableLoop() {
   if (liveTableInterval) return;
 
   liveTableInterval = setInterval(() => {
-    // 🔥 extra guard
-    if (game.ui?.tab !== "table") return;
+  if (game.ui?.tab !== "table") return;
 
-    renderLiveTable();
-  }, 1000);
+  renderLiveTable();
+
+  if (typeof renderScheduleModule === "function") {
+    renderScheduleModule();
+  }
+
+  game.ui.dirty = true;
+}, 1000);
 }
 
 // =========================
