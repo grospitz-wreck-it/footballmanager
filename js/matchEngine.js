@@ -248,10 +248,12 @@ function emitMatchEvent(type, payload = {}) {
   let teamName = null;
 
   if (teamId) {
-    const isHome = String(teamId) === String(match.homeTeamId);
+  const isHome = String(teamId) === String(match.homeTeamId);
 
-    teamName = isHome ? match.home?.name : match.away?.name;
-  }
+  teamName = isHome
+    ? (match.home?.name || getTeamNameById(teamId))
+    : (match.away?.name || getTeamNameById(teamId));
+}
 
   // 🔥 PLAYER NAME RESOLVE
   let playerName = null;
