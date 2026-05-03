@@ -352,16 +352,19 @@ function simulateLiveMatchMinute(round, minute) {
     // =========================
     // 🟢 INIT
     // =========================
-    if (minute === 0) {
-      match.live = true;
-      match.finished = false;
-      match.status = "LIVE";
+   if (
+  match.homeGoals === undefined ||
+  match.awayGoals === undefined
+) {
+  match.live = true;
+  match.finished = false;
+  match.status = "LIVE";
 
-      match.homeGoals = 0;
-      match.awayGoals = 0;
+  match.homeGoals = 0;
+  match.awayGoals = 0;
 
-      return;
-    }
+  return;
+}
 
     // =========================
     // ⚽ DYNAMISCHE SPIELSIMULATION
