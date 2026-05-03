@@ -303,13 +303,6 @@ export class MatchOrchestrator {
   // DATEI:
  /gameplay/core/matchOrchestrator.js
 
-
-// SUCHEN:
-interpolateTeamShapes(dt) {
-
-
-// GESAMTE METHODE KOMPLETT ERSETZEN MIT:
-
 interpolateTeamShapes(dt) {
   const playerLerpSpeed =
     this.config.animation?.playerLerpSpeed || 4.5;
