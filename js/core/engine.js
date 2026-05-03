@@ -2,11 +2,16 @@
 // 📦 IMPORTS
 // =========================
 import { updateUI } from "../ui/ui.js";
-import { renderTable, renderLiveTable } from "../modules/table.js";
+import {
+  renderTable,
+  renderLiveTable,
+} from "../modules/table.js";
+
 import {
   renderSchedule,
   nextMatch,
   advanceSchedule,
+  updateTable, // 🔥 NEU
 } from "../modules/scheduler.js";
 
 import { game } from "./state.js";
@@ -14,7 +19,9 @@ import { game } from "./state.js";
 import { emit } from "./events.js";
 import { EVENTS } from "./events.constants.js";
 
-// 🔥 FIX: richtiger Pfad!
+// =========================
+// 🎮 MATCH ENGINE
+// =========================
 import {
   initMatch,
   runMatchLoop,
