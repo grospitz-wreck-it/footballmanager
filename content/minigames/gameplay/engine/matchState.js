@@ -1,43 +1,65 @@
 // /gameplay/engine/matchState.js
+// Phase 1.5 Upgrade: echte Zielpositionen + Bewegungsdynamik
 
 export function createInitialMatchState(config) {
+  const createPlayer = (
+    id,
+    role,
+    x,
+    y
+  ) => ({
+    id,
+    role,
+
+    // Current position
+    x,
+    y,
+
+    // Movement target
+    targetX: x,
+    targetY: y,
+
+    speed:
+      role === "ST" || role.includes("W")
+        ? 1.15
+        : role.includes("CM")
+        ? 1
+        : 0.92,
+
+    stamina: 1,
+  });
+
   const createFormation = (side) => {
     if (side === "home") {
       return [
-        // Defensive line
-        { id: "H1", role: "LB", x: 0.12, y: 0.2 },
-        { id: "H2", role: "CB", x: 0.14, y: 0.4 },
-        { id: "H3", role: "CB", x: 0.14, y: 0.6 },
-        { id: "H4", role: "RB", x: 0.12, y: 0.8 },
+        createPlayer("H1", "LB", 0.12, 0.2),
+        createPlayer("H2", "CB", 0.14, 0.4),
+        createPlayer("H3", "CB", 0.14, 0.6),
+        createPlayer("H4", "RB", 0.12, 0.8),
 
-        // Midfield
-        { id: "H5", role: "LM", x: 0.32, y: 0.25 },
-        { id: "H6", role: "CM", x: 0.34, y: 0.5 },
-        { id: "H7", role: "RM", x: 0.32, y: 0.75 },
+        createPlayer("H5", "LM", 0.32, 0.25),
+        createPlayer("H6", "CM", 0.34, 0.5),
+        createPlayer("H7", "RM", 0.32, 0.75),
 
-        // Attack
-        { id: "H8", role: "LW", x: 0.58, y: 0.28 },
-        { id: "H9", role: "ST", x: 0.64, y: 0.5 },
-        { id: "H10", role: "RW", x: 0.58, y: 0.72 },
+        createPlayer("H8", "LW", 0.58, 0.28),
+        createPlayer("H9", "ST", 0.64, 0.5),
+        createPlayer("H10", "RW", 0.58, 0.72),
       ];
     }
 
     return [
-      // Defensive line
-      { id: "A1", role: "LB", x: 0.88, y: 0.2 },
-      { id: "A2", role: "CB", x: 0.86, y: 0.4 },
-      { id: "A3", role: "CB", x: 0.86, y: 0.6 },
-      { id: "A4", role: "RB", x: 0.88, y: 0.8 },
+      createPlayer("A1", "LB", 0.88, 0.2),
+      createPlayer("A2", "CB", 0.86, 0.4),
+      createPlayer("A3", "CB", 0.86, 0.6),
+      createPlayer("A4", "RB", 0.88, 0.8),
 
-      // Midfield
-      { id: "A5", role: "LM", x: 0.68, y: 0.25 },
-      { id: "A6", role: "CM", x: 0.66, y: 0.5 },
-      { id: "A7", role: "RM", x: 0.68, y: 0.75 },
+      createPlayer("A5", "LM", 0.68, 0.25),
+      createPlayer("A6", "CM", 0.66, 0.5),
+      createPlayer("A7", "RM", 0.68, 0.75),
 
-      // Attack
-      { id: "A8", role: "LW", x: 0.42, y: 0.28 },
-      { id: "A9", role: "ST", x: 0.36, y: 0.5 },
-      { id: "A10", role: "RW", x: 0.42, y: 0.72 },
+      createPlayer("A8", "LW", 0.42, 0.28),
+      createPlayer("A9", "ST", 0.36, 0.5),
+      createPlayer("A10", "RW", 0.42, 0.72),
     ];
   };
 
@@ -45,7 +67,8 @@ export function createInitialMatchState(config) {
     phase: "IDLE",
 
     clock: {
-      minute: config.matchStartMinute || 53,
+      minute:
+        config.matchStartMinute || 53,
       second: 0,
     },
 
@@ -57,17 +80,25 @@ export function createInitialMatchState(config) {
     ball: {
       x: 0.22,
       y: 0.52,
+
+      targetX: 0.22,
+      targetY: 0.52,
+
       owner: "HOME",
-      speed: 0,
-      target: null,
+      speed: 1,
     },
 
     home: createFormation("home"),
     away: createFormation("away"),
 
     tactical: {
-      home: config.tacticalProfiles?.home || null,
-      away: config.tacticalProfiles?.away || null,
+      home:
+        config.tacticalProfiles?.home ||
+        null,
+
+      away:
+        config.tacticalProfiles?.away ||
+        null,
     },
 
     momentum: {
