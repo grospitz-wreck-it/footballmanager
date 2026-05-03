@@ -570,6 +570,29 @@ function initUI() {
   });
 
   // =========================
+// ⚽ PENALTY EVENT LISTENER
+// =========================
+on(EVENTS.MATCH_EVENT, (event) => {
+  if (!event) return;
+
+  console.log("📡 UI MATCH EVENT:", event);
+
+  if (event.type === "PENALTY") {
+    console.log("🚨 PENALTY DETECTED IN UI");
+
+    if (typeof window.startPenaltySequence === "function") {
+      window.startPenaltySequence({
+        teamId: event.teamId,
+        teamName: event.teamName,
+        playerId: event.playerId,
+      });
+    } else {
+      console.warn("❌ startPenaltySequence missing");
+    }
+  }
+});
+  
+  // =========================
   // ⚙️ TACTICS BUTTON
   // =========================
   const tacticsBtn = document.getElementById("tacticsBtn");
