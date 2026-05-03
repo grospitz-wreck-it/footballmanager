@@ -115,6 +115,38 @@ function handleMainAction() {
 // 🏁 START MATCH
 // =========================
 function startMatch() {
+  // =========================
+  // 🔥 PREVIOUS MATCH SAVE GUARD
+  // =========================
+  if (
+    game.match?._scheduleRef &&
+    !game.match._scheduleRef._processed &&
+    game.match?.score
+  ) {
+    const hg = Number(game.match.score.home ?? 0);
+    const ag = Number(game.match.score.away ?? 0);
+
+    game.match._scheduleRef.result = {
+      home: hg,
+      away: ag,
+    };
+
+    game.match._scheduleRef.homeGoals = hg;
+    game.match._scheduleRef.awayGoals = ag;
+
+    game.match._scheduleRef.finished = true;
+    game.match._scheduleRef._processed = true;
+
+    updateTable(
+      game.match._scheduleRef.homeTeamId,
+      game.match._scheduleRef.awayTeamId,
+      hg,
+      ag,
+    );
+
+    console.log("💾 PREVIOUS MATCH FORCE-SAVED");
+  }
+
   console.log("🚀 START MATCH");
 
   const match = nextMatch();
