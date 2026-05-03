@@ -21,7 +21,6 @@ import { saveGame } from "./services/storage.js"; // 🔥 FIXED
 
 import { getPositionWeights } from "./engine/positionEngine.js";
 import { getPlayerRating } from "./engine/playerEngine.js";
-import { resolveFoul } from "./engine/eventResolver.js";
 import { getTacticModifier } from "./engine/tacticsEngine.js";
 
 import {
