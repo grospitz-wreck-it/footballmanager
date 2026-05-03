@@ -86,56 +86,64 @@ function startBackgroundSimulation() {
 
     const myTeamId = normalizeId(game.team?.selectedId);
 
-    round.forEach((match) => {
-      if (
-        normalizeId(match.homeTeamId) === myTeamId ||
-        normalizeId(match.awayTeamId) === myTeamId
+    round
+      .filter(
+        (match) =>
+          match &&
+          typeof match === "object" &&
+          match.homeTeamId &&
+          match.awayTeamId,
       )
-        return;
+      .forEach((match) => {
+        if (
+          normalizeId(match.homeTeamId) === myTeamId ||
+          normalizeId(match.awayTeamId) === myTeamId
+        )
+          return;
 
-      if (match._processed || match.live?.running === false) return;
+        if (match._processed || match.live?.running === false) return;
 
-      if (!match.live) {
-        match.live = {
-          minute: 0,
-          score: { home: 0, away: 0 },
-          running: true,
-          started: false,
-          startDelay: Math.random() * 6,
-        };
-      }
-
-      if (!match.live.started) {
-        match.live.startDelay -= 2;
-        if (match.live.startDelay > 0) return;
-        match.live.started = true;
-      }
-
-      const timeStep = Math.floor(Math.random() * 5) + 1;
-      match.live.minute += timeStep;
-
-      const goalChance = 0.18;
-
-      if (Math.random() < goalChance) {
-        if (Math.random() < 0.5) {
-          match.live.score.home++;
-        } else {
-          match.live.score.away++;
+        if (!match.live) {
+          match.live = {
+            minute: 0,
+            score: { home: 0, away: 0 },
+            running: true,
+            started: false,
+            startDelay: Math.random() * 6,
+          };
         }
-      }
 
-      if (match.live.minute >= 90) {
-        match.live.minute = 90;
-        match.live.running = false;
+        if (!match.live.started) {
+          match.live.startDelay -= 2;
+          if (match.live.startDelay > 0) return;
+          match.live.started = true;
+        }
 
-        match.result = {
-          home: match.live.score.home,
-          away: match.live.score.away,
-        };
+        const timeStep = Math.floor(Math.random() * 5) + 1;
+        match.live.minute += timeStep;
 
-        match._processed = true;
-      }
-    });
+        const goalChance = 0.18;
+
+        if (Math.random() < goalChance) {
+          if (Math.random() < 0.5) {
+            match.live.score.home++;
+          } else {
+            match.live.score.away++;
+          }
+        }
+
+        if (match.live.minute >= 90) {
+          match.live.minute = 90;
+          match.live.running = false;
+
+          match.result = {
+            home: match.live.score.home,
+            away: match.live.score.away,
+          };
+
+          match._processed = true;
+        }
+      });
 
     const schedule = league?.schedule;
 
