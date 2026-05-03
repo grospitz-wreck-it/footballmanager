@@ -727,17 +727,45 @@ function createFoul(ctx) {
      EMIT EVENT
      ========================= */
 
-  emitMatchEvent(
-    EVENT_TYPES.FOUL,
-    {
-      teamId,
-      playerId:
-        player?.id,
-      outcome:
-        EVENT_OUTCOMES.NEUTRAL,
-      attackPosition,
-    }
-  );
+  function createFoul(ctx) {
+  const teamId =
+    Math.random() < 0.5
+      ? ctx.match.homeTeamId
+      : ctx.match.awayTeamId;
+
+  const player = getRandomPlayer(teamId);
+
+  const attackPosition =
+    window.DEBUG_PENALTY_MODE === true
+      ? {
+          x: 0.5,
+          y: 0.18,
+        }
+      : {
+          x: Math.random() * 0.7 + 0.15,
+          y: Math.random() * 0.6,
+        };
+
+  /* =========================
+     RESOLVE FOUL FIRST
+     ========================= */
+  const resolvedType = resolveFoul({
+    attackPosition,
+    minute: game.match?.live?.minute || 0,
+    intensity:
+      Math.random() < 0.35
+        ? "high"
+        : "normal",
+  });
+
+  console.log("📦 createFoul resolved:", resolvedType);
+
+  emitMatchEvent(resolvedType, {
+    teamId,
+    playerId: player?.id,
+    outcome: EVENT_OUTCOMES.NEUTRAL,
+    attackPosition,
+  });
 }
 
 function createCorner(ctx) {
