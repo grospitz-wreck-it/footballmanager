@@ -1114,7 +1114,9 @@ function runMatchLoop({ onTick, onEnd } = {}) {
       if (live.minute >= 90) {
         live.minute = 90;
 
-        // 🔥 WICHTIG: nur EINMAL feuern
+        // =========================
+        // 🔥 FULLTIME EVENT (NUR EINMAL)
+        // =========================
         if (!live._fulltimeEmitted) {
           live._fulltimeEmitted = true;
 
@@ -1133,27 +1135,50 @@ function runMatchLoop({ onTick, onEnd } = {}) {
         live.running = false;
 
         // =========================
-        // 🔥 TABLE UPDATE (DEIN MATCH)
+        // 🏁 USER MATCH FINAL SAVE
         // =========================
         const league = game.league?.current;
         const match = game.match?.current;
 
-        if (league && match) {
-          const home = league.teams.find(
-            (t) => String(t.id) === match.homeTeamId,
-          );
-          const away = league.teams.find(
-            (t) => String(t.id) === match.awayTeamId,
-          );
+        if (league && match && !match._processed) {
+          const hg = Number(game.match.score.home ?? 0);
+          const ag = Number(game.match.score.away ?? 0);
 
-          const hg = game.match.score.home;
-          const ag = game.match.score.away;
+          // 🔥 RESULT SPEICHERN
+          match.result = {
+            home: hg,
+            away: ag,
+          };
 
+          match.homeGoals = hg;
+          match.awayGoals = ag;
+
+          match.finished = true;
+          match._processed = true;
+          match.live = false;
+          match.status = "FT";
+
+          // =========================
+          // 📊 TABELLE AKTUALISIEREN
+          // =========================
           updateTable(match.homeTeamId, match.awayTeamId, hg, ag);
+
+          console.log("✅ USER MATCH FINALIZED:", {
+            home: match.homeTeamId,
+            away: match.awayTeamId,
+            score: `${hg}:${ag}`,
+          });
         }
+
+        // =========================
+        // 🧹 CLEANUP
+        // =========================
         document.body?.classList.remove("match-live");
+
         clearInterval(matchInterval);
         matchInterval = null;
+
+        saveGame();
 
         onEnd?.();
         return;
