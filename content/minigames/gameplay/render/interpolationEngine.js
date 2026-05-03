@@ -1,15 +1,5 @@
 // /gameplay/render/interpolationEngine.js
-
-/**
- * Interpolation Engine V1.2
- *
- * Ziel:
- * Flüssigere Spieler- und Ballbewegungen
- * zwischen MatchState-Updates.
- *
- * Noch isoliert:
- * Keine Main-App Integration.
- */
+// Phase 1.5 Upgrade: echte Spielerbewegung + Formation Shift
 
 export class InterpolationEngine {
   constructor() {
@@ -41,20 +31,101 @@ export class InterpolationEngine {
     return a + (b - a) * t;
   }
 
+  smoothStep(t) {
+    return t * t * (3 - 2 * t);
+  }
+
   interpolatePlayer(prev, curr) {
+    const t = this.smoothStep(this.alpha);
+
     return {
       ...curr,
-      x: this.lerp(prev.x, curr.x, this.alpha),
-      y: this.lerp(prev.y, curr.y, this.alpha),
+      x: this.lerp(prev.x, curr.x, t),
+      y: this.lerp(prev.y, curr.y, t),
     };
   }
 
   interpolateBall(prev, curr) {
+    const t = this.smoothStep(this.alpha);
+
     return {
       ...curr,
-      x: this.lerp(prev.x, curr.x, this.alpha),
-      y: this.lerp(prev.y, curr.y, this.alpha),
+      x: this.lerp(prev.x, curr.x, t),
+      y: this.lerp(prev.y, curr.y, t),
     };
+  }
+
+  applyDynamicShape(players, side, phase, possession) {
+    return players.map((player) => {
+      let targetX = player.x;
+      let targetY = player.y;
+
+      const attacking =
+        (side === "home" && possession === "HOME") ||
+        (side === "away" && possession === "AWAY");
+
+      switch (phase) {
+        case "BUILDUP_RIGHT":
+          targetX += attacking
+            ? side === "home"
+              ? 0.025
+              : -0.025
+            : 0;
+
+          targetY += player.role.includes("R")
+            ? 0.035
+            : player.role.includes("L")
+            ? -0.01
+            : 0;
+          break;
+
+        case "BUILDUP_LEFT":
+          targetX += attacking
+            ? side === "home"
+              ? 0.025
+              : -0.025
+            : 0;
+
+          targetY += player.role.includes("L")
+            ? -0.035
+            : player.role.includes("R")
+            ? 0.01
+            : 0;
+          break;
+
+        case "THROUGH_PASS":
+          targetX += attacking
+            ? side === "home"
+              ? 0.045
+              : -0.045
+            : 0;
+          break;
+
+        case "SHOT":
+        case "BIG_CHANCE":
+          targetX += attacking
+            ? side === "home"
+              ? 0.06
+              : -0.06
+            : 0;
+          break;
+
+        case "BALL_LOSS":
+        case "INTERCEPTION":
+          targetX += attacking
+            ? side === "home"
+              ? -0.04
+              : 0.04
+            : 0;
+          break;
+      }
+
+      return {
+        ...player,
+        x: Math.max(0.02, Math.min(0.98, targetX)),
+        y: Math.max(0.05, Math.min(0.95, targetY)),
+      };
+    });
   }
 
   getInterpolatedState() {
@@ -62,17 +133,35 @@ export class InterpolationEngine {
       return this.currentState;
     }
 
+    const phase = this.currentState.phase;
+    const possession =
+      this.currentState.metadata?.possession || "HOME";
+
+    const shapedHome = this.applyDynamicShape(
+      this.currentState.home,
+      "home",
+      phase,
+      possession
+    );
+
+    const shapedAway = this.applyDynamicShape(
+      this.currentState.away,
+      "away",
+      phase,
+      possession
+    );
+
     return {
       ...this.currentState,
 
-      home: this.currentState.home.map((player, i) =>
+      home: shapedHome.map((player, i) =>
         this.interpolatePlayer(
           this.previousState.home[i],
           player
         )
       ),
 
-      away: this.currentState.away.map((player, i) =>
+      away: shapedAway.map((player, i) =>
         this.interpolatePlayer(
           this.previousState.away[i],
           player
