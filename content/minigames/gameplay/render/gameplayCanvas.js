@@ -1,30 +1,206 @@
 export class GameplayCanvas {
   constructor(canvas, config, camera) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext("2d");
     this.config = config;
     this.camera = camera;
+
+    this.dpr = Math.min(2, window.devicePixelRatio || 1);
+
+    this.trails = [];
+    this.highlightPulse = null;
+
     this.resize();
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener("resize", () => this.resize());
   }
+
   resize() {
     const w = this.canvas.clientWidth || 360;
-    this.canvas.width = w * Math.min(2, window.devicePixelRatio || 1);
-    this.canvas.height = (w / (16 / 9)) * Math.min(2, window.devicePixelRatio || 1);
+    const h = w / (this.config.canvasAspectRatio || (16 / 9));
+
+    this.canvas.width = w * this.dpr;
+    this.canvas.height = h * this.dpr;
+
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.scale(Math.min(2, window.devicePixelRatio || 1), Math.min(2, window.devicePixelRatio || 1));
+    this.ctx.scale(this.dpr, this.dpr);
+
+    this.width = w;
+    this.height = h;
+
+    this.pitch = {
+      x: 8,
+      y: 8,
+      w: w - 16,
+      h: h - 16,
+    };
   }
-  render(state) {
+
+  worldToScreen(x, y) {
+    const { cx, cy, zoom } = this.camera;
+
+    const viewW = 1 / zoom;
+    const viewH = 1 / zoom;
+
+    const left = cx - viewW / 2;
+    const top = cy - viewH / 2;
+
+    const nx = (x - left) / viewW;
+    const ny = (y - top) / viewH;
+
+    return {
+      x: this.pitch.x + nx * this.pitch.w,
+      y: this.pitch.y + ny * this.pitch.h,
+    };
+  }
+
+  addTrail(from, to, type = "pass") {
+    this.trails.push({
+      from,
+      to,
+      type,
+      life: 1,
+    });
+  }
+
+  triggerHighlight(position) {
+    this.highlightPulse = {
+      x: position[0],
+      y: position[1],
+      life: 1,
+    };
+  }
+
+  updateEffects() {
+    this.trails.forEach((trail) => {
+      trail.life -= 0.03;
+    });
+
+    this.trails = this.trails.filter((trail) => trail.life > 0);
+
+    if (this.highlightPulse) {
+      this.highlightPulse.life -= 0.04;
+
+      if (this.highlightPulse.life <= 0) {
+        this.highlightPulse = null;
+      }
+    }
+  }
+
+  renderPitch() {
     const ctx = this.ctx;
-    const w = this.canvas.clientWidth;
-    const h = this.canvas.clientHeight;
-    ctx.fillStyle = this.config.theme.bg; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = this.config.theme.pitch; ctx.fillRect(8, 8, w - 16, h - 16);
-    ctx.strokeStyle = this.config.theme.line; ctx.lineWidth = 2; ctx.strokeRect(8, 8, w - 16, h - 16);
-    ctx.beginPath(); ctx.moveTo(w / 2, 8); ctx.lineTo(w / 2, h - 8); ctx.stroke();
-    const drawDot = (x, y, color, r = 6) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(8 + x*(w-16), 8 + y*(h-16), r, 0, Math.PI*2); ctx.fill(); };
-    state.home.forEach(p => drawDot(p.x, p.y, state.colors.home.color));
-    state.away.forEach(p => drawDot(p.x, p.y, state.colors.away.color));
-    drawDot(state.ball.x, state.ball.y, this.config.theme.ball, 4);
+    const { x, y, w, h } = this.pitch;
+
+    // Background
+    ctx.fillStyle = this.config.theme.bg;
+    ctx.fillRect(0, 0, this.width, this.height);
+
+    // Pitch
+    ctx.fillStyle = this.config.theme.pitch;
+    ctx.fillRect(x, y, w, h);
+
+    // Central zone shading
+    ctx.fillStyle = "rgba(255,255,255,0.03)";
+    ctx.fillRect(x + w * 0.33, y, w * 0.34, h);
+
+    // Borders
+    ctx.strokeStyle = this.config.theme.line;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, w, h);
+
+    // Midline
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, y);
+    ctx.lineTo(x + w / 2, y + h);
+    ctx.stroke();
+
+    // Center circle
+    ctx.beginPath();
+    ctx.arc(x + w / 2, y + h / 2, h * 0.12, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Left penalty box
+    ctx.strokeRect(x, y + h * 0.3, w * 0.08, h * 0.4);
+
+    // Right penalty box
+    ctx.strokeRect(x + w * 0.92, y + h * 0.3, w * 0.08, h * 0.4);
+  }
+
+  renderTrails() {
+    const ctx = this.ctx;
+
+    for (const trail of this.trails) {
+      const from = this.worldToScreen(trail.from[0], trail.from[1]);
+      const to = this.worldToScreen(trail.to[0], trail.to[1]);
+
+      ctx.strokeStyle =
+        trail.type === "shot"
+          ? `rgba(255,80,80,${trail.life})`
+          : `rgba(255,255,255,${trail.life})`;
+
+      ctx.lineWidth = trail.type === "shot" ? 3 : 2;
+
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+    }
+  }
+
+  renderHighlight() {
+    if (!this.highlightPulse) return;
+
+    const ctx = this.ctx;
+    const pulse = this.highlightPulse;
+    const pos = this.worldToScreen(pulse.x, pulse.y);
+
+    ctx.strokeStyle = `rgba(255,255,120,${pulse.life})`;
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 12 + (1 - pulse.life) * 30, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  drawDot(x, y, color, radius = 6) {
+    const ctx = this.ctx;
+    const pos = this.worldToScreen(x, y);
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Outline for contrast
+    ctx.strokeStyle = "rgba(0,0,0,0.35)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  renderEntities(state) {
+    const zoomScale = Math.max(0.8, Math.min(1.3, this.camera.zoom));
+
+    state.home.forEach((p) =>
+      this.drawDot(p.x, p.y, state.colors.home.color, 6 * zoomScale)
+    );
+
+    state.away.forEach((p) =>
+      this.drawDot(p.x, p.y, state.colors.away.color, 6 * zoomScale)
+    );
+
+    this.drawDot(
+      state.ball.x,
+      state.ball.y,
+      this.config.theme.ball,
+      4 * zoomScale
+    );
+  }
+
+  render(state) {
+    this.updateEffects();
+
+    this.renderPitch();
+    this.renderTrails();
+    this.renderEntities(state);
+    this.renderHighlight();
   }
 }
