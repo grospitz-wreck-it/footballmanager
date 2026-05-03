@@ -1,10 +1,12 @@
 <!-- /gameplay/demo.html -->
+<!-- Phase 1.4 Full Drop-In Upgrade -->
+
 <!doctype html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Gameplay Sandbox V1.2</title>
+  <title>Gameplay Sandbox V1.4</title>
 
   <style>
     :root {
@@ -15,7 +17,6 @@
       --goal: #7CFF8A;
       --chance: #FFD95E;
       --danger: #FF6A6A;
-      --accent: #00E5FF;
     }
 
     * {
@@ -40,15 +41,12 @@
       justify-content: space-between;
       align-items: center;
       background: rgba(11,18,34,0.95);
-      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 14px;
       padding: 12px 14px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+      margin-bottom: 10px;
     }
 
     .team {
-      display: flex;
-      flex-direction: column;
       min-width: 100px;
     }
 
@@ -60,28 +58,17 @@
       font-size: 13px;
       color: var(--subtle);
       text-transform: uppercase;
-      letter-spacing: 0.08em;
     }
 
     .team-score {
       font-size: 28px;
       font-weight: 800;
-      line-height: 1;
-    }
-
-    .center-panel {
-      text-align: center;
     }
 
     .minute {
+      text-align: center;
       font-size: 26px;
       font-weight: 800;
-    }
-
-    .momentum {
-      margin-top: 4px;
-      font-size: 12px;
-      color: var(--subtle);
     }
 
     .momentum-bar {
@@ -90,36 +77,33 @@
       background: rgba(255,255,255,0.08);
       border-radius: 999px;
       overflow: hidden;
-      margin: 6px auto 0;
+      margin-top: 6px;
     }
 
     .momentum-fill {
       height: 100%;
       width: 50%;
       background: linear-gradient(90deg, #FF4D8D, #00E5FF);
-      transition: width 0.4s ease;
+      transition: width 0.35s ease;
     }
 
     canvas {
       width: 100%;
       aspect-ratio: 16 / 9;
       display: block;
-      margin-top: 10px;
       border-radius: 14px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
       background: #111;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
     }
 
     .feed {
       margin-top: 10px;
       background: rgba(11,18,34,0.96);
-      border: 1px solid rgba(255,255,255,0.06);
       border-radius: 14px;
       padding: 10px;
       min-height: 180px;
-      max-height: 240px;
+      max-height: 260px;
       overflow-y: auto;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
     }
 
     .feed-entry {
@@ -130,26 +114,21 @@
       line-height: 1.35;
       border-left: 4px solid transparent;
       background: rgba(255,255,255,0.02);
-      animation: fadeIn 0.35s ease;
     }
 
-    .feed-entry.goal {
+    .goal {
       border-color: var(--goal);
       background: rgba(124,255,138,0.08);
     }
 
-    .feed-entry.chance {
+    .chance {
       border-color: var(--chance);
       background: rgba(255,217,94,0.08);
     }
 
-    .feed-entry.danger {
+    .danger {
       border-color: var(--danger);
       background: rgba(255,106,106,0.08);
-    }
-
-    .feed-entry.standard {
-      border-color: rgba(255,255,255,0.12);
     }
 
     .debug {
@@ -159,32 +138,6 @@
       border-radius: 12px;
       font-size: 12px;
       color: var(--subtle);
-      line-height: 1.5;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(4px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 520px) {
-      .team-score {
-        font-size: 24px;
-      }
-
-      .minute {
-        font-size: 22px;
-      }
-
-      .feed {
-        min-height: 160px;
-      }
     }
   </style>
 </head>
@@ -195,58 +148,45 @@
   <!-- SCOREBOARD -->
   <div class="scoreboard">
     <div class="team left">
-      <span class="team-name" id="homeName">HOME</span>
-      <span class="team-score" id="homeScore">0</span>
+      <div class="team-name" id="homeName">HOME</div>
+      <div class="team-score" id="homeScore">0</div>
     </div>
 
     <div class="center-panel">
       <div class="minute" id="minuteDisplay">53'</div>
 
-      <div class="momentum">
-        Momentum
-        <div class="momentum-bar">
-          <div class="momentum-fill" id="momentumFill"></div>
-        </div>
+      <div class="momentum-bar">
+        <div class="momentum-fill" id="momentumFill"></div>
       </div>
     </div>
 
     <div class="team right">
-      <span class="team-name" id="awayName">AWAY</span>
-      <span class="team-score" id="awayScore">0</span>
+      <div class="team-name" id="awayName">AWAY</div>
+      <div class="team-score" id="awayScore">0</div>
     </div>
   </div>
 
-  <!-- MATCH CANVAS -->
+  <!-- MATCH -->
   <canvas id="pitch"></canvas>
 
-  <!-- EVENT FEED -->
+  <!-- FEED -->
   <div class="feed" id="feed"></div>
 
   <!-- DEBUG -->
-  <div class="debug" id="debug">
-    Phase: INIT<br />
-    Sequence: 0
-  </div>
+  <div class="debug" id="debug"></div>
 
 </div>
 
 <script type="module">
-import { gameplayConfig } from './config/gameplayConfig.js';
-import { GameLoop } from './core/gameLoop.js';
-import { MatchOrchestrator } from './core/matchOrchestrator.js';
-import { GameplayCanvas } from './render/gameplayCanvas.js';
-import { CameraController } from './render/cameraController.js';
+import { gameplayConfig } from "./config/gameplayConfig.js";
+import { GameLoop } from "./core/gameLoop.js";
+import { MatchOrchestrator } from "./core/matchOrchestrator.js";
+import { GameplayCanvas } from "./render/gameplayCanvas.js";
+import { CameraController } from "./render/cameraController.js";
+import { InterpolationEngine } from "./render/interpolationEngine.js";
+import { DebugOverlay } from "./dev/debugOverlay.js";
 
-const orchestrator = new MatchOrchestrator();
-const camera = new CameraController();
-
-const renderer = new GameplayCanvas(
-  document.getElementById("pitch"),
-  gameplayConfig,
-  camera
-);
-
-const feed = document.getElementById("feed");
+const canvas = document.getElementById("pitch");
 
 const homeScore = document.getElementById("homeScore");
 const awayScore = document.getElementById("awayScore");
@@ -257,7 +197,21 @@ const awayName = document.getElementById("awayName");
 const minuteDisplay = document.getElementById("minuteDisplay");
 const momentumFill = document.getElementById("momentumFill");
 
-const debug = document.getElementById("debug");
+const feed = document.getElementById("feed");
+const debugEl = document.getElementById("debug");
+
+const camera = new CameraController();
+const orchestrator = new MatchOrchestrator();
+
+const interpolation = new InterpolationEngine();
+
+const renderer = new GameplayCanvas(
+  canvas,
+  gameplayConfig,
+  camera
+);
+
+const debug = new DebugOverlay(debugEl);
 
 homeName.textContent = gameplayConfig.team.home.name;
 awayName.textContent = gameplayConfig.team.away.name;
@@ -269,6 +223,7 @@ function getFeedClass(type) {
 
     case "SHOT":
     case "THROUGH_PASS":
+    case "BIG_CHANCE":
       return "chance";
 
     case "FOUL":
@@ -276,28 +231,23 @@ function getFeedClass(type) {
       return "danger";
 
     default:
-      return "standard";
+      return "";
   }
 }
 
-function updateMomentumBar(momentum) {
-  const normalized = ((momentum + 1) / 2) * 100;
-  momentumFill.style.width = `${normalized}%`;
-}
+function pushFeed(event) {
+  const entry = document.createElement("div");
 
-function pushFeedEvent(event) {
-  const row = document.createElement("div");
+  entry.className = `feed-entry ${getFeedClass(event.type)}`;
 
-  row.className = `feed-entry ${getFeedClass(event.type)}`;
-
-  row.innerHTML = `
-    <strong>${event.timelineText}</strong><br />
-    <span style="color: var(--subtle)">
+  entry.innerHTML = `
+    <strong>${event.minute}' ${event.timelineText}</strong><br/>
+    <span style="color:#8bb8c7">
       Momentum: ${event.momentum.toFixed(2)}
     </span>
   `;
 
-  feed.prepend(row);
+  feed.prepend(entry);
 }
 
 function updateUI(event) {
@@ -306,23 +256,25 @@ function updateUI(event) {
 
   minuteDisplay.textContent = `${event.minute}'`;
 
-  updateMomentumBar(event.momentum);
+  const normalizedMomentum =
+    ((event.momentum + 1) / 2) * 100;
 
-  debug.innerHTML = `
-    Phase: ${orchestrator.state.phase}<br />
-    Sequence: ${orchestrator.state.metadata.sequenceStep}<br />
-    Possession: ${orchestrator.state.metadata.possession}<br />
-    Momentum: ${orchestrator.state.momentum.value.toFixed(2)}
-  `;
+  momentumFill.style.width = `${normalizedMomentum}%`;
 }
 
 const loop = new GameLoop({
   tickRate: gameplayConfig.tickRate,
 
+  interpolationEngine: interpolation,
+
+  debugOverlay: debug,
+
   onTick: (dt) => {
     orchestrator.tick(dt);
 
     camera.update(dt);
+
+    interpolation.capture(orchestrator.state);
 
     const events = orchestrator.queue.drain();
 
@@ -333,18 +285,21 @@ const loop = new GameLoop({
         camera.triggerEventFocus(event.type);
       }
 
-      pushFeedEvent(event);
-      updateUI(event);
-
-      if (event.type === "THROUGH_PASS") {
+      if (
+        event.type === "THROUGH_PASS" ||
+        event.type === "PASS"
+      ) {
         renderer.addTrail(
-          [0.44, 0.38],
+          [0.45, 0.5],
           event.ball,
           "pass"
         );
       }
 
-      if (event.type === "SHOT") {
+      if (
+        event.type === "SHOT" ||
+        event.type === "BIG_CHANCE"
+      ) {
         renderer.addTrail(
           [0.82, 0.5],
           event.ball,
@@ -357,12 +312,26 @@ const loop = new GameLoop({
       if (event.type === "GOAL") {
         renderer.triggerHighlight(event.ball);
       }
+
+      pushFeed(event);
+      updateUI(event);
     }
+
+    debug.updateMatchState(
+      orchestrator.state,
+      gameplayConfig.tickRate
+    );
   },
 
   onRender: () => {
-    renderer.render(orchestrator.state);
-  }
+    const interpolated =
+      interpolation.getInterpolatedState() ||
+      orchestrator.state;
+
+    renderer.render(interpolated);
+
+    debug.render();
+  },
 });
 
 loop.start();
