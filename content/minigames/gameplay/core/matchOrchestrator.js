@@ -1,5 +1,5 @@
 // /gameplay/core/matchOrchestrator.js
-// Phase 1.4 Harmonized Production Upgrade
+// Phase 1.5 Harmonized Production Upgrade (syntax reviewed)
 
 import { gameplayConfig } from "../config/gameplayConfig.js";
 import { tacticalProfiles } from "../config/tacticalProfiles.js";
@@ -8,10 +8,7 @@ import { createInitialMatchState } from "../engine/matchState.js";
 import { EventQueue } from "../engine/eventQueue.js";
 import { SequenceEngine } from "../engine/sequenceEngine.js";
 
-import {
-  createMatchEvent,
-  EVENT_TYPES,
-} from "../engine/eventContract.js";
+import { createMatchEvent, EVENT_TYPES } from "../engine/eventContract.js";
 
 import { demoScenario } from "../dev/demoScenario.js";
 
@@ -28,14 +25,11 @@ export class MatchOrchestrator {
 
     this.queue = new EventQueue();
 
-    this.sequence = new SequenceEngine(
-      options.scenario || demoScenario,
-      {
-        randomize: true,
-        loop: false,
-        tacticalProfiles,
-      }
-    );
+    this.sequence = new SequenceEngine(options.scenario || demoScenario, {
+      randomize: true,
+      loop: false,
+      tacticalProfiles,
+    });
 
     this.momentum = new MomentumModel();
 
@@ -77,69 +71,45 @@ export class MatchOrchestrator {
       this.hooks.onEvent(event, this.state);
     }
 
-    if (
-      event.type === EVENT_TYPES.GOAL &&
-      this.hooks.onGoal
-    ) {
+    if (event.type === EVENT_TYPES.GOAL && this.hooks.onGoal) {
       this.hooks.onGoal(event, this.state);
     }
   }
 
   buildMatchEvent(rawEvent) {
-    const minute =
-      rawEvent.minute ??
-      this.state.clock.minute;
+    const minute = rawEvent.minute ?? this.state.clock.minute;
 
-    const second =
-      rawEvent.second ??
-      this.state.clock.second;
+    const second = rawEvent.second ?? this.state.clock.second;
 
     const momentum = this.momentum.applyEvent(
       rawEvent.type,
       this.state.score,
-      minute
+      minute,
     );
 
     return createMatchEvent({
       minute,
       second,
 
-      type:
-        rawEvent.type ||
-        EVENT_TYPES.PASS,
+      type: rawEvent.type || EVENT_TYPES.PASS,
 
-      team:
-        rawEvent.team ||
-        this.state.metadata.possession,
+      team: rawEvent.team || this.state.metadata.possession,
 
       teamName:
         rawEvent.teamName ||
-        (
-          this.state.metadata.possession === "HOME"
-            ? this.config.team.home.name
-            : this.config.team.away.name
-        ),
+        (this.state.metadata.possession === "HOME"
+          ? this.config.team.home.name
+          : this.config.team.away.name),
 
-      playerName:
-        rawEvent.playerName ||
-        null,
+      playerName: rawEvent.playerName || null,
 
-      ball:
-        rawEvent.ball ||
-        [
-          this.state.ball.x,
-          this.state.ball.y,
-        ],
+      ball: rawEvent.ball || [this.state.ball.x, this.state.ball.y],
 
-      camera:
-        rawEvent.camera || null,
+      camera: rawEvent.camera || null,
 
-      timelineText:
-        rawEvent.timelineText ||
-        rawEvent.type,
+      timelineText: rawEvent.timelineText || rawEvent.type,
 
-      intensity:
-        rawEvent.intensity || 1,
+      intensity: rawEvent.intensity || 1,
 
       momentum,
 
@@ -153,8 +123,7 @@ export class MatchOrchestrator {
       },
 
       metadata: {
-        sequenceStep:
-          this.state.metadata.sequenceStep,
+        sequenceStep: this.state.metadata.sequenceStep,
       },
     });
   }
@@ -172,8 +141,7 @@ export class MatchOrchestrator {
     this.state.metadata.sequenceStep += 1;
 
     this.state.momentum.value = event.momentum;
-    this.state.momentum.dominantTeam =
-      this.momentum.getDominantSide();
+    this.state.momentum.dominantTeam = this.momentum.getDominantSide();
 
     switch (event.type) {
       case EVENT_TYPES.BALL_WIN:
@@ -184,9 +152,7 @@ export class MatchOrchestrator {
       case EVENT_TYPES.INTERCEPTION:
       case EVENT_TYPES.BALL_LOSS:
         this.state.metadata.possession =
-          this.state.metadata.possession === "HOME"
-            ? "AWAY"
-            : "HOME";
+          this.state.metadata.possession === "HOME" ? "AWAY" : "HOME";
         break;
 
       case EVENT_TYPES.GOAL:
@@ -201,22 +167,34 @@ export class MatchOrchestrator {
     this.updateTeamShapes(event);
   }
 
+  // Phase 1.5 Upgrade: echte Spielerzielbewegung
   updateTeamShapes(event) {
     let shiftX = 0;
+    let flankBias = 0;
 
     switch (event.type) {
       case EVENT_TYPES.BUILDUP_RIGHT:
+        shiftX = 0.03;
+        flankBias = 0.04;
+        break;
+
       case EVENT_TYPES.BUILDUP_LEFT:
-        shiftX = 0.025;
+        shiftX = 0.03;
+        flankBias = -0.04;
         break;
 
       case EVENT_TYPES.THROUGH_PASS:
-        shiftX = 0.045;
+        shiftX = 0.055;
         break;
 
       case EVENT_TYPES.SHOT:
       case EVENT_TYPES.BIG_CHANCE:
-        shiftX = 0.065;
+        shiftX = 0.075;
+        break;
+
+      case EVENT_TYPES.BALL_LOSS:
+      case EVENT_TYPES.INTERCEPTION:
+        shiftX = -0.045;
         break;
 
       default:
@@ -224,51 +202,51 @@ export class MatchOrchestrator {
         break;
     }
 
-    const possession =
-      this.state.metadata.possession;
+    const possession = this.state.metadata.possession;
+
+    const moveTeam = (players, direction) => {
+      players.forEach((player) => {
+        let roleFlank = 0;
+
+        if (player.role.includes("R")) {
+          roleFlank = flankBias;
+        }
+
+        if (player.role.includes("L")) {
+          roleFlank = -flankBias;
+        }
+
+        if (player.role === "CM") {
+          roleFlank = flankBias * 0.3;
+        }
+
+        const speedFactor = player.speed || 1;
+
+        player.targetX = Math.max(
+          0.03,
+          Math.min(0.97, player.x + shiftX * direction * speedFactor),
+        );
+
+        player.targetY = Math.max(
+          0.06,
+          Math.min(0.94, player.y + roleFlank * speedFactor),
+        );
+      });
+    };
 
     if (possession === "HOME") {
-      this.state.home.forEach((player) => {
-        player.x = Math.min(
-          player.x + shiftX,
-          0.96
-        );
-      });
+      moveTeam(this.state.home, 1);
 
-      this.state.away.forEach((player) => {
-        player.x = Math.min(
-          player.x + shiftX * 0.22,
-          0.94
-        );
-      });
+      moveTeam(this.state.away, 0.28);
     } else {
-      this.state.away.forEach((player) => {
-        player.x = Math.max(
-          player.x - shiftX,
-          0.04
-        );
-      });
+      moveTeam(this.state.away, -1);
 
-      this.state.home.forEach((player) => {
-        player.x = Math.max(
-          player.x - shiftX * 0.22,
-          0.06
-        );
-      });
+      moveTeam(this.state.home, -0.28);
     }
-  }
 
-  reset() {
-    this.state = createInitialMatchState({
-      ...gameplayConfig,
-      tacticalProfiles,
-    });
+    // Ball movement target
+    this.state.ball.targetX = event.ball[0];
 
-    this.sequence.reset();
-    this.momentum.reset();
-
-    this.elapsed = 0;
-
-    this.queue.clear();
+    this.state.ball.targetY = event.ball[1];
   }
 }
