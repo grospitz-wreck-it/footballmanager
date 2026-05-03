@@ -238,8 +238,9 @@ function pickEventByWeight(weights) {
 // =========================
 function emitMatchEvent(type, payload = {}) {
   const live = game.match?.live;
-  const match = game.match?.current;
-
+  const match =
+  game.match?._scheduleRef ||
+  game.match?.current;
   if (!live || !match) return;
 
   const teamId = payload.teamId;
