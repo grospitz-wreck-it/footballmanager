@@ -50,17 +50,24 @@ export function resolveShot({ shooter, keeper }) {
 // 🚫 FOUL RESOLUTION
 // =========================
 export function resolveFoul(context = {}) {
-  const attackPosition = context.attackPosition;
+  console.log("🧠 resolveFoul()", context);
 
-  if (!attackPosition) {
-    return EVENT_TYPES.FOUL;
-  }
+  const attackPosition = context.attackPosition;
 
   /* =========================
      🧪 TEST MODE: IMMER ELFMETER
      ========================= */
   if (window.DEBUG_PENALTY_MODE === true) {
+    console.log("🎯 DEBUG PENALTY MODE ACTIVE");
     return EVENT_TYPES.PENALTY;
+  }
+
+  /* =========================
+     NO POSITION DATA
+     ========================= */
+  if (!attackPosition) {
+    console.warn("⚠️ No attackPosition supplied");
+    return EVENT_TYPES.FOUL;
   }
 
   /* =========================
@@ -70,6 +77,9 @@ export function resolveFoul(context = {}) {
     attackPosition.x >= 0.12 &&
     attackPosition.x <= 0.88 &&
     attackPosition.y <= 0.42;
+
+  console.log("📍 attackPosition:", attackPosition);
+  console.log("📦 inPenaltyBox:", inPenaltyBox);
 
   if (inPenaltyBox) {
     let penaltyChance = 0.38;
@@ -84,7 +94,10 @@ export function resolveFoul(context = {}) {
 
     penaltyChance = Math.max(0.2, Math.min(0.65, penaltyChance));
 
+    console.log("🎲 penaltyChance:", penaltyChance);
+
     if (Math.random() < penaltyChance) {
+      console.log("🚨 PENALTY AWARDED");
       return EVENT_TYPES.PENALTY;
     }
   }
@@ -95,13 +108,16 @@ export function resolveFoul(context = {}) {
   const r = Math.random();
 
   if (r < RULES.foul.red) {
+    console.log("🟥 RED CARD");
     return EVENT_TYPES.RED_CARD;
   }
 
   if (r < RULES.foul.red + RULES.foul.yellow) {
+    console.log("🟨 YELLOW CARD");
     return EVENT_TYPES.YELLOW_CARD;
   }
 
+  console.log("🚫 STANDARD FOUL");
   return EVENT_TYPES.FOUL;
 }
 // =========================
