@@ -3,7 +3,11 @@
 // =========================
 import { updateUI } from "../ui/ui.js";
 import { renderTable, renderLiveTable } from "../modules/table.js";
-import { renderSchedule, nextMatch, advanceSchedule } from "../modules/scheduler.js";
+import {
+  renderSchedule,
+  nextMatch,
+  advanceSchedule,
+} from "../modules/scheduler.js";
 
 import { game } from "./state.js";
 
@@ -16,7 +20,7 @@ import {
   runMatchLoop,
   simulateOtherMatches,
   pauseMatch,
-  resumeMatch
+  resumeMatch,
 } from "../matchEngine.js";
 
 import { saveGame } from "../services/storage.js";
@@ -24,32 +28,30 @@ import { saveGame } from "../services/storage.js";
 // =========================
 // 🧠 BUTTON LABEL
 // =========================
-function updateMainButton(){
-
+function updateMainButton() {
   const btn = document.getElementById("mainButton");
-  if(!btn) return;
+  if (!btn) return;
 
   const phase = game.phase;
   const live = game.match?.live;
 
-  if(phase === "setup"){
+  if (phase === "setup") {
     btn.textContent = "Start";
     return;
   }
 
-  if(phase === "idle"){
+  if (phase === "idle") {
     btn.textContent = "Spiel starten";
     return;
   }
 
-  if(phase === "live"){
-
-    if(live?.phase === "halftime"){
+  if (phase === "live") {
+    if (live?.phase === "halftime") {
       btn.textContent = "2. Halbzeit starten";
       return;
     }
 
-    if(live?.running){
+    if (live?.running) {
       btn.textContent = "Pause";
       return;
     }
@@ -58,12 +60,12 @@ function updateMainButton(){
     return;
   }
 
-  if(phase === "postmatch"){
+  if (phase === "postmatch") {
     btn.textContent = "Nächstes Spiel";
     return;
   }
 
-  if(phase === "season_end"){
+  if (phase === "season_end") {
     btn.textContent = "Saison beendet";
     return;
   }
@@ -72,35 +74,33 @@ function updateMainButton(){
 // =========================
 // ▶️ BUTTON ACTION
 // =========================
-function handleMainAction(){
-
+function handleMainAction() {
   const live = game.match?.live;
   const phase = game.phase;
 
   console.log("▶️ Action:", phase, live);
 
-  if(phase === "postmatch"){
+  if (phase === "postmatch") {
     advanceGame();
     startMatch();
     updateMainButton();
     return;
   }
 
-  if(phase === "setup" || phase === "idle"){
+  if (phase === "setup" || phase === "idle") {
     startMatch();
     updateMainButton();
     return;
   }
 
-  if(phase === "live"){
-
-    if(live?.phase === "halftime"){
+  if (phase === "live") {
+    if (live?.phase === "halftime") {
       resumeMatch();
       updateMainButton();
       return;
     }
 
-    if(live?.running){
+    if (live?.running) {
       pauseMatch();
       updateMainButton();
       return;
@@ -114,13 +114,12 @@ function handleMainAction(){
 // =========================
 // 🏁 START MATCH
 // =========================
-function startMatch(){
-
+function startMatch() {
   console.log("🚀 START MATCH");
 
   const match = nextMatch();
 
-  if(!match){
+  if (!match) {
     game.phase = "season_end";
     updateMainButton();
     return;
@@ -132,13 +131,13 @@ function startMatch(){
   const round = game.league.schedule?.[r];
   const realMatch = match;
 
-  if(!round){
+  if (!round) {
     console.error("❌ Kein Spieltag gefunden");
     return;
   }
 
   // 🔥 Gegner simulieren
-  if(!round._simulated){
+  if (!round._simulated) {
     simulateOtherMatches(round);
     round._simulated = true;
     console.log("🧠 Spieltag simuliert:", r);
@@ -146,7 +145,7 @@ function startMatch(){
 
   const success = initMatch([realMatch]);
 
-  if(!success){
+  if (!success) {
     console.error("❌ initMatch failed");
     return;
   }
@@ -157,23 +156,24 @@ function startMatch(){
   try {
     const current = game.match?.current;
 
-    if(current){
+    if (current) {
       const pool = window.playerPool || [];
 
-      current.homePlayers = pool.filter(p =>
-        p.Team === current.home ||
-        p.team === current.home ||
-        p.club === current.home
+      current.homePlayers = pool.filter(
+        (p) =>
+          p.Team === current.home ||
+          p.team === current.home ||
+          p.club === current.home,
       );
 
-      current.awayPlayers = pool.filter(p =>
-        p.Team === current.away ||
-        p.team === current.away ||
-        p.club === current.away
+      current.awayPlayers = pool.filter(
+        (p) =>
+          p.Team === current.away ||
+          p.team === current.away ||
+          p.club === current.away,
       );
     }
-
-  } catch(e){
+  } catch (e) {
     console.warn("⚠️ Player attach failed", e);
   }
 
@@ -183,7 +183,7 @@ function startMatch(){
     running: false,
     score: { home: 0, away: 0 },
     events: [],
-    phase: "first_half"
+    phase: "first_half",
   };
 
   game.phase = "live";
@@ -197,6 +197,20 @@ function startMatch(){
 
   runMatchLoop({
     onTick: () => {
+      // =========================
+      // ⚽ FREMDMATCHES LIVE UPDATE
+      // =========================
+      if (
+        game.match?.live?.minute > 0 &&
+        game.match.live.minute <= 90 &&
+        game.match.live.minute % 5 === 0
+      ) {
+        simulateOtherMatches(
+          game.league.schedule?.[game.league.currentRound],
+          game.match.live.minute,
+        );
+      }
+
       updateUI();
       renderLiveTable();
       renderSchedule();
@@ -204,16 +218,15 @@ function startMatch(){
     },
 
     onEnd: () => {
-
       console.log("🏁 MATCH ENDE");
 
       const matchRef = game.league.schedule?.[r]?.[m];
 
-      if(matchRef){
+      if (matchRef) {
         matchRef._processed = true;
         matchRef.result = {
           home: game.match.live.score.home,
-          away: game.match.live.score.away
+          away: game.match.live.score.away,
         };
       }
 
@@ -225,15 +238,14 @@ function startMatch(){
       renderTable();
       renderSchedule();
       updateMainButton();
-    }
+    },
   });
 }
 
 // =========================
 // ➡️ ADVANCE GAME
 // =========================
-function advanceGame(){
-
+function advanceGame() {
   advanceSchedule();
 
   const schedule = game.league.schedule;
@@ -242,7 +254,7 @@ function advanceGame(){
 
   const next = schedule?.[r]?.[m];
 
-  if(!next){
+  if (!next) {
     game.phase = "season_end";
 
     saveGame();
@@ -258,7 +270,7 @@ function advanceGame(){
     running: false,
     score: { home: 0, away: 0 },
     events: [],
-    phase: "first_half"
+    phase: "first_half",
   };
 
   game.phase = "idle";
@@ -273,8 +285,4 @@ function advanceGame(){
 // =========================
 // 📦 EXPORTS
 // =========================
-export {
-  startMatch,
-  handleMainAction,
-  updateMainButton
-};
+export { startMatch, handleMainAction, updateMainButton };
