@@ -298,6 +298,9 @@ function applyGameEventEffect(event, ctx) {
     event.type || event.effect || "",
   ).toLowerCase();
 
+  // =========================
+  // 🔥 LIVE MINUTE SAFE
+  // =========================
   const liveMinute = Number(
     game.match?.live?.minute ?? 0,
   );
@@ -314,9 +317,6 @@ function applyGameEventEffect(event, ctx) {
 
     const player = getRandomPlayer(teamId);
 
-    // =========================
-    // 🔥 USER MATCH SCORE UPDATE
-    // =========================
     if (!game.match.live.score) {
       game.match.live.score = {
         home: 0,
@@ -341,9 +341,6 @@ function applyGameEventEffect(event, ctx) {
       game.match.score.away++;
     }
 
-    // =========================
-    // 🔥 FINAL EVENT EMIT
-    // =========================
     emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
       playerId: player?.id,
@@ -401,8 +398,7 @@ function applyGameEventEffect(event, ctx) {
   }
 
   // =========================
-  // ⏱ GLOBAL FREMDMATCH SYNC
-  // ADDITIV / NICHT INVASIV
+  // ⚽ FREMDMATCH SYNC
   // =========================
   if (
     liveMinute > 0 &&
