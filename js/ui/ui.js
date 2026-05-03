@@ -2075,7 +2075,7 @@ window.startPenaltySequence = function (context = {}) {
   if (matchOverlay && overlayImage && overlayText) {
     overlayImage.src = "./gfx/events/penalty.webp";
 
-    `⚽ ELFMETER FÜR ${context.teamName || "TEAM"}`;
+    overlayText.innerText = `⚽ ELFMETER FÜR ${context.teamName || "TEAM"}`;
 
     matchOverlay.classList.remove("hidden");
 
@@ -2184,13 +2184,16 @@ window.startPenaltySequence = function (context = {}) {
         /* =========================
            CLEANUP
            ========================= */
-        penaltyRoot.remove();
+       if (penaltyRoot) {
+  penaltyRoot.remove();
+}
 
-        if (matchOverlay) {
-          matchOverlay.classList.remove("show");
+if (matchOverlay) {
+  matchOverlay.classList.remove("show");
+  matchOverlay.classList.add("hidden");
+}
 
-          matchOverlay.classList.add("hidden");
-        }
+window.__penaltyActive = false;
 
         /* =========================
            RESUME MATCH
