@@ -21,6 +21,7 @@ import { saveGame } from "./services/storage.js"; // 🔥 FIXED
 
 import { getPositionWeights } from "./engine/positionEngine.js";
 import { getPlayerRating } from "./engine/playerEngine.js";
+import { resolveFoul } from "./engine/eventResolver.js";
 import { getTacticModifier } from "./engine/tacticsEngine.js";
 
 import {
@@ -664,64 +665,6 @@ function createShot(ctx) {
     outcome: EVENT_OUTCOMES.FAIL,
   });
 }
-
-function createFoul(ctx) {
-  /* =========================
-     FOUL FREQUENCY BOOST
-     ========================= */
-
-  if (
-    Math.random() > 0.55
-  ) {
-    return;
-  }
-
-  /* =========================
-     TEAM SELECTION
-     ========================= */
-
-  const teamId =
-    Math.random() < 0.5
-      ? ctx.match.homeTeamId
-      : ctx.match.awayTeamId;
-
-  /* =========================
-     PLAYER
-     ========================= */
-
-  const player =
-    getRandomPlayer(teamId);
-
-  /* =========================
-     ATTACK POSITION
-     Higher chance near box
-     ========================= */
-
-  const dangerousAttack =
-    Math.random() < 0.42;
-
-  const attackPosition =
-    dangerousAttack
-      ? {
-          x:
-            Math.random() *
-              0.72 +
-            0.14,
-
-          y:
-            Math.random() *
-              0.42,
-        }
-      : {
-          x:
-            Math.random() *
-              0.7 +
-            0.15,
-
-          y:
-            Math.random() *
-              0.75,
-        };
 
   /* =========================
      EMIT EVENT
