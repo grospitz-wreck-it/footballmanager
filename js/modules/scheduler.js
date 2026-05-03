@@ -347,38 +347,41 @@ function simulateLiveMatchMinute(round, minute) {
       String(match.homeTeamId) === myTeamId ||
       String(match.awayTeamId) === myTeamId;
 
-    // =========================
-    // 🎮 DEIN SPIEL:
-    // Weiterhin echte Live-Simulation
-    // =========================
     if (isMyMatch) return;
 
     // =========================
-    // ⚽ FREMDMATCHES:
-    // Grobe aber dynamische Live-Simulation
+    // 🟢 INIT
     // =========================
-
-    // INIT
     if (minute === 0) {
       match.live = true;
       match.finished = false;
       match.status = "LIVE";
 
-      if (match.homeGoals === undefined) match.homeGoals = 0;
-      if (match.awayGoals === undefined) match.awayGoals = 0;
+      match.homeGoals = 0;
+      match.awayGoals = 0;
 
       return;
     }
 
     // =========================
-    // ⏱ LIVE UPDATES ALLE 15 MIN
+    // ⚽ DYNAMISCHE SPIELSIMULATION
+    // Alle 5 Minuten
     // =========================
-    if (minute > 0 && minute < 90 && minute % 15 === 0) {
+    if (minute > 0 && minute < 90 && minute % 5 === 0) {
       const homeStrength = getTeamDataById(match.homeTeamId)?.strength || 60;
       const awayStrength = getTeamDataById(match.awayTeamId)?.strength || 60;
 
-      const homeChance = Math.min(0.35, homeStrength / 220);
-      const awayChance = Math.min(0.35, awayStrength / 240);
+      const strengthDiff = homeStrength - awayStrength;
+
+      const homeChance =
+        0.04 +
+        homeStrength / 1800 +
+        Math.max(0, strengthDiff) / 2500;
+
+      const awayChance =
+        0.04 +
+        awayStrength / 1850 +
+        Math.max(0, -strengthDiff) / 2600;
 
       if (Math.random() < homeChance) {
         match.homeGoals++;
@@ -388,17 +391,23 @@ function simulateLiveMatchMinute(round, minute) {
         match.awayGoals++;
       }
 
-      match.status = minute < 45 ? "LIVE" : "2H";
+      if (minute < 45) {
+        match.status = "LIVE";
+      } else {
+        match.status = "2H";
+      }
     }
 
-    // HALBZEIT
+    // =========================
+    // ⏸ HALBZEIT
+    // =========================
     if (minute === 45) {
       match.status = "HT";
       return;
     }
 
     // =========================
-    // 🏁 ENDSTAND
+    // 🏁 FULLTIME
     // =========================
     if (minute >= 90) {
       if (match.finished) return;
@@ -407,14 +416,9 @@ function simulateLiveMatchMinute(round, minute) {
       match.live = false;
       match.status = "FT";
 
-      // 🔥 Safety Finalisierung
-      if (match.homeGoals === undefined) match.homeGoals = 0;
-      if (match.awayGoals === undefined) match.awayGoals = 0;
-
-      // 🔥 Ergebnis persistieren
       match.result = {
-        home: match.homeGoals,
-        away: match.awayGoals,
+        home: match.homeGoals ?? 0,
+        away: match.awayGoals ?? 0,
       };
 
       match._processed = true;
