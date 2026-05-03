@@ -528,73 +528,109 @@ function renderSchedule() {
   }
 
   // =========================
-  // 📅 HEADER + ROUND SYNC FIX (FULL DROP-IN)
-  // Direkt in renderSchedule() ersetzen
+  // 📅 AKTUELLER SPIELTAG SYNC
   // =========================
+  const activeRound = Number(game.league?.currentRound ?? 0);
 
-  // 🔥 Echter aktiver Liga-Spieltag
-  const activeRound = Number(game.league?.current?.currentRound ?? 0);
-
-  // 🔥 View Index sauber initialisieren
-  if (typeof window.scheduleViewIndex !== "number") {
+  // 🔥 Immer mit Saisonfortschritt synchronisieren
+  if (
+    typeof window.scheduleViewIndex !== "number" ||
+    window.scheduleViewIndex < activeRound
+  ) {
     window.scheduleViewIndex = activeRound;
   }
 
-  // 🔥 Safety Clamp
+  // 🔒 Clamp
   window.scheduleViewIndex = Math.max(
     0,
     Math.min(window.scheduleViewIndex, schedule.length - 1),
   );
 
-  let selectedRound = window.scheduleViewIndex;
+  const selectedRound = window.scheduleViewIndex;
   const round = schedule[selectedRound];
-  if (!round) return;
+
+  if (!round?.length) {
+    container.innerHTML = "<p>Kein Spieltag verfügbar</p>";
+    return;
+  }
+
   // =========================
-  // 📦 HTML BUILD
+  // 📦 HEADER
   // =========================
   let html = `
-  <div class="schedule-card">
-    <div class="schedule-header">
-      <button class="prev-day" ${
-        selectedRound <= 0 ? "disabled" : ""
-      }>‹</button>
+    <div class="schedule-card">
+      <div class="schedule-header">
+        <button class="prev-day" ${
+          selectedRound <= 0 ? "disabled" : ""
+        }>‹</button>
 
-      <h3>${
-        selectedRound === activeRound
-          ? `Aktueller Spieltag ${activeRound + 1}`
-          : `Spieltag ${selectedRound + 1}`
-      }</h3>
+        <h3>${
+          selectedRound === activeRound
+            ? `Aktueller Spieltag ${activeRound + 1}`
+            : `Spieltag ${selectedRound + 1}`
+        }</h3>
 
-      <button class="next-day" ${
-        selectedRound >= schedule.length - 1 ? "disabled" : ""
-      }>›</button>
-    </div>
+        <button class="next-day" ${
+          selectedRound >= schedule.length - 1 ? "disabled" : ""
+        }>›</button>
+      </div>
 
-    <div class="schedule-list">
-`;
+      <div class="schedule-list">
+  `;
 
+  // =========================
+  // ⚽ MATCH LIST
+  // =========================
   round.forEach((match, mIndex) => {
+    if (!match) return;
+
     const isUserMatch = isMyMatch(match);
 
     const isCurrent =
-      selectedRound === game.league.currentRound &&
-      mIndex === game.league.currentMatchIndex;
+      selectedRound === activeRound &&
+      mIndex === (game.league?.currentMatchIndex ?? 0);
 
     const matchClasses = [
       "match",
-      isUserMatch ? "active my-match" : "",
+      isUserMatch ? "my-match" : "",
       isCurrent ? "current" : "",
+      match.finished ? "finished" : "",
+      match.live ? "live" : "",
     ]
       .filter(Boolean)
       .join(" ");
 
-    const centerDisplay = match.result
-      ? `<span class="score">${match.result.home}:${match.result.away}</span>`
-      : `<span class="vs">vs</span>`;
+    // =========================
+    // 🎯 SCORE / STATUS
+    // =========================
+    let centerDisplay = `<span class="vs">vs</span>`;
+
+    if (match.live && !match.finished) {
+      centerDisplay = `
+        <span class="live-score">
+          ${match.homeGoals ?? 0}:${match.awayGoals ?? 0}
+          <small>${match.status || "LIVE"}</small>
+        </span>
+      `;
+    }
+
+    else if (
+      match.finished ||
+      match.result
+    ) {
+      const homeScore = match.result?.home ?? match.homeGoals ?? 0;
+      const awayScore = match.result?.away ?? match.awayGoals ?? 0;
+
+      centerDisplay = `
+        <span class="score">
+          ${homeScore}:${awayScore}
+        </span>
+      `;
+    }
 
     html += `
-         <div class="${matchClasses}" data-match-index="${mIndex}">
-         <span class="home">${getTeamName(match.homeTeamId)}</span>
+      <div class="${matchClasses}" data-match-index="${mIndex}">
+        <span class="home">${getTeamName(match.homeTeamId)}</span>
         ${centerDisplay}
         <span class="away">${getTeamName(match.awayTeamId)}</span>
       </div>
@@ -609,7 +645,7 @@ function renderSchedule() {
   container.innerHTML = html;
 
   // =========================
-  // 🎯 MATCH CLICK EVENTS
+  // 🎯 MATCH DETAILS
   // =========================
   container.querySelectorAll(".match").forEach((el) => {
     el.addEventListener("click", () => {
@@ -623,11 +659,9 @@ function renderSchedule() {
   });
 
   // =========================
-  // ◀ ▶ NAVIGATION
+  // ◀ NAVIGATION
   // =========================
   const prevBtn = container.querySelector(".prev-day");
-  const nextBtn = container.querySelector(".next-day");
-
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
       if (window.scheduleViewIndex > 0) {
@@ -637,6 +671,10 @@ function renderSchedule() {
     });
   }
 
+  // =========================
+  // ▶ NAVIGATION
+  // =========================
+  const nextBtn = container.querySelector(".next-day");
   if (nextBtn) {
     nextBtn.addEventListener("click", () => {
       if (window.scheduleViewIndex < schedule.length - 1) {
