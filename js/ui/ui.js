@@ -2129,25 +2129,47 @@ window.startPenaltySequence = function (context = {}) {
           const isHome =
             String(context.teamId) === String(game.match.current?.homeTeamId);
 
+          /* =========================
+     REAL SCORE UPDATE
+     ========================= */
           if (isHome) {
             live.score.home += 1;
           } else {
             live.score.away += 1;
           }
 
+          /* =========================
+     EVENT LOG
+     ========================= */
           game.events.history.push({
             id: Date.now(),
             minute: live.minute,
             type: "GOAL",
+            teamId: context.teamId,
+            teamName: context.teamName,
             text: "⚽ Da verwandelt er das Ding!!!",
           });
+
+          /* =========================
+     UI FX
+     ========================= */
+          triggerGoalAnimation(isHome ? "home" : "away");
+
+          requestUIUpdate();
         } else {
+          /* =========================
+     MISSED PENALTY
+     ========================= */
           game.events.history.push({
             id: Date.now(),
             minute: live.minute,
             type: "SHOT_MISS",
+            teamId: context.teamId,
+            teamName: context.teamName,
             text: "❌ Und er verschießt!!! Das kann doch nicht sein!",
           });
+
+          requestUIUpdate();
         }
 
         /* =========================
