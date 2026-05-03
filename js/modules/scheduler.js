@@ -355,14 +355,40 @@ function simulateLiveMatchMinute(round, minute) {
 
     // =========================
     // ⚽ FREMDMATCHES:
-    // Nur grobe Statusupdates
+    // Grobe aber dynamische Live-Simulation
     // =========================
 
     // INIT
     if (minute === 0) {
       match.live = true;
+      match.finished = false;
       match.status = "LIVE";
+
+      if (match.homeGoals === undefined) match.homeGoals = 0;
+      if (match.awayGoals === undefined) match.awayGoals = 0;
+
       return;
+    }
+
+    // =========================
+    // ⏱ LIVE UPDATES ALLE 15 MIN
+    // =========================
+    if (minute > 0 && minute < 90 && minute % 15 === 0) {
+      const homeStrength = getTeamDataById(match.homeTeamId)?.strength || 60;
+      const awayStrength = getTeamDataById(match.awayTeamId)?.strength || 60;
+
+      const homeChance = Math.min(0.35, homeStrength / 220);
+      const awayChance = Math.min(0.35, awayStrength / 240);
+
+      if (Math.random() < homeChance) {
+        match.homeGoals++;
+      }
+
+      if (Math.random() < awayChance) {
+        match.awayGoals++;
+      }
+
+      match.status = minute < 45 ? "LIVE" : "2H";
     }
 
     // HALBZEIT
@@ -371,7 +397,9 @@ function simulateLiveMatchMinute(round, minute) {
       return;
     }
 
-    // ENDSTAND
+    // =========================
+    // 🏁 ENDSTAND
+    // =========================
     if (minute >= 90) {
       if (match.finished) return;
 
@@ -379,19 +407,17 @@ function simulateLiveMatchMinute(round, minute) {
       match.live = false;
       match.status = "FT";
 
-      // 🔥 Einmalige Ergebnis-Simulation
-      // 📍 Exakter Austausch:
+      // 🔥 Safety Finalisierung
+      if (match.homeGoals === undefined) match.homeGoals = 0;
+      if (match.awayGoals === undefined) match.awayGoals = 0;
 
-      if (match.homeGoals === undefined || match.awayGoals === undefined) {
-        const homeStrength = getTeamDataById(match.homeTeamId).strength;
-        const awayStrength = getTeamDataById(match.awayTeamId).strength;
+      // 🔥 Ergebnis persistieren
+      match.result = {
+        home: match.homeGoals,
+        away: match.awayGoals,
+      };
 
-        const baseHome = Math.round(Math.random() * 2 + homeStrength / 40);
-        const baseAway = Math.round(Math.random() * 2 + awayStrength / 45);
-
-        match.homeGoals = Math.max(0, baseHome);
-        match.awayGoals = Math.max(0, baseAway);
-      }
+      match._processed = true;
     }
   });
 }
