@@ -292,9 +292,31 @@ function emitMatchEvent(type, payload = {}) {
 // 🎮 GAME EVENT EFFECT HANDLER
 // =========================
 function applyGameEventEffect(event, ctx) {
-  if (!event) return;
+  if (!event || !ctx?.match) return;
 
-  const type = String(event.type || event.effect || "").toLowerCase();
+  const type = String(
+    event.type || event.effect || "",
+  ).toLowerCase();
+
+  const liveMinute = Number(
+    game.match?.live?.minute ?? 0,
+  );
+
+  // =========================
+  // ⏱ GLOBAL FREMDMATCH SYNC
+  // Läuft unabhängig vom Eventtyp
+  // =========================
+  if (
+    liveMinute > 0 &&
+    typeof simulateLiveMatchMinute === "function"
+  ) {
+    simulateLiveMatchMinute(
+      game.league?.current?.schedule?.[
+        game.league.currentRound
+      ],
+      liveMinute,
+    );
+  }
 
   // =========================
   // ⚽ GOAL EVENT
@@ -307,39 +329,46 @@ function applyGameEventEffect(event, ctx) {
       : ctx.match.awayTeamId;
 
     const player = getRandomPlayer(teamId);
+    const relatedPlayer = getRandomPlayer(teamId);
 
     // =========================
     // 🔥 USER MATCH SCORE UPDATE
     // =========================
+    if (!game.match.live.score) {
+      game.match.live.score = {
+        home: 0,
+        away: 0,
+      };
+    }
+
+    if (!game.match.score) {
+      game.match.score = {
+        home: 0,
+        away: 0,
+      };
+    }
+
     if (isHome) {
       game.match.live.score.home++;
-
-      if (game.match.score) {
-        game.match.score.home++;
-      }
+      game.match.score.home++;
     }
 
     else {
       game.match.live.score.away++;
-
-      if (game.match.score) {
-        game.match.score.away++;
-      }
+      game.match.score.away++;
     }
 
     // =========================
-    // 📊 LIVE ROUND UPDATE
-    // Fremdspiele fortschreiben
+    // 📊 POST-GOAL FREMDMATCH RESYNC
     // =========================
     if (
-      game.match?.live?.minute % 5 === 0 &&
       typeof simulateLiveMatchMinute === "function"
     ) {
       simulateLiveMatchMinute(
         game.league?.current?.schedule?.[
           game.league.currentRound
         ],
-        game.match.live.minute,
+        liveMinute,
       );
     }
 
@@ -349,26 +378,67 @@ function applyGameEventEffect(event, ctx) {
     emitMatchEvent(EVENT_TYPES.GOAL, {
       teamId,
       playerId: player?.id,
-      relatedPlayerId: getRandomPlayer(teamId)?.id,
+      relatedPlayerId: relatedPlayer?.id,
       outcome: EVENT_OUTCOMES.SUCCESS,
     });
+
+    return;
   }
 
   // =========================
-  // ⏱ GENERELLER MATCH TIMER SYNC
-  // Auch ohne Goal Events
+  // 🚫 FOUL EVENT
   // =========================
-  if (
-    game.match?.live?.minute > 0 &&
-    game.match.live.minute % 5 === 0 &&
-    typeof simulateLiveMatchMinute === "function"
-  ) {
-    simulateLiveMatchMinute(
-      game.league?.current?.schedule?.[
-        game.league.currentRound
-      ],
-      game.match.live.minute,
-    );
+  if (type === "foul") {
+    emitMatchEvent(EVENT_TYPES.FOUL, {
+      teamId:
+        Math.random() < 0.5
+          ? ctx.match.homeTeamId
+          : ctx.match.awayTeamId,
+    });
+
+    return;
+  }
+
+  // =========================
+  // 📐 CORNER EVENT
+  // =========================
+  if (type === "corner") {
+    emitMatchEvent(EVENT_TYPES.CORNER, {
+      teamId:
+        Math.random() < 0.5
+          ? ctx.match.homeTeamId
+          : ctx.match.awayTeamId,
+    });
+
+    return;
+  }
+
+  // =========================
+  // ⚔️ DUEL EVENT
+  // =========================
+  if (type === "duel") {
+    emitMatchEvent(EVENT_TYPES.DUEL, {
+      teamId:
+        Math.random() < 0.5
+          ? ctx.match.homeTeamId
+          : ctx.match.awayTeamId,
+    });
+
+    return;
+  }
+
+  // =========================
+  // 🎯 SHOT EVENT
+  // =========================
+  if (type === "shot") {
+    emitMatchEvent(EVENT_TYPES.SHOT, {
+      teamId:
+        Math.random() < 0.5
+          ? ctx.match.homeTeamId
+          : ctx.match.awayTeamId,
+    });
+
+    return;
   }
 }
 // =========================
