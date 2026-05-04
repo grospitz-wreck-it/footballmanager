@@ -26,7 +26,8 @@ export class PenaltyInput {
 
   mount(onShot) {
     this.unmount();
-
+   this.locked = false;
+     
     const onPointerDown = (event) => {
       if (this.activePointer) return;
 
@@ -59,61 +60,93 @@ export class PenaltyInput {
         event.clientY;
     };
 
-    const commitShot = (event) => {
-      if (
-        !this.activePointer ||
-        event.pointerId !==
-          this.activePointer.id
-      )
-        return;
+   const commitShot = (event) => {
+  /* =========================
+     HARD LOCK
+     verhindert Mehrfachschüsse
+     ========================= */
+  if (this.locked) return;
 
-      const elapsed =
-        performance.now() -
-        this.activePointer.startTime;
+  /* =========================
+     POINTER VALIDATION
+     ========================= */
+  if (
+    !this.activePointer ||
+    event.pointerId !== this.activePointer.id
+  ) {
+    return;
+  }
 
-      const dx =
-        event.clientX -
-        this.activePointer.startX;
+  /* =========================
+     LOCK INPUT SOFORT
+     ========================= */
+  this.locked = true;
 
-      const dy =
-        event.clientY -
-        this.activePointer.startY;
+  /* =========================
+     INPUT DATA
+     ========================= */
+  const elapsed =
+    performance.now() -
+    this.activePointer.startTime;
 
-      const swipeDistance =
-        Math.hypot(dx, dy);
+  const dx =
+    event.clientX -
+    this.activePointer.startX;
 
-      const swipeAngle = Math.atan2(
-        dy,
-        dx
-      );
+  const dy =
+    event.clientY -
+    this.activePointer.startY;
 
-      const power = this.computePower(
-        elapsed,
-        swipeDistance,
-        dy
-      );
+  const swipeDistance =
+    Math.hypot(dx, dy);
 
-      const zone = this.detectZone(
-        dx,
-        dy,
-        event.clientX,
-        event.clientY
-      );
+  const swipeAngle =
+    Math.atan2(dy, dx);
 
-      const shotData = {
-        power,
-        zone,
-        elapsed,
-        swipeDistance,
-        swipeAngle,
-        dx,
-        dy
-      };
+  /* =========================
+     POWER
+     ========================= */
+  const power = this.computePower(
+    elapsed,
+    swipeDistance,
+    dy
+  );
 
-      this.activePointer = null;
+  /* =========================
+     TARGET ZONE
+     ========================= */
+  const zone = this.detectZone(
+    dx,
+    dy,
+    event.clientX,
+    event.clientY
+  );
 
-      onShot(shotData);
-    };
+  /* =========================
+     FINAL SHOT OBJECT
+     ========================= */
+  const shotData = {
+    power,
+    zone,
+    elapsed,
+    swipeDistance,
+    swipeAngle,
+    dx,
+    dy,
+  };
+
+  /* =========================
+     CLEANUP
+     ========================= */
+  this.activePointer = null;
+
+  this.unmount();
+
+  /* =========================
+     FIRE SHOT
+     ========================= */
+  onShot(shotData);
+};
 
     const onPointerUp = (event) =>
       commitShot(event);
