@@ -1022,16 +1022,20 @@ function simulateLiveEvent(ctx) {
 // =========================
 // ▶️ CONTROL
 // =========================
-function pauseMatch() {
-  if (game.match?.live) {
-    game.match.live.running = false;
-  }
+function pauseMatch(reason = "MATCH PAUSED") {
+  if (!game.match?.live) return;
+
+  game.match.live.running = false;
+
+  console.log(`⏸ ${reason}`);
 }
 
-function resumeMatch() {
-  if (game.match?.live) {
-    game.match.live.running = true;
-  }
+function resumeMatch(reason = "MATCH RESUMED") {
+  if (!game.match?.live) return;
+
+  game.match.live.running = true;
+
+  console.log(`▶ ${reason}`);
 }
 
 // =========================
