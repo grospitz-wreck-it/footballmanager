@@ -158,3 +158,49 @@
   filter: blur(4px);
   opacity: 0.35;
 }
+.penalty-result-overlay {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 60;
+  pointer-events: none;
+
+  background: rgba(0, 0, 0, 0.18);
+
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.penalty-result-overlay.show {
+  opacity: 1;
+}
+
+.penalty-result-overlay img {
+  max-width: 52%;
+  max-height: 42%;
+
+  image-rendering: pixelated;
+
+  animation: penaltyResultPop 0.45s ease;
+}
+
+@keyframes penaltyResultPop {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
