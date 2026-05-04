@@ -1052,13 +1052,14 @@ function runMatchLoop({ onTick, onEnd } = {}) {
     const live = game.match?.live;
     const currentMatch = game.match?.current;
 
-    if (!live || !currentMatch) return;
-    if (live.phase === "bye") return;
+   if (!live || !currentMatch) return;
+if (live.phase === "bye") return;
+if (live._penaltyPause === true) return;
 
-    // =========================
-    // ⏸ PAUSE SAFE FIX
-    // =========================
-    if (live.running === false) {
+// =========================
+// ⏸ PAUSE SAFE FIX
+// =========================
+if (live.running === false) {
   lastTime = performance.now();
   accumulator = 0;
   return;
