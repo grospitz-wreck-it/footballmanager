@@ -4,6 +4,7 @@ console.log("UI LOADED");
 // =======================
 import { game } from "../core/state.js";
 import { buildCommentary } from "../engine/commentaryEngine.js";
+import { pauseMatch, resumeMatch } from "../matchEngine.js";
 import { track } from "../../tools/analytics.js";
 import { renderLiveTable } from "../modules/table.js";
 import { getPlayerTexture } from "../modules/playerGenerator/playerGenerator.js";
@@ -2068,9 +2069,6 @@ function pushEventIcon(type) {
   return;
 }
 
-/* =========================
-   ⚽ GLOBAL PENALTY SEQUENCE
-   ========================= */
 
 // =========================
 // ⚽ GLOBAL PENALTY SEQUENCE
@@ -2091,8 +2089,7 @@ window.startPenaltySequence = function (context = {}) {
   // =========================
   // ⏸ MATCH PAUSE
   // =========================
-  live.running = false;
-
+ pauseMatch("PENALTY");
   // =========================
   // 🎮 GAME CANVAS ROOT ONLY
   // =========================
@@ -2102,8 +2099,8 @@ window.startPenaltySequence = function (context = {}) {
 
   if (!gameCanvas) {
     console.warn("❌ gameCanvas missing");
-    live.running = true;
-    window.__penaltyActive = false;
+  resumeMatch("PENALTY COMPLETE")
+  window.__penaltyActive = false;
     return;
   }
 
