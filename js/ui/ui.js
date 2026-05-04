@@ -2175,7 +2175,7 @@ window.startPenaltySequence = function (context = {}) {
   // =========================
   // 🚀 START PENALTY GAME
   // =========================
-  startPenaltyGame({
+startPenaltyGame({
   rootElement,
 
   hooks: {
@@ -2191,6 +2191,7 @@ window.startPenaltySequence = function (context = {}) {
 
           game.match.current.homeGoals =
             Number(game.match.current.homeGoals || 0) + 1;
+
         } else {
           live.score.away++;
           game.match.score.away++;
@@ -2198,6 +2199,14 @@ window.startPenaltySequence = function (context = {}) {
           game.match.current.awayGoals =
             Number(game.match.current.awayGoals || 0) + 1;
         }
+
+        // =========================
+        // 🔥 HARD SCORE SYNC
+        // =========================
+        game.match.current.result = {
+          home: Number(game.match.score.home || 0),
+          away: Number(game.match.score.away || 0),
+        };
 
         game.events.history.push({
           id: Date.now(),
@@ -2234,6 +2243,12 @@ window.startPenaltySequence = function (context = {}) {
       }
 
       // =========================
+      // 🔄 FORCE SCORE/UI UPDATE
+      // =========================
+      updateScore();
+      updateEvents();
+
+      // =========================
       // 🧹 CLEANUP
       // =========================
       penaltyRoot?.remove();
@@ -2250,12 +2265,6 @@ window.startPenaltySequence = function (context = {}) {
       requestUIUpdate();
     },
   },
-});
-};
-
-requestAnimationFrame(() => {
-  if (window.DEBUG) console.log("🚀 initial UI render");
-  requestUIUpdate();
 });
 
 // =========================
