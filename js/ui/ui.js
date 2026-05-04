@@ -2090,6 +2090,7 @@ window.startPenaltySequence = function (context = {}) {
   // ⏸ MATCH PAUSE
   // =========================
  pauseMatch("PENALTY");
+  live._penaltyPause = true;
   // =========================
   // 🎮 GAME CANVAS ROOT ONLY
   // =========================
@@ -2099,6 +2100,7 @@ window.startPenaltySequence = function (context = {}) {
 
   if (!gameCanvas) {
     console.warn("❌ gameCanvas missing");
+    live._penaltyPause = false;
   resumeMatch("PENALTY COMPLETE")
   window.__penaltyActive = false;
     return;
@@ -2174,61 +2176,81 @@ window.startPenaltySequence = function (context = {}) {
   // 🚀 START PENALTY GAME
   // =========================
   startPenaltyGame({
-    rootElement,
+  rootElement,
 
-    hooks: {
-      onGameEnd: (result) => {
+  hooks: {
+    onGameEnd: (result) => {
 
-        if (result?.goal) {
-          const isHome =
-            String(context.teamId) === String(game.match.current?.homeTeamId);
+      if (result?.goal) {
+        const isHome =
+          String(context.teamId) === String(game.match.current?.homeTeamId);
 
-          if (isHome) {
-            live.score.home++;
-            game.match.score.home++;
-          } else {
-            live.score.away++;
-            game.match.score.away++;
-          }
+        if (isHome) {
+          live.score.home++;
+          game.match.score.home++;
 
-          game.events.history.push({
-            id: Date.now(),
-            minute: live.minute,
-            type: "GOAL",
-            teamId: context.teamId,
-            teamName: context.teamName,
-            text: "⚽ Da verwandelt er das Ding!!!",
-          });
-
-          triggerGoalAnimation(isHome ? "home" : "away");
+          game.match.current.homeGoals =
+            Number(game.match.current.homeGoals || 0) + 1;
         } else {
-          game.events.history.push({
-            id: Date.now(),
-            minute: live.minute,
-            type: "SHOT_MISS",
-            teamId: context.teamId,
-            teamName: context.teamName,
-            text: "❌ Und er verschießt!!!",
-          });
+          live.score.away++;
+          game.match.score.away++;
+
+          game.match.current.awayGoals =
+            Number(game.match.current.awayGoals || 0) + 1;
         }
 
-        // =========================
-        // 🧹 CLEANUP
-        // =========================
-        penaltyRoot?.remove();
+        game.events.history.push({
+          id: Date.now(),
+          minute: live.minute,
+          type: "GOAL",
+          teamId: context.teamId,
+          teamName: context.teamName,
+          text: "⚽ Da verwandelt er das Ding!!!",
+        });
 
-        window.__penaltyActive = false;
-        lastRenderedEventId = null;
+        triggerGoalAnimation(isHome ? "home" : "away");
 
-        // =========================
-        // ▶ RESUME
-        // =========================
-        live.running = true;
+      } else if (result?.saved) {
 
-        requestUIUpdate();
-      },
+        game.events.history.push({
+          id: Date.now(),
+          minute: live.minute,
+          type: "SHOT_SAVED",
+          teamId: context.teamId,
+          teamName: context.teamName,
+          text: "🧤 ELFMETER GEHALTEN!",
+        });
+
+      } else {
+
+        game.events.history.push({
+          id: Date.now(),
+          minute: live.minute,
+          type: "SHOT_MISS",
+          teamId: context.teamId,
+          teamName: context.teamName,
+          text: "❌ Und er verschießt!!!",
+        });
+      }
+
+      // =========================
+      // 🧹 CLEANUP
+      // =========================
+      penaltyRoot?.remove();
+
+      window.__penaltyActive = false;
+      live._penaltyPause = false;
+      lastRenderedEventId = null;
+
+      // =========================
+      // ▶ RESUME
+      // =========================
+      resumeMatch("PENALTY COMPLETE");
+
+      requestUIUpdate();
     },
-  });
+  },
+});
 };
 
 requestAnimationFrame(() => {
