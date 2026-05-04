@@ -2181,23 +2181,31 @@ startPenaltyGame({
   hooks: {
     onGameEnd: (result) => {
 
+      // =========================
+      // 🔒 SAFETY SCORE OBJECTS
+      // =========================
+      live.score = live.score || { home: 0, away: 0 };
+      game.match.score = game.match.score || { home: 0, away: 0 };
+      game.match.current.homeGoals =
+        Number(game.match.current.homeGoals || 0);
+      game.match.current.awayGoals =
+        Number(game.match.current.awayGoals || 0);
+
+      const homeTeamId = String(game.match.current?.homeTeamId);
+      const attackingTeamId = String(context.teamId);
+      const isHome = attackingTeamId === homeTeamId;
+
       if (result?.goal) {
-        const isHome =
-          String(context.teamId) === String(game.match.current?.homeTeamId);
 
         if (isHome) {
           live.score.home++;
           game.match.score.home++;
-
-          game.match.current.homeGoals =
-            Number(game.match.current.homeGoals || 0) + 1;
+          game.match.current.homeGoals++;
 
         } else {
           live.score.away++;
           game.match.score.away++;
-
-          game.match.current.awayGoals =
-            Number(game.match.current.awayGoals || 0) + 1;
+          game.match.current.awayGoals++;
         }
 
         // =========================
@@ -2247,6 +2255,12 @@ startPenaltyGame({
       // =========================
       updateScore();
       updateEvents();
+
+      console.log("▶ PENALTY COMPLETE", {
+        result,
+        liveScore: live.score,
+        matchScore: game.match.score,
+      });
 
       // =========================
       // 🧹 CLEANUP
