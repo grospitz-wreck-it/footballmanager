@@ -1050,7 +1050,14 @@ function runMatchLoop({ onTick, onEnd } = {}) {
 
     if (!live || !currentMatch) return;
     if (live.phase === "bye") return;
-    if (live.running === false) return;
+
+    // =========================
+    // ⏸ PAUSE SAFE FIX
+    // =========================
+    if (live.running === false) {
+      lastTime = performance.now();
+      return;
+    }
 
     const now = performance.now();
     const delta = now - lastTime;
@@ -1063,6 +1070,7 @@ function runMatchLoop({ onTick, onEnd } = {}) {
     while (accumulator >= STEP && safety < 10) {
       live.minute++;
       document.body?.classList.add("match-live");
+
       // =========================
       // ⚡ ANDERE MATCHES LIVE
       // =========================
@@ -1116,6 +1124,9 @@ function runMatchLoop({ onTick, onEnd } = {}) {
         });
       }
 
+      // =========================
+      // 🛑 HALFTIME
+      // =========================
       if (live.minute === 45 && live.phase === "first_half") {
         live.phase = "halftime";
         live.running = false;
@@ -1130,12 +1141,12 @@ function runMatchLoop({ onTick, onEnd } = {}) {
         saveGame();
       }
 
+      // =========================
+      // 🏁 FULLTIME
+      // =========================
       if (live.minute >= 90) {
         live.minute = 90;
 
-        // =========================
-        // 🔥 FULLTIME EVENT (NUR EINMAL)
-        // =========================
         if (!live._fulltimeEmitted) {
           live._fulltimeEmitted = true;
 
@@ -1153,9 +1164,6 @@ function runMatchLoop({ onTick, onEnd } = {}) {
 
         live.running = false;
 
-        // =========================
-        // 🏁 USER MATCH FINAL SAVE
-        // =========================
         const league = game.league?.current;
         const match = game.match?.current;
 
@@ -1163,7 +1171,6 @@ function runMatchLoop({ onTick, onEnd } = {}) {
           const hg = Number(game.match.score.home ?? 0);
           const ag = Number(game.match.score.away ?? 0);
 
-          // 🔥 RESULT SPEICHERN
           match.result = {
             home: hg,
             away: ag,
@@ -1177,9 +1184,6 @@ function runMatchLoop({ onTick, onEnd } = {}) {
           match.live = false;
           match.status = "FT";
 
-          // =========================
-          // 📊 TABELLE AKTUALISIEREN
-          // =========================
           updateTable(match.homeTeamId, match.awayTeamId, hg, ag);
 
           console.log("✅ USER MATCH FINALIZED:", {
@@ -1189,9 +1193,6 @@ function runMatchLoop({ onTick, onEnd } = {}) {
           });
         }
 
-        // =========================
-        // 🧹 CLEANUP
-        // =========================
         document.body?.classList.remove("match-live");
 
         clearInterval(matchInterval);
