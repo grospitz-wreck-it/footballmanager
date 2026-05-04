@@ -1059,9 +1059,10 @@ function runMatchLoop({ onTick, onEnd } = {}) {
     // ⏸ PAUSE SAFE FIX
     // =========================
     if (live.running === false) {
-      lastTime = performance.now();
-      return;
-    }
+  lastTime = performance.now();
+  accumulator = 0;
+  return;
+}
 
     const now = performance.now();
     const delta = now - lastTime;
