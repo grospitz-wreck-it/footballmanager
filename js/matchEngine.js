@@ -238,9 +238,7 @@ function pickEventByWeight(weights) {
 // =========================
 function emitMatchEvent(type, payload = {}) {
   const live = game.match?.live;
-  const match =
-  game.match?._scheduleRef ||
-  game.match?.current;
+  const match = game.match?._scheduleRef || game.match?.current;
   if (!live || !match) return;
 
   const teamId = payload.teamId;
@@ -560,8 +558,8 @@ function initMatch(round) {
     game.match.away = null;
 
     game.match.score = {
-      home: 0,
-      away: 0,
+      home: Number(playerMatch.homeGoals ?? playerMatch.result?.home ?? 0),
+      away: Number(playerMatch.awayGoals ?? playerMatch.result?.away ?? 0),
     };
 
     return {
@@ -581,20 +579,40 @@ function initMatch(round) {
     return false;
   }
 
+  // =========================
+  // 🔥 ECHTE SCHEDULE REFERENZ
+  // =========================
   game.match._scheduleRef = playerMatch;
 
-  game.match.current = {
-    id: playerMatch.id,
+  // 🔥 NICHT MEHR ALS NEUES OBJEKT KLONEN
+  game.match.current = playerMatch;
 
-    homeTeamId: homeId,
-    awayTeamId: awayId,
+  // =========================
+  // 🧠 SAFETY NORMALIZATION
+  // =========================
+  game.match.current.id = game.match.current.id || crypto.randomUUID();
 
-    home: playerMatch.home,
-    away: playerMatch.away,
+  game.match.current.homeTeamId = homeId;
+  game.match.current.awayTeamId = awayId;
 
-    result: null,
-  };
+  game.match.current.home = game.match.current.home || playerMatch.home || null;
 
+  game.match.current.away = game.match.current.away || playerMatch.away || null;
+
+  // 🔥 RESULT NICHT RESETTEN
+  if (!game.match.current.result) {
+    game.match.current.result = null;
+  }
+
+  // 🔥 SCORE FIELDS SICHERN
+  game.match.current.homeGoals = Number(game.match.current.homeGoals ?? 0);
+
+  game.match.current.awayGoals = Number(game.match.current.awayGoals ?? 0);
+
+  // 🔥 FLAGS
+  game.match.current.finished = game.match.current.finished || false;
+
+  game.match.current._processed = game.match.current._processed || false;
   try {
     autoFillLineup(homeId);
     autoFillLineup(awayId);
