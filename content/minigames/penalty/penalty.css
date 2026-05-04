@@ -9,7 +9,29 @@
   image-rendering: pixelated;
   background: #000;
 }
+.penalty-feedback {
+  position: absolute;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
 
+  font-size: 48px;
+  font-weight: bold;
+  color: #ffe66d;
+
+  text-transform: uppercase;
+  letter-spacing: 3px;
+
+  text-shadow:
+    0 0 8px rgba(0,0,0,0.9),
+    0 0 18px rgba(0,0,0,0.7),
+    0 0 28px rgba(0,247,255,0.45);
+
+  pointer-events: none;
+
+  animation: penaltyFeedbackPop 0.35s ease-out;
+}
 /* HUD bleibt */
 .penalty-hud {
   display: flex;
