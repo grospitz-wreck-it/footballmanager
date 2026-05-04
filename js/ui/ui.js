@@ -2132,15 +2132,42 @@ window.startPenaltySequence = function (context = {}) {
   penaltyRoot.style.pointerEvents = "auto";
 
   penaltyRoot.innerHTML = `
+  <div
+    data-penalty-root
+    style="
+      width:100%;
+      height:100%;
+      position:relative;
+      overflow:hidden;
+    "
+  >
     <div
-      data-penalty-root
+      data-penalty-pitch
       style="
-        width:100%;
-        height:100%;
-        position:relative;
+        position:absolute;
+        inset:0;
       "
     ></div>
-  `;
+
+    <div
+      data-penalty-keeper
+      style="
+        position:absolute;
+        width:140px;
+        height:140px;
+      "
+    ></div>
+
+    <div
+      data-penalty-ball
+      style="
+        position:absolute;
+        width:42px;
+        height:42px;
+      "
+    ></div>
+  </div>
+`;
 
   gameCanvas.appendChild(penaltyRoot);
 
