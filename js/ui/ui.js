@@ -2072,11 +2072,12 @@ function pushEventIcon(type) {
    ⚽ GLOBAL PENALTY SEQUENCE
    ========================= */
 
+// =========================
+// ⚽ GLOBAL PENALTY SEQUENCE
+// =========================
+
 window.startPenaltySequence = function (context = {}) {
 
-  /* =========================
-     DUPLICATE GUARD
-     ========================= */
   if (window.__penaltyActive) return;
   window.__penaltyActive = true;
 
@@ -2086,98 +2087,86 @@ window.startPenaltySequence = function (context = {}) {
     window.__penaltyActive = false;
     return;
   }
-  /* =========================
-     MATCH PAUSE
-     ========================= */
+
+  // =========================
+  // ⏸ MATCH PAUSE
+  // =========================
   live.running = false;
 
-  /* =========================
-     OVERLAY ROOT
-     ========================= */
-  const matchOverlay = document.getElementById("matchOverlay");
+  // =========================
+  // 🎮 GAME CANVAS ROOT ONLY
+  // =========================
+  const gameCanvas =
+    document.getElementById("gameCanvas") ||
+    document.getElementById("matchOverlay");
 
-  const overlayImage = document.getElementById("overlayImage");
-
-  const overlayText = document.getElementById("overlayText");
-
-  if (matchOverlay && overlayImage && overlayText) {
-    overlayImage.src = "./gfx/events/penalty.webp";
-
-    overlayText.innerText = `⚽ ELFMETER FÜR ${context.teamName || "TEAM"}`;
-
-    matchOverlay.classList.remove("hidden");
-
-    matchOverlay.classList.add("show");
+  if (!gameCanvas) {
+    console.warn("❌ gameCanvas missing");
+    live.running = true;
+    window.__penaltyActive = false;
+    return;
   }
 
-  /* =========================
-     PENALTY ROOT
-     ========================= */
+  // =========================
+  // 🧹 REMOVE OLD INSTANCE
+  // =========================
   let penaltyRoot = document.getElementById("penaltyGameContainer");
 
-  if (!penaltyRoot) {
-    penaltyRoot = document.createElement("div");
-
-    penaltyRoot.id = "penaltyGameContainer";
-
-    penaltyRoot.style.position = "fixed";
-
-    penaltyRoot.style.inset = "0";
-
-    penaltyRoot.style.zIndex = "9999";
-
-    penaltyRoot.style.display = "flex";
-
-    penaltyRoot.style.alignItems = "center";
-
-    penaltyRoot.style.justifyContent = "center";
-
-    penaltyRoot.style.background = "rgba(0,0,0,0.82)";
-
-    document.body.appendChild(penaltyRoot);
+  if (penaltyRoot) {
+    penaltyRoot.remove();
   }
+
+  // =========================
+  // 📦 EMBED INSIDE GAME UI
+  // =========================
+  penaltyRoot = document.createElement("div");
+  penaltyRoot.id = "penaltyGameContainer";
+
+  penaltyRoot.style.position = "absolute";
+  penaltyRoot.style.inset = "0";
+  penaltyRoot.style.zIndex = "50";
   penaltyRoot.style.display = "flex";
+  penaltyRoot.style.alignItems = "center";
+  penaltyRoot.style.justifyContent = "center";
+  penaltyRoot.style.background = "transparent";
+  penaltyRoot.style.pointerEvents = "auto";
+
   penaltyRoot.innerHTML = `
     <div
       data-penalty-root
       style="
         width:100%;
-        max-width:900px;
-        aspect-ratio:16/9;
+        height:100%;
         position:relative;
       "
     ></div>
   `;
 
+  gameCanvas.appendChild(penaltyRoot);
+
   const rootElement = penaltyRoot.querySelector("[data-penalty-root]");
 
-  /* =========================
-     START MINIGAME
-     ========================= */
+  // =========================
+  // 🚀 START PENALTY GAME
+  // =========================
   startPenaltyGame({
     rootElement,
 
     hooks: {
       onGameEnd: (result) => {
-        /* =========================
-           GOAL = REAL SCORE
-           ========================= */
+
         if (result?.goal) {
           const isHome =
             String(context.teamId) === String(game.match.current?.homeTeamId);
 
-          /* =========================
-     REAL SCORE UPDATE
-     ========================= */
           if (isHome) {
-            live.score.home += 1;
+            live.score.home++;
+            game.match.score.home++;
           } else {
-            live.score.away += 1;
+            live.score.away++;
+            game.match.score.away++;
           }
 
-          /* =========================
-     EVENT LOG
-     ========================= */
           game.events.history.push({
             id: Date.now(),
             minute: live.minute,
@@ -2187,46 +2176,29 @@ window.startPenaltySequence = function (context = {}) {
             text: "⚽ Da verwandelt er das Ding!!!",
           });
 
-          /* =========================
-     UI FX
-     ========================= */
           triggerGoalAnimation(isHome ? "home" : "away");
-
-          requestUIUpdate();
         } else {
-          /* =========================
-     MISSED PENALTY
-     ========================= */
           game.events.history.push({
             id: Date.now(),
             minute: live.minute,
             type: "SHOT_MISS",
             teamId: context.teamId,
             teamName: context.teamName,
-            text: "❌ Und er verschießt!!! Das kann doch nicht sein!",
+            text: "❌ Und er verschießt!!!",
           });
-
-          requestUIUpdate();
         }
 
-        /* =========================
-           CLEANUP
-           ========================= */
-       if (penaltyRoot) {
-  penaltyRoot.remove();
-}
+        // =========================
+        // 🧹 CLEANUP
+        // =========================
+        penaltyRoot?.remove();
 
-if (matchOverlay) {
-  matchOverlay.classList.remove("show");
-  matchOverlay.classList.add("hidden");
-}
-
-window.__penaltyActive = false;
-
-        /* =========================
-           RESUME MATCH
-           ========================= */
+        window.__penaltyActive = false;
         lastRenderedEventId = null;
+
+        // =========================
+        // ▶ RESUME
+        // =========================
         live.running = true;
 
         requestUIUpdate();
