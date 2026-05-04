@@ -330,107 +330,113 @@ if (!keeperHasBall) {
     this.rafId = requestAnimationFrame(tick);
   }
 
-  resolveShotEvent(shot, keeperPose, keeperDecision) {
-    const result = resolveShot(shot, keeperPose, keeperDecision);
+ resolveShotEvent(shot, keeperPose, keeperDecision) {
+  const result = resolveShot(shot, keeperPose, keeperDecision);
 
-    /* =========================
-       IMMEDIATE BALL RESET
-       ========================= */
+  /* =========================
+     IMMEDIATE BALL RESET
+     ========================= */
 
-    if (this.renderer.ball) {
-      this.renderer.ball.style.opacity = "1";
-    }
+  if (this.renderer.ball) {
+    this.renderer.ball.style.opacity = "1";
+  }
 
-    this.state.currentShot = null;
+  this.state.currentShot = null;
 
-    this.state.resolved = true;
+  this.state.resolved = true;
 
-    this.state.result = {
-      ...result,
-      shot,
-      keeperDecision,
+  this.state.result = {
+    ...result,
+    shot,
+    keeperDecision,
 
-      outcome: result.goal ? "goal" : result.saved ? "saved" : "missed",
-    };
+    outcome: result.goal ? "goal" : result.saved ? "saved" : "missed",
+  };
 
-    this.config.hooks.onRoundResolved?.({
-      round: 1,
-      result: this.state.result,
-    });
+  this.config.hooks.onRoundResolved?.({
+    round: 1,
+    result: this.state.result,
+  });
 
-    /* =========================
-       GOAL FX
-       ========================= */
+  /* =========================
+     GOAL FX
+     ========================= */
 
-    if (result.goal) {
-      if (this.renderer.pitch) {
-        this.renderer.pitch.classList.add("penalty-goal-hit");
-
-        setTimeout(() => {
-          this.renderer.pitch.classList.remove("penalty-goal-hit");
-        }, 500);
-      }
-
-      this.root.classList.add("goal-shake");
+  if (result.goal) {
+    if (this.renderer.pitch) {
+      this.renderer.pitch.classList.add("penalty-goal-hit");
 
       setTimeout(() => {
-        this.root.classList.remove("goal-shake");
-      }, 420);
+        this.renderer.pitch.classList.remove("penalty-goal-hit");
+      }, 500);
+    }
 
-      /* =========================
-         BALL INTO NET
-         ========================= */
+    this.root.classList.add("goal-shake");
 
-      this.renderer.renderBall({
-        x: shot.target.x,
-        y: shot.target.y + 0.05,
-      });
+    setTimeout(() => {
+      this.root.classList.remove("goal-shake");
+    }, 420);
 
-      this.ui.setFeedback("GOAL!");
-    } else if (result.saved) {
+    /* =========================
+       BALL INTO NET
+       ========================= */
+
+    this.renderer.renderBall({
+      x: shot.target.x,
+      y: shot.target.y + 0.05,
+    });
+
+    this.ui.setFeedback("GOAL!");
+    this.ui.showResultGraphic("goal");
+
+  } else if (result.saved) {
 
     /* =========================
        SAVE FX
        ========================= */
-      this.root.classList.add("save-shake");
 
-      setTimeout(() => {
-        this.root.classList.remove("save-shake");
-      }, 280);
+    this.root.classList.add("save-shake");
 
-      this.ui.setFeedback("SAVED!");
-    } else {
+    setTimeout(() => {
+      this.root.classList.remove("save-shake");
+    }, 280);
+
+    this.ui.setFeedback("SAVED!");
+    this.ui.showResultGraphic("saved");
+
+  } else {
 
     /* =========================
        MISS FX
        ========================= */
-      this.ui.setFeedback("MISSED!");
-    }
 
-    /* =========================
-       FINAL BALL RESET
-       ========================= */
-
-    if (this.renderer.ball) {
-      this.renderer.ball.style.opacity = "1";
-    }
-
-    /* =========================
-       CLOSE EVENT
-       ========================= */
-
-    setTimeout(() => {
-      this.end();
-    }, 1800);
+    this.ui.setFeedback("MISSED!");
+    this.ui.showResultGraphic("miss");
   }
 
-  stopLoop() {
-    if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
-    }
+  /* =========================
+     FINAL BALL RESET
+     ========================= */
 
-    this.rafId = null;
+  if (this.renderer.ball) {
+    this.renderer.ball.style.opacity = "1";
   }
+
+  /* =========================
+     CLOSE EVENT
+     ========================= */
+
+  setTimeout(() => {
+    this.end();
+  }, 1800);
+}
+
+stopLoop() {
+  if (this.rafId) {
+    cancelAnimationFrame(this.rafId);
+  }
+
+  this.rafId = null;
 }
 let penaltyGameInstance = null;
 
