@@ -131,13 +131,23 @@ export class PenaltyGame {
      END
      ========================= */
 
-  end() {
+  end(options = {}) {
+    if (!this.state.active && this.state.resolved) {
+      return;
+    }
+
     this.stopLoop();
     this.input.unmount();
 
     this.state.active = false;
 
-    this.config.hooks.onGameEnd?.(this.state.result);
+    if (!options.silent) {
+      this.config.hooks.onGameEnd?.(this.state.result);
+    }
+
+    if (penaltyGameInstance === this) {
+      penaltyGameInstance = null;
+    }
   }
 
   /* =========================
@@ -438,7 +448,7 @@ export function startPenaltyGame(config = {}) {
     throw new Error("startPenaltyGame requires config.rootElement");
   }
 
-  penaltyGameInstance?.end();
+  penaltyGameInstance?.end({ silent: true });
 
   penaltyGameInstance = new PenaltyGame(root, config);
 
@@ -460,7 +470,7 @@ export function destroyPenaltyGame() {
     return;
   }
 
-  penaltyGameInstance.end();
+  penaltyGameInstance.end({ silent: true });
 
   penaltyGameInstance = null;
 }
