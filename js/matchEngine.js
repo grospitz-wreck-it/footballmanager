@@ -766,6 +766,11 @@ function createFoul(ctx) {
   const teamId =
     Math.random() < 0.5 ? ctx.match.homeTeamId : ctx.match.awayTeamId;
 
+  const attackingTeamId =
+    game.match?.live?.possession ||
+    ctx.teamId ||
+    teamId;
+
   const player = getRandomPlayer(teamId);
 
   const attackPosition =
@@ -791,7 +796,10 @@ function createFoul(ctx) {
   console.log("📦 createFoul resolved:", resolvedType);
 
   emitMatchEvent(resolvedType, {
-    teamId,
+    teamId:
+      resolvedType === EVENT_TYPES.PENALTY
+        ? attackingTeamId
+        : teamId,
     playerId: player?.id,
     outcome: EVENT_OUTCOMES.NEUTRAL,
     attackPosition,
@@ -1027,15 +1035,61 @@ function pauseMatch(reason = "MATCH PAUSED") {
 
   game.match.live.running = false;
 
+  if (String(reason).includes("PENALTY") || String(reason).includes("MINIGAME")) {
+    game.match.live._penaltyPause = true;
+    game.match.live._minigamePause = true;
+    game.match.live._minigameType = String(reason).includes("PENALTY")
+      ? "penalty"
+      : "minigame";
+  }
+
   console.log(`⏸ ${reason}`);
 }
 
 function resumeMatch(reason = "MATCH RESUMED") {
   if (!game.match?.live) return;
 
+  const reasonText = String(reason);
+  const isMinigameComplete =
+    reasonText.includes("PENALTY COMPLETE") ||
+    reasonText.includes("MINIGAME COMPLETE");
+
+  if (
+    game.match.live._minigamePause === true &&
+    !isMinigameComplete
+  ) {
+    console.log(`▶ ${reason} ignored during minigame`);
+    return;
+  }
+
+  if (isMinigameComplete) {
+    game.match.live._penaltyPause = false;
+    game.match.live._minigamePause = false;
+    game.match.live._minigameType = null;
+  }
+
   game.match.live.running = true;
 
   console.log(`▶ ${reason}`);
+}
+
+function isLivePaused(live) {
+  const penaltyActive =
+    typeof window !== "undefined" &&
+    window.__penaltyActive === true;
+
+  const penaltyRootActive =
+    typeof document !== "undefined" &&
+    Boolean(document.getElementById("penaltyGameContainer"));
+
+  return (
+    !live ||
+    live.running === false ||
+    live._penaltyPause === true ||
+    live._minigamePause === true ||
+    penaltyActive ||
+    penaltyRootActive
+  );
 }
 
 // =========================
@@ -1054,7 +1108,11 @@ function runMatchLoop({ onTick, onEnd } = {}) {
 
    if (!live || !currentMatch) return;
 if (live.phase === "bye") return;
-if (live._penaltyPause === true) return;
+if (live._penaltyPause === true || live._minigamePause === true) {
+  lastTime = performance.now();
+  accumulator = 0;
+  return;
+}
 
 // =========================
 // ⏸ PAUSE SAFE FIX
@@ -1074,6 +1132,12 @@ if (live.running === false) {
     let safety = 0;
 
     while (accumulator >= STEP && safety < 10) {
+      if (isLivePaused(live)) {
+        lastTime = performance.now();
+        accumulator = 0;
+        break;
+      }
+
       live.minute++;
       document.body?.classList.add("match-live");
 
@@ -1102,10 +1166,18 @@ if (live.running === false) {
         console.warn("⚠️ Simulation error", e);
       }
 
+      if (isLivePaused(live)) {
+        lastTime = performance.now();
+        accumulator = 0;
+        break;
+      }
+
       const gameEvents = game.data?.gameEvents;
 
       if (Array.isArray(gameEvents)) {
         gameEvents.forEach((ev) => {
+          if (isLivePaused(live)) return;
+
           if (ev.active === false) return;
 
           if (ev.trigger === "always") {
@@ -1128,6 +1200,12 @@ if (live.running === false) {
             }
           }
         });
+      }
+
+      if (isLivePaused(live)) {
+        lastTime = performance.now();
+        accumulator = 0;
+        break;
       }
 
       // =========================
