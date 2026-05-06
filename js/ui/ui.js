@@ -82,6 +82,12 @@ function initColorPicker() {
 
     applyColor(color);
     localStorage.setItem("userColor", color);
+    localStorage.setItem("userTeamColor", color);
+    game.ui.dirty = true;
+
+    if (game.ui.tab === "schedule") {
+      renderSchedule();
+    }
 
     if (typeof showToast === "function") {
       showToast("Farbe aktualisiert");
@@ -494,6 +500,10 @@ function updateUI() {
     renderTeam();
   }
 
+  if (game.ui.tab === "schedule") {
+    renderSchedule();
+  }
+
   // =========================
   // ⚙️ TACTICS
   // =========================
@@ -580,6 +590,13 @@ on(EVENTS.MATCH_EVENT, (event) => {
 
   if (event.type === "PENALTY") {
     console.log("🚨 PENALTY DETECTED IN UI");
+
+    const userTeamId = String(game.team?.selectedId || game.team?.id || "");
+    const penaltyTeamId = String(event.teamId || "");
+
+    if (!userTeamId || penaltyTeamId !== userTeamId) {
+      return;
+    }
 
     if (typeof window.startPenaltySequence === "function") {
       window.startPenaltySequence({
@@ -2076,21 +2093,46 @@ function pushEventIcon(type) {
 
 window.startPenaltySequence = function (context = {}) {
 
-  if (window.__penaltyActive) return;
-  window.__penaltyActive = true;
-
   const live = game.match?.live;
+  const userTeamId = String(game.team?.selectedId || game.team?.id || "");
+  const penaltyTeamId = String(context.teamId || "");
 
   if (!live) {
     window.__penaltyActive = false;
     return;
   }
 
+  if (!userTeamId || penaltyTeamId !== userTeamId) {
+    return;
+  }
+
+  const existingPenaltyRoot = document.getElementById("penaltyGameContainer");
+
+  if (window.__penaltyActive && existingPenaltyRoot) {
+    pauseMatch("PENALTY");
+    live._penaltyPause = true;
+    live._minigamePause = true;
+    return;
+  }
+
+  if (window.__penaltyActive && !existingPenaltyRoot) {
+    window.__penaltyActive = false;
+    live._penaltyPause = false;
+    live._minigamePause = false;
+  }
+
+  window.__penaltyActive = true;
+  window.__penaltySequenceId = (window.__penaltySequenceId || 0) + 1;
+  const penaltySequenceId = window.__penaltySequenceId;
+
   // =========================
   // ⏸ MATCH PAUSE
   // =========================
- pauseMatch("PENALTY");
+  pauseMatch("PENALTY");
   live._penaltyPause = true;
+  live._minigamePause = true;
+  live._minigameType = "penalty";
+
   // =========================
   // 🎮 GAME CANVAS ROOT ONLY
   // =========================
@@ -2101,8 +2143,10 @@ window.startPenaltySequence = function (context = {}) {
   if (!gameCanvas) {
     console.warn("❌ gameCanvas missing");
     live._penaltyPause = false;
-  resumeMatch("PENALTY COMPLETE")
-  window.__penaltyActive = false;
+    live._minigamePause = false;
+    live._minigameType = null;
+    resumeMatch("PENALTY COMPLETE");
+    window.__penaltyActive = false;
     return;
   }
 
@@ -2180,45 +2224,55 @@ startPenaltyGame({
 
   hooks: {
     onGameEnd: (result) => {
+      if (penaltySequenceId !== window.__penaltySequenceId) {
+        return;
+      }
+
+      const currentLive = game.match?.live || live;
+      const currentMatch = game.match?.current;
 
       // =========================
       // 🔒 SAFETY SCORE OBJECTS
       // =========================
-      live.score = live.score || { home: 0, away: 0 };
+      currentLive.score = currentLive.score || { home: 0, away: 0 };
       game.match.score = game.match.score || { home: 0, away: 0 };
-      game.match.current.homeGoals =
-        Number(game.match.current.homeGoals || 0);
-      game.match.current.awayGoals =
-        Number(game.match.current.awayGoals || 0);
+      currentMatch.homeGoals =
+        Number(currentMatch.homeGoals || 0);
+      currentMatch.awayGoals =
+        Number(currentMatch.awayGoals || 0);
 
-      const homeTeamId = String(game.match.current?.homeTeamId);
-      const attackingTeamId = String(context.teamId);
+      const homeTeamId = String(currentMatch?.homeTeamId);
+      const attackingTeamId = String(
+        context.teamId ||
+        currentLive.possession ||
+        currentMatch?.homeTeamId,
+      );
       const isHome = attackingTeamId === homeTeamId;
 
       if (result?.goal) {
 
         if (isHome) {
-          live.score.home++;
+          currentLive.score.home++;
           game.match.score.home++;
-          game.match.current.homeGoals++;
+          currentMatch.homeGoals++;
 
         } else {
-          live.score.away++;
+          currentLive.score.away++;
           game.match.score.away++;
-          game.match.current.awayGoals++;
+          currentMatch.awayGoals++;
         }
 
         // =========================
         // 🔥 HARD SCORE SYNC
         // =========================
-        game.match.current.result = {
+        currentMatch.result = {
           home: Number(game.match.score.home || 0),
           away: Number(game.match.score.away || 0),
         };
 
         game.events.history.push({
           id: Date.now(),
-          minute: live.minute,
+          minute: currentLive.minute,
           type: "GOAL",
           teamId: context.teamId,
           teamName: context.teamName,
@@ -2231,7 +2285,7 @@ startPenaltyGame({
 
         game.events.history.push({
           id: Date.now(),
-          minute: live.minute,
+          minute: currentLive.minute,
           type: "SHOT_SAVED",
           teamId: context.teamId,
           teamName: context.teamName,
@@ -2242,7 +2296,7 @@ startPenaltyGame({
 
         game.events.history.push({
           id: Date.now(),
-          minute: live.minute,
+          minute: currentLive.minute,
           type: "SHOT_MISS",
           teamId: context.teamId,
           teamName: context.teamName,
@@ -2258,7 +2312,7 @@ startPenaltyGame({
 
       console.log("▶ PENALTY COMPLETE", {
         result,
-        liveScore: live.score,
+        liveScore: currentLive.score,
         matchScore: game.match.score,
       });
 
@@ -2268,7 +2322,9 @@ startPenaltyGame({
       penaltyRoot?.remove();
 
       window.__penaltyActive = false;
-      live._penaltyPause = false;
+      currentLive._penaltyPause = false;
+      currentLive._minigamePause = false;
+      currentLive._minigameType = null;
       lastRenderedEventId = null;
 
       // =========================
