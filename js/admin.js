@@ -1567,7 +1567,7 @@ async function saveInlineEvent(id){
     assets: withEventRuntimeConfig(getDisplayAssets(existing?.assets), runtimeConfig)
   };
 
-  const { error } = await supabase.from("events").update(payload).eq("id", id);
+  const { error } = await supabase.from("game_events").update(payload).eq("id", id);
 
   if(error){
     console.error("❌ Inline Save Event Error:", error);
@@ -1607,7 +1607,7 @@ await supabase
 // =====================
 async function loadEvents(){
 
-const { data } = await supabase.from("events").select("*");
+const { data } = await supabase.from("game_events").select("*");
 
 renderEvents(data || []);
 }
@@ -1903,7 +1903,7 @@ function renderGameEvents(list){
 // DELETE EVENT
 // =====================
 async function deleteEvent(id){
-await supabase.from("events").delete().eq("id", id);
+await supabase.from("game_events").delete().eq("id", id);
 loadEvents();
 }
 
