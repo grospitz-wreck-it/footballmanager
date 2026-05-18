@@ -979,17 +979,22 @@ async function saveEvent(){
 
   let result;
 
-  if(state.editEventId){
-    result = await supabase.from("events").update(payload).eq("id", state.editEventId);
-  } else {
-    result = await supabase.from("events").insert(payload);
-  }
+ if(state.editEventId){
+  result = await supabase
+    .from("game_events")
+    .update(payload)
+    .eq("id", state.editEventId);
+} else {
+  result = await supabase
+    .from("game_events")
+    .insert(payload);
+}
 
-  if(result?.error){
-    console.error("❌ Save Event Error:", result.error);
-    alert(`❌ Event wurde nicht gespeichert: ${result.error.message || "Supabase Fehler"}`);
-    return;
-  }
+if(result?.error){
+  console.error("❌ Save Event Error:", result.error);
+  alert(`❌ Event wurde nicht gespeichert: ${result.error.message || "Supabase Fehler"}`);
+  return;
+}
 
   state.editEventId = null;
   clearEventForm();
