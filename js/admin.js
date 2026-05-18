@@ -207,7 +207,22 @@ updateDebugButton();
 // =====================
 // FILE UPLOAD
 // =====================
-async function uploadFiles(bucket, files){
+function detectAssetType(file, forcedType = "auto"){
+  if(forcedType && forcedType !== "auto") return forcedType;
+
+  const mime = file?.type || "";
+  if(mime.includes("video")) return "video";
+  if(mime.includes("audio")) return "audio";
+  if(mime.includes("image")) return "image";
+
+  const name = (file?.name || "").toLowerCase();
+  if(/\.(mp3|wav|ogg|m4a)$/.test(name)) return "audio";
+  if(/\.(mp4|webm|mov)$/.test(name)) return "video";
+
+  return "image";
+}
+
+async function uploadFiles(bucket, files, forcedType = "auto"){
 
 let assets = [];
 
@@ -229,7 +244,8 @@ const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
 assets.push({
   id,
   url: data.publicUrl,
-  type: file.type.includes("video") ? "video" : "image"
+  type: detectAssetType(file, forcedType),
+  name: file.name
 });
 
 
@@ -877,21 +893,53 @@ function removeEventScopeReference(value){
   renderEventScopePicker();
 }
 
+function getEventRuntimeConfig(event){
+  const configAsset = (event?.assets || []).find(asset => asset?.type === "config" && asset?.eventConfig);
+  const config = configAsset?.eventConfig || {};
+
+  return {
+    trigger: event?.trigger || config.trigger || "random",
+    cooldown: Number(event?.cooldown ?? config.cooldown ?? 0)
+  };
+}
+
+function withEventRuntimeConfig(assets, config){
+  const cleanAssets = (assets || []).filter(asset => asset?.type !== "config");
+
+  cleanAssets.push({
+    id: "event_runtime_config",
+    type: "config",
+    eventConfig: {
+      trigger: config.trigger || "random",
+      cooldown: Number(config.cooldown || 0)
+    }
+  });
+
+  return cleanAssets;
+}
+
+function getDisplayAssets(assets){
+  return (assets || []).filter(asset => asset?.url);
+}
+
+function getTriggerLabel(trigger){
+  switch(trigger){
+    case "kickoff": return "Anpfiff";
+    case "halftime": return "Halbzeit";
+    case "late": return "Schlussphase";
+    default: return "Zufällig im Live-Spiel";
+  }
+}
+
 async function saveEvent(){
 
-  const files = qs("eventMedia").files;
+  const files = qs("eventMedia")?.files;
+  const uploadedAssets = files?.length
+    ? await uploadFiles("events", files, qs("eventAssetType")?.value || "auto")
+    : [];
 
-  // ❌ KEIN FILE → BLOCKIEREN
-  if(!files || !files.length){
-    alert("❌ Bitte mindestens ein Asset hochladen (WEBP)");
-    return;
-  }
-
-  const assets = await uploadFiles("events", files);
-
-  // ❌ Upload fehlgeschlagen
-  if(!assets.length){
-    alert("❌ Upload fehlgeschlagen");
+  if(files?.length && !uploadedAssets.length){
+    alert("❌ Upload fehlgeschlagen. Event wurde nicht gespeichert.");
     return;
   }
 
@@ -901,6 +949,11 @@ async function saveEvent(){
   if(scope === "team" && scope_ref){
     scope_ref = scope_ref.split(",").map(s => s.trim());
   }
+
+  const runtimeConfig = {
+    trigger: qs("eventTrigger")?.value || "random",
+    cooldown: Number(qs("eventCooldown")?.value || 0)
+  };
 
   const payload = {
     title: qs("eventTitle").value,
@@ -916,8 +969,7 @@ async function saveEvent(){
     modifier_attack: Number(qs("eventAttack").value || 0),
     modifier_defense: Number(qs("eventDefense").value || 0),
 
-    // 🔥 WICHTIG
-    assets: assets,
+    assets: withEventRuntimeConfig(uploadedAssets, runtimeConfig),
 
     scope,
     scope_ref
@@ -925,13 +977,21 @@ async function saveEvent(){
 
   console.log("🚀 SAVE EVENT:", payload);
 
+  let result;
+
   if(state.editEventId){
-    await supabase.from("events").update(payload).eq("id", state.editEventId);
-    state.editEventId = null;
+    result = await supabase.from("events").update(payload).eq("id", state.editEventId);
   } else {
-    await supabase.from("events").insert(payload);
+    result = await supabase.from("events").insert(payload);
   }
 
+  if(result?.error){
+    console.error("❌ Save Event Error:", result.error);
+    alert(`❌ Event wurde nicht gespeichert: ${result.error.message || "Supabase Fehler"}`);
+    return;
+  }
+
+  state.editEventId = null;
   clearEventForm();
   loadEvents();
 }
@@ -954,6 +1014,9 @@ function clearEventForm(){
   if(qs("eventValue")) qs("eventValue").value = "0";
   if(qs("eventAttack")) qs("eventAttack").value = "0";
   if(qs("eventDefense")) qs("eventDefense").value = "0";
+  if(qs("eventTrigger")) qs("eventTrigger").value = "random";
+  if(qs("eventCooldown")) qs("eventCooldown").value = "0";
+  if(qs("eventAssetType")) qs("eventAssetType").value = "auto";
   if(qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
 
   state.eventScopeSelection = [];
@@ -1476,6 +1539,12 @@ async function saveInlineEvent(id){
     scope_ref = normalizeScopeRefs(scope_ref);
   }
 
+  const existing = state.events.find(event => String(event.id) === String(id));
+  const runtimeConfig = {
+    trigger: row.querySelector("[data-field='trigger']")?.value || "random",
+    cooldown: Number(row.querySelector("[data-field='cooldown']")?.value || 0)
+  };
+
   const payload = {
     title: row.querySelector("[data-field='title']").value,
     description: row.querySelector("[data-field='description']").value,
@@ -1489,10 +1558,17 @@ async function saveInlineEvent(id){
     probability: Number(row.querySelector("[data-field='probability']").value || 0),
     duration: Number(row.querySelector("[data-field='duration']").value || 0),
     modifier_attack: Number(row.querySelector("[data-field='modifier_attack']").value || 0),
-    modifier_defense: Number(row.querySelector("[data-field='modifier_defense']").value || 0)
+    modifier_defense: Number(row.querySelector("[data-field='modifier_defense']").value || 0),
+    assets: withEventRuntimeConfig(getDisplayAssets(existing?.assets), runtimeConfig)
   };
 
-  await supabase.from("events").update(payload).eq("id", id);
+  const { error } = await supabase.from("events").update(payload).eq("id", id);
+
+  if(error){
+    console.error("❌ Inline Save Event Error:", error);
+    alert(`❌ Event wurde nicht gespeichert: ${error.message || "Supabase Fehler"}`);
+    return;
+  }
 
   state.inlineEventEditId = null;
   loadEvents();
@@ -1544,7 +1620,8 @@ function renderEvents(list){
   list.forEach(e => {
 
     const isEdit = state.inlineEventEditId === e.id;
-    const assets = e.assets || [];
+    const assets = getDisplayAssets(e.assets);
+    const runtimeConfig = getEventRuntimeConfig(e);
     const scopeLabel = e.scope === "global" || !e.scope
       ? "Global"
       : getEventReferenceLabel(e.scope, e.scope_ref) || normalizeScopeRefs(e.scope_ref).join(", ") || "Keine Auswahl";
@@ -1554,7 +1631,9 @@ function renderEvents(list){
         ${
           a.type==="video"
           ? `<video src="${a?.url || ''}" muted></video>`
-          : `<img src="${a?.url || ''}">`
+          : a.type==="audio"
+            ? `<audio src="${a?.url || ''}" controls></audio>`
+            : `<img src="${a?.url || ''}" alt="">`
         }
       </div>
     `).join("");
@@ -1625,6 +1704,21 @@ function renderEvents(list){
             </label>
 
             <label class="field">
+              <span>Trigger im Spiel</span>
+              <select data-field="trigger">
+                <option value="random" ${runtimeConfig.trigger==="random"?"selected":""}>Zufällig während des Live-Spiels</option>
+                <option value="kickoff" ${runtimeConfig.trigger==="kickoff"?"selected":""}>Nur rund um den Anpfiff</option>
+                <option value="halftime" ${runtimeConfig.trigger==="halftime"?"selected":""}>Nur zur Halbzeit</option>
+                <option value="late" ${runtimeConfig.trigger==="late"?"selected":""}>Nur in der Schlussphase</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Cooldown</span>
+              <input data-field="cooldown" type="number" min="0" value="${runtimeConfig.cooldown || 0}">
+            </label>
+
+            <label class="field">
               <span>Angriff-Modifier</span>
               <input data-field="modifier_attack" type="number" value="${e.modifier_attack || 0}">
             </label>
@@ -1642,6 +1736,7 @@ function renderEvents(list){
               <span class="pill">${e.effect_type || "modifier"}</span>
               <span class="pill">${e.effect_target || "both"}</span>
               <span class="pill">${escapeHtml(scopeLabel)}</span>
+              <span class="pill">${getTriggerLabel(runtimeConfig.trigger)}</span>
             </div>
 
             <div>${e.description || "Keine Beschreibung hinterlegt."}</div>
@@ -1654,6 +1749,10 @@ function renderEvents(list){
               <div class="modifierCard">
                 <span>Dauer</span>
                 <strong>${Number(e.duration || 0)}</strong>
+              </div>
+              <div class="modifierCard">
+                <span>Cooldown</span>
+                <strong>${Number(runtimeConfig.cooldown || 0)}</strong>
               </div>
               <div class="modifierCard">
                 <span>Angriff</span>
