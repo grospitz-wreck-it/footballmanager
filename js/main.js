@@ -211,22 +211,16 @@ function startBackgroundSimulation() {
           match.live.minute = 90;
           match.live.running = false;
 
+          const finalScore = {
+            home: Number(match.live?.score?.home ?? match.homeGoals ?? 0),
+            away: Number(match.live?.score?.away ?? match.awayGoals ?? 0),
+          };
+
           match.finished = true;
           match.live = false;
           match.status = "FT";
 
-          match.result = {
-            home: Number(
-              match.live?.score?.home ??
-              match.homeGoals ??
-              0,
-            ),
-            away: Number(
-              match.live?.score?.away ??
-              match.awayGoals ??
-              0,
-            ),
-          };
+          match.result = finalScore;
 
           match.homeGoals = match.result.home;
           match.awayGoals = match.result.away;
@@ -707,9 +701,22 @@ async function init() {
 
     if (window.DEBUG)
       console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
+
+    const { data: matchEvents, error: matchEventsError } = await supabase
+      .from("events")
+      .select("*");
+
+    if (matchEventsError) {
+      console.error("❌ Match Events load failed:", matchEventsError);
+    }
+
+    if (window.DEBUG)
+      console.log("🎮 MATCH EVENTS LOADED:", matchEvents?.length || 0);
+
     // 🔥🔥🔥 DAS HAT GEFEHLT
     game.data = game.data || {};
     game.data.eventDefinitions = gameEvents || [];
+    game.data.events = matchEvents || [];
     // =========================
     // 🧠 LEAGUE BUILD (FINAL CLEAN)
     // =========================
@@ -954,22 +961,22 @@ function updateMainButtonText() {
   }
 
   if (!live) {
-    mainBtn.textContent = "Start Match";
+    mainBtn.textContent = "Spiel starten";
     return;
   }
 
   if (live.phase === "bye") {
-    mainBtn.textContent = "No Match";
+    mainBtn.textContent = "Spielfrei";
   } else if (live.minute >= 90) {
-    mainBtn.textContent = "Next Match";
+    mainBtn.textContent = "Nächstes Spiel";
   } else if (live.phase === "halftime") {
-    mainBtn.textContent = "Start 2nd Half";
+    mainBtn.textContent = "2. Halbzeit starten";
   } else if (live.running) {
     mainBtn.textContent = "Pause";
   } else if (live.minute > 0) {
-    mainBtn.textContent = "Resume";
+    mainBtn.textContent = "Fortsetzen";
   } else {
-    mainBtn.textContent = "Start Match";
+    mainBtn.textContent = "Spiel starten";
   }
 }
 
