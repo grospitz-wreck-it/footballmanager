@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -144,6 +145,23 @@
           <input id="eventDuration" type="number" min="0" value="0">
           <small>Dauer des Effekts. 0 bedeutet sofortiger/einmaliger Effekt.</small>
         </label>
+
+        <label class="field">
+          <span>Trigger im Spiel</span>
+          <select id="eventTrigger">
+            <option value="random">Zufällig während des Live-Spiels</option>
+            <option value="kickoff">Nur rund um den Anpfiff</option>
+            <option value="halftime">Nur zur Halbzeit</option>
+            <option value="late">Nur in der Schlussphase</option>
+          </select>
+          <small>Legt fest, wann die Wahrscheinlichkeit geprüft wird.</small>
+        </label>
+
+        <label class="field">
+          <span>Cooldown</span>
+          <input id="eventCooldown" type="number" min="0" value="0">
+          <small>Spielminuten bis dieses Event erneut ausgelöst werden darf. 0 = kein Cooldown.</small>
+        </label>
       </div>
     </div>
 
@@ -195,10 +213,22 @@
     <div class="formSection">
       <h3>4. Asset</h3>
       <div class="formGrid">
-        <label class="field wide">
-          <span>Bild / Video / Overlay</span>
+        <label class="field">
+          <span>Asset-Art</span>
+          <select id="eventAssetType">
+            <option value="auto">Automatisch erkennen</option>
+            <option value="image">Bild</option>
+            <option value="video">Video</option>
+            <option value="audio">Audio</option>
+            <option value="overlay">Overlay</option>
+          </select>
+          <small>Overlay nutzt eine Bilddatei, wird aber im Event als Overlay markiert.</small>
+        </label>
+
+        <label class="field">
+          <span>Datei(en)</span>
           <input type="file" id="eventMedia" multiple>
-          <small>Aktuell Pflichtfeld, weil die bestehende Speicherlogik mindestens ein Asset erwartet.</small>
+          <small>Optional. Bilder, Videos, Audio und Overlays werden unterstützt.</small>
         </label>
       </div>
     </div>
