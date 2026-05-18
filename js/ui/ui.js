@@ -2412,5 +2412,5 @@ export function showVideoOverlay(videoUrl, text, duration = 4000) {
     }, 250);
   }, duration);
 }
-  
+  }
 export { updateUI, renderSchedule, renderCurrentMatch };
