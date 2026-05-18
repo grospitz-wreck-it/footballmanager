@@ -1,52 +1,249 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Dashboard</title>
 
-  resize: vertical;
-}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
 
-.eventReferenceField{
-  min-height: 0;
-}
+<button id="toggleDebug" class="debugToggle"></button>
 
-.eventReferenceField[hidden]{
-  display:none;
-}
+<div class="container">
 
-#eventScopePicker{
-  min-height: 146px;
-}
+<h1>📊 Ad Dashboard</h1>
 
-.selectionChips{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  min-height: 31px;
-}
+<!-- TABS -->
+<div class="tabs">
+  <button id="tabAds" class="active">📢 Ads</button>
+  <button id="tabEvents">🎮 Events</button>
+  <button id="tabInsights">📈 Insights</button>
+  <button id="tabGameEvents">🧠 Game</button>
+</div>
 
-.selectionChip{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:6px 8px;
-  border-radius:999px;
-  background:rgba(34,197,94,0.14);
-  border:1px solid rgba(34,197,94,0.28);
-  color:#dcfce7;
-  font-size:12px;
-  font-weight:700;
-}
+<!-- ========================= -->
+<!-- ADS TAB -->
+<!-- ========================= -->
+<div id="adsTab" class="tabContent active">
 
-.selectionChip button{
-  padding:0;
-  width:18px;
-  height:18px;
-  border-radius:50%;
-  line-height:1;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(15,23,42,0.75);
-  color:#dcfce7;
-}
+<div class="box">
+  <h2>➕ Neue Kampagne</h2>
+  <div class="grid">
+    <input id="campaignName" placeholder="Kampagnen Name">
+    <input id="campaignCustomer" placeholder="Kunde">
+    <input id="campaignBudget" type="number" placeholder="Budget €">
+    <input type="date" id="campaignStart">
+    <input type="date" id="campaignEnd">
+    <input id="campaignLink" placeholder="https://...">
+    <input id="targetStates" placeholder="Bundesländer">
+    <input id="targetCities" placeholder="Städte">
+    <input id="targetTeams" placeholder="Teams">
+    <button id="createCampaignBtn">🚀 Kampagne erstellen</button>
+  </div>
+</div>
 
-/* =========================
-   INPUTS (APP LEVEL)
-========================= */
+<div class="box">
+  <h2>🎯 Ad Type hinzufügen</h2>
+  <div class="grid">
+    <select id="adType">
+      <option value="interstitial">Interstitial</option>
+      <option value="banner">Banner</option>
+      <option value="video">Rewarded Video</option>
+      <option value="branded">Branded</option>
+    </select>
+    <input id="adPlacement" placeholder="Placement">
+    <input id="freqUser" type="number" placeholder="Max pro User">
+    <input id="freqDay" type="number" placeholder="Max pro Tag">
+    <input id="dailyLimit" type="number" placeholder="Daily Limit">
+    <button id="addAdSetBtn">➕ Ad Type hinzufügen</button>
+  </div>
+</div>
+
+<div class="box">
+  <h2>🖼 Assets hochladen</h2>
+  <div class="grid">
+    <input id="assetUpload" type="file" multiple>
+    <button id="addAssetBtn">📤 Assets hinzufügen</button>
+  </div>
+</div>
+
+<div class="box">
+  <h2>📊 Kampagnen Übersicht</h2>
+  <div id="campaignList"></div>
+</div>
+
+</div> <!-- ✅ ADS TAB ENDE -->
+
+
+<!-- ========================= -->
+<!-- EVENTS TAB -->
+<!-- ========================= -->
+<div id="eventsTab" class="tabContent">
+
+<div class="box">
+  <h2>🎮 Tagesereignis / Spielmodifier</h2>
+  <p class="formIntro">
+    Hier legst du Ereignisse an, die tagesaktuell auf ein Spiel wirken können,
+    z.B. Regen, Stadtfest, Derbydruck oder Verletzungswelle. Die Werte werden
+    in der bestehenden <strong>events</strong>-Tabelle gespeichert.
+  </p>
+
+  <div class="eventForm">
+
+    <div class="formSection">
+      <h3>1. Inhalt</h3>
+      <div class="formGrid">
+        <label class="field wide">
+          <span>Titel</span>
+          <input id="eventTitle" placeholder="z.B. Regenchaos vor Anpfiff">
+          <small>Kurzer Name, der später in Listen und Overlays erkennbar ist.</small>
+        </label>
+
+        <label class="field wide">
+          <span>Beschreibung</span>
+          <textarea id="eventDescription" placeholder="Was passiert und warum beeinflusst es das Spiel?"></textarea>
+          <small>Optionaler Text für Admin-Übersicht oder spätere Darstellung im Spiel.</small>
+        </label>
+      </div>
+    </div>
+
+    <div class="formSection">
+      <h3>2. Gültigkeit</h3>
+      <div class="formGrid">
+        <label class="field">
+          <span>Gültig für</span>
+          <select id="eventScope">
+            <option value="global">Global - alle Spiele</option>
+            <option value="league">Nur eine Liga</option>
+            <option value="team">Nur bestimmte Teams</option>
+          </select>
+          <small>Steuert, wo das Ereignis grundsätzlich angewendet werden darf.</small>
+        </label>
+
+        <div class="field eventReferenceField">
+          <span>Auswahl</span>
+          <input id="eventScopeRef" type="hidden">
+          <input id="eventScopeSearch" placeholder="Liga oder Team suchen">
+          <select id="eventScopePicker" size="6"></select>
+          <div id="eventScopeSelected" class="selectionChips"></div>
+          <small id="eventScopeHelp">Bei Global brauchst du keine weitere Auswahl.</small>
+        </div>
+
+        <label class="field">
+          <span>Wahrscheinlichkeit</span>
+          <input id="eventProbability" type="number" step="0.01" min="0" max="1" value="0.1">
+          <small>0 = nie, 1 = immer. Beispiel: 0.25 bedeutet 25% Chance.</small>
+        </label>
+
+        <label class="field">
+          <span>Dauer</span>
+          <input id="eventDuration" type="number" min="0" value="0">
+          <small>Dauer des Effekts. 0 bedeutet sofortiger/einmaliger Effekt.</small>
+        </label>
+      </div>
+    </div>
+
+    <div class="formSection">
+      <h3>3. Wirkung im Spiel</h3>
+      <div class="formGrid">
+        <label class="field">
+          <span>Effekt-Typ</span>
+          <select id="eventEffectType">
+            <option value="modifier">📊 Spielmodifier</option>
+            <option value="goal">⚽ Direktes Tor</option>
+            <option value="pause">⏸ Spiel pausieren</option>
+            <option value="resume">▶️ Spiel fortsetzen</option>
+            <option value="end">🏁 Spiel beenden</option>
+          </select>
+          <small>Für Tagesereignisse normalerweise “Spielmodifier” verwenden.</small>
+        </label>
+
+        <label class="field">
+          <span>Betroffenes Team</span>
+          <select id="eventTarget">
+            <option value="both">Beide Teams</option>
+            <option value="home">Heimteam</option>
+            <option value="away">Auswärtsteam</option>
+          </select>
+          <small>Wichtig: Home/Away ist nicht automatisch deine Mannschaft.</small>
+        </label>
+
+        <label class="field">
+          <span>Allgemeiner Wert</span>
+          <input id="eventValue" type="number" value="0">
+          <small>Für direkte Effekte, z.B. Torwert. Bei Modifier meist 0 lassen.</small>
+        </label>
+
+        <label class="field">
+          <span>Angriff-Modifier</span>
+          <input id="eventAttack" type="number" value="0">
+          <small>Positiv stärkt Angriff, negativ schwächt. Beispiel: -5 bei starkem Regen.</small>
+        </label>
+
+        <label class="field">
+          <span>Defensive-Modifier</span>
+          <input id="eventDefense" type="number" value="0">
+          <small>Positiv stärkt Defensive, negativ schwächt. Beispiel: +3 bei defensiver Kulisse.</small>
+        </label>
+      </div>
+    </div>
+
+    <div class="formSection">
+      <h3>4. Asset</h3>
+      <div class="formGrid">
+        <label class="field wide">
+          <span>Bild / Video / Overlay</span>
+          <input type="file" id="eventMedia" multiple>
+          <small>Aktuell Pflichtfeld, weil die bestehende Speicherlogik mindestens ein Asset erwartet.</small>
+        </label>
+      </div>
+    </div>
+
+    <button id="createEventBtn">🎬 Tagesereignis speichern</button>
+  </div>
+</div>
+
+<div class="box">
+  <h2>📋 Events</h2>
+  <div id="eventList"></div>
+</div>
+
+</div>
+
+
+<!-- ========================= -->
+<!-- INSIGHTS TAB -->
+<!-- ========================= -->
+<div id="insightsTab" class="tabContent">
+
+<div class="box">
+  <h2>📈 Overview</h2>
+  <div class="kpiGrid">
+    <div class="kpiCard"><span>DAU</span><h2 id="insightDAU">0</h2></div>
+    <div class="kpiCard"><span>Sessions</span><h2 id="insightSessions">0</h2></div>
+    <div class="kpiCard"><span>Matches</span><h2 id="insightMatches">0</h2></div>
+    <div class="kpiCard"><span>Avg Session</span><h2 id="insightAvg">0</h2></div>
+    <div class="kpiCard"><span>MPS</span><h2 id="insightMPS">0</h2></div>
+    <div class="kpiCard"><span>Engagement</span><h2 id="insightEngagement">-</h2></div>
+  </div>
+</div>
+
+<div class="box">
+  <canvas id="insightChart"></canvas>
+</div>
+
+<div class="box">
+  <div id="geoMap" style="height:400px;"></div>
+  <div id="topRegions"></div>
+</div>
+
+<div class="box">
+  <div id="insightMonetization"></div>
+</div>
+
+</div>
+
