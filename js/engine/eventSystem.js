@@ -176,6 +176,86 @@ function mapDbEvent(e){
   };
 }
 
+function normalizeRefList(value){
+  if(Array.isArray(value)){
+    return value.map(v => String(v)).filter(Boolean);
+  }
+
+  if(value === null || value === undefined) return [];
+
+  return String(value)
+    .split(",")
+    .map(v => v.trim())
+    .filter(Boolean);
+}
+
+function getDbEventConfig(event){
+  const configAsset = (event?.assets || []).find(asset => asset?.type === "config" && asset?.eventConfig);
+  const config = configAsset?.eventConfig || {};
+
+  return {
+    trigger: event?.trigger || config.trigger || "random",
+    cooldown: Number(event?.cooldown ?? config.cooldown ?? 0)
+  };
+}
+
+function isEventInScope(event, context){
+  const scope = event?.scope || "global";
+  if(scope === "global") return true;
+
+  const refs = normalizeRefList(event?.scope_ref);
+  if(!refs.length) return false;
+
+  const match = context?.match || game.match?.current || {};
+
+  if(scope === "league"){
+    const leagueId = String(game.league?.current?.id || "");
+    return leagueId && refs.includes(leagueId);
+  }
+
+  if(scope === "team"){
+    const homeId = String(match.homeTeamId || match.home?.id || "");
+    const awayId = String(match.awayTeamId || match.away?.id || "");
+    return refs.includes(homeId) || refs.includes(awayId);
+  }
+
+  return true;
+}
+
+function isEventTriggerWindow(event, minute){
+  const { trigger } = getDbEventConfig(event);
+
+  switch(trigger){
+    case "kickoff":
+      return minute <= 1;
+    case "halftime":
+      return minute === 45;
+    case "late":
+      return minute >= 75;
+    default:
+      return true;
+  }
+}
+
+function canTriggerByCooldown(event, minute){
+  game.events = game.events || {};
+  game.events.cooldowns = game.events.cooldowns || {};
+
+  const lastMinute = game.events.cooldowns[event.id];
+  if(lastMinute === minute) return false;
+
+  const { cooldown } = getDbEventConfig(event);
+  if(!cooldown || lastMinute === undefined) return true;
+
+  return minute - lastMinute >= cooldown;
+}
+
+function markEventTriggered(event, minute){
+  game.events = game.events || {};
+  game.events.cooldowns = game.events.cooldowns || {};
+  game.events.cooldowns[event.id] = minute;
+}
+
 // =========================
 // 🚀 TRIGGER EVENT
 // =========================
@@ -293,12 +373,18 @@ function getActiveModifiers(){
 function rollRandomEvents(context){
 
   const events = game.data.events || [];
+  const minute = Number(game.match?.live?.minute ?? 0);
 
   events.forEach(e => {
 
     if(!e.probability) return;
+    if(e.active === false) return;
+    if(!isEventInScope(e, context)) return;
+    if(!isEventTriggerWindow(e, minute)) return;
+    if(!canTriggerByCooldown(e, minute)) return;
 
     if(Math.random() < e.probability){
+      markEventTriggered(e, minute);
       triggerEvent(e.id, context);
     }
   });
