@@ -247,3 +247,128 @@
 
 </div>
 
+
+<!-- ========================= -->
+<!-- GAME EVENTS TAB -->
+<!-- ========================= -->
+<div id="gameEventsTab" class="tabContent">
+
+<div class="box">
+  <h2>🎮 Neues Game Event</h2>
+
+  <div class="grid">
+
+    <input id="geTitle" placeholder="Name des Events (z.B. 'Brutales Foul')">
+
+<select id="geType" title="Event-Typ (z.B. goal, foul)">
+  <option value="GOAL">⚽ Tor</option>
+  <option value="SHOT">🎯 Schuss</option>
+  <option value="SHOT_SAVED">🧤 Parade</option>
+  <option value="FOUL">🚫 Foul</option>
+  <option value="CORNER">🚩 Ecke</option>
+  <option value="DUEL">⚔️ Zweikampf</option>
+
+  <!-- 🔥 NEUE ENGINE EVENTS -->
+  <option value="PASS">➡️ Pass</option>
+  <option value="DRIBBLE">🌀 Dribbling</option>
+  <option value="INTERCEPTION">🛑 Interception</option>
+  <option value="BALL_LOSS">❌ Ballverlust</option>
+  <option value="BALL_RECOVERY">🔄 Ballgewinn</option>
+  <option value="CLEARANCE">🧹 Klärung</option>
+
+  <!-- 🔥 WICHTIG -->
+  <option value="FULLTIME">⏱️ Abpfiff</option>
+</select>
+    <select id="geTrigger" title="Wann das Event ausgelöst wird">
+      <option value="random">Random (zufällig im Spiel)</option>
+      <option value="always">Always (Debug / Test)</option>
+      <option value="goal">Goal (bei Tor)</option>
+      <option value="foul">Foul (bei Foul)</option>
+    </select>
+
+    <div>
+      <input 
+        id="geProbability" 
+        type="number" 
+        step="0.01"
+        min="0"
+        max="1"
+        placeholder="Chance (0–1, z.B. 0.3 = 30%)"
+      >
+      <small style="opacity:0.6; font-size:12px;">
+        0 = nie, 1 = immer
+      </small>
+    </div>
+
+    <input 
+      id="geValue" 
+      type="number"
+      placeholder="Effektstärke (z.B. 4)"
+    >
+
+    <input 
+      id="geDuration" 
+      type="number"
+      placeholder="Dauer in Sekunden (z.B. 3)"
+    >
+    <input 
+  id="gePriority" 
+  type="number"
+  placeholder="Priority (z.B. 1–100)"
+>
+
+<label style="display:flex; align-items:center; gap:6px;">
+  <input type="checkbox" id="geGuaranteed">
+  Immer anzeigen (z.B. Sponsored)
+</label>
+
+<input 
+  id="geCooldown" 
+  type="number"
+  placeholder="Cooldown Sekunden (z.B. 30)"
+>
+    <input 
+      type="file" 
+      id="geMedia" 
+      multiple
+    >
+<input 
+  type="file" 
+  id="geMedia" 
+  multiple
+>
+
+<!-- 🔥 NEU: ASSET TYPE -->
+<select id="assetType">
+  <option value="image">🖼 Image</option>
+  <option value="overlay">✨ Overlay</option>
+  <option value="audio">🔊 Audio</option>
+  <option value="video">🎬 Video</option>
+</select>
+
+<!-- 🔥 NEU: ASSET LIST -->
+<div id="assetList" style="margin-top:10px;"></div>
+
+<button id="addAssetBtn">➕ Asset hinzufügen</button>
+
+<button id="saveGameEventBtn">💾 Speichern</button>
+    <button id="saveGameEventBtn">💾 Speichern</button>
+
+  </div>
+</div>
+
+<div class="box">
+  <h2>📋 Game Events</h2>
+  <div id="gameEventList"></div>
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module" src="./js/admin.js"></script>
+
+</body>
+</html>
