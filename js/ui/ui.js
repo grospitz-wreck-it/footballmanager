@@ -1129,11 +1129,14 @@ if (newest.assets?.length) {
   const url = asset?.url;
 
   if (url) {
-    console.log("🎬 CALL OVERLAY:", url);
-
     const isVideo =
       asset.type === "video" ||
       /\.(mp4|webm|ogg)$/i.test(url);
+
+    console.log("🎬 ASSET RAW:", asset);
+    console.log("🎬 URL:", url);
+    console.log("🎬 TYPE:", asset.type);
+    console.log("🎬 VIDEO TEST:", isVideo);
 
     if (isVideo) {
       showVideoOverlay(url, text);
@@ -1141,7 +1144,6 @@ if (newest.assets?.length) {
       showOverlay(url, text);
     }
   }
-}
 }
 // =========================
 // 📊 TABS
