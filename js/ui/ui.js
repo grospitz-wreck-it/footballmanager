@@ -1207,6 +1207,62 @@ export function showOverlay(imageUrl, text, duration = 2500) {
   );
 }
 
+export function showVideoOverlay(videoUrl, text, duration = 4000) {
+  const overlayEl = document.getElementById("matchOverlay");
+  const overlayImg = document.getElementById("overlayImage");
+  const overlayText = document.getElementById("overlayText");
+
+  if (!overlayEl || !overlayImg || !overlayText) {
+    console.warn("❌ Overlay DOM fehlt");
+    return;
+  }
+
+  // =========================
+  // 🎥 VIDEO ELEMENT
+  // =========================
+  let videoEl = document.getElementById("overlayVideo");
+
+  if (!videoEl) {
+    videoEl = document.createElement("video");
+    videoEl.id = "overlayVideo";
+    videoEl.autoplay = true;
+    videoEl.muted = true;
+    videoEl.playsInline = true;
+    videoEl.controls = false;
+    videoEl.className = "overlay-video";
+
+    overlayImg.parentNode.insertBefore(videoEl, overlayImg);
+  }
+
+  overlayImg.style.display = "none";
+  videoEl.style.display = "block";
+
+  videoEl.src = videoUrl;
+  videoEl.load();
+
+  overlayText.innerText = text || "";
+
+  overlayEl.classList.remove("show", "hidden");
+  overlayEl.getBoundingClientRect();
+
+  requestAnimationFrame(() => {
+    overlayEl.classList.add("show");
+  });
+
+  clearTimeout(overlayTimeout);
+  clearTimeout(overlayHideTimeout);
+
+  overlayTimeout = setTimeout(() => {
+    overlayEl.classList.remove("show");
+
+    overlayHideTimeout = setTimeout(() => {
+      overlayEl.classList.add("hidden");
+      videoEl.pause();
+      videoEl.src = "";
+    }, 250);
+  }, duration);
+}
+  
 // =========================
 // 📊 TABS
 // =========================
