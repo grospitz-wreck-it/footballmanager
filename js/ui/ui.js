@@ -1207,7 +1207,7 @@ export function showOverlay(imageUrl, text, duration = 2500) {
   );
 }
 
-export function showVideoOverlay(videoUrl, text, duration = 4000) {
+function showVideoOverlay(videoUrl, text, duration = 4000) {
   const overlayEl = document.getElementById("matchOverlay");
   const overlayImg = document.getElementById("overlayImage");
   const overlayText = document.getElementById("overlayText");
