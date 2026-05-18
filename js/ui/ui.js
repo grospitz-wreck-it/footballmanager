@@ -1,4 +1,4 @@
-console.log("UI LOADED");
+ console.log("UI LOADED");
 // =======================
 // 🖥 UI ENGINE (FULL + LIVE TABLE SAFE)
 // =======================
@@ -1207,7 +1207,7 @@ export function showOverlay(imageUrl, text, duration = 2500) {
   );
 }
 
-function showVideoOverlay(videoUrl, text, duration = 4000) {
+export function showVideoOverlay(videoUrl, text, duration = 4000) {
   const overlayEl = document.getElementById("matchOverlay");
   const overlayImg = document.getElementById("overlayImage");
   const overlayText = document.getElementById("overlayText");
@@ -1262,7 +1262,7 @@ function showVideoOverlay(videoUrl, text, duration = 4000) {
     }, 250);
   }, duration);
 }
-  
+  }
 // =========================
 // 📊 TABS
 // =========================
