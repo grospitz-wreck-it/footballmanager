@@ -2311,7 +2311,17 @@ export function showOverlay(imageUrl, text, duration = 2500) {
   const overlayEl = document.getElementById("matchOverlay");
   const overlayImg = document.getElementById("overlayImage");
   const overlayText = document.getElementById("overlayText");
+  const videoEl = document.getElementById("overlayVideo");
 
+if (videoEl) {
+  videoEl.pause();
+  videoEl.style.display = "none";
+  videoEl.src = "";
+}
+
+overlayImg.style.display = "block";
+
+ 
   if (!overlayEl || !overlayImg || !overlayText) {
     console.warn("❌ Overlay DOM fehlt");
     return;
@@ -2386,7 +2396,8 @@ export function showVideoOverlay(videoUrl, text, duration = 4000) {
 
   overlayImg.style.display = "none";
   videoEl.style.display = "block";
-
+  overlayImg.src = "";
+  videoEl.currentTime = 0;
   videoEl.src = videoUrl;
   videoEl.load();
 
