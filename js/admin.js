@@ -15,7 +15,12 @@ const state = {
   inlineEventEditId: null,
 
   // 🔥 NEU
-  inlineGameEventEditId: null
+  inlineGameEventEditId: null,
+  eventReferenceData: {
+    leagues: [],
+    teams: []
+  },
+  eventScopeSelection: []
 };
 // =====================
 // HELPERS
@@ -117,6 +122,15 @@ return {
 };
 }
 const qs = (id) => document.getElementById(id);
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 function uuid(){
 return crypto.randomUUID();
@@ -610,6 +624,259 @@ function renderCampaigns(list){
 // =====================
 // EVENTS
 // =====================
+function formatLeagueName(league){
+  const rawName = (league?.name || "Unbenannte Liga").trim();
+  const regionName = league?.regions?.name || league?.regions?.states?.name || "";
+
+  if(regionName && !rawName.toLowerCase().includes(regionName.toLowerCase())){
+    return `${rawName} (${regionName})`;
+  }
+
+  return rawName;
+}
+
+function normalizeScopeRefs(value){
+  if(Array.isArray(value)){
+    return value.map(v => String(v).trim()).filter(Boolean);
+  }
+
+  if(value === null || value === undefined) return [];
+
+  return String(value)
+    .split(",")
+    .map(v => v.trim())
+    .filter(Boolean);
+}
+
+function getEventReferenceItems(scope){
+  if(scope === "league") return state.eventReferenceData.leagues;
+  if(scope === "team") return state.eventReferenceData.teams;
+  return [];
+}
+
+function getEventReferenceLabel(scope, value){
+  const refs = normalizeScopeRefs(value);
+  if(!refs.length) return "";
+
+  const items = getEventReferenceItems(scope);
+  const labels = refs.map(ref => {
+    const item = items.find(i => String(i.id) === String(ref));
+    return item?.label || item?.name || ref;
+  });
+
+  return labels.join(", ");
+}
+
+function renderEventReferenceOptions(scope, selectedRefs = []){
+  const selected = new Set(selectedRefs.map(String));
+
+  return getEventReferenceItems(scope).map(item => `
+    <option value="${escapeHtml(item.id)}" ${selected.has(String(item.id)) ? "selected" : ""}>
+      ${escapeHtml(item.label || item.name || item.id)}
+    </option>
+  `).join("");
+}
+
+function renderInlineScopeRefField(event, scopeLabel){
+  const scope = event.scope || "global";
+  const selectedRefs = normalizeScopeRefs(event.scope_ref);
+
+  if(scope === "global"){
+    return `
+      <label class="field">
+        <span>Auswahl</span>
+        <input data-field="scope_ref" type="hidden" value="">
+        <small>Global gilt automatisch für alle Spiele.</small>
+      </label>
+    `;
+  }
+
+  if(scope === "league"){
+    return `
+      <label class="field">
+        <span>Liga auswählen</span>
+        <select data-field="scope_ref">
+          <option value="">Keine Liga gewählt</option>
+          ${renderEventReferenceOptions("league", selectedRefs)}
+        </select>
+        <small>${escapeHtml(scopeLabel)}</small>
+      </label>
+    `;
+  }
+
+  return `
+    <label class="field">
+      <span>Teams auswählen</span>
+      <select data-field="scope_ref" multiple size="6">
+        ${renderEventReferenceOptions("team", selectedRefs)}
+      </select>
+      <small>${escapeHtml(scopeLabel)}</small>
+    </label>
+  `;
+}
+
+async function loadEventReferenceData(){
+  try{
+    const [competitionsResult, teamsResult] = await Promise.all([
+      supabase
+        .from("competitions")
+        .select(`
+          id,
+          name,
+          level,
+          region_id,
+          regions (
+            id,
+            name,
+            states ( name )
+          )
+        `),
+      supabase
+        .from("teams")
+        .select(`
+          id,
+          name,
+          competition_id,
+          competitions (
+            id,
+            name,
+            level
+          )
+        `)
+    ]);
+
+    if(competitionsResult.error) throw competitionsResult.error;
+    if(teamsResult.error) throw teamsResult.error;
+
+    const leagues = (competitionsResult.data || [])
+      .map(league => ({
+        id: String(league.id),
+        name: league.name,
+        label: formatLeagueName(league),
+        level: Number(league.level) || 99
+      }))
+      .sort((a,b) => a.level - b.level || a.label.localeCompare(b.label, "de"));
+
+    const leagueLabelById = new Map(leagues.map(l => [String(l.id), l.label]));
+
+    const teams = (teamsResult.data || [])
+      .map(team => ({
+        id: String(team.id),
+        name: team.name,
+        leagueId: team.competition_id ? String(team.competition_id) : "",
+        label: `${team.name}${team.competition_id ? ` (${leagueLabelById.get(String(team.competition_id)) || team.competitions?.name || "Liga"})` : ""}`
+      }))
+      .sort((a,b) => a.name.localeCompare(b.name, "de"));
+
+    state.eventReferenceData = { leagues, teams };
+    renderEventScopePicker();
+    loadEvents();
+  } catch(error){
+    console.error("❌ Event references load failed:", error);
+    const help = qs("eventScopeHelp");
+    if(help) help.textContent = "Liga-/Team-Auswahl konnte nicht geladen werden. Das Speichern bleibt trotzdem möglich.";
+  }
+}
+
+function syncEventScopeHidden(){
+  const hidden = qs("eventScopeRef");
+  if(hidden) hidden.value = state.eventScopeSelection.join(",");
+}
+
+function renderEventScopeSelected(){
+  const container = qs("eventScopeSelected");
+  if(!container) return;
+
+  const scope = qs("eventScope")?.value || "global";
+  const refs = state.eventScopeSelection;
+
+  if(scope === "global" || !refs.length){
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = refs.map(ref => `
+    <span class="selectionChip">
+      ${escapeHtml(getEventReferenceLabel(scope, ref) || ref)}
+      <button type="button" data-action="removeEventScopeRef" data-ref="${escapeHtml(ref)}">×</button>
+    </span>
+  `).join("");
+}
+
+function renderEventScopePicker(){
+  const scope = qs("eventScope")?.value || "global";
+  const field = document.querySelector(".eventReferenceField");
+  const search = qs("eventScopeSearch");
+  const picker = qs("eventScopePicker");
+  const help = qs("eventScopeHelp");
+
+  if(!field || !search || !picker || !help) return;
+
+  if(scope === "global"){
+    field.hidden = true;
+    state.eventScopeSelection = [];
+    syncEventScopeHidden();
+    renderEventScopeSelected();
+    return;
+  }
+
+  field.hidden = false;
+
+  search.placeholder = scope === "league"
+    ? "Liga suchen, z.B. Kreisliga oder Region"
+    : "Team suchen, z.B. Vereinsname";
+
+  help.textContent = scope === "league"
+    ? "Eine Liga anklicken. Die technische Liga-ID wird automatisch gespeichert."
+    : "Ein oder mehrere Teams anklicken. Die technischen Team-IDs werden automatisch gespeichert.";
+
+  const query = normalize(search.value);
+  const items = getEventReferenceItems(scope)
+    .filter(item => !query || normalize(item.label).includes(query))
+    .slice(0, 80);
+
+  picker.innerHTML = "";
+
+  if(!items.length){
+    const option = document.createElement("option");
+    option.disabled = true;
+    option.textContent = state.eventReferenceData.leagues.length || state.eventReferenceData.teams.length
+      ? "Keine Treffer"
+      : "Daten werden geladen...";
+    picker.appendChild(option);
+  } else {
+    items.forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.label;
+      option.selected = state.eventScopeSelection.includes(item.id);
+      picker.appendChild(option);
+    });
+  }
+
+  renderEventScopeSelected();
+}
+
+function selectEventScopeReference(value){
+  const scope = qs("eventScope")?.value || "global";
+  if(!value || scope === "global") return;
+
+  if(scope === "league"){
+    state.eventScopeSelection = [String(value)];
+  } else if(!state.eventScopeSelection.includes(String(value))){
+    state.eventScopeSelection.push(String(value));
+  }
+
+  syncEventScopeHidden();
+  renderEventScopePicker();
+}
+
+function removeEventScopeReference(value){
+  state.eventScopeSelection = state.eventScopeSelection.filter(ref => ref !== String(value));
+  syncEventScopeHidden();
+  renderEventScopePicker();
+}
+
 async function saveEvent(){
 
   const files = qs("eventMedia").files;
@@ -669,8 +936,29 @@ async function saveEvent(){
   loadEvents();
 }
 function clearEventForm(){
-document.querySelectorAll("#eventsTab input, #eventsTab textarea, #eventsTab select")
-.forEach(i => i.value = "");
+  document.querySelectorAll("#eventsTab input, #eventsTab textarea, #eventsTab select")
+    .forEach(i => {
+      if(i.type === "file"){
+        i.value = "";
+        return;
+      }
+
+      i.value = "";
+    });
+
+  if(qs("eventScope")) qs("eventScope").value = "global";
+  if(qs("eventProbability")) qs("eventProbability").value = "0.1";
+  if(qs("eventDuration")) qs("eventDuration").value = "0";
+  if(qs("eventEffectType")) qs("eventEffectType").value = "modifier";
+  if(qs("eventTarget")) qs("eventTarget").value = "both";
+  if(qs("eventValue")) qs("eventValue").value = "0";
+  if(qs("eventAttack")) qs("eventAttack").value = "0";
+  if(qs("eventDefense")) qs("eventDefense").value = "0";
+  if(qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
+
+  state.eventScopeSelection = [];
+  syncEventScopeHidden();
+  renderEventScopePicker();
 }
 
 
@@ -1178,16 +1466,30 @@ async function saveInlineEvent(id){
   const row = document.querySelector(`[data-event-row="${id}"]`);
   if(!row) return;
 
+  const scope = row.querySelector("[data-field='scope']").value;
+  const scopeRefEl = row.querySelector("[data-field='scope_ref']");
+  let scope_ref = scopeRefEl?.multiple
+    ? Array.from(scopeRefEl.selectedOptions).map(option => option.value)
+    : scopeRefEl?.value || null;
+
+  if(scope === "team" && scope_ref){
+    scope_ref = normalizeScopeRefs(scope_ref);
+  }
+
   const payload = {
     title: row.querySelector("[data-field='title']").value,
     description: row.querySelector("[data-field='description']").value,
+    scope,
+    scope_ref,
 
     effect_type: row.querySelector("[data-field='effect_type']").value,
     effect_target: row.querySelector("[data-field='effect_target']").value,
 
     effect_value: Number(row.querySelector("[data-field='effect_value']").value || 0),
     probability: Number(row.querySelector("[data-field='probability']").value || 0),
-    duration: Number(row.querySelector("[data-field='duration']").value || 0)
+    duration: Number(row.querySelector("[data-field='duration']").value || 0),
+    modifier_attack: Number(row.querySelector("[data-field='modifier_attack']").value || 0),
+    modifier_defense: Number(row.querySelector("[data-field='modifier_defense']").value || 0)
   };
 
   await supabase.from("events").update(payload).eq("id", id);
@@ -1243,6 +1545,9 @@ function renderEvents(list){
 
     const isEdit = state.inlineEventEditId === e.id;
     const assets = e.assets || [];
+    const scopeLabel = e.scope === "global" || !e.scope
+      ? "Global"
+      : getEventReferenceLabel(e.scope, e.scope_ref) || normalizeScopeRefs(e.scope_ref).join(", ") || "Keine Auswahl";
 
     const assetHTML = assets.map(a=>`
       <div class="asset small">
@@ -1262,41 +1567,110 @@ function renderEvents(list){
       ${
         isEdit
         ? `
-          <input data-field="title" value="${e.title}">
-          <textarea data-field="description">${e.description || ""}</textarea>
+          <div class="inlineEventForm">
+            <label class="field wide">
+              <span>Titel</span>
+              <input data-field="title" value="${e.title || ""}">
+            </label>
 
-          <select data-field="effect_type">
-            <option value="goal" ${e.effect_type==="goal"?"selected":""}>⚽ Tor</option>
-            <option value="modifier" ${e.effect_type==="modifier"?"selected":""}>📊 Modifier</option>
-            <option value="pause" ${e.effect_type==="pause"?"selected":""}>⏸ Pause</option>
-            <option value="resume" ${e.effect_type==="resume"?"selected":""}>▶️ Resume</option>
-            <option value="end" ${e.effect_type==="end"?"selected":""}>🏁 Ende</option>
-          </select>
+            <label class="field wide">
+              <span>Beschreibung</span>
+              <textarea data-field="description">${e.description || ""}</textarea>
+            </label>
 
-          <select data-field="effect_target">
-            <option value="home" ${e.effect_target==="home"?"selected":""}>Home</option>
-            <option value="away" ${e.effect_target==="away"?"selected":""}>Away</option>
-            <option value="both" ${e.effect_target==="both"?"selected":""}>Beide</option>
-          </select>
+            <label class="field">
+              <span>Gültig für</span>
+              <select data-field="scope">
+                <option value="global" ${!e.scope || e.scope==="global"?"selected":""}>Global - alle Spiele</option>
+                <option value="league" ${e.scope==="league"?"selected":""}>Nur eine Liga</option>
+                <option value="team" ${e.scope==="team"?"selected":""}>Nur bestimmte Teams</option>
+              </select>
+            </label>
 
-          <input data-field="effect_value" type="number" value="${e.effect_value || 0}">
-          <input data-field="probability" type="number" step="0.01" value="${e.probability || 0}">
-          <input data-field="duration" type="number" value="${e.duration || 0}">
+            ${renderInlineScopeRefField(e, scopeLabel)}
+
+            <label class="field">
+              <span>Effekt-Typ</span>
+              <select data-field="effect_type">
+                <option value="modifier" ${!e.effect_type || e.effect_type==="modifier"?"selected":""}>📊 Spielmodifier</option>
+                <option value="goal" ${e.effect_type==="goal"?"selected":""}>⚽ Direktes Tor</option>
+                <option value="pause" ${e.effect_type==="pause"?"selected":""}>⏸ Pause</option>
+                <option value="resume" ${e.effect_type==="resume"?"selected":""}>▶️ Resume</option>
+                <option value="end" ${e.effect_type==="end"?"selected":""}>🏁 Ende</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Betroffenes Team</span>
+              <select data-field="effect_target">
+                <option value="both" ${!e.effect_target || e.effect_target==="both"?"selected":""}>Beide Teams</option>
+                <option value="home" ${e.effect_target==="home"?"selected":""}>Heimteam</option>
+                <option value="away" ${e.effect_target==="away"?"selected":""}>Auswärtsteam</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Allgemeiner Wert</span>
+              <input data-field="effect_value" type="number" value="${e.effect_value || 0}">
+            </label>
+
+            <label class="field">
+              <span>Wahrscheinlichkeit</span>
+              <input data-field="probability" type="number" step="0.01" min="0" max="1" value="${e.probability || 0}">
+            </label>
+
+            <label class="field">
+              <span>Dauer</span>
+              <input data-field="duration" type="number" value="${e.duration || 0}">
+            </label>
+
+            <label class="field">
+              <span>Angriff-Modifier</span>
+              <input data-field="modifier_attack" type="number" value="${e.modifier_attack || 0}">
+            </label>
+
+            <label class="field">
+              <span>Defensive-Modifier</span>
+              <input data-field="modifier_defense" type="number" value="${e.modifier_defense || 0}">
+            </label>
+          </div>
         `
         : `
-          <strong>${e.title}</strong><br>
-          ${e.description || ""}
+          <div class="eventSummary">
+            <div class="eventTitleLine">
+              <strong>${e.title || "Unbenanntes Ereignis"}</strong>
+              <span class="pill">${e.effect_type || "modifier"}</span>
+              <span class="pill">${e.effect_target || "both"}</span>
+              <span class="pill">${escapeHtml(scopeLabel)}</span>
+            </div>
+
+            <div>${e.description || "Keine Beschreibung hinterlegt."}</div>
+
+            <div class="modifierGrid">
+              <div class="modifierCard">
+                <span>Chance</span>
+                <strong>${Math.round(Number(e.probability || 0) * 100)}%</strong>
+              </div>
+              <div class="modifierCard">
+                <span>Dauer</span>
+                <strong>${Number(e.duration || 0)}</strong>
+              </div>
+              <div class="modifierCard">
+                <span>Angriff</span>
+                <strong>${Number(e.modifier_attack || 0)}</strong>
+              </div>
+              <div class="modifierCard">
+                <span>Defensive</span>
+                <strong>${Number(e.modifier_defense || 0)}</strong>
+              </div>
+            </div>
+          </div>
         `
       }
 
-      <div class="metaRow">
-        🎯 ${e.effect_type} | ${e.effect_target} | ${e.effect_value}<br>
-        ⚡ ${e.probability} | ⏳ ${e.duration}
-      </div>
-
       <div class="assetRow">${assetHTML}</div>
 
-      <div>
+      <div class="eventActions">
         ${
           isEdit
           ? `
@@ -1601,6 +1975,10 @@ const a = target.dataset.action;
   // =====================
   // EVENTS
   // =====================
+  if(a==="removeEventScopeRef"){
+    removeEventScopeReference(e.target.dataset.ref);
+  }
+
   if(a==="editInlineEvent"){
     state.inlineEventEditId = e.target.dataset.id;
     loadEvents();
@@ -1641,6 +2019,16 @@ document.addEventListener("DOMContentLoaded", () => {
   qs("addAdSetBtn")?.addEventListener("click", addAdSet);
   qs("addAssetBtn")?.addEventListener("click", addAssets);
   qs("createEventBtn")?.addEventListener("click", saveEvent);
+  qs("eventScope")?.addEventListener("change", () => {
+    state.eventScopeSelection = [];
+    if(qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
+    syncEventScopeHidden();
+    renderEventScopePicker();
+  });
+  qs("eventScopeSearch")?.addEventListener("input", renderEventScopePicker);
+  qs("eventScopePicker")?.addEventListener("change", (e) => {
+    selectEventScopeReference(e.target.value);
+  });
 
   // 🔥 GAME EVENTS
   document.addEventListener("click", (e) => {
@@ -1655,6 +2043,7 @@ document.addEventListener("DOMContentLoaded", () => {
   qs("tabGameEvents")?.addEventListener("click", () => switchTab("game"));
 
   // 🔥 INIT LOADS
+  loadEventReferenceData();
   loadGameEvents();
   setTimeout(loadEventTypes, 0);
 
