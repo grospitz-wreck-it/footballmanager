@@ -957,7 +957,7 @@ async function saveEvent(){
 
   const payload = {
     title: qs("eventTitle").value,
-    description: qs("eventDescription").value,
+    text: qs("eventDescription").value,
 
     probability: Number(qs("eventProbability").value || 0),
     duration: Number(qs("eventDuration").value || 0),
@@ -1552,7 +1552,7 @@ async function saveInlineEvent(id){
 
   const payload = {
     title: row.querySelector("[data-field='title']").value,
-    description: row.querySelector("[data-field='description']").value,
+    text: row.querySelector("[data-field='description']").value,
     scope,
     scope_ref,
 
@@ -1659,7 +1659,7 @@ function renderEvents(list){
 
             <label class="field wide">
               <span>Beschreibung</span>
-              <textarea data-field="description">${e.description || ""}</textarea>
+              <textarea data-field="description">${e.text || ""}</textarea>
             </label>
 
             <label class="field">
@@ -1744,7 +1744,7 @@ function renderEvents(list){
               <span class="pill">${getTriggerLabel(runtimeConfig.trigger)}</span>
             </div>
 
-            <div>${e.description || "Keine Beschreibung hinterlegt."}</div>
+            <div>${e.text || "Keine Beschreibung hinterlegt."}</div>
 
             <div class="modifierGrid">
               <div class="modifierCard">
