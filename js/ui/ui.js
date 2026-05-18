@@ -1124,12 +1124,20 @@ function updateEvents() {
   // =========================
   // 🎬 OVERLAY (optional)
   // =========================
-  if (newest.assets?.length) {
-    const asset = newest.assets[0];
-    const url = asset?.url;
+if (newest.assets?.length) {
+  const asset = newest.assets[0];
+  const url = asset?.url;
 
-    if (url) {
-      console.log("🎬 CALL OVERLAY:", url);
+  if (url) {
+    console.log("🎬 CALL OVERLAY:", url);
+
+    const isVideo =
+      asset.type === "video" ||
+      /\.(mp4|webm|ogg)$/i.test(url);
+
+    if (isVideo) {
+      showVideoOverlay(url, text);
+    } else {
       showOverlay(url, text);
     }
   }
