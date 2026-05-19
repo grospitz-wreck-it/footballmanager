@@ -1165,6 +1165,7 @@ if (newest.assets?.length) {
     showOverlay(url, text);
   }
 }
+ }
 // =========================
 // 📊 TABS
 // =========================
