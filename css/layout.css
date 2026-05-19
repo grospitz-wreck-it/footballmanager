@@ -396,10 +396,19 @@ body:not(.match-live) #topMinute::before {
 }
 
 .overlay-video {
+  position: absolute;
+  inset: 0;
+
   width: 100%;
-  max-height: 100%;
+  height: 100%;
+
   object-fit: cover;
+
+  z-index: 20;
+
   border-radius: 12px;
+
+  background: black;
 }
 /* =========================
 📊 TABLE MODULE (FULL INTEGRATION)
