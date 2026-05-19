@@ -2382,61 +2382,76 @@ function showVideoOverlay(videoUrl, text, duration = 4000) {
   // =========================
   // 🎥 VIDEO ELEMENT
   // =========================
-  let videoEl = document.getElementById("overlayVideo");
+ let videoEl = document.getElementById("overlayVideo");
 
-  if (!videoEl) {
-    videoEl = document.createElement("video");
-    videoEl.id = "overlayVideo";
-    videoEl.autoplay = true;
-    videoEl.muted = true;
-    videoEl.playsInline = true;
-    videoEl.controls = false;
-    videoEl.loop = false;
-    videoEl.preload = "auto";
-    videoEl.className = "overlay-video";
+if (!videoEl) {
+  videoEl = document.createElement("video");
+  videoEl.id = "overlayVideo";
+  videoEl.autoplay = true;
+  videoEl.muted = true;
+  videoEl.playsInline = true;
+  videoEl.controls = false;
+  videoEl.loop = false;
+  videoEl.preload = "auto";
+  videoEl.className = "overlay-video";
 
-    overlayImg.parentNode.insertBefore(videoEl, overlayImg);
-  }
+  videoEl.onerror = (e) => {
+    console.error("❌ VIDEO ERROR:", e);
+  };
 
-  overlayImg.style.display = "none";
-  videoEl.style.display = "block";
-  overlayImg.src = "";
-  videoEl.currentTime = 0;
-  videoEl.src = videoUrl;
-  videoEl.pause();
-  videoEl.currentTime = 0;
-  videoEl.src = videoUrl;
+  videoEl.onloadeddata = () => {
+    console.log("✅ VIDEO LOADED");
+  };
 
-  videoEl.load();
+  overlayImg.parentNode.insertBefore(videoEl, overlayImg);
+}
 
-  const playPromise = videoEl.play();
+overlayImg.style.display = "none";
+videoEl.style.display = "block";
+overlayImg.src = "";
 
-  if (playPromise !== undefined) {
-    playPromise.catch((err) => {
-      console.warn("🎥 VIDEO PLAY FAILED:", err);
-    });
-  }
+// 🔥 HARD RESET
+videoEl.pause();
+videoEl.currentTime = 0;
+videoEl.removeAttribute("src");
+videoEl.load();
 
-  overlayText.innerText = text || "";
+// 🔥 NEW SOURCE
+videoEl.src = videoUrl;
+videoEl.load();
 
-  overlayEl.classList.remove("show", "hidden");
-  overlayEl.getBoundingClientRect();
+// 🔥 FORCE PLAY
+const playPromise = videoEl.play();
 
-  requestAnimationFrame(() => {
-    overlayEl.classList.add("show");
+if (playPromise !== undefined) {
+  playPromise.catch((err) => {
+    console.warn("🎥 VIDEO PLAY FAILED:", err);
   });
+}
 
-  clearTimeout(overlayTimeout);
-  clearTimeout(overlayHideTimeout);
+overlayText.innerText = text || "";
 
-  overlayTimeout = setTimeout(() => {
-    overlayEl.classList.remove("show");
+overlayEl.classList.remove("show", "hidden");
+overlayEl.getBoundingClientRect();
 
-    overlayHideTimeout = setTimeout(() => {
-      overlayEl.classList.add("hidden");
-      videoEl.pause();
-      videoEl.src = "";
-    }, 250);
-  }, duration);
+requestAnimationFrame(() => {
+  overlayEl.classList.add("show");
+});
+
+clearTimeout(overlayTimeout);
+clearTimeout(overlayHideTimeout);
+
+overlayTimeout = setTimeout(() => {
+  overlayEl.classList.remove("show");
+
+  overlayHideTimeout = setTimeout(() => {
+    overlayEl.classList.add("hidden");
+
+    videoEl.pause();
+    videoEl.removeAttribute("src");
+    videoEl.load();
+
+  }, 250);
+}, duration);
 }
 export { updateUI, renderSchedule, renderCurrentMatch };
