@@ -1,4 +1,4 @@
- console.log("UI LOADED");
+console.log("UI LOADED");
 // =======================
 // 🖥 UI ENGINE (FULL + LIVE TABLE SAFE)
 // =======================
@@ -581,35 +581,35 @@ function initUI() {
   });
 
   // =========================
-// ⚽ PENALTY EVENT LISTENER
-// =========================
-on(EVENTS.MATCH_EVENT, (event) => {
-  if (!event) return;
+  // ⚽ PENALTY EVENT LISTENER
+  // =========================
+  on(EVENTS.MATCH_EVENT, (event) => {
+    if (!event) return;
 
-  console.log("📡 UI MATCH EVENT:", event);
+    console.log("📡 UI MATCH EVENT:", event);
 
-  if (event.type === "PENALTY") {
-    console.log("🚨 PENALTY DETECTED IN UI");
+    if (event.type === "PENALTY") {
+      console.log("🚨 PENALTY DETECTED IN UI");
 
-    const userTeamId = String(game.team?.selectedId || game.team?.id || "");
-    const penaltyTeamId = String(event.teamId || "");
+      const userTeamId = String(game.team?.selectedId || game.team?.id || "");
+      const penaltyTeamId = String(event.teamId || "");
 
-    if (!userTeamId || penaltyTeamId !== userTeamId) {
-      return;
+      if (!userTeamId || penaltyTeamId !== userTeamId) {
+        return;
+      }
+
+      if (typeof window.startPenaltySequence === "function") {
+        window.startPenaltySequence({
+          teamId: event.teamId,
+          teamName: event.teamName,
+          playerId: event.playerId,
+        });
+      } else {
+        console.warn("❌ startPenaltySequence missing");
+      }
     }
+  });
 
-    if (typeof window.startPenaltySequence === "function") {
-      window.startPenaltySequence({
-        teamId: event.teamId,
-        teamName: event.teamName,
-        playerId: event.playerId,
-      });
-    } else {
-      console.warn("❌ startPenaltySequence missing");
-    }
-  }
-});
-  
   // =========================
   // ⚙️ TACTICS BUTTON
   // =========================
@@ -1061,10 +1061,8 @@ function updateEvents() {
   if (!events?.length) return;
 
   const newest =
-  [...events]
-    .reverse()
-    .find(e => e?.assets?.length) ||
-  events[events.length - 1];
+    [...events].reverse().find((e) => e?.assets?.length) ||
+    events[events.length - 1];
   if (!newest) return;
 
   console.log("🧪 EVENT DEBUG:", newest);
@@ -1129,43 +1127,38 @@ function updateEvents() {
   // 🎬 OVERLAY (optional)
   // =========================
 
-console.log("🟢 BEFORE ASSET BLOCK");
+  console.log("🟢 BEFORE ASSET BLOCK");
 
-if (newest.assets?.length) {
+  if (newest.assets?.length) {
+    const asset = newest.assets.find(
+      (a) =>
+        a?.url &&
+        (a.type === "video" ||
+          a.type === "image" ||
+          /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)),
+    );
 
-  const asset = newest.assets.find(
-    a =>
-      a?.url &&
-      (
-        a.type === "video" ||
-        a.type === "image" ||
-        /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)
-      )
-  );
+    if (!asset) {
+      console.warn("❌ No valid media asset found");
+      return;
+    }
 
-  if (!asset) {
-    console.warn("❌ No valid media asset found");
-    return;
-  }
+    const url = asset.url;
 
-  const url = asset.url;
+    const isVideo = asset.type === "video" || /\.(mp4|webm|ogg)$/i.test(url);
 
-  const isVideo =
-    asset.type === "video" ||
-    /\.(mp4|webm|ogg)$/i.test(url);
+    console.log("🎬 ASSET RAW:", asset);
+    console.log("🎬 URL:", url);
+    console.log("🎬 TYPE:", asset.type);
+    console.log("🎬 VIDEO TEST:", isVideo);
 
-  console.log("🎬 ASSET RAW:", asset);
-  console.log("🎬 URL:", url);
-  console.log("🎬 TYPE:", asset.type);
-  console.log("🎬 VIDEO TEST:", isVideo);
-
-  if (isVideo) {
-    showVideoOverlay(url, text);
-  } else {
-    showOverlay(url, text);
+    if (isVideo) {
+      showVideoOverlay(url, text);
+    } else {
+      showOverlay(url, text);
+    }
   }
 }
- }
 // =========================
 // 📊 TABS
 // =========================
@@ -1267,16 +1260,16 @@ function ensureLiveTableLoop() {
   if (liveTableInterval) return;
 
   liveTableInterval = setInterval(() => {
-  if (game.ui?.tab !== "table") return;
+    if (game.ui?.tab !== "table") return;
 
-  renderLiveTable();
+    renderLiveTable();
 
-  if (typeof renderScheduleModule === "function") {
-    renderScheduleModule();
-  }
+    if (typeof renderScheduleModule === "function") {
+      renderScheduleModule();
+    }
 
-  game.ui.dirty = true;
-}, 1000);
+    game.ui.dirty = true;
+  }, 1000);
 }
 
 // =========================
@@ -2053,13 +2046,11 @@ function pushEventIcon(type) {
   return;
 }
 
-
 // =========================
 // ⚽ GLOBAL PENALTY SEQUENCE
 // =========================
 
 window.startPenaltySequence = function (context = {}) {
-
   const live = game.match?.live;
   const userTeamId = String(game.team?.selectedId || game.team?.id || "");
   const penaltyTeamId = String(context.teamId || "");
@@ -2186,124 +2177,114 @@ window.startPenaltySequence = function (context = {}) {
   // =========================
   // 🚀 START PENALTY GAME
   // =========================
-startPenaltyGame({
-  rootElement,
+  startPenaltyGame({
+    rootElement,
 
-  hooks: {
-    onGameEnd: (result) => {
-      if (penaltySequenceId !== window.__penaltySequenceId) {
-        return;
-      }
+    hooks: {
+      onGameEnd: (result) => {
+        if (penaltySequenceId !== window.__penaltySequenceId) {
+          return;
+        }
 
-      const currentLive = game.match?.live || live;
-      const currentMatch = game.match?.current;
+        const currentLive = game.match?.live || live;
+        const currentMatch = game.match?.current;
 
-      // =========================
-      // 🔒 SAFETY SCORE OBJECTS
-      // =========================
-      currentLive.score = currentLive.score || { home: 0, away: 0 };
-      game.match.score = game.match.score || { home: 0, away: 0 };
-      currentMatch.homeGoals =
-        Number(currentMatch.homeGoals || 0);
-      currentMatch.awayGoals =
-        Number(currentMatch.awayGoals || 0);
+        // =========================
+        // 🔒 SAFETY SCORE OBJECTS
+        // =========================
+        currentLive.score = currentLive.score || { home: 0, away: 0 };
+        game.match.score = game.match.score || { home: 0, away: 0 };
+        currentMatch.homeGoals = Number(currentMatch.homeGoals || 0);
+        currentMatch.awayGoals = Number(currentMatch.awayGoals || 0);
 
-      const homeTeamId = String(currentMatch?.homeTeamId);
-      const attackingTeamId = String(
-        context.teamId ||
-        currentLive.possession ||
-        currentMatch?.homeTeamId,
-      );
-      const isHome = attackingTeamId === homeTeamId;
+        const homeTeamId = String(currentMatch?.homeTeamId);
+        const attackingTeamId = String(
+          context.teamId || currentLive.possession || currentMatch?.homeTeamId,
+        );
+        const isHome = attackingTeamId === homeTeamId;
 
-      if (result?.goal) {
+        if (result?.goal) {
+          if (isHome) {
+            currentLive.score.home++;
+            game.match.score.home++;
+            currentMatch.homeGoals++;
+          } else {
+            currentLive.score.away++;
+            game.match.score.away++;
+            currentMatch.awayGoals++;
+          }
 
-        if (isHome) {
-          currentLive.score.home++;
-          game.match.score.home++;
-          currentMatch.homeGoals++;
+          // =========================
+          // 🔥 HARD SCORE SYNC
+          // =========================
+          currentMatch.result = {
+            home: Number(game.match.score.home || 0),
+            away: Number(game.match.score.away || 0),
+          };
 
+          game.events.history.push({
+            id: Date.now(),
+            minute: currentLive.minute,
+            type: "GOAL",
+            teamId: context.teamId,
+            teamName: context.teamName,
+            text: "⚽ Da verwandelt er das Ding!!!",
+          });
+
+          triggerGoalAnimation(isHome ? "home" : "away");
+        } else if (result?.saved) {
+          game.events.history.push({
+            id: Date.now(),
+            minute: currentLive.minute,
+            type: "SHOT_SAVED",
+            teamId: context.teamId,
+            teamName: context.teamName,
+            text: "🧤 ELFMETER GEHALTEN!",
+          });
         } else {
-          currentLive.score.away++;
-          game.match.score.away++;
-          currentMatch.awayGoals++;
+          game.events.history.push({
+            id: Date.now(),
+            minute: currentLive.minute,
+            type: "SHOT_MISS",
+            teamId: context.teamId,
+            teamName: context.teamName,
+            text: "❌ Und er verschießt!!!",
+          });
         }
 
         // =========================
-        // 🔥 HARD SCORE SYNC
+        // 🔄 FORCE SCORE/UI UPDATE
         // =========================
-        currentMatch.result = {
-          home: Number(game.match.score.home || 0),
-          away: Number(game.match.score.away || 0),
-        };
+        updateScore();
+        updateEvents();
 
-        game.events.history.push({
-          id: Date.now(),
-          minute: currentLive.minute,
-          type: "GOAL",
-          teamId: context.teamId,
-          teamName: context.teamName,
-          text: "⚽ Da verwandelt er das Ding!!!",
+        console.log("▶ PENALTY COMPLETE", {
+          result,
+          liveScore: currentLive.score,
+          matchScore: game.match.score,
         });
 
-        triggerGoalAnimation(isHome ? "home" : "away");
+        // =========================
+        // 🧹 CLEANUP
+        // =========================
+        penaltyRoot?.remove();
 
-      } else if (result?.saved) {
+        window.__penaltyActive = false;
+        currentLive._penaltyPause = false;
+        currentLive._minigamePause = false;
+        currentLive._minigameType = null;
+        lastRenderedEventId = null;
 
-        game.events.history.push({
-          id: Date.now(),
-          minute: currentLive.minute,
-          type: "SHOT_SAVED",
-          teamId: context.teamId,
-          teamName: context.teamName,
-          text: "🧤 ELFMETER GEHALTEN!",
-        });
+        // =========================
+        // ▶ RESUME
+        // =========================
+        resumeMatch("PENALTY COMPLETE");
 
-      } else {
-
-        game.events.history.push({
-          id: Date.now(),
-          minute: currentLive.minute,
-          type: "SHOT_MISS",
-          teamId: context.teamId,
-          teamName: context.teamName,
-          text: "❌ Und er verschießt!!!",
-        });
-      }
-
-      // =========================
-      // 🔄 FORCE SCORE/UI UPDATE
-      // =========================
-      updateScore();
-      updateEvents();
-
-      console.log("▶ PENALTY COMPLETE", {
-        result,
-        liveScore: currentLive.score,
-        matchScore: game.match.score,
-      });
-
-      // =========================
-      // 🧹 CLEANUP
-      // =========================
-      penaltyRoot?.remove();
-
-      window.__penaltyActive = false;
-      currentLive._penaltyPause = false;
-      currentLive._minigamePause = false;
-      currentLive._minigameType = null;
-      lastRenderedEventId = null;
-
-      // =========================
-      // ▶ RESUME
-      // =========================
-      resumeMatch("PENALTY COMPLETE");
-
-      requestUIUpdate();
+        requestUIUpdate();
+      },
     },
-  },
-});
-}
+  });
+};
 // =========================
 // 📦 EXPORTS
 // =========================
@@ -2314,7 +2295,6 @@ function renderCurrentMatch() {
 function renderSchedule() {
   renderScheduleModule();
 }
-
 
 // =========================
 // 🎮 OVERLAY TRIGGER
@@ -2336,15 +2316,14 @@ function showOverlay(imageUrl, text, duration = 2500) {
   const overlayText = document.getElementById("overlayText");
   const videoEl = document.getElementById("overlayVideo");
 
-if (videoEl) {
-  videoEl.pause();
-  videoEl.style.display = "none";
-  videoEl.src = "";
-}
+  if (videoEl) {
+    videoEl.pause();
+    videoEl.style.display = "none";
+    videoEl.src = "";
+  }
 
-overlayImg.style.display = "block";
+  overlayImg.style.display = "block";
 
- 
   if (!overlayEl || !overlayImg || !overlayText) {
     console.warn("❌ Overlay DOM fehlt");
     return;
@@ -2412,6 +2391,8 @@ function showVideoOverlay(videoUrl, text, duration = 4000) {
     videoEl.muted = true;
     videoEl.playsInline = true;
     videoEl.controls = false;
+    videoEl.loop = false;
+    videoEl.preload = "auto";
     videoEl.className = "overlay-video";
 
     overlayImg.parentNode.insertBefore(videoEl, overlayImg);
@@ -2423,18 +2404,18 @@ function showVideoOverlay(videoUrl, text, duration = 4000) {
   videoEl.currentTime = 0;
   videoEl.src = videoUrl;
   videoEl.pause();
-videoEl.currentTime = 0;
-videoEl.src = videoUrl;
+  videoEl.currentTime = 0;
+  videoEl.src = videoUrl;
 
-videoEl.load();
+  videoEl.load();
 
-const playPromise = videoEl.play();
+  const playPromise = videoEl.play();
 
-if (playPromise !== undefined) {
-  playPromise.catch(err => {
-    console.warn("🎥 VIDEO PLAY FAILED:", err);
-  });
-}
+  if (playPromise !== undefined) {
+    playPromise.catch((err) => {
+      console.warn("🎥 VIDEO PLAY FAILED:", err);
+    });
+  }
 
   overlayText.innerText = text || "";
 
