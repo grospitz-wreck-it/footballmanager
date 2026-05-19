@@ -1235,7 +1235,7 @@ layout.css ersetzen
 }
 
 /* IMAGE */
-#matchOverlay img {
+#overlayImage {
   display: block;
   position: relative;
   z-index: 10;
@@ -1253,7 +1253,7 @@ layout.css ersetzen
   transition: transform 0.25s ease;
 }
 
-#matchOverlay.show img {
+#matchOverlay.show #overlayImage {
   transform: scale(1);
 }
 
