@@ -1128,6 +1128,8 @@ function updateEvents() {
   // =========================
   // 🎬 OVERLAY (optional)
   // =========================
+
+ console.log("🟢 BEFORE ASSET BLOCK");
 if (newest.assets?.length) {
   const asset = newest.assets[0];
   const url = asset?.url;
