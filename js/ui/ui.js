@@ -1129,29 +1129,42 @@ function updateEvents() {
   // 🎬 OVERLAY (optional)
   // =========================
 
- console.log("🟢 BEFORE ASSET BLOCK");
+console.log("🟢 BEFORE ASSET BLOCK");
+
 if (newest.assets?.length) {
-  const asset = newest.assets[0];
-  const url = asset?.url;
 
-  if (url) {
-    const isVideo =
-      asset.type === "video" ||
-      /\.(mp4|webm|ogg)$/i.test(url);
+  const asset = newest.assets.find(
+    a =>
+      a?.url &&
+      (
+        a.type === "video" ||
+        a.type === "image" ||
+        /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)
+      )
+  );
 
-    console.log("🎬 ASSET RAW:", asset);
-    console.log("🎬 URL:", url);
-    console.log("🎬 TYPE:", asset.type);
-    console.log("🎬 VIDEO TEST:", isVideo);
+  if (!asset) {
+    console.warn("❌ No valid media asset found");
+    return;
+  }
 
-    if (isVideo) {
-      showVideoOverlay(url, text);
-    } else {
-      showOverlay(url, text);
-    }
+  const url = asset.url;
+
+  const isVideo =
+    asset.type === "video" ||
+    /\.(mp4|webm|ogg)$/i.test(url);
+
+  console.log("🎬 ASSET RAW:", asset);
+  console.log("🎬 URL:", url);
+  console.log("🎬 TYPE:", asset.type);
+  console.log("🎬 VIDEO TEST:", isVideo);
+
+  if (isVideo) {
+    showVideoOverlay(url, text);
+  } else {
+    showOverlay(url, text);
   }
 }
- }
 // =========================
 // 📊 TABS
 // =========================
