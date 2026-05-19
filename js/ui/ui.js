@@ -1060,7 +1060,11 @@ function updateEvents() {
   const events = game.events?.history;
   if (!events?.length) return;
 
-  const newest = events[events.length - 1];
+  const newest =
+  [...events]
+    .reverse()
+    .find(e => e?.assets?.length) ||
+  events[events.length - 1];
   if (!newest) return;
 
   console.log("🧪 EVENT DEBUG:", newest);
