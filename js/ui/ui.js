@@ -2320,6 +2320,8 @@ function showOverlay(imageUrl, text, duration = 2500) {
     videoEl.pause();
     videoEl.style.display = "none";
     videoEl.src = "";
+    videoEl.removeAttribute("src");
+    videoEl.load();
   }
 
   overlayImg.style.display = "block";
@@ -2340,14 +2342,7 @@ function showOverlay(imageUrl, text, duration = 2500) {
     overlayHideTimeout = null;
   }
 
-  const videoEl = document.getElementById("overlayVideo");
 
-if (videoEl) {
-  videoEl.pause();
-  videoEl.style.display = "none";
-  videoEl.removeAttribute("src");
-  videoEl.load();
-}
   
   overlayImg.src = imageUrl || "";
   overlayText.innerText = text || "";
