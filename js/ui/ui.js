@@ -2340,7 +2340,15 @@ function showOverlay(imageUrl, text, duration = 2500) {
     overlayHideTimeout = null;
   }
 
-  // 🔥 Content setzen
+  const videoEl = document.getElementById("overlayVideo");
+
+if (videoEl) {
+  videoEl.pause();
+  videoEl.style.display = "none";
+  videoEl.removeAttribute("src");
+  videoEl.load();
+}
+  
   overlayImg.src = imageUrl || "";
   overlayText.innerText = text || "";
 
@@ -2407,6 +2415,7 @@ if (!videoEl) {
 }
 
 overlayImg.style.display = "none";
+overlayImg.removeAttribute("src");
 videoEl.style.display = "block";
 overlayImg.src = "";
 
