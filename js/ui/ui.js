@@ -2422,7 +2422,19 @@ function showVideoOverlay(videoUrl, text, duration = 4000) {
   overlayImg.src = "";
   videoEl.currentTime = 0;
   videoEl.src = videoUrl;
-  videoEl.load();
+  videoEl.pause();
+videoEl.currentTime = 0;
+videoEl.src = videoUrl;
+
+videoEl.load();
+
+const playPromise = videoEl.play();
+
+if (playPromise !== undefined) {
+  playPromise.catch(err => {
+    console.warn("🎥 VIDEO PLAY FAILED:", err);
+  });
+}
 
   overlayText.innerText = text || "";
 
