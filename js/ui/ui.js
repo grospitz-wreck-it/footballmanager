@@ -2304,7 +2304,7 @@ let overlayTimeout = null;
 let overlayHideTimeout = null;
 let lastOverlayTime = 0;
 
-export function showOverlay(imageUrl, text, duration = 2500) {
+function showOverlay(imageUrl, text, duration = 2500) {
   const now = Date.now();
 
   // 🔥 Overlay Cooldown (verhindert Spam)
@@ -2370,7 +2370,7 @@ overlayImg.style.display = "block";
   );
 }
 
-export function showVideoOverlay(videoUrl, text, duration = 4000) {
+function showVideoOverlay(videoUrl, text, duration = 4000) {
   const overlayEl = document.getElementById("matchOverlay");
   const overlayImg = document.getElementById("overlayImage");
   const overlayText = document.getElementById("overlayText");
