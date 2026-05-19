@@ -1236,8 +1236,13 @@ layout.css ersetzen
 
 /* IMAGE */
 #matchOverlay img {
+  display: block;
+  position: relative;
+  z-index: 10;
+
   width: 60%;
   max-width: 300px;
+
   border-radius: 12px;
 
   box-shadow:
