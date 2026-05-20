@@ -1147,10 +1147,10 @@ function updateEvents() {
 
     const isVideo = asset.type === "video" || /\.(mp4|webm|ogg)$/i.test(url);
 
-    console.log("🎬 ASSET RAW:", asset);
-    console.log("🎬 URL:", url);
-    console.log("🎬 TYPE:", asset.type);
-    console.log("🎬 VIDEO TEST:", isVideo);
+ console.log("🎥 ASSET CHECK:", asset);
+console.log("🎥 URL:", url);
+console.log("🎥 TYPE:", asset.type);
+console.log("🎥 IS VIDEO:", isVideo);
 
     if (isVideo) {
       showVideoOverlay(url, text);
