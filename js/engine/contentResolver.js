@@ -89,8 +89,9 @@ function isValidAsset(asset){
 function getEventDefinitions(){
 
   const defs =
-    game?.data?.eventDefinitions ||
     game?.data?.gameEvents ||
+    game?.data?.eventDefinitions ||
+  
     [];
 
   if(!Array.isArray(defs)){
