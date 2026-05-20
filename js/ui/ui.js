@@ -2313,92 +2313,35 @@ let lastOverlayTime = 0;
 // =========================
 
 function showOverlay(imageUrl, text, duration = 2500) {
-  const now = Date.now();
-
-  // 🔥 Cooldown
-  if (now - lastOverlayTime < 4000) return;
-  lastOverlayTime = now;
 
   const overlayEl = document.getElementById("matchOverlay");
+  const mediaEl = document.getElementById("overlayMedia");
   const overlayText = document.getElementById("overlayText");
 
-  if (!overlayEl || !overlayText) {
-    console.warn("❌ Overlay DOM fehlt");
-    return;
-  }
+  if (!overlayEl || !mediaEl || !overlayText) return;
 
-  // =========================
-  // 🧹 CLEANUP OLD VIDEO
-  // =========================
-
-  const oldVideo = document.getElementById("overlayVideo");
-
-  if (oldVideo) {
-    oldVideo.pause();
-    oldVideo.remove();
-  }
-
-  // =========================
-  // 🖼 CREATE FRESH IMAGE
-  // =========================
-
-  const oldImg = document.getElementById("overlayImage");
-
-  const newImg = document.createElement("img");
-
-  newImg.id = "overlayImage";
-  newImg.src = imageUrl;
-  newImg.alt = "event-image";
-
-  newImg.onload = () => {
-    console.log("✅ IMAGE LOADED");
-  };
-
-  newImg.onerror = (e) => {
-    console.error("❌ IMAGE LOAD FAILED:", imageUrl, e);
-  };
-
-  if (oldImg) {
-    oldImg.replaceWith(newImg);
-  } else {
-    overlayEl.prepend(newImg);
-  }
-
-  // =========================
-  // 📝 TEXT
-  // =========================
+  mediaEl.innerHTML = `
+    <img
+      id="overlayImage"
+      class="overlay-image"
+      src="${imageUrl}"
+    />
+  `;
 
   overlayText.innerText = text || "";
 
-  // =========================
-  // 🧹 TIMER CLEANUP
-  // =========================
+  overlayEl.classList.remove("hidden");
+  overlayEl.classList.add("show");
 
   clearTimeout(overlayTimeout);
-  clearTimeout(overlayHideTimeout);
-
-  // =========================
-  // 🔥 SHOW
-  // =========================
-
-  overlayEl.classList.remove("show", "hidden");
-
-  overlayEl.getBoundingClientRect();
-
-  requestAnimationFrame(() => {
-    overlayEl.classList.add("show");
-  });
-
-  // =========================
-  // 🔥 HIDE
-  // =========================
 
   overlayTimeout = setTimeout(() => {
 
     overlayEl.classList.remove("show");
 
-    overlayHideTimeout = setTimeout(() => {
+    setTimeout(() => {
       overlayEl.classList.add("hidden");
+      mediaEl.innerHTML = "";
     }, 250);
 
   }, duration);
@@ -2411,113 +2354,43 @@ function showOverlay(imageUrl, text, duration = 2500) {
 function showVideoOverlay(videoUrl, text, duration = 4000) {
 
   const overlayEl = document.getElementById("matchOverlay");
+  const mediaEl = document.getElementById("overlayMedia");
   const overlayText = document.getElementById("overlayText");
 
-  if (!overlayEl || !overlayText) {
-    console.warn("❌ Overlay DOM fehlt");
-    return;
-  }
+  if (!overlayEl || !mediaEl || !overlayText) return;
 
-  // =========================
-  // 🧹 REMOVE OLD IMAGE
-  // =========================
+  mediaEl.innerHTML = `
+    <video
+      id="overlayVideo"
+      class="overlay-video"
+      autoplay
+      muted
+      playsinline
+    >
+      <source src="${videoUrl}" type="video/mp4">
+    </video>
+  `;
 
-  const oldImg = document.getElementById("overlayImage");
+  const videoEl = document.getElementById("overlayVideo");
 
-  if (oldImg) {
-    oldImg.remove();
-  }
-
-  // =========================
-  // 🧹 REMOVE OLD VIDEO
-  // =========================
-
-  const oldVideo = document.getElementById("overlayVideo");
-
-  if (oldVideo) {
-    oldVideo.pause();
-    oldVideo.remove();
-  }
-
-  // =========================
-  // 🎥 CREATE FRESH VIDEO
-  // =========================
-
-  const videoEl = document.createElement("video");
-
-  videoEl.id = "overlayVideo";
-  videoEl.autoplay = true;
-  videoEl.muted = true;
-  videoEl.playsInline = true;
-  videoEl.controls = false;
-  videoEl.loop = false;
-  videoEl.preload = "auto";
-  videoEl.className = "overlay-video";
-
-  videoEl.src = videoUrl;
-
-  videoEl.onloadeddata = () => {
-    console.log("✅ VIDEO LOADED");
-  };
-
-  videoEl.onerror = (e) => {
-    console.error("❌ VIDEO LOAD FAILED:", videoUrl, e);
-  };
-
-  overlayEl.prepend(videoEl);
-
-  // =========================
-  // ▶ FORCE PLAY
-  // =========================
-
-  const playPromise = videoEl.play();
-
-  if (playPromise !== undefined) {
-    playPromise.catch((err) => {
-      console.warn("🎥 VIDEO PLAY FAILED:", err);
-    });
-  }
-
-  // =========================
-  // 📝 TEXT
-  // =========================
+  videoEl.play().catch(err => {
+    console.warn("🎥 VIDEO PLAY FAILED:", err);
+  });
 
   overlayText.innerText = text || "";
 
-  // =========================
-  // 🧹 TIMER CLEANUP
-  // =========================
+  overlayEl.classList.remove("hidden");
+  overlayEl.classList.add("show");
 
   clearTimeout(overlayTimeout);
-  clearTimeout(overlayHideTimeout);
-
-  // =========================
-  // 🔥 SHOW
-  // =========================
-
-  overlayEl.classList.remove("show", "hidden");
-
-  overlayEl.getBoundingClientRect();
-
-  requestAnimationFrame(() => {
-    overlayEl.classList.add("show");
-  });
-
-  // =========================
-  // 🔥 HIDE
-  // =========================
 
   overlayTimeout = setTimeout(() => {
 
     overlayEl.classList.remove("show");
 
-    overlayHideTimeout = setTimeout(() => {
-
+    setTimeout(() => {
       overlayEl.classList.add("hidden");
-
-      videoEl.pause();
-      videoEl.remove();
-
+      mediaEl.innerHTML = "";
     }, 250);
 
   }, duration);
