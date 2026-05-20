@@ -1,4 +1,3 @@
-
 let insightChart = null;
 let currentAssets = [];
 import { supabase } from "./client.js";
@@ -18,17 +17,15 @@ const state = {
   inlineGameEventEditId: null,
   eventReferenceData: {
     leagues: [],
-    teams: []
+    teams: [],
   },
-  eventScopeSelection: []
+  eventScopeSelection: [],
 };
 // =====================
 // HELPERS
 // =====================
-const normalize = (v) =>
-  (v || "").toString().trim().toLowerCase();
-function clearForm(){
-
+const normalize = (v) => (v || "").toString().trim().toLowerCase();
+function clearForm() {
   [
     "campaignName",
     "campaignCustomer",
@@ -38,92 +35,84 @@ function clearForm(){
     "campaignEnd",
     "targetStates",
     "targetCities",
-    "targetTeams"
-  ].forEach(id => {
+    "targetTeams",
+  ].forEach((id) => {
     const el = qs(id);
-    if(el) el.value = "";
+    if (el) el.value = "";
   });
-
 }
 
-
-
-function calculateCampaignKPIs(campaign, data){
-
-  if(!data || !data.length) return campaign;
+function calculateCampaignKPIs(campaign, data) {
+  if (!data || !data.length) return campaign;
 
   const adSets = campaign.ad_sets || [];
   const targeting = campaign.targeting || {};
 
-  const updatedSets = adSets.map(set => {
+  const updatedSets = adSets.map((set) => {
+    const relevant = data.filter((e) => {
+      if (e.ad_type !== set.type) return false;
 
-   const relevant = data.filter(e => {
+      if (set.placement && e.placement && e.placement !== set.placement) {
+        return false;
+      }
 
-  if (e.ad_type !== set.type) return false;
+      if (targeting.states?.length) {
+        const states = targeting.states.map(normalize);
+        const eventRegion = normalize(e.region);
 
-  if (set.placement && e.placement && e.placement !== set.placement) {
-    return false;
-  }
+        if (!eventRegion || !states.includes(eventRegion)) {
+          return false;
+        }
+      }
 
-  if (targeting.states?.length) {
-    const states = targeting.states.map(normalize);
-    const eventRegion = normalize(e.region);
+      if (targeting.cities?.length) {
+        const cities = targeting.cities.map(normalize);
+        const eventCity = normalize(e.city);
 
-    if (!eventRegion || !states.includes(eventRegion)) {
-      return false;
-    }
-  }
+        if (!eventCity || !cities.includes(eventCity)) {
+          return false;
+        }
+      }
 
-  if (targeting.cities?.length) {
-    const cities = targeting.cities.map(normalize);
-    const eventCity = normalize(e.city);
+      if (targeting.teams?.length) {
+        const teams = targeting.teams.map(normalize);
+        const eventTeam = normalize(e.team);
 
-    if (!eventCity || !cities.includes(eventCity)) {
-      return false;
-    }
-  }
+        if (!eventTeam || !teams.includes(eventTeam)) {
+          return false;
+        }
+      }
 
-  if (targeting.teams?.length) {
-    const teams = targeting.teams.map(normalize);
-    const eventTeam = normalize(e.team);
+      return true;
+    });
 
-    if (!eventTeam || !teams.includes(eventTeam)) {
-      return false;
-    }
-  }
+    // 🔥 DAS HAT GEFEHLT
+    const impressions = relevant.length;
 
-  return true;
-});
+    // =========================
+    // 💰 REVENUE (CPM MODEL)
+    // =========================
+    const ecpm = 8;
 
-// 🔥 DAS HAT GEFEHLT
-const impressions = relevant.length;
+    const revenue = impressions ? (impressions / 1000) * ecpm : 0;
 
-  // =========================
-  // 💰 REVENUE (CPM MODEL)
-  // =========================
-  const ecpm = 8;
-
-  const revenue = impressions
-    ? (impressions / 1000) * ecpm
-    : 0;
+    return {
+      ...set,
+      metrics: {
+        impressions,
+        revenue: Number(revenue.toFixed(2)),
+      },
+    };
+  });
 
   return {
-    ...set,
-    metrics: {
-      impressions,
-      revenue: Number(revenue.toFixed(2))
-    }
+    ...campaign,
+    ad_sets: updatedSets,
   };
-});
-
-return {
-  ...campaign,
-  ad_sets: updatedSets
-};
 }
 const qs = (id) => document.getElementById(id);
 
-function escapeHtml(value){
+function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -132,56 +121,51 @@ function escapeHtml(value){
     .replace(/'/g, "&#39;");
 }
 
-function uuid(){
-return crypto.randomUUID();
+function uuid() {
+  return crypto.randomUUID();
 }
 
-function copy(text){
-navigator.clipboard.writeText(text);
+function copy(text) {
+  navigator.clipboard.writeText(text);
 
-const el = document.createElement("div");
-el.innerText = "Copied";
-el.className = "copyToast";
-document.body.appendChild(el);
+  const el = document.createElement("div");
+  el.innerText = "Copied";
+  el.className = "copyToast";
+  document.body.appendChild(el);
 
-setTimeout(()=> el.remove(), 800);
+  setTimeout(() => el.remove(), 800);
 }
 
-function toggleFullscreen(el){
-el.closest(".asset").classList.toggle("fullscreen");
+function toggleFullscreen(el) {
+  el.closest(".asset").classList.toggle("fullscreen");
 }
-function isDebugEnabled(){
+function isDebugEnabled() {
   return localStorage.getItem("debugOverlay") === "true";
 }
 
-function formatDurationVerbose(seconds){
-
-  if(!seconds || seconds <= 0) return "0s";
+function formatDurationVerbose(seconds) {
+  if (!seconds || seconds <= 0) return "0s";
 
   const min = Math.floor(seconds / 60);
   const sec = Math.floor(seconds % 60);
 
-  if(min === 0) return `${sec}s`;
+  if (min === 0) return `${sec}s`;
 
   return `${min}m ${sec}s`;
 }
 
-function updateDebugButton(){
-
+function updateDebugButton() {
   const btn = document.getElementById("toggleDebug");
-  if(!btn) return;
+  if (!btn) return;
 
   const enabled = isDebugEnabled();
 
-  btn.textContent = enabled
-    ? "🐞 Debug ON"
-    : "🐞 Debug OFF";
+  btn.textContent = enabled ? "🐞 Debug ON" : "🐞 Debug OFF";
 
   btn.style.color = enabled ? "#0f0" : "#888";
 }
 
 document.getElementById("toggleDebug")?.addEventListener("click", () => {
-
   const next = !isDebugEnabled();
 
   localStorage.setItem("debugOverlay", next.toString());
@@ -189,84 +173,83 @@ document.getElementById("toggleDebug")?.addEventListener("click", () => {
   updateDebugButton();
 
   // 🔥 optional: direkt reload triggern
-  window.dispatchEvent(new StorageEvent("storage", {
-    key: "debugOverlay"
-  }));
+  window.dispatchEvent(
+    new StorageEvent("storage", {
+      key: "debugOverlay",
+    }),
+  );
 });
 
-function destroyChart(){
-  if(insightChart){
+function destroyChart() {
+  if (insightChart) {
     insightChart.destroy();
     insightChart = null;
   }
 }
-
 
 // INIT
 updateDebugButton();
 // =====================
 // FILE UPLOAD
 // =====================
-function detectAssetType(file, forcedType = "auto"){
-  if(forcedType && forcedType !== "auto") return forcedType;
+function detectAssetType(file, forcedType = "auto") {
+  if (forcedType && forcedType !== "auto") return forcedType;
 
   const mime = file?.type || "";
-  if(mime.includes("video")) return "video";
-  if(mime.includes("audio")) return "audio";
-  if(mime.includes("image")) return "image";
+  if (mime.includes("video")) return "video";
+  if (mime.includes("audio")) return "audio";
+  if (mime.includes("image")) return "image";
 
   const name = (file?.name || "").toLowerCase();
-  if(/\.(mp3|wav|ogg|m4a)$/.test(name)) return "audio";
-  if(/\.(mp4|webm|mov)$/.test(name)) return "video";
+  if (/\.(mp3|wav|ogg|m4a)$/.test(name)) return "audio";
+  if (/\.(mp4|webm|mov)$/.test(name)) return "video";
 
   return "image";
 }
 
-async function uploadFiles(bucket, files, forcedType = "auto"){
+async function uploadFiles(bucket, files, forcedType = "auto") {
+  let assets = [];
 
-let assets = [];
+  for (const file of files) {
+    const id = uuid();
 
-for(const file of files){
+    const safeName = file.name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9._-]/g, "");
 
+    const fileName = `${id}_${safeName}`;
 
-const id = uuid();
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file);
 
-const safeName = file.name
-  .toLowerCase()
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .replace(/\
+    if (error) {
+      console.error(error);
+      continue;
+    }
 
-const { error } = await supabase.storage.from(bucket).upload(fileName, file);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
-if(error){
-  console.error(error);
-  continue;
+    assets.push({
+      id,
+      url: data.publicUrl,
+      type: detectAssetType(file, forcedType),
+      name: file.name,
+    });
+  }
+
+  return assets;
 }
 
-const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
-
-assets.push({
-  id,
-  url: data.publicUrl,
-  type: detectAssetType(file, forcedType),
-  name: file.name
-});
-
-
-}
-
-return assets;
-}
-
-function getAssetType(){
+function getAssetType() {
   const el = document.getElementById("assetType");
   return el?.value || "image";
 }
 
-
-async function createCampaign(){
-
+async function createCampaign() {
   const payload = {
     name: qs("campaignName").value,
     customer: qs("campaignCustomer").value,
@@ -277,64 +260,68 @@ async function createCampaign(){
     end_date: qs("campaignEnd").value || null,
 
     targeting: {
-      states: (qs("targetStates").value || "").split(",").map(s=>s.trim()).filter(Boolean),
-      cities: (qs("targetCities").value || "").split(",").map(s=>s.trim()).filter(Boolean),
-      teams: (qs("targetTeams").value || "").split(",").map(s=>s.trim()).filter(Boolean)
+      states: (qs("targetStates").value || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      cities: (qs("targetCities").value || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      teams: (qs("targetTeams").value || "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
     },
 
     ad_sets: [], // 🔥 NEU
     metrics_total: {},
 
-    active: true
+    active: true,
   };
 
-  const { data, error } = await supabase
-  .from("campaigns")
-  .insert(payload);
+  const { data, error } = await supabase.from("campaigns").insert(payload);
 
-console.log("INSERT RESULT:", data);
-console.log("INSERT ERROR:", error);
+  console.log("INSERT RESULT:", data);
+  console.log("INSERT ERROR:", error);
 
-if(error){
-  alert("❌ Fehler beim Speichern");
-  return;
+  if (error) {
+    alert("❌ Fehler beim Speichern");
+    return;
+  }
+
+  clearForm();
+  loadCampaigns();
 }
 
-clearForm();
-loadCampaigns();
-}
-
-
-async function addAssets(){
-
+async function addAssets() {
   const files = qs("assetUpload")?.files;
   const type = qs("assetType")?.value || "image";
 
-  if(!files || !files.length){
+  if (!files || !files.length) {
     alert("❌ Keine Assets ausgewählt");
     return;
   }
 
-  const campaign = state.campaigns.find(c => c.active);
+  const campaign = state.campaigns.find((c) => c.active);
 
-  if(!campaign){
+  if (!campaign) {
     alert("❌ Keine aktive Kampagne");
     return;
   }
 
-  if(!campaign.ad_sets?.length){
+  if (!campaign.ad_sets?.length) {
     alert("❌ Erst Ad Type erstellen");
     return;
   }
 
   try {
-
     // =========================
     // 📤 UPLOAD
     // =========================
     const uploaded = await uploadFiles("ads", files);
 
-    if(!uploaded?.length){
+    if (!uploaded?.length) {
       alert("❌ Upload fehlgeschlagen");
       return;
     }
@@ -345,7 +332,7 @@ async function addAssets(){
     const newAssets = uploaded.map((asset, index) => ({
       ...asset,
       type,
-      layer: currentAssets.length + index
+      layer: currentAssets.length + index,
     }));
 
     // 👉 UI STATE
@@ -356,8 +343,7 @@ async function addAssets(){
     // 💾 SAVE IN DB
     // =========================
     const updatedSets = campaign.ad_sets.map((set, i) => {
-
-      if(i !== 0) return set;
+      if (i !== 0) return set;
 
       const existing = set.assets || [];
 
@@ -367,9 +353,9 @@ async function addAssets(){
           ...existing,
           ...newAssets.map((a, idx) => ({
             ...a,
-            layer: existing.length + idx
-          }))
-        ]
+            layer: existing.length + idx,
+          })),
+        ],
       };
     });
 
@@ -378,7 +364,7 @@ async function addAssets(){
       .update({ ad_sets: updatedSets })
       .eq("id", campaign.id);
 
-    if(error){
+    if (error) {
       console.error(error);
       alert("❌ Fehler beim Speichern");
       return;
@@ -387,21 +373,16 @@ async function addAssets(){
     qs("assetUpload").value = "";
 
     await loadCampaigns();
-
-  } catch(e){
+  } catch (e) {
     console.error("❌ addAssets crash:", e);
     alert("❌ Unerwarteter Fehler");
   }
 }
 
+async function addAdSet() {
+  const campaign = state.campaigns.find((c) => c.active);
 
-
-
-async function addAdSet(){
-
- const campaign = state.campaigns.find(c => c.active);
-
-  if(!campaign){
+  if (!campaign) {
     alert("❌ Erst Kampagne erstellen");
     return;
   }
@@ -414,7 +395,7 @@ async function addAdSet(){
     freq_day: Number(qs("freqDay").value || 0),
     daily_limit: Number(qs("dailyLimit").value || 0),
     assets: [],
-    metrics: {}
+    metrics: {},
   };
 
   const updated = [...(campaign.ad_sets || []), adSet];
@@ -427,39 +408,36 @@ async function addAdSet(){
   loadCampaigns();
 }
 
-
-
 // =====================
 // INLINE UPDATE CAMPAIGN
 // =====================
-async function saveInlineCampaign(id){
+async function saveInlineCampaign(id) {
+  const row = document.querySelector(`[data-row="${id}"]`);
 
-const row = document.querySelector(`[data-row="${id}"]`);
+  const payload = {
+    name: row.querySelector("[data-field='name']").value,
+    customer: row.querySelector("[data-field='customer']").value,
+    budget: Number(row.querySelector("[data-field='budget']").value || 0),
+  };
 
-const payload = {
-name: row.querySelector("[data-field='name']").value,
-customer: row.querySelector("[data-field='customer']").value,
-budget: Number(row.querySelector("[data-field='budget']").value || 0)
-};
+  await supabase.from("campaigns").update(payload).eq("id", id);
 
-await supabase.from("campaigns").update(payload).eq("id", id);
-
-state.inlineEditId = null;
-loadCampaigns();
+  state.inlineEditId = null;
+  loadCampaigns();
 }
 
 // =====================
 // DELETE
 // =====================
-async function deleteCampaign(id){
-await supabase.from("campaigns").delete().eq("id", id);
-loadCampaigns();
+async function deleteCampaign(id) {
+  await supabase.from("campaigns").delete().eq("id", id);
+  loadCampaigns();
 }
 
 // =====================
 // LOAD
 // =====================
-async function loadCampaigns(){
+async function loadCampaigns() {
   // =========================
   // 🔥 LOAD CAMPAIGNS
   // =========================
@@ -467,14 +445,14 @@ async function loadCampaigns(){
     .from("campaigns")
     .select("*")
     .order("created_at", { ascending: false });
-console.log("LOADED CAMPAIGNS:", campaigns);
+  console.log("LOADED CAMPAIGNS:", campaigns);
 
-  if(cError){
+  if (cError) {
     console.error("❌ Campaign Load Error", cError);
     return;
   }
 
-  if(!campaigns) return;
+  if (!campaigns) return;
 
   // =========================
   // 🔥 LOAD EVENTS (EINMAL!)
@@ -483,7 +461,7 @@ console.log("LOADED CAMPAIGNS:", campaigns);
     .from("analytics_events")
     .select("*");
 
-  if(eError){
+  if (eError) {
     console.error("❌ Events Load Error", eError);
     return;
   }
@@ -491,9 +469,7 @@ console.log("LOADED CAMPAIGNS:", campaigns);
   // =========================
   // 🔥 KPI CALC
   // =========================
-  const enriched = campaigns.map(c => 
-    calculateCampaignKPIs(c, events || [])
-  );
+  const enriched = campaigns.map((c) => calculateCampaignKPIs(c, events || []));
 
   renderCampaigns(enriched);
 }
@@ -501,15 +477,13 @@ console.log("LOADED CAMPAIGNS:", campaigns);
 // =====================
 // RENDER CAMPAIGNS
 // =====================
-function renderCampaigns(list){
-
+function renderCampaigns(list) {
   state.campaigns = list;
 
   const container = qs("campaignList");
   container.innerHTML = "";
 
-  list.forEach(c => {
-
+  list.forEach((c) => {
     const adSets = c.ad_sets || [];
 
     // =========================
@@ -517,23 +491,23 @@ function renderCampaigns(list){
     // =========================
     let totalRevenue = 0;
 
-    adSets.forEach(s => {
+    adSets.forEach((s) => {
       totalRevenue += s.metrics?.revenue || 0;
     });
 
     // =========================
     // 🎯 BREAKDOWN UI
     // =========================
-    const breakdownHTML = adSets.map(set => {
+    const breakdownHTML = adSets
+      .map((set) => {
+        const revenue = set.metrics?.revenue || 0;
+        const impressions = set.metrics?.impressions || 0;
 
-      const revenue = set.metrics?.revenue || 0;
-      const impressions = set.metrics?.impressions || 0;
+        const share = totalRevenue
+          ? Math.round((revenue / totalRevenue) * 100)
+          : 0;
 
-      const share = totalRevenue
-        ? Math.round((revenue / totalRevenue) * 100)
-        : 0;
-
-      return `
+        return `
         <div style="margin-top:6px;">
           <div style="display:flex; justify-content:space-between; font-size:12px;">
             <span>${set.type.toUpperCase()}</span>
@@ -559,30 +533,32 @@ function renderCampaigns(list){
           </div>
         </div>
       `;
-    }).join("");
+      })
+      .join("");
 
-
-
-    
     // =========================
     // 🎮 ASSETS
     // =========================
 
-  const adSetHTML = adSets.map(set => {
+    const adSetHTML = adSets
+      .map((set) => {
+        const assets = set.assets || [];
 
-  const assets = set.assets || [];
-
-  const assetHTML = assets.map(a=>`
+        const assetHTML = assets
+          .map(
+            (a) => `
     <div class="asset small">
       ${
-        a.type==="video"
-        ? `<video src="${a?.url || ''}" muted></video>`
-        : `<img src="${a?.url || ''}">`
+        a.type === "video"
+          ? `<video src="${a?.url || ""}" muted></video>`
+          : `<img src="${a?.url || ""}">`
       }
     </div>
-  `).join("");
+  `,
+          )
+          .join("");
 
-  return `
+        return `
     <div class="box" style="margin-top:10px;">
       <strong>${set.type.toUpperCase()}</strong><br>
       🎯 ${set.placement || "-"} • 🔁 ${set.freq_user || 0}/user
@@ -590,9 +566,8 @@ function renderCampaigns(list){
       <div class="assetRow">${assetHTML}</div>
     </div>
   `;
-
-}).join("");
-    
+      })
+      .join("");
 
     // =========================
     // 🎯 TARGETING
@@ -645,64 +620,69 @@ function renderCampaigns(list){
 // =====================
 // EVENTS
 // =====================
-function formatLeagueName(league){
+function formatLeagueName(league) {
   const rawName = (league?.name || "Unbenannte Liga").trim();
-  const regionName = league?.regions?.name || league?.regions?.states?.name || "";
+  const regionName =
+    league?.regions?.name || league?.regions?.states?.name || "";
 
-  if(regionName && !rawName.toLowerCase().includes(regionName.toLowerCase())){
+  if (regionName && !rawName.toLowerCase().includes(regionName.toLowerCase())) {
     return `${rawName} (${regionName})`;
   }
 
   return rawName;
 }
 
-function normalizeScopeRefs(value){
-  if(Array.isArray(value)){
-    return value.map(v => String(v).trim()).filter(Boolean);
+function normalizeScopeRefs(value) {
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v).trim()).filter(Boolean);
   }
 
-  if(value === null || value === undefined) return [];
+  if (value === null || value === undefined) return [];
 
   return String(value)
     .split(",")
-    .map(v => v.trim())
+    .map((v) => v.trim())
     .filter(Boolean);
 }
 
-function getEventReferenceItems(scope){
-  if(scope === "league") return state.eventReferenceData.leagues;
-  if(scope === "team") return state.eventReferenceData.teams;
+function getEventReferenceItems(scope) {
+  if (scope === "league") return state.eventReferenceData.leagues;
+  if (scope === "team") return state.eventReferenceData.teams;
   return [];
 }
 
-function getEventReferenceLabel(scope, value){
+function getEventReferenceLabel(scope, value) {
   const refs = normalizeScopeRefs(value);
-  if(!refs.length) return "";
+  if (!refs.length) return "";
 
   const items = getEventReferenceItems(scope);
-  const labels = refs.map(ref => {
-    const item = items.find(i => String(i.id) === String(ref));
+  const labels = refs.map((ref) => {
+    const item = items.find((i) => String(i.id) === String(ref));
     return item?.label || item?.name || ref;
   });
 
   return labels.join(", ");
 }
 
-function renderEventReferenceOptions(scope, selectedRefs = []){
+function renderEventReferenceOptions(scope, selectedRefs = []) {
   const selected = new Set(selectedRefs.map(String));
 
-  return getEventReferenceItems(scope).map(item => `
+  return getEventReferenceItems(scope)
+    .map(
+      (item) => `
     <option value="${escapeHtml(item.id)}" ${selected.has(String(item.id)) ? "selected" : ""}>
       ${escapeHtml(item.label || item.name || item.id)}
     </option>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 
-function renderInlineScopeRefField(event, scopeLabel){
+function renderInlineScopeRefField(event, scopeLabel) {
   const scope = event.scope || "global";
   const selectedRefs = normalizeScopeRefs(event.scope_ref);
 
-  if(scope === "global"){
+  if (scope === "global") {
     return `
       <label class="field">
         <span>Auswahl</span>
@@ -712,7 +692,7 @@ function renderInlineScopeRefField(event, scopeLabel){
     `;
   }
 
-  if(scope === "league"){
+  if (scope === "league") {
     return `
       <label class="field">
         <span>Liga auswählen</span>
@@ -736,12 +716,10 @@ function renderInlineScopeRefField(event, scopeLabel){
   `;
 }
 
-async function loadEventReferenceData(){
-  try{
+async function loadEventReferenceData() {
+  try {
     const [competitionsResult, teamsResult] = await Promise.all([
-      supabase
-        .from("competitions")
-        .select(`
+      supabase.from("competitions").select(`
           id,
           name,
           level,
@@ -752,9 +730,7 @@ async function loadEventReferenceData(){
             states ( name )
           )
         `),
-      supabase
-        .from("teams")
-        .select(`
+      supabase.from("teams").select(`
           id,
           name,
           competition_id,
@@ -763,77 +739,87 @@ async function loadEventReferenceData(){
             name,
             level
           )
-        `)
+        `),
     ]);
 
-    if(competitionsResult.error) throw competitionsResult.error;
-    if(teamsResult.error) throw teamsResult.error;
+    if (competitionsResult.error) throw competitionsResult.error;
+    if (teamsResult.error) throw teamsResult.error;
 
     const leagues = (competitionsResult.data || [])
-      .map(league => ({
+      .map((league) => ({
         id: String(league.id),
         name: league.name,
         label: formatLeagueName(league),
-        level: Number(league.level) || 99
+        level: Number(league.level) || 99,
       }))
-      .sort((a,b) => a.level - b.level || a.label.localeCompare(b.label, "de"));
+      .sort(
+        (a, b) => a.level - b.level || a.label.localeCompare(b.label, "de"),
+      );
 
-    const leagueLabelById = new Map(leagues.map(l => [String(l.id), l.label]));
+    const leagueLabelById = new Map(
+      leagues.map((l) => [String(l.id), l.label]),
+    );
 
     const teams = (teamsResult.data || [])
-      .map(team => ({
+      .map((team) => ({
         id: String(team.id),
         name: team.name,
         leagueId: team.competition_id ? String(team.competition_id) : "",
-        label: `${team.name}${team.competition_id ? ` (${leagueLabelById.get(String(team.competition_id)) || team.competitions?.name || "Liga"})` : ""}`
+        label: `${team.name}${team.competition_id ? ` (${leagueLabelById.get(String(team.competition_id)) || team.competitions?.name || "Liga"})` : ""}`,
       }))
-      .sort((a,b) => a.name.localeCompare(b.name, "de"));
+      .sort((a, b) => a.name.localeCompare(b.name, "de"));
 
     state.eventReferenceData = { leagues, teams };
     renderEventScopePicker();
     loadEvents();
-  } catch(error){
+  } catch (error) {
     console.error("❌ Event references load failed:", error);
     const help = qs("eventScopeHelp");
-    if(help) help.textContent = "Liga-/Team-Auswahl konnte nicht geladen werden. Das Speichern bleibt trotzdem möglich.";
+    if (help)
+      help.textContent =
+        "Liga-/Team-Auswahl konnte nicht geladen werden. Das Speichern bleibt trotzdem möglich.";
   }
 }
 
-function syncEventScopeHidden(){
+function syncEventScopeHidden() {
   const hidden = qs("eventScopeRef");
-  if(hidden) hidden.value = state.eventScopeSelection.join(",");
+  if (hidden) hidden.value = state.eventScopeSelection.join(",");
 }
 
-function renderEventScopeSelected(){
+function renderEventScopeSelected() {
   const container = qs("eventScopeSelected");
-  if(!container) return;
+  if (!container) return;
 
   const scope = qs("eventScope")?.value || "global";
   const refs = state.eventScopeSelection;
 
-  if(scope === "global" || !refs.length){
+  if (scope === "global" || !refs.length) {
     container.innerHTML = "";
     return;
   }
 
-  container.innerHTML = refs.map(ref => `
+  container.innerHTML = refs
+    .map(
+      (ref) => `
     <span class="selectionChip">
       ${escapeHtml(getEventReferenceLabel(scope, ref) || ref)}
       <button type="button" data-action="removeEventScopeRef" data-ref="${escapeHtml(ref)}">×</button>
     </span>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 
-function renderEventScopePicker(){
+function renderEventScopePicker() {
   const scope = qs("eventScope")?.value || "global";
   const field = document.querySelector(".eventReferenceField");
   const search = qs("eventScopeSearch");
   const picker = qs("eventScopePicker");
   const help = qs("eventScopeHelp");
 
-  if(!field || !search || !picker || !help) return;
+  if (!field || !search || !picker || !help) return;
 
-  if(scope === "global"){
+  if (scope === "global") {
     field.hidden = true;
     state.eventScopeSelection = [];
     syncEventScopeHidden();
@@ -843,30 +829,34 @@ function renderEventScopePicker(){
 
   field.hidden = false;
 
-  search.placeholder = scope === "league"
-    ? "Liga suchen, z.B. Kreisliga oder Region"
-    : "Team suchen, z.B. Vereinsname";
+  search.placeholder =
+    scope === "league"
+      ? "Liga suchen, z.B. Kreisliga oder Region"
+      : "Team suchen, z.B. Vereinsname";
 
-  help.textContent = scope === "league"
-    ? "Eine Liga anklicken. Die technische Liga-ID wird automatisch gespeichert."
-    : "Ein oder mehrere Teams anklicken. Die technischen Team-IDs werden automatisch gespeichert.";
+  help.textContent =
+    scope === "league"
+      ? "Eine Liga anklicken. Die technische Liga-ID wird automatisch gespeichert."
+      : "Ein oder mehrere Teams anklicken. Die technischen Team-IDs werden automatisch gespeichert.";
 
   const query = normalize(search.value);
   const items = getEventReferenceItems(scope)
-    .filter(item => !query || normalize(item.label).includes(query))
+    .filter((item) => !query || normalize(item.label).includes(query))
     .slice(0, 80);
 
   picker.innerHTML = "";
 
-  if(!items.length){
+  if (!items.length) {
     const option = document.createElement("option");
     option.disabled = true;
-    option.textContent = state.eventReferenceData.leagues.length || state.eventReferenceData.teams.length
-      ? "Keine Treffer"
-      : "Daten werden geladen...";
+    option.textContent =
+      state.eventReferenceData.leagues.length ||
+      state.eventReferenceData.teams.length
+        ? "Keine Treffer"
+        : "Daten werden geladen...";
     picker.appendChild(option);
   } else {
-    items.forEach(item => {
+    items.forEach((item) => {
       const option = document.createElement("option");
       option.value = item.id;
       option.textContent = item.label;
@@ -878,13 +868,13 @@ function renderEventScopePicker(){
   renderEventScopeSelected();
 }
 
-function selectEventScopeReference(value){
+function selectEventScopeReference(value) {
   const scope = qs("eventScope")?.value || "global";
-  if(!value || scope === "global") return;
+  if (!value || scope === "global") return;
 
-  if(scope === "league"){
+  if (scope === "league") {
     state.eventScopeSelection = [String(value)];
-  } else if(!state.eventScopeSelection.includes(String(value))){
+  } else if (!state.eventScopeSelection.includes(String(value))) {
     state.eventScopeSelection.push(String(value));
   }
 
@@ -892,58 +882,67 @@ function selectEventScopeReference(value){
   renderEventScopePicker();
 }
 
-function removeEventScopeReference(value){
-  state.eventScopeSelection = state.eventScopeSelection.filter(ref => ref !== String(value));
+function removeEventScopeReference(value) {
+  state.eventScopeSelection = state.eventScopeSelection.filter(
+    (ref) => ref !== String(value),
+  );
   syncEventScopeHidden();
   renderEventScopePicker();
 }
 
-function getEventRuntimeConfig(event){
-  const configAsset = (event?.assets || []).find(asset => asset?.type === "config" && asset?.eventConfig);
+function getEventRuntimeConfig(event) {
+  const configAsset = (event?.assets || []).find(
+    (asset) => asset?.type === "config" && asset?.eventConfig,
+  );
   const config = configAsset?.eventConfig || {};
 
   return {
     trigger: event?.trigger || config.trigger || "random",
-    cooldown: Number(event?.cooldown ?? config.cooldown ?? 0)
+    cooldown: Number(event?.cooldown ?? config.cooldown ?? 0),
   };
 }
 
-function withEventRuntimeConfig(assets, config){
-  const cleanAssets = (assets || []).filter(asset => asset?.type !== "config");
+function withEventRuntimeConfig(assets, config) {
+  const cleanAssets = (assets || []).filter(
+    (asset) => asset?.type !== "config",
+  );
 
   cleanAssets.push({
     id: "event_runtime_config",
     type: "config",
     eventConfig: {
       trigger: config.trigger || "random",
-      cooldown: Number(config.cooldown || 0)
-    }
+      cooldown: Number(config.cooldown || 0),
+    },
   });
 
   return cleanAssets;
 }
 
-function getDisplayAssets(assets){
-  return (assets || []).filter(asset => asset?.url);
+function getDisplayAssets(assets) {
+  return (assets || []).filter((asset) => asset?.url);
 }
 
-function getTriggerLabel(trigger){
-  switch(trigger){
-    case "kickoff": return "Anpfiff";
-    case "halftime": return "Halbzeit";
-    case "late": return "Schlussphase";
-    default: return "Zufällig im Live-Spiel";
+function getTriggerLabel(trigger) {
+  switch (trigger) {
+    case "kickoff":
+      return "Anpfiff";
+    case "halftime":
+      return "Halbzeit";
+    case "late":
+      return "Schlussphase";
+    default:
+      return "Zufällig im Live-Spiel";
   }
 }
 
-async function saveEvent(){
-
+async function saveEvent() {
   const files = qs("eventMedia")?.files;
   const uploadedAssets = files?.length
     ? await uploadFiles("events", files, qs("eventAssetType")?.value || "auto")
     : [];
 
-  if(files?.length && !uploadedAssets.length){
+  if (files?.length && !uploadedAssets.length) {
     alert("❌ Upload fehlgeschlagen. Event wurde nicht gespeichert.");
     return;
   }
@@ -951,13 +950,13 @@ async function saveEvent(){
   const scope = qs("eventScope")?.value || "global";
   let scope_ref = qs("eventScopeRef")?.value || null;
 
-  if(scope === "team" && scope_ref){
-    scope_ref = scope_ref.split(",").map(s => s.trim());
+  if (scope === "team" && scope_ref) {
+    scope_ref = scope_ref.split(",").map((s) => s.trim());
   }
 
   const runtimeConfig = {
     trigger: qs("eventTrigger")?.value || "random",
-    cooldown: Number(qs("eventCooldown")?.value || 0)
+    cooldown: Number(qs("eventCooldown")?.value || 0),
   };
 
   const payload = {
@@ -977,38 +976,41 @@ async function saveEvent(){
     assets: withEventRuntimeConfig(uploadedAssets, runtimeConfig),
 
     scope,
-    scope_ref
+    scope_ref,
   };
 
   console.log("🚀 SAVE EVENT:", payload);
 
   let result;
 
- if(state.editEventId){
-  result = await supabase
-    .from("game_events")
-    .update(payload)
-    .eq("id", state.editEventId);
-} else {
-  result = await supabase
-    .from("game_events")
-    .insert(payload);
-}
+  if (state.editEventId) {
+    result = await supabase
+      .from("game_events")
+      .update(payload)
+      .eq("id", state.editEventId);
+  } else {
+    result = await supabase.from("game_events").insert(payload);
+  }
 
-if(result?.error){
-  console.error("❌ Save Event Error:", result.error);
-  alert(`❌ Event wurde nicht gespeichert: ${result.error.message || "Supabase Fehler"}`);
-  return;
-}
+  if (result?.error) {
+    console.error("❌ Save Event Error:", result.error);
+    alert(
+      `❌ Event wurde nicht gespeichert: ${result.error.message || "Supabase Fehler"}`,
+    );
+    return;
+  }
 
   state.editEventId = null;
   clearEventForm();
   loadEvents();
 }
-function clearEventForm(){
-  document.querySelectorAll("#eventsTab input, #eventsTab textarea, #eventsTab select")
-    .forEach(i => {
-      if(i.type === "file"){
+function clearEventForm() {
+  document
+    .querySelectorAll(
+      "#eventsTab input, #eventsTab textarea, #eventsTab select",
+    )
+    .forEach((i) => {
+      if (i.type === "file") {
         i.value = "";
         return;
       }
@@ -1016,31 +1018,29 @@ function clearEventForm(){
       i.value = "";
     });
 
-  if(qs("eventScope")) qs("eventScope").value = "global";
-  if(qs("eventProbability")) qs("eventProbability").value = "0.1";
-  if(qs("eventDuration")) qs("eventDuration").value = "0";
-  if(qs("eventEffectType")) qs("eventEffectType").value = "modifier";
-  if(qs("eventTarget")) qs("eventTarget").value = "both";
-  if(qs("eventValue")) qs("eventValue").value = "0";
-  if(qs("eventAttack")) qs("eventAttack").value = "0";
-  if(qs("eventDefense")) qs("eventDefense").value = "0";
-  if(qs("eventTrigger")) qs("eventTrigger").value = "random";
-  if(qs("eventCooldown")) qs("eventCooldown").value = "0";
-  if(qs("eventAssetType")) qs("eventAssetType").value = "auto";
-  if(qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
+  if (qs("eventScope")) qs("eventScope").value = "global";
+  if (qs("eventProbability")) qs("eventProbability").value = "0.1";
+  if (qs("eventDuration")) qs("eventDuration").value = "0";
+  if (qs("eventEffectType")) qs("eventEffectType").value = "modifier";
+  if (qs("eventTarget")) qs("eventTarget").value = "both";
+  if (qs("eventValue")) qs("eventValue").value = "0";
+  if (qs("eventAttack")) qs("eventAttack").value = "0";
+  if (qs("eventDefense")) qs("eventDefense").value = "0";
+  if (qs("eventTrigger")) qs("eventTrigger").value = "random";
+  if (qs("eventCooldown")) qs("eventCooldown").value = "0";
+  if (qs("eventAssetType")) qs("eventAssetType").value = "auto";
+  if (qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
 
   state.eventScopeSelection = [];
   syncEventScopeHidden();
   renderEventScopePicker();
 }
 
-
 import { EVENT_REGISTRY } from "./engine/eventRegistry.js";
 
-function loadEventTypes(){
-
+function loadEventTypes() {
   const select = qs("geType");
-  if(!select) return;
+  if (!select) return;
 
   select.innerHTML = "";
 
@@ -1064,7 +1064,7 @@ function loadEventTypes(){
     ["CLEARANCE", "🧹 Klärung"],
 
     // 🔥 WICHTIG
-    ["FULLTIME", "⏱️ Abpfiff"]
+    ["FULLTIME", "⏱️ Abpfiff"],
   ];
 
   // =========================
@@ -1085,13 +1085,11 @@ function loadEventTypes(){
   // =========================
   // 🧩 OPTIONAL: REGISTRY EVENTS
   // =========================
-  if(typeof EVENT_REGISTRY !== "undefined"){
-
+  if (typeof EVENT_REGISTRY !== "undefined") {
     const regGroup = document.createElement("optgroup");
     regGroup.label = "System Events";
 
-    Object.values(EVENT_REGISTRY).forEach(e => {
-
+    Object.values(EVENT_REGISTRY).forEach((e) => {
       const opt = document.createElement("option");
       opt.value = e.id;
       opt.textContent = e.label || e.id;
@@ -1103,37 +1101,34 @@ function loadEventTypes(){
   }
 }
 
-
-async function loadInsights(){
-
+async function loadInsights() {
   const { data: events } = await supabase
     .from("analytics_events")
     .select("event_name, session_id, created_at");
 
-  if(!events || !events.length) return;
+  if (!events || !events.length) return;
 
   // =========================
   // 🧠 SESSION BUILD
   // =========================
   const sessions = {};
 
-  events.forEach(e => {
-
-    if(!sessions[e.session_id]){
+  events.forEach((e) => {
+    if (!sessions[e.session_id]) {
       sessions[e.session_id] = {
         start: e.created_at,
         end: e.created_at,
-        events: []
+        events: [],
       };
     }
 
     sessions[e.session_id].events.push(e.event_name);
 
-    if(e.created_at < sessions[e.session_id].start){
+    if (e.created_at < sessions[e.session_id].start) {
       sessions[e.session_id].start = e.created_at;
     }
 
-    if(e.created_at > sessions[e.session_id].end){
+    if (e.created_at > sessions[e.session_id].end) {
       sessions[e.session_id].end = e.created_at;
     }
   });
@@ -1143,16 +1138,16 @@ async function loadInsights(){
   // =========================
   // 🔥 KPI CALC
   // =========================
-  const dau = new Set(events.map(e => e.session_id)).size;
+  const dau = new Set(events.map((e) => e.session_id)).size;
 
-  const matches = events.filter(e => e.event_name === "match_start").length;
+  const matches = events.filter((e) => e.event_name === "match_start").length;
 
-  const durations = sessionList.map(s =>
-    (new Date(s.end) - new Date(s.start)) / 1000
+  const durations = sessionList.map(
+    (s) => (new Date(s.end) - new Date(s.start)) / 1000,
   );
 
   const avgSession = durations.length
-    ? Math.round(durations.reduce((a,b)=>a+b,0)/durations.length)
+    ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
     : 0;
 
   const matchesPerSession = sessionList.length
@@ -1166,12 +1161,11 @@ async function loadInsights(){
   let core = 0;
   let hardcore = 0;
 
-  sessionList.forEach(s => {
+  sessionList.forEach((s) => {
+    const matchCount = s.events.filter((e) => e === "match_start").length;
 
-    const matchCount = s.events.filter(e => e === "match_start").length;
-
-    if(matchCount <= 1) casual++;
-    else if(matchCount <= 4) core++;
+    if (matchCount <= 1) casual++;
+    else if (matchCount <= 4) core++;
     else hardcore++;
   });
 
@@ -1190,7 +1184,7 @@ async function loadInsights(){
   // =========================
   // 🔁 RETENTION PROXY
   // =========================
-  const returningUsers = sessionList.filter(s => s.events.length > 5).length;
+  const returningUsers = sessionList.filter((s) => s.events.length > 5).length;
 
   const retention = sessionList.length
     ? ((returningUsers / sessionList.length) * 100).toFixed(1)
@@ -1199,18 +1193,14 @@ async function loadInsights(){
   // =========================
   // 🧠 ENGAGEMENT SCORE
   // =========================
-  const engagementScore = avgSession > 600
-    ? "🔥 HIGH"
-    : avgSession > 300
-    ? "⚡ MEDIUM"
-    : "🧊 LOW";
+  const engagementScore =
+    avgSession > 600 ? "🔥 HIGH" : avgSession > 300 ? "⚡ MEDIUM" : "🧊 LOW";
 
   // =========================
   // ⏱ FORMAT DURATION
   // =========================
-  function formatDuration(seconds){
-
-    if(!seconds || seconds <= 0) return "0:00";
+  function formatDuration(seconds) {
+    if (!seconds || seconds <= 0) return "0:00";
 
     const min = Math.floor(seconds / 60);
     const sec = Math.floor(seconds % 60);
@@ -1225,15 +1215,15 @@ async function loadInsights(){
   qs("insightSessions").textContent = sessionList.length;
   qs("insightMatches").textContent = matches;
   qs("insightAvg").textContent = formatDurationVerbose(avgSession);
-  
+
   const mps = qs("insightMPS");
-  if(mps) mps.textContent = matchesPerSession;
+  if (mps) mps.textContent = matchesPerSession;
 
   const eng = qs("insightEngagement");
-  if(eng) eng.textContent = engagementScore;
+  if (eng) eng.textContent = engagementScore;
 
   const seg = qs("insightSegments");
-  if(seg){
+  if (seg) {
     seg.innerHTML = `
       Casual: ${casual}<br>
       Core: ${core}<br>
@@ -1246,7 +1236,7 @@ async function loadInsights(){
   // =========================
   const monet = qs("insightMonetization");
 
-  if(monet){
+  if (monet) {
     monet.innerHTML = `
       📺 Ads / Session: ${adsPerSession}<br>
       👁 Impressions: ${totalImpressions}<br>
@@ -1256,10 +1246,7 @@ async function loadInsights(){
   }
 }
 
-
-
-async function getChartData(){
-
+async function getChartData() {
   const { data } = await supabase
     .from("analytics_events")
     .select("created_at, session_id")
@@ -1267,11 +1254,10 @@ async function getChartData(){
 
   const map = {};
 
-  data?.forEach(e => {
-
+  data?.forEach((e) => {
     const date = new Date(e.created_at).toLocaleDateString();
 
-    if(!map[date]){
+    if (!map[date]) {
       map[date] = new Set();
     }
 
@@ -1280,20 +1266,19 @@ async function getChartData(){
 
   // 🔥 Sets → Zahlen
   const labels = Object.keys(map);
-  const values = labels.map(d => map[d].size);
+  const values = labels.map((d) => map[d].size);
 
   return { labels, values };
 }
 
-async function loadChart(){
-
+async function loadChart() {
   const ctx = document.getElementById("insightChart");
 
   // 🔥 FIX 1: Canvas existiert?
-  if(!ctx) return;
+  if (!ctx) return;
 
   // 🔥 FIX 2: alten Chart sauber zerstören
-  if(insightChart){
+  if (insightChart) {
     insightChart.destroy();
     insightChart = null;
   }
@@ -1304,31 +1289,30 @@ async function loadChart(){
     type: "line",
     data: {
       labels: data.labels,
-      datasets: [{
-        label: "Events",
-        data: data.values
-      }]
-    }
+      datasets: [
+        {
+          label: "Events",
+          data: data.values,
+        },
+      ],
+    },
   });
 }
 
-async function getGeoData(){
-
-  const { data } = await supabase
-    .from("analytics_events")
-    .select("region_id");
+async function getGeoData() {
+  const { data } = await supabase.from("analytics_events").select("region_id");
 
   const map = {};
 
   const REGION_MAP = {
-    "bayern": "DE-BY",
-    "nrw": "DE-NW",
-    "berlin": "DE-BE",
-    "hamburg": "DE-HH"
+    bayern: "DE-BY",
+    nrw: "DE-NW",
+    berlin: "DE-BE",
+    hamburg: "DE-HH",
   };
 
-  (data || []).forEach(e => {
-    if(!e.region_id) return;
+  (data || []).forEach((e) => {
+    if (!e.region_id) return;
 
     const key = REGION_MAP[e.region_id.toLowerCase()] || e.region_id;
 
@@ -1340,19 +1324,18 @@ async function getGeoData(){
 
 let geoMap = null;
 
-async function loadGeoMap(){
-
+async function loadGeoMap() {
   const container = document.getElementById("geoMap");
-  if(!container) return;
+  if (!container) return;
 
-  if(geoMap){
+  if (geoMap) {
     geoMap.remove();
   }
 
   geoMap = L.map("geoMap").setView([51.2, 10.4], 6);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
+    attribution: "© OpenStreetMap",
   }).addTo(geoMap);
 
   const geoData = await getGeoData();
@@ -1360,18 +1343,18 @@ async function loadGeoMap(){
   const res = await fetch("./admin/data/germany.json");
   const germany = await res.json();
 
-  function getColor(value){
-    if(value > 200) return "#800026";
-    if(value > 100) return "#BD0026";
-    if(value > 50) return "#E31A1C";
-    if(value > 20) return "#FC4E2A";
-    if(value > 10) return "#FD8D3C";
-    if(value > 5) return "#FEB24C";
-    if(value > 0) return "#FED976";
+  function getColor(value) {
+    if (value > 200) return "#800026";
+    if (value > 100) return "#BD0026";
+    if (value > 50) return "#E31A1C";
+    if (value > 20) return "#FC4E2A";
+    if (value > 10) return "#FD8D3C";
+    if (value > 5) return "#FEB24C";
+    if (value > 0) return "#FED976";
     return "#EEE";
   }
 
-  function style(feature){
+  function style(feature) {
     const regionId = feature.properties.id;
     const value = geoData[regionId] || 0;
 
@@ -1380,16 +1363,14 @@ async function loadGeoMap(){
       weight: 1,
       opacity: 1,
       color: "#333",
-      fillOpacity: 0.7
+      fillOpacity: 0.7,
     };
   }
 
   const geoLayer = L.geoJSON(germany, {
-
     style,
 
     onEachFeature: (feature, layer) => {
-
       const regionId = feature.properties.id;
       const value = geoData[regionId] || 0;
 
@@ -1404,61 +1385,61 @@ async function loadGeoMap(){
           l.setStyle({
             weight: 2,
             color: "#000",
-            fillOpacity: 0.9
+            fillOpacity: 0.9,
           });
           l.bringToFront();
         },
         mouseout: (e) => {
           geoLayer.resetStyle(e.target);
-        }
+        },
       });
-    }
-
+    },
   }).addTo(geoMap);
 
   // 🔥 BONUS: Top Regionen anzeigen
   renderTopRegions(geoData);
 }
 
-
-  function renderTopRegions(geoData){
-
+function renderTopRegions(geoData) {
   const container = document.getElementById("topRegions");
-  if(!container) return;
+  if (!container) return;
 
   const sorted = Object.entries(geoData)
-    .sort((a,b) => b[1] - a[1])
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  if(!sorted.length){
+  if (!sorted.length) {
     container.innerHTML = "Keine Daten";
     return;
   }
 
-  container.innerHTML = sorted.map(([id, val], i) => `
+  container.innerHTML = sorted
+    .map(
+      ([id, val], i) => `
     <div class="regionRow">
-      <span>#${i+1} Region ${id}</span>
+      <span>#${i + 1} Region ${id}</span>
       <strong>${val}</strong>
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 
 // =====================
 // 🎮 GAME EVENTS (NEU)
 // =====================
 
-async function saveGameEvent(){
-
+async function saveGameEvent() {
   const files = qs("geMedia")?.files;
 
-  if(!files || !files.length){
+  if (!files || !files.length) {
     alert("❌ Game Event braucht Asset!");
     return;
   }
 
   const assets = await uploadFiles("game-events", files);
 
-  if(!assets.length){
+  if (!assets.length) {
     alert("❌ Upload failed");
     return;
   }
@@ -1471,16 +1452,13 @@ async function saveGameEvent(){
     value: Number(qs("geValue")?.value || 0),
     duration: Number(qs("geDuration")?.value || 0),
     assets: assets,
-    
   };
 
   console.log("🎮 SAVE GAME EVENT:", payload);
 
-  const { error } = await supabase
-    .from("event_definitions")
-    .insert(payload);
+  const { error } = await supabase.from("event_definitions").insert(payload);
 
-  if(error){
+  if (error) {
     console.error("❌ Save GameEvent Error:", error);
     alert("Speichern fehlgeschlagen");
     return;
@@ -1489,9 +1467,9 @@ async function saveGameEvent(){
   console.log("✅ GameEvent gespeichert");
 
   // 🔥 reset form (optional aber sinnvoll)
-  ["geTitle","geProbability","geValue","geDuration"].forEach(id=>{
+  ["geTitle", "geProbability", "geValue", "geDuration"].forEach((id) => {
     const el = qs(id);
-    if(el) el.value = "";
+    if (el) el.value = "";
   });
 
   qs("geMedia").value = "";
@@ -1499,8 +1477,7 @@ async function saveGameEvent(){
   loadGameEvents();
 }
 
-async function loadGameEvents(){
-
+async function loadGameEvents() {
   const { data } = await supabase
     .from("event_definitions")
     .select("*")
@@ -1509,17 +1486,15 @@ async function loadGameEvents(){
   renderGameEvents(data || []);
 }
 
-
-async function deleteGameEvent(id){
-
-  if(!confirm("Event wirklich löschen?")) return;
+async function deleteGameEvent(id) {
+  if (!confirm("Event wirklich löschen?")) return;
 
   const { error } = await supabase
     .from("event_definitions")
     .delete()
     .eq("id", id);
 
-  if(error){
+  if (error) {
     console.error("❌ Delete Error:", error);
     alert("Löschen fehlgeschlagen");
     return;
@@ -1530,29 +1505,29 @@ async function deleteGameEvent(id){
   loadGameEvents();
 }
 
-
 // =====================
 // INLINE EVENT UPDATE
 // =====================
-async function saveInlineEvent(id){
-
+async function saveInlineEvent(id) {
   const row = document.querySelector(`[data-event-row="${id}"]`);
-  if(!row) return;
+  if (!row) return;
 
   const scope = row.querySelector("[data-field='scope']").value;
   const scopeRefEl = row.querySelector("[data-field='scope_ref']");
   let scope_ref = scopeRefEl?.multiple
-    ? Array.from(scopeRefEl.selectedOptions).map(option => option.value)
+    ? Array.from(scopeRefEl.selectedOptions).map((option) => option.value)
     : scopeRefEl?.value || null;
 
-  if(scope === "team" && scope_ref){
+  if (scope === "team" && scope_ref) {
     scope_ref = normalizeScopeRefs(scope_ref);
   }
 
-  const existing = state.events.find(event => String(event.id) === String(id));
+  const existing = state.events.find(
+    (event) => String(event.id) === String(id),
+  );
   const runtimeConfig = {
     trigger: row.querySelector("[data-field='trigger']")?.value || "random",
-    cooldown: Number(row.querySelector("[data-field='cooldown']")?.value || 0)
+    cooldown: Number(row.querySelector("[data-field='cooldown']")?.value || 0),
   };
 
   const payload = {
@@ -1564,19 +1539,35 @@ async function saveInlineEvent(id){
     effect_type: row.querySelector("[data-field='effect_type']").value,
     effect_target: row.querySelector("[data-field='effect_target']").value,
 
-    effect_value: Number(row.querySelector("[data-field='effect_value']").value || 0),
-    probability: Number(row.querySelector("[data-field='probability']").value || 0),
+    effect_value: Number(
+      row.querySelector("[data-field='effect_value']").value || 0,
+    ),
+    probability: Number(
+      row.querySelector("[data-field='probability']").value || 0,
+    ),
     duration: Number(row.querySelector("[data-field='duration']").value || 0),
-    modifier_attack: Number(row.querySelector("[data-field='modifier_attack']").value || 0),
-    modifier_defense: Number(row.querySelector("[data-field='modifier_defense']").value || 0),
-    assets: withEventRuntimeConfig(getDisplayAssets(existing?.assets), runtimeConfig)
+    modifier_attack: Number(
+      row.querySelector("[data-field='modifier_attack']").value || 0,
+    ),
+    modifier_defense: Number(
+      row.querySelector("[data-field='modifier_defense']").value || 0,
+    ),
+    assets: withEventRuntimeConfig(
+      getDisplayAssets(existing?.assets),
+      runtimeConfig,
+    ),
   };
 
-  const { error } = await supabase.from("game_events").update(payload).eq("id", id);
+  const { error } = await supabase
+    .from("game_events")
+    .update(payload)
+    .eq("id", id);
 
-  if(error){
+  if (error) {
     console.error("❌ Inline Save Event Error:", error);
-    alert(`❌ Event wurde nicht gespeichert: ${error.message || "Supabase Fehler"}`);
+    alert(
+      `❌ Event wurde nicht gespeichert: ${error.message || "Supabase Fehler"}`,
+    );
     return;
   }
 
@@ -1584,25 +1575,23 @@ async function saveInlineEvent(id){
   loadEvents();
 }
 
-async function saveInlineGameEvent(id){
-
+async function saveInlineGameEvent(id) {
   const row = document.querySelector(`[data-id="${id}"]`);
-  if(!row) return;
+  if (!row) return;
 
   const payload = {
     title: row.querySelector("[data-field='title']").value,
     type: row.querySelector("[data-field='type']").value,
     trigger: row.querySelector("[data-field='trigger']").value,
 
-    probability: Number(row.querySelector("[data-field='probability']").value || 0),
+    probability: Number(
+      row.querySelector("[data-field='probability']").value || 0,
+    ),
     value: Number(row.querySelector("[data-field='value']").value || 0),
-    duration: Number(row.querySelector("[data-field='duration']").value || 0)
+    duration: Number(row.querySelector("[data-field='duration']").value || 0),
   };
 
-await supabase
-  .from("event_definitions")
-  .update(payload)
-  .eq("id", id);
+  await supabase.from("event_definitions").update(payload).eq("id", id);
   state.inlineGameEventEditId = null;
   loadGameEvents();
 }
@@ -1610,43 +1599,47 @@ await supabase
 // =====================
 // LOAD EVENTS
 // =====================
-async function loadEvents(){
+async function loadEvents() {
+  const { data } = await supabase.from("game_events").select("*");
 
-const { data } = await supabase.from("game_events").select("*");
-
-renderEvents(data || []);
+  renderEvents(data || []);
 }
 
 // =====================
 // RENDER EVENTS
 // =====================
-function renderEvents(list){
-
+function renderEvents(list) {
   state.events = list;
 
   const container = qs("eventList");
   container.innerHTML = "";
 
-  list.forEach(e => {
-
+  list.forEach((e) => {
     const isEdit = state.inlineEventEditId === e.id;
     const assets = getDisplayAssets(e.assets);
     const runtimeConfig = getEventRuntimeConfig(e);
-    const scopeLabel = e.scope === "global" || !e.scope
-      ? "Global"
-      : getEventReferenceLabel(e.scope, e.scope_ref) || normalizeScopeRefs(e.scope_ref).join(", ") || "Keine Auswahl";
+    const scopeLabel =
+      e.scope === "global" || !e.scope
+        ? "Global"
+        : getEventReferenceLabel(e.scope, e.scope_ref) ||
+          normalizeScopeRefs(e.scope_ref).join(", ") ||
+          "Keine Auswahl";
 
-    const assetHTML = assets.map(a=>`
+    const assetHTML = assets
+      .map(
+        (a) => `
       <div class="asset small">
         ${
-          a.type==="video"
-          ? `<video src="${a?.url || ''}" muted></video>`
-          : a.type==="audio"
-            ? `<audio src="${a?.url || ''}" controls></audio>`
-            : `<img src="${a?.url || ''}" alt="">`
+          a.type === "video"
+            ? `<video src="${a?.url || ""}" muted></video>`
+            : a.type === "audio"
+              ? `<audio src="${a?.url || ""}" controls></audio>`
+              : `<img src="${a?.url || ""}" alt="">`
         }
       </div>
-    `).join("");
+    `,
+      )
+      .join("");
 
     const div = document.createElement("div");
     div.className = "eventRow";
@@ -1655,7 +1648,7 @@ function renderEvents(list){
     div.innerHTML = `
       ${
         isEdit
-        ? `
+          ? `
           <div class="inlineEventForm">
             <label class="field wide">
               <span>Titel</span>
@@ -1670,9 +1663,9 @@ function renderEvents(list){
             <label class="field">
               <span>Gültig für</span>
               <select data-field="scope">
-                <option value="global" ${!e.scope || e.scope==="global"?"selected":""}>Global - alle Spiele</option>
-                <option value="league" ${e.scope==="league"?"selected":""}>Nur eine Liga</option>
-                <option value="team" ${e.scope==="team"?"selected":""}>Nur bestimmte Teams</option>
+                <option value="global" ${!e.scope || e.scope === "global" ? "selected" : ""}>Global - alle Spiele</option>
+                <option value="league" ${e.scope === "league" ? "selected" : ""}>Nur eine Liga</option>
+                <option value="team" ${e.scope === "team" ? "selected" : ""}>Nur bestimmte Teams</option>
               </select>
             </label>
 
@@ -1681,20 +1674,20 @@ function renderEvents(list){
             <label class="field">
               <span>Effekt-Typ</span>
               <select data-field="effect_type">
-                <option value="modifier" ${!e.effect_type || e.effect_type==="modifier"?"selected":""}>📊 Spielmodifier</option>
-                <option value="goal" ${e.effect_type==="goal"?"selected":""}>⚽ Direktes Tor</option>
-                <option value="pause" ${e.effect_type==="pause"?"selected":""}>⏸ Pause</option>
-                <option value="resume" ${e.effect_type==="resume"?"selected":""}>▶️ Resume</option>
-                <option value="end" ${e.effect_type==="end"?"selected":""}>🏁 Ende</option>
+                <option value="modifier" ${!e.effect_type || e.effect_type === "modifier" ? "selected" : ""}>📊 Spielmodifier</option>
+                <option value="goal" ${e.effect_type === "goal" ? "selected" : ""}>⚽ Direktes Tor</option>
+                <option value="pause" ${e.effect_type === "pause" ? "selected" : ""}>⏸ Pause</option>
+                <option value="resume" ${e.effect_type === "resume" ? "selected" : ""}>▶️ Resume</option>
+                <option value="end" ${e.effect_type === "end" ? "selected" : ""}>🏁 Ende</option>
               </select>
             </label>
 
             <label class="field">
               <span>Betroffenes Team</span>
               <select data-field="effect_target">
-                <option value="both" ${!e.effect_target || e.effect_target==="both"?"selected":""}>Beide Teams</option>
-                <option value="home" ${e.effect_target==="home"?"selected":""}>Heimteam</option>
-                <option value="away" ${e.effect_target==="away"?"selected":""}>Auswärtsteam</option>
+                <option value="both" ${!e.effect_target || e.effect_target === "both" ? "selected" : ""}>Beide Teams</option>
+                <option value="home" ${e.effect_target === "home" ? "selected" : ""}>Heimteam</option>
+                <option value="away" ${e.effect_target === "away" ? "selected" : ""}>Auswärtsteam</option>
               </select>
             </label>
 
@@ -1716,10 +1709,10 @@ function renderEvents(list){
             <label class="field">
               <span>Trigger im Spiel</span>
               <select data-field="trigger">
-                <option value="random" ${runtimeConfig.trigger==="random"?"selected":""}>Zufällig während des Live-Spiels</option>
-                <option value="kickoff" ${runtimeConfig.trigger==="kickoff"?"selected":""}>Nur rund um den Anpfiff</option>
-                <option value="halftime" ${runtimeConfig.trigger==="halftime"?"selected":""}>Nur zur Halbzeit</option>
-                <option value="late" ${runtimeConfig.trigger==="late"?"selected":""}>Nur in der Schlussphase</option>
+                <option value="random" ${runtimeConfig.trigger === "random" ? "selected" : ""}>Zufällig während des Live-Spiels</option>
+                <option value="kickoff" ${runtimeConfig.trigger === "kickoff" ? "selected" : ""}>Nur rund um den Anpfiff</option>
+                <option value="halftime" ${runtimeConfig.trigger === "halftime" ? "selected" : ""}>Nur zur Halbzeit</option>
+                <option value="late" ${runtimeConfig.trigger === "late" ? "selected" : ""}>Nur in der Schlussphase</option>
               </select>
             </label>
 
@@ -1739,7 +1732,7 @@ function renderEvents(list){
             </label>
           </div>
         `
-        : `
+          : `
           <div class="eventSummary">
             <div class="eventTitleLine">
               <strong>${e.title || "Unbenanntes Ereignis"}</strong>
@@ -1782,11 +1775,11 @@ function renderEvents(list){
       <div class="eventActions">
         ${
           isEdit
-          ? `
+            ? `
             <button data-action="saveInlineEvent" data-id="${e.id}">💾</button>
             <button data-action="cancelInlineEvent">❌</button>
           `
-          : `
+            : `
             <button data-action="editInlineEvent" data-id="${e.id}">✏️</button>
             <button class="danger" data-action="deleteEvent" data-id="${e.id}">🗑️</button>
           `
@@ -1798,29 +1791,31 @@ function renderEvents(list){
   });
 }
 
-function renderGameEvents(list){
-
+function renderGameEvents(list) {
   state.gameEvents = list;
 
   const container = qs("gameEventList");
-  if(!container) return;
+  if (!container) return;
 
   container.innerHTML = "";
 
-  list.forEach(e => {
-
+  list.forEach((e) => {
     const isEdit = state.inlineGameEventEditId === e.id;
     const assets = e.assets || [];
 
-    const assetHTML = assets.map(a=>`
+    const assetHTML = assets
+      .map(
+        (a) => `
       <div class="asset small">
         ${
-          a.type==="video"
-          ? `<video src="${a?.url || ''}" muted></video>`
-          : `<img src="${a?.url || ''}">`
+          a.type === "video"
+            ? `<video src="${a?.url || ""}" muted></video>`
+            : `<img src="${a?.url || ""}">`
         }
       </div>
-    `).join("");
+    `,
+      )
+      .join("");
 
     const div = document.createElement("div");
     div.className = "eventRow";
@@ -1830,7 +1825,7 @@ function renderGameEvents(list){
       <div>
         ${
           isEdit
-          ? `
+            ? `
             <input data-field="title" value="${e.title}">
 
             <select data-field="type"></select>
@@ -1840,7 +1835,7 @@ function renderGameEvents(list){
             <input data-field="value" type="number" value="${e.value || 0}">
             <input data-field="duration" type="number" value="${e.duration || 0}">
           `
-          : `
+            : `
             <strong>${e.title}</strong><br>
             🧠 ${e.type} | 🎯 ${e.trigger}<br>
             ⚡ ${e.probability} | ⏳ ${e.duration}
@@ -1853,11 +1848,11 @@ function renderGameEvents(list){
       <div>
         ${
           isEdit
-          ? `
+            ? `
             <button data-action="saveGameEventInline" data-id="${e.id}">💾</button>
             <button data-action="cancelGameEventInline">❌</button>
           `
-          : `
+            : `
             <button data-action="editGameEventInline" data-id="${e.id}">✏️</button>
             <button class="danger" data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
           `
@@ -1866,82 +1861,75 @@ function renderGameEvents(list){
     `;
 
     container.appendChild(div);
-    if(isEdit){
-  const select = div.querySelector("[data-field='type']");
-  if(select){
+    if (isEdit) {
+      const select = div.querySelector("[data-field='type']");
+      if (select) {
+        // Optionen neu laden
+        select.innerHTML = "";
 
-    // Optionen neu laden
-    select.innerHTML = "";
+        const coreEvents = [
+          ["GOAL", "⚽ Tor"],
+          ["SHOT", "🎯 Schuss"],
+          ["SHOT_SAVED", "🧤 Parade"],
+          ["FOUL", "🚫 Foul"],
+          ["CORNER", "🚩 Ecke"],
+          ["DUEL", "⚔️ Zweikampf"],
+          ["PASS", "➡️ Pass"],
+          ["DRIBBLE", "🌀 Dribbling"],
+          ["INTERCEPTION", "🛑 Interception"],
+          ["BALL_LOSS", "❌ Ballverlust"],
+          ["BALL_RECOVERY", "🔄 Ballgewinn"],
+          ["CLEARANCE", "🧹 Klärung"],
+          ["FULLTIME", "⏱️ Abpfiff"],
+        ];
 
-    const coreEvents = [
-      ["GOAL", "⚽ Tor"],
-      ["SHOT", "🎯 Schuss"],
-      ["SHOT_SAVED", "🧤 Parade"],
-      ["FOUL", "🚫 Foul"],
-      ["CORNER", "🚩 Ecke"],
-      ["DUEL", "⚔️ Zweikampf"],
-      ["PASS", "➡️ Pass"],
-      ["DRIBBLE", "🌀 Dribbling"],
-      ["INTERCEPTION", "🛑 Interception"],
-      ["BALL_LOSS", "❌ Ballverlust"],
-      ["BALL_RECOVERY", "🔄 Ballgewinn"],
-      ["CLEARANCE", "🧹 Klärung"],
-      ["FULLTIME", "⏱️ Abpfiff"]
-    ];
+        coreEvents.forEach(([value, label]) => {
+          const opt = document.createElement("option");
+          opt.value = value;
+          opt.textContent = label;
+          select.appendChild(opt);
+        });
 
-    coreEvents.forEach(([value, label]) => {
-      const opt = document.createElement("option");
-      opt.value = value;
-      opt.textContent = label;
-      select.appendChild(opt);
-    });
-
-    // aktuellen Wert setzen
-    select.value = e.type;
-  }
-}
+        // aktuellen Wert setzen
+        select.value = e.type;
+      }
+    }
   });
 }
-
 
 // =====================
 // DELETE EVENT
 // =====================
-async function deleteEvent(id){
-await supabase.from("game_events").delete().eq("id", id);
-loadEvents();
+async function deleteEvent(id) {
+  await supabase.from("game_events").delete().eq("id", id);
+  loadEvents();
 }
 
 // =====================
 // Edit Assets
 // =====================
-async function removeAssetFromEvent(eventId, assetId, table){
-
+async function removeAssetFromEvent(eventId, assetId, table) {
   const { data } = await supabase
     .from(table)
     .select("assets")
     .eq("id", eventId)
     .single();
 
-  if(!data) return;
+  if (!data) return;
 
-  const updated = (data.assets || []).filter(a => a.id !== assetId);
+  const updated = (data.assets || []).filter((a) => a.id !== assetId);
 
-  await supabase
-    .from(table)
-    .update({ assets: updated })
-    .eq("id", eventId);
+  await supabase.from(table).update({ assets: updated }).eq("id", eventId);
 
-  if(table === "events") loadEvents();
-  if(table === "event_definitions") loadGameEvents();
+  if (table === "events") loadEvents();
+  if (table === "event_definitions") loadGameEvents();
 }
-async function uploadInlineAssets(eventId, files, table){
-
+async function uploadInlineAssets(eventId, files, table) {
   const bucket = table === "events" ? "events" : "game-events";
 
   const newAssets = await uploadFiles(bucket, files);
 
-  if(!newAssets.length) return;
+  if (!newAssets.length) return;
 
   const { data } = await supabase
     .from(table)
@@ -1949,67 +1937,63 @@ async function uploadInlineAssets(eventId, files, table){
     .eq("id", eventId)
     .single();
 
-  const updated = [
-    ...(data.assets || []),
-    ...newAssets
-  ];
+  const updated = [...(data.assets || []), ...newAssets];
 
-  await supabase
-    .from(table)
-    .update({ assets: updated })
-    .eq("id", eventId);
+  await supabase.from(table).update({ assets: updated }).eq("id", eventId);
 
-  if(table === "events") loadEvents();
-  if(table === "event_definitions") loadGameEvents();
+  if (table === "events") loadEvents();
+  if (table === "event_definitions") loadGameEvents();
 }
-
 
 // =====================
 // TABS
 // =====================
-function switchTab(tab){
-
-  document.querySelectorAll(".tabContent").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+function switchTab(tab) {
+  document
+    .querySelectorAll(".tabContent")
+    .forEach((t) => t.classList.remove("active"));
+  document
+    .querySelectorAll(".tabs button")
+    .forEach((b) => b.classList.remove("active"));
 
   // 🔥 FIX: ADS TAB (fehlte)
-  if(tab === "ads"){
+  if (tab === "ads") {
     qs("adsTab")?.classList.add("active");
     qs("tabAds")?.classList.add("active");
     loadCampaigns();
   }
 
-  if(tab === "game"){
+  if (tab === "game") {
     qs("gameEventsTab")?.classList.add("active");
     qs("tabGameEvents")?.classList.add("active");
     loadGameEvents();
   }
 
-  if(tab === "events"){
+  if (tab === "events") {
     qs("eventsTab")?.classList.add("active");
     qs("tabEvents")?.classList.add("active");
     loadEvents();
   }
 
-if(tab === "insights"){
+  if (tab === "insights") {
+    qs("insightsTab")?.classList.add("active");
+    qs("tabInsights")?.classList.add("active");
 
-  qs("insightsTab")?.classList.add("active");
-  qs("tabInsights")?.classList.add("active");
+    destroyChart();
 
-  destroyChart();
-
-  loadInsights();
-  loadChart();
-  loadGeoMap(); // 🔥 DAS HAT GEFEHLT
+    loadInsights();
+    loadChart();
+    loadGeoMap(); // 🔥 DAS HAT GEFEHLT
+  }
 }
-}
 
-function renderAssetList(){
-
+function renderAssetList() {
   const container = document.getElementById("assetList");
-  if(!container) return;
+  if (!container) return;
 
-  container.innerHTML = currentAssets.map((a, i) => `
+  container.innerHTML = currentAssets
+    .map(
+      (a, i) => `
     <div style="
       display:flex;
       align-items:center;
@@ -2024,8 +2008,8 @@ function renderAssetList(){
 
       ${
         a.type === "video"
-        ? `<video src="${a.url}" style="height:40px;" muted></video>`
-        : `<img src="${a.url}" style="height:40px;">`
+          ? `<video src="${a.url}" style="height:40px;" muted></video>`
+          : `<img src="${a.url}" style="height:40px;">`
       }
 
       <button onclick="moveAsset(${i}, -1)">⬆️</button>
@@ -2033,36 +2017,37 @@ function renderAssetList(){
 
       <button onclick="removeAsset(${i})">❌</button>
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 // =====================
 // GLOBAL CLICK HANDLER (FIXED)
 // =====================
-document.addEventListener("click", (e)=>{
-
+document.addEventListener("click", (e) => {
   const target = e.target.closest("[data-action]");
-if(!target) return;
+  if (!target) return;
 
-const a = target.dataset.action;
+  const a = target.dataset.action;
   console.log("🖱 ACTION:", a); // 🔥 DEBUG
 
   // =====================
   // 🖼 ASSET ACTIONS
   // =====================
-  if(a==="deleteAsset"){
+  if (a === "deleteAsset") {
     removeAssetFromEvent(
       e.target.dataset.eventId,
       e.target.dataset.assetId,
-      e.target.dataset.table
+      e.target.dataset.table,
     );
   }
 
-  if(a==="uploadAssetInline"){
+  if (a === "uploadAssetInline") {
     const input = document.querySelector(
-      `input[data-upload="${e.target.dataset.id}"]`
+      `input[data-upload="${e.target.dataset.id}"]`,
     );
 
-    if(!input || !input.files.length){
+    if (!input || !input.files.length) {
       alert("Kein File");
       return;
     }
@@ -2070,67 +2055,65 @@ const a = target.dataset.action;
     uploadInlineAssets(
       e.target.dataset.id,
       input.files,
-      e.target.dataset.table
+      e.target.dataset.table,
     );
   }
 
   // =====================
   // CAMPAIGNS
   // =====================
-  if(a==="delete"){
+  if (a === "delete") {
     deleteCampaign(e.target.dataset.id);
   }
 
   // =====================
   // EVENTS
   // =====================
-  if(a==="removeEventScopeRef"){
+  if (a === "removeEventScopeRef") {
     removeEventScopeReference(e.target.dataset.ref);
   }
 
-  if(a==="editInlineEvent"){
+  if (a === "editInlineEvent") {
     state.inlineEventEditId = e.target.dataset.id;
     loadEvents();
   }
 
-  if(a==="saveInlineEvent"){
+  if (a === "saveInlineEvent") {
     saveInlineEvent(e.target.dataset.id);
   }
 
-  if(a==="deleteEvent"){
+  if (a === "deleteEvent") {
     deleteEvent(e.target.dataset.id);
   }
 
   // =====================
   // 🎮 GAME EVENTS (🔥 FIXED)
   // =====================
-  if(a==="editGameEventInline"){
+  if (a === "editGameEventInline") {
     state.inlineGameEventEditId = e.target.dataset.id;
     loadGameEvents();
   }
 
-  if(a==="saveGameEventInline"){
+  if (a === "saveGameEventInline") {
     saveInlineGameEvent(e.target.dataset.id);
   }
 
-  if(a==="deleteGameEvent"){
+  if (a === "deleteGameEvent") {
     deleteGameEvent(e.target.dataset.id);
   }
-
 });
 
 // =====================
 // INIT
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
-
   qs("createCampaignBtn")?.addEventListener("click", createCampaign);
   qs("addAdSetBtn")?.addEventListener("click", addAdSet);
   qs("addAssetBtn")?.addEventListener("click", addAssets);
   qs("createEventBtn")?.addEventListener("click", saveEvent);
   qs("eventScope")?.addEventListener("change", () => {
     state.eventScopeSelection = [];
-    if(qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
+    if (qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
     syncEventScopeHidden();
     renderEventScopePicker();
   });
@@ -2141,11 +2124,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🔥 GAME EVENTS
   document.addEventListener("click", (e) => {
-  if(e.target.id === "saveGameEventBtn"){
-    saveGameEvent();
-  }
-});
-  
+    if (e.target.id === "saveGameEventBtn") {
+      saveGameEvent();
+    }
+  });
+
   qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
   qs("tabEvents")?.addEventListener("click", () => switchTab("events"));
   qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
