@@ -516,6 +516,20 @@ html, body {
   100% { transform: scale(1); opacity: 1; }
 }
 
+#overlayMedia {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.overlay-image,
+.overlay-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
 /* =========================
 📰 LIVE EVENT BAR PREMIUM
 ========================= */
