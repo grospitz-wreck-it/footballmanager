@@ -230,7 +230,12 @@ for(const file of files){
 
 
 const id = uuid();
-const fileName = `${id}_${file.name}`;
+
+const safeName = file.name
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/\
 
 const { error } = await supabase.storage.from(bucket).upload(fileName, file);
 
