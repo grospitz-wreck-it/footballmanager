@@ -2300,95 +2300,151 @@ function renderSchedule() {
 // 🎮 OVERLAY TRIGGER
 // =========================
 
+// =========================
+// 🎮 OVERLAY TRIGGER
+// =========================
+
 let overlayTimeout = null;
 let overlayHideTimeout = null;
 let lastOverlayTime = 0;
 
+// =========================
+// 🖼 IMAGE OVERLAY
+// =========================
+
 function showOverlay(imageUrl, text, duration = 2500) {
   const now = Date.now();
 
-  // 🔥 Overlay Cooldown (verhindert Spam)
+  // 🔥 Cooldown
   if (now - lastOverlayTime < 4000) return;
   lastOverlayTime = now;
 
   const overlayEl = document.getElementById("matchOverlay");
-  const overlayImg = document.getElementById("overlayImage");
   const overlayText = document.getElementById("overlayText");
-  const videoEl = document.getElementById("overlayVideo");
 
-  if (videoEl) {
-    videoEl.pause();
-    videoEl.style.display = "none";
-    videoEl.src = "";
-    videoEl.removeAttribute("src");
-    videoEl.load();
-  }
-
-  overlayImg.style.display = "block";
-
-  if (!overlayEl || !overlayImg || !overlayText) {
+  if (!overlayEl || !overlayText) {
     console.warn("❌ Overlay DOM fehlt");
     return;
   }
 
-  // 🔥 Timer cleanup (stabilisiert bei Spam)
-  if (overlayTimeout) {
-    clearTimeout(overlayTimeout);
-    overlayTimeout = null;
+  // =========================
+  // 🧹 CLEANUP OLD VIDEO
+  // =========================
+
+  const oldVideo = document.getElementById("overlayVideo");
+
+  if (oldVideo) {
+    oldVideo.pause();
+    oldVideo.remove();
   }
 
-  if (overlayHideTimeout) {
-    clearTimeout(overlayHideTimeout);
-    overlayHideTimeout = null;
+  // =========================
+  // 🖼 CREATE FRESH IMAGE
+  // =========================
+
+  const oldImg = document.getElementById("overlayImage");
+
+  const newImg = document.createElement("img");
+
+  newImg.id = "overlayImage";
+  newImg.src = imageUrl;
+  newImg.alt = "event-image";
+
+  newImg.onload = () => {
+    console.log("✅ IMAGE LOADED");
+  };
+
+  newImg.onerror = (e) => {
+    console.error("❌ IMAGE LOAD FAILED:", imageUrl, e);
+  };
+
+  if (oldImg) {
+    oldImg.replaceWith(newImg);
+  } else {
+    overlayEl.prepend(newImg);
   }
 
+  // =========================
+  // 📝 TEXT
+  // =========================
 
-  
-  overlayImg.src = imageUrl || "";
   overlayText.innerText = text || "";
 
-  // 🔥 HARD RESET
-  overlayEl.classList.remove("show");
-  overlayEl.classList.remove("hidden");
+  // =========================
+  // 🧹 TIMER CLEANUP
+  // =========================
 
-  // 🔥 Reflow (safe)
+  clearTimeout(overlayTimeout);
+  clearTimeout(overlayHideTimeout);
+
+  // =========================
+  // 🔥 SHOW
+  // =========================
+
+  overlayEl.classList.remove("show", "hidden");
+
   overlayEl.getBoundingClientRect();
 
-  // 🔥 SHOW
   requestAnimationFrame(() => {
     overlayEl.classList.add("show");
   });
 
-  // 🔥 AUTO HIDE (guarded)
-  overlayTimeout = setTimeout(
-    () => {
-      overlayEl.classList.remove("show");
+  // =========================
+  // 🔥 HIDE
+  // =========================
 
-      overlayHideTimeout = setTimeout(() => {
-        overlayEl.classList.add("hidden");
-      }, 250);
-    },
-    Math.max(0, duration || 0),
-  );
+  overlayTimeout = setTimeout(() => {
+
+    overlayEl.classList.remove("show");
+
+    overlayHideTimeout = setTimeout(() => {
+      overlayEl.classList.add("hidden");
+    }, 250);
+
+  }, duration);
 }
 
+// =========================
+// 🎥 VIDEO OVERLAY
+// =========================
+
 function showVideoOverlay(videoUrl, text, duration = 4000) {
+
   const overlayEl = document.getElementById("matchOverlay");
-  const overlayImg = document.getElementById("overlayImage");
   const overlayText = document.getElementById("overlayText");
 
-  if (!overlayEl || !overlayImg || !overlayText) {
+  if (!overlayEl || !overlayText) {
     console.warn("❌ Overlay DOM fehlt");
     return;
   }
 
   // =========================
-  // 🎥 VIDEO ELEMENT
+  // 🧹 REMOVE OLD IMAGE
   // =========================
- let videoEl = document.getElementById("overlayVideo");
 
-if (!videoEl) {
-  videoEl = document.createElement("video");
+  const oldImg = document.getElementById("overlayImage");
+
+  if (oldImg) {
+    oldImg.remove();
+  }
+
+  // =========================
+  // 🧹 REMOVE OLD VIDEO
+  // =========================
+
+  const oldVideo = document.getElementById("overlayVideo");
+
+  if (oldVideo) {
+    oldVideo.pause();
+    oldVideo.remove();
+  }
+
+  // =========================
+  // 🎥 CREATE FRESH VIDEO
+  // =========================
+
+  const videoEl = document.createElement("video");
+
   videoEl.id = "overlayVideo";
   videoEl.autoplay = true;
   videoEl.muted = true;
@@ -2398,64 +2454,72 @@ if (!videoEl) {
   videoEl.preload = "auto";
   videoEl.className = "overlay-video";
 
-  videoEl.onerror = (e) => {
-    console.error("❌ VIDEO ERROR:", e);
-  };
+  videoEl.src = videoUrl;
 
   videoEl.onloadeddata = () => {
     console.log("✅ VIDEO LOADED");
   };
 
-  overlayImg.parentNode.insertBefore(videoEl, overlayImg);
-}
+  videoEl.onerror = (e) => {
+    console.error("❌ VIDEO LOAD FAILED:", videoUrl, e);
+  };
 
-overlayImg.style.display = "none";
-overlayImg.removeAttribute("src");
-videoEl.style.display = "block";
-overlayImg.src = "";
+  overlayEl.prepend(videoEl);
 
-// 🔥 HARD RESET
-videoEl.pause();
-videoEl.currentTime = 0;
-videoEl.removeAttribute("src");
-videoEl.load();
+  // =========================
+  // ▶ FORCE PLAY
+  // =========================
 
-// 🔥 NEW SOURCE
-videoEl.src = videoUrl;
-videoEl.load();
+  const playPromise = videoEl.play();
 
-// 🔥 FORCE PLAY
-const playPromise = videoEl.play();
+  if (playPromise !== undefined) {
+    playPromise.catch((err) => {
+      console.warn("🎥 VIDEO PLAY FAILED:", err);
+    });
+  }
 
-if (playPromise !== undefined) {
-  playPromise.catch((err) => {
-    console.warn("🎥 VIDEO PLAY FAILED:", err);
+  // =========================
+  // 📝 TEXT
+  // =========================
+
+  overlayText.innerText = text || "";
+
+  // =========================
+  // 🧹 TIMER CLEANUP
+  // =========================
+
+  clearTimeout(overlayTimeout);
+  clearTimeout(overlayHideTimeout);
+
+  // =========================
+  // 🔥 SHOW
+  // =========================
+
+  overlayEl.classList.remove("show", "hidden");
+
+  overlayEl.getBoundingClientRect();
+
+  requestAnimationFrame(() => {
+    overlayEl.classList.add("show");
   });
-}
 
-overlayText.innerText = text || "";
+  // =========================
+  // 🔥 HIDE
+  // =========================
 
-overlayEl.classList.remove("show", "hidden");
-overlayEl.getBoundingClientRect();
+  overlayTimeout = setTimeout(() => {
 
-requestAnimationFrame(() => {
-  overlayEl.classList.add("show");
-});
+    overlayEl.classList.remove("show");
 
-clearTimeout(overlayTimeout);
-clearTimeout(overlayHideTimeout);
+    overlayHideTimeout = setTimeout(() => {
 
-overlayTimeout = setTimeout(() => {
-  overlayEl.classList.remove("show");
+      overlayEl.classList.add("hidden");
 
-  overlayHideTimeout = setTimeout(() => {
-    overlayEl.classList.add("hidden");
+      videoEl.pause();
+      videoEl.remove();
 
-    videoEl.pause();
-    videoEl.removeAttribute("src");
-    videoEl.load();
+    }, 250);
 
-  }, 250);
-}, duration);
+  }, duration);
 }
 export { updateUI, renderSchedule, renderCurrentMatch };
