@@ -1136,19 +1136,33 @@ if (live.running === false) {
     let safety = 0;
 
     while (accumulator >= STEP && safety < 10) {
-      if(live.phase === "match_intro"){
+      // =========================
+// 🎬 MATCH INTRO PHASE
+// =========================
+if (live.phase === "match_intro") {
 
-  live.running = false;
+  // 🔥 nur einmal triggern
+  if (!live._introStarted) {
 
-  setTimeout(() => {
+    live._introStarted = true;
+    live.running = false;
 
-    if(game.match?.live){
-      game.match.live.phase = "first_half";
-      game.match.live.running = true;
-    }
+    console.log("🎬 MATCH INTRO START");
 
-  }, 4000);
+    setTimeout(() => {
 
+      if (game.match?.live) {
+
+        game.match.live.phase = "first_half";
+        game.match.live.running = true;
+
+        console.log("▶ MATCH START");
+      }
+
+    }, 4000);
+  }
+
+  accumulator = 0;
   return;
 }
       live.minute++;
