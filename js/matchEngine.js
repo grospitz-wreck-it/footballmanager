@@ -665,21 +665,23 @@ function initMatch(round) {
   }
 
   game.match.live = {
-    minute: 0,
-    running: true,
-    score: { home: 0, away: 0 },
-    events: [],
-    phase: "first_half",
+  minute: 0,
+  running: false,
+  score: { home: 0, away: 0 },
+  events: [],
 
-    // 🔥 NEU
-    possession:
-      Math.random() < 0.5 ? playerMatch.homeTeamId : playerMatch.awayTeamId,
+  // 🎬 BROADCAST INTRO
+  phase: "match_intro",
 
-    lastEvent: null,
+  possession:
+    Math.random() < 0.5
+      ? playerMatch.homeTeamId
+      : playerMatch.awayTeamId,
 
-    // 🔥 CRITICAL FIX (für Abpfiff!)
-    _fulltimeEmitted: false,
-  };
+  lastEvent: null,
+
+  _fulltimeEmitted: false,
+};
 
   game.match.home = {
     id: homeId,
@@ -696,10 +698,12 @@ function initMatch(round) {
     away: 0,
   };
 
-  console.log("✅ MATCH INIT:", {
-    home: game.match.home,
-    away: game.match.away,
-  });
+  emitMatchEvent("MATCH_INTRO", {
+  homeTeamId: homeId,
+  awayTeamId: awayId,
+  homeTeamName: game.match.home?.name,
+  awayTeamName: game.match.away?.name
+});
 
   return true;
 }
@@ -1132,12 +1136,30 @@ if (live.running === false) {
     let safety = 0;
 
     while (accumulator >= STEP && safety < 10) {
+<<<<<<< HEAD
       if (isLivePaused(live)) {
         lastTime = performance.now();
         accumulator = 0;
         break;
       }
 
+=======
+      if(live.phase === "match_intro"){
+
+  live.running = false;
+
+  setTimeout(() => {
+
+    if(game.match?.live){
+      game.match.live.phase = "first_half";
+      game.match.live.running = true;
+    }
+
+  }, 4000);
+
+  return;
+}
+>>>>>>> 8a78a39 (improve broadcast event editor)
       live.minute++;
       document.body?.classList.add("match-live");
 
@@ -1215,12 +1237,14 @@ if (live.running === false) {
         live.phase = "halftime";
         live.running = false;
 
-        setTimeout(() => {
-          if (game.match?.live) {
-            game.match.live.running = true;
-            game.match.live.phase = "second_half";
-          }
-        }, 1000);
+        emitMatchEvent("HALFTIME", {
+  score: {
+    home: game.match.score.home,
+    away: game.match.score.away
+  }
+});
+
+pauseMatch("HALFTIME");
 
         saveGame();
       }
@@ -1233,7 +1257,7 @@ if (live.running === false) {
 
         if (!live._fulltimeEmitted) {
           live._fulltimeEmitted = true;
-
+live.phase = "fulltime";
           emitMatchEvent(EVENT_TYPES.FULLTIME, {
             teamId: null,
             playerId: null,

@@ -548,6 +548,8 @@ function renderCampaigns(list) {
           .map(
             (a) => `
     <div class="asset small">
+
+  
       ${
         a.type === "video"
           ? `<video src="${a?.url || ""}" muted></video>`
@@ -1054,6 +1056,9 @@ function loadEventTypes() {
     ["FOUL", "🚫 Foul"],
     ["CORNER", "🚩 Ecke"],
     ["DUEL", "⚔️ Zweikampf"],
+    ["MATCH_INTRO", "🎬 Match Intro"],
+["HALFTIME", "⏸ Halbzeit"],
+["IDLE", "🏟 Stadion Idle"],
 
     // 🔥 NEUE GAMEPLAY EVENTS
     ["PASS", "➡️ Pass"],
@@ -1605,192 +1610,6 @@ async function loadEvents() {
   renderEvents(data || []);
 }
 
-// =====================
-// RENDER EVENTS
-// =====================
-function renderEvents(list) {
-  state.events = list;
-
-  const container = qs("eventList");
-  container.innerHTML = "";
-
-  list.forEach((e) => {
-    const isEdit = state.inlineEventEditId === e.id;
-    const assets = getDisplayAssets(e.assets);
-    const runtimeConfig = getEventRuntimeConfig(e);
-    const scopeLabel =
-      e.scope === "global" || !e.scope
-        ? "Global"
-        : getEventReferenceLabel(e.scope, e.scope_ref) ||
-          normalizeScopeRefs(e.scope_ref).join(", ") ||
-          "Keine Auswahl";
-
-    const assetHTML = assets
-      .map(
-        (a) => `
-      <div class="asset small">
-        ${
-          a.type === "video"
-            ? `<video src="${a?.url || ""}" muted></video>`
-            : a.type === "audio"
-              ? `<audio src="${a?.url || ""}" controls></audio>`
-              : `<img src="${a?.url || ""}" alt="">`
-        }
-      </div>
-    `,
-      )
-      .join("");
-
-    const div = document.createElement("div");
-    div.className = "eventRow";
-    div.dataset.eventRow = e.id;
-
-    div.innerHTML = `
-      ${
-        isEdit
-          ? `
-          <div class="inlineEventForm">
-            <label class="field wide">
-              <span>Titel</span>
-              <input data-field="title" value="${e.title || ""}">
-            </label>
-
-            <label class="field wide">
-              <span>Beschreibung</span>
-              <textarea data-field="description">${e.text || ""}</textarea>
-            </label>
-
-            <label class="field">
-              <span>Gültig für</span>
-              <select data-field="scope">
-                <option value="global" ${!e.scope || e.scope === "global" ? "selected" : ""}>Global - alle Spiele</option>
-                <option value="league" ${e.scope === "league" ? "selected" : ""}>Nur eine Liga</option>
-                <option value="team" ${e.scope === "team" ? "selected" : ""}>Nur bestimmte Teams</option>
-              </select>
-            </label>
-
-            ${renderInlineScopeRefField(e, scopeLabel)}
-
-            <label class="field">
-              <span>Effekt-Typ</span>
-              <select data-field="effect_type">
-                <option value="modifier" ${!e.effect_type || e.effect_type === "modifier" ? "selected" : ""}>📊 Spielmodifier</option>
-                <option value="goal" ${e.effect_type === "goal" ? "selected" : ""}>⚽ Direktes Tor</option>
-                <option value="pause" ${e.effect_type === "pause" ? "selected" : ""}>⏸ Pause</option>
-                <option value="resume" ${e.effect_type === "resume" ? "selected" : ""}>▶️ Resume</option>
-                <option value="end" ${e.effect_type === "end" ? "selected" : ""}>🏁 Ende</option>
-              </select>
-            </label>
-
-            <label class="field">
-              <span>Betroffenes Team</span>
-              <select data-field="effect_target">
-                <option value="both" ${!e.effect_target || e.effect_target === "both" ? "selected" : ""}>Beide Teams</option>
-                <option value="home" ${e.effect_target === "home" ? "selected" : ""}>Heimteam</option>
-                <option value="away" ${e.effect_target === "away" ? "selected" : ""}>Auswärtsteam</option>
-              </select>
-            </label>
-
-            <label class="field">
-              <span>Allgemeiner Wert</span>
-              <input data-field="effect_value" type="number" value="${e.effect_value || 0}">
-            </label>
-
-            <label class="field">
-              <span>Wahrscheinlichkeit</span>
-              <input data-field="probability" type="number" step="0.01" min="0" max="1" value="${e.probability || 0}">
-            </label>
-
-            <label class="field">
-              <span>Dauer</span>
-              <input data-field="duration" type="number" value="${e.duration || 0}">
-            </label>
-
-            <label class="field">
-              <span>Trigger im Spiel</span>
-              <select data-field="trigger">
-                <option value="random" ${runtimeConfig.trigger === "random" ? "selected" : ""}>Zufällig während des Live-Spiels</option>
-                <option value="kickoff" ${runtimeConfig.trigger === "kickoff" ? "selected" : ""}>Nur rund um den Anpfiff</option>
-                <option value="halftime" ${runtimeConfig.trigger === "halftime" ? "selected" : ""}>Nur zur Halbzeit</option>
-                <option value="late" ${runtimeConfig.trigger === "late" ? "selected" : ""}>Nur in der Schlussphase</option>
-              </select>
-            </label>
-
-            <label class="field">
-              <span>Cooldown</span>
-              <input data-field="cooldown" type="number" min="0" value="${runtimeConfig.cooldown || 0}">
-            </label>
-
-            <label class="field">
-              <span>Angriff-Modifier</span>
-              <input data-field="modifier_attack" type="number" value="${e.modifier_attack || 0}">
-            </label>
-
-            <label class="field">
-              <span>Defensive-Modifier</span>
-              <input data-field="modifier_defense" type="number" value="${e.modifier_defense || 0}">
-            </label>
-          </div>
-        `
-          : `
-          <div class="eventSummary">
-            <div class="eventTitleLine">
-              <strong>${e.title || "Unbenanntes Ereignis"}</strong>
-              <span class="pill">${e.effect_type || "modifier"}</span>
-              <span class="pill">${e.effect_target || "both"}</span>
-              <span class="pill">${escapeHtml(scopeLabel)}</span>
-              <span class="pill">${getTriggerLabel(runtimeConfig.trigger)}</span>
-            </div>
-
-            <div>${e.text || "Keine Beschreibung hinterlegt."}</div>
-
-            <div class="modifierGrid">
-              <div class="modifierCard">
-                <span>Chance</span>
-                <strong>${Math.round(Number(e.probability || 0) * 100)}%</strong>
-              </div>
-              <div class="modifierCard">
-                <span>Dauer</span>
-                <strong>${Number(e.duration || 0)}</strong>
-              </div>
-              <div class="modifierCard">
-                <span>Cooldown</span>
-                <strong>${Number(runtimeConfig.cooldown || 0)}</strong>
-              </div>
-              <div class="modifierCard">
-                <span>Angriff</span>
-                <strong>${Number(e.modifier_attack || 0)}</strong>
-              </div>
-              <div class="modifierCard">
-                <span>Defensive</span>
-                <strong>${Number(e.modifier_defense || 0)}</strong>
-              </div>
-            </div>
-          </div>
-        `
-      }
-
-      <div class="assetRow">${assetHTML}</div>
-
-      <div class="eventActions">
-        ${
-          isEdit
-            ? `
-            <button data-action="saveInlineEvent" data-id="${e.id}">💾</button>
-            <button data-action="cancelInlineEvent">❌</button>
-          `
-            : `
-            <button data-action="editInlineEvent" data-id="${e.id}">✏️</button>
-            <button class="danger" data-action="deleteEvent" data-id="${e.id}">🗑️</button>
-          `
-        }
-      </div>
-    `;
-
-    container.appendChild(div);
-  });
-}
-
 function renderGameEvents(list) {
   state.gameEvents = list;
 
@@ -1803,68 +1622,221 @@ function renderGameEvents(list) {
     const isEdit = state.inlineGameEventEditId === e.id;
     const assets = e.assets || [];
 
+    // =========================
+    // 🎨 ASSETS
+    // =========================
     const assetHTML = assets
       .map(
         (a) => `
-      <div class="asset small">
-        ${
-          a.type === "video"
-            ? `<video src="${a?.url || ""}" muted></video>`
-            : `<img src="${a?.url || ""}">`
-        }
-      </div>
-    `,
+        <div class="asset small">
+
+          <button
+            class="danger"
+            data-action="deleteAsset"
+            data-event-id="${e.id}"
+            data-asset-id="${a.id}"
+            data-table="event_definitions"
+            style="
+              position:absolute;
+              top:4px;
+              right:4px;
+              z-index:5;
+            "
+          >
+            ✕
+          </button>
+
+          ${
+            a.type === "video"
+              ? `<video src="${a?.url || ""}" muted></video>`
+              : `<img src="${a?.url || ""}">`
+          }
+
+        </div>
+      `,
       )
       .join("");
 
+    // =========================
+    // 🧱 ROW
+    // =========================
     const div = document.createElement("div");
     div.className = "eventRow";
     div.dataset.id = e.id;
 
     div.innerHTML = `
       <div>
+
         ${
           isEdit
             ? `
-            <input data-field="title" value="${e.title}">
+            <div class="inlineEventForm">
 
-            <select data-field="type"></select>
-            <input data-field="trigger" value="${e.trigger}">
+              <label class="field">
+                <span>Titel</span>
+                <input
+                  data-field="title"
+                  value="${e.title || ""}"
+                >
+              </label>
 
-            <input data-field="probability" type="number" step="0.01" value="${e.probability || 0}">
-            <input data-field="value" type="number" value="${e.value || 0}">
-            <input data-field="duration" type="number" value="${e.duration || 0}">
+              <label class="field">
+                <span>Eventtyp</span>
+                <select data-field="type"></select>
+              </label>
+
+              <label class="field">
+                <span>Trigger</span>
+                <input
+                  data-field="trigger"
+                  value="${e.trigger || "random"}"
+                >
+              </label>
+
+              <label class="field">
+                <span>Wahrscheinlichkeit</span>
+                <input
+                  data-field="probability"
+                  type="number"
+                  step="0.01"
+                  value="${e.probability || 0}"
+                >
+              </label>
+
+              <label class="field">
+                <span>Wert</span>
+                <input
+                  data-field="value"
+                  type="number"
+                  value="${e.value || 0}"
+                >
+              </label>
+
+              <label class="field">
+                <span>Dauer</span>
+                <input
+                  data-field="duration"
+                  type="number"
+                  value="${e.duration || 0}"
+                >
+              </label>
+
+            </div>
           `
             : `
-            <strong>${e.title}</strong><br>
-            🧠 ${e.type} | 🎯 ${e.trigger}<br>
-            ⚡ ${e.probability} | ⏳ ${e.duration}
+            <div class="eventSummary">
+
+              <div class="eventTitleLine">
+                <strong>
+                  ${e.title || "Unbenanntes Event"}
+                </strong>
+              </div>
+
+              <div class="modifierGrid">
+
+                <div class="modifierCard">
+                  <span>Eventtyp</span>
+                  <strong>${e.type || "-"}</strong>
+                </div>
+
+                <div class="modifierCard">
+                  <span>Trigger</span>
+                  <strong>${e.trigger || "random"}</strong>
+                </div>
+
+                <div class="modifierCard">
+                  <span>Wahrscheinlichkeit</span>
+                  <strong>
+                    ${Math.round((e.probability || 0) * 100)}%
+                  </strong>
+                </div>
+
+                <div class="modifierCard">
+                  <span>Dauer</span>
+                  <strong>${e.duration || 0}s</strong>
+                </div>
+
+              </div>
+
+            </div>
           `
         }
+
       </div>
 
-      <div class="assetRow">${assetHTML}</div>
+      <!-- 🎨 ASSETS -->
+      <div class="assetRow">
+        ${assetHTML}
+      </div>
 
-      <div>
+      <!-- 📤 UPLOAD -->
+      <div style="margin-top:10px;">
+
+        <input
+          type="file"
+          multiple
+          data-upload="${e.id}"
+        >
+
+        <button
+          data-action="uploadAssetInline"
+          data-id="${e.id}"
+          data-table="event_definitions"
+        >
+          ➕ Assets
+        </button>
+
+      </div>
+
+      <!-- 🎛 ACTIONS -->
+      <div class="eventActions">
+
         ${
           isEdit
             ? `
-            <button data-action="saveGameEventInline" data-id="${e.id}">💾</button>
-            <button data-action="cancelGameEventInline">❌</button>
+            <button
+              data-action="saveGameEventInline"
+              data-id="${e.id}"
+            >
+              💾
+            </button>
+
+            <button
+              data-action="cancelGameEventInline"
+            >
+              ❌
+            </button>
           `
             : `
-            <button data-action="editGameEventInline" data-id="${e.id}">✏️</button>
-            <button class="danger" data-action="deleteGameEvent" data-id="${e.id}">🗑️</button>
+            <button
+              data-action="editGameEventInline"
+              data-id="${e.id}"
+            >
+              ✏️
+            </button>
+
+            <button
+              class="danger"
+              data-action="deleteGameEvent"
+              data-id="${e.id}"
+            >
+              🗑️
+            </button>
           `
         }
+
       </div>
     `;
 
     container.appendChild(div);
+
+    // =========================
+    // 🧠 EVENT TYPES
+    // =========================
     if (isEdit) {
       const select = div.querySelector("[data-field='type']");
+
       if (select) {
-        // Optionen neu laden
         select.innerHTML = "";
 
         const coreEvents = [
@@ -1874,12 +1846,17 @@ function renderGameEvents(list) {
           ["FOUL", "🚫 Foul"],
           ["CORNER", "🚩 Ecke"],
           ["DUEL", "⚔️ Zweikampf"],
+
           ["PASS", "➡️ Pass"],
           ["DRIBBLE", "🌀 Dribbling"],
           ["INTERCEPTION", "🛑 Interception"],
           ["BALL_LOSS", "❌ Ballverlust"],
           ["BALL_RECOVERY", "🔄 Ballgewinn"],
           ["CLEARANCE", "🧹 Klärung"],
+
+          ["MATCH_INTRO", "🎬 Match Intro"],
+          ["HALFTIME", "⏸ Halbzeit"],
+          ["IDLE", "🏟 Stadion Idle"],
           ["FULLTIME", "⏱️ Abpfiff"],
         ];
 
@@ -1890,7 +1867,6 @@ function renderGameEvents(list) {
           select.appendChild(opt);
         });
 
-        // aktuellen Wert setzen
         select.value = e.type;
       }
     }
@@ -1921,11 +1897,14 @@ async function removeAssetFromEvent(eventId, assetId, table) {
 
   await supabase.from(table).update({ assets: updated }).eq("id", eventId);
 
-  if (table === "events") loadEvents();
+  if (table === "game_events") loadEvents();
   if (table === "event_definitions") loadGameEvents();
 }
 async function uploadInlineAssets(eventId, files, table) {
-  const bucket = table === "events" ? "events" : "game-events";
+  const bucket =
+  table === "game_events"
+    ? "events"
+    : "game-events";
 
   const newAssets = await uploadFiles(bucket, files);
 
@@ -2024,7 +2003,7 @@ function renderAssetList() {
 // =====================
 // GLOBAL CLICK HANDLER (FIXED)
 // =====================
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const target = e.target.closest("[data-action]");
   if (!target) return;
 
@@ -2043,20 +2022,50 @@ document.addEventListener("click", (e) => {
   }
 
   if (a === "uploadAssetInline") {
-    const input = document.querySelector(
-      `input[data-upload="${e.target.dataset.id}"]`,
-    );
 
-    if (!input || !input.files.length) {
-      alert("Kein File");
-      return;
-    }
+  const id = e.target.dataset.id;
 
-    uploadInlineAssets(
-      e.target.dataset.id,
-      input.files,
-      e.target.dataset.table,
-    );
+  const table =
+    e.target.dataset.table || "game_events";
+
+  const input = document.querySelector(
+    `input[data-upload="${id}"]`,
+  );
+
+  if (!input || !input.files.length) {
+    alert("Kein File");
+    return;
+  }
+
+  const uploaded = await uploadFiles(
+    "game-events",
+    [...input.files],
+  );
+
+  const { data: current } = await supabase
+    .from(table)
+    .select("assets")
+    .eq("id", id)
+    .single();
+
+  const assets = [
+    ...(current?.assets || []),
+    ...uploaded,
+  ];
+
+  const { error } = await supabase
+    .from(table)
+    .update({ assets })
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("Upload fehlgeschlagen");
+    return;
+  }
+
+  await loadGameEvents();
+}
   }
 
   // =====================

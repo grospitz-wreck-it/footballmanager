@@ -2295,7 +2295,11 @@ function renderCurrentMatch() {
 function renderSchedule() {
   renderScheduleModule();
 }
+// =========================
+// ▶ HALFTIME RESUME
+// =========================
 
+<<<<<<< HEAD
 // =========================
 // 🎮 OVERLAY TRIGGER
 // =========================
@@ -2395,4 +2399,27 @@ function showVideoOverlay(videoUrl, text, duration = 4000) {
 
   }, duration);
 }
+=======
+window.resumeHalftime = function () {
+
+  if (!game.match?.live) {
+    console.warn("❌ no live match");
+    return;
+  }
+
+  console.log("▶ RESUME SECOND HALF");
+
+  game.match.live.phase = "second_half";
+
+  resumeMatch("HALFTIME COMPLETE");
+
+  // 🔥 Optional Overlay Cleanup
+  const overlay = document.getElementById("matchOverlay");
+
+  if (overlay) {
+    overlay.classList.remove("show");
+    overlay.classList.add("hidden");
+  }
+};
+>>>>>>> 8a78a39 (improve broadcast event editor)
 export { updateUI, renderSchedule, renderCurrentMatch };
