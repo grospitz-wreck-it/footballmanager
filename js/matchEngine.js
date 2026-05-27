@@ -697,7 +697,7 @@ function initMatch(round) {
     home: 0,
     away: 0,
   };
-
+window.idleAlreadyShown = false;
   emitMatchEvent("MATCH_INTRO", {
   homeTeamId: homeId,
   awayTeamId: awayId,
@@ -724,8 +724,8 @@ function createShot(ctx) {
   if (Math.random() > w.shot) return;
 
   const r = Math.random();
-  const goalChance = 0.2;
-  const saveChance = 0.5;
+  const goalChance = 0.08;
+  const saveChance = 0.72;
 
   if (r < goalChance) {
     if (isHome) {
@@ -1187,8 +1187,16 @@ if (live.phase === "match_intro") {
 
       try {
         rollRandomEvents(ctx);
-        simulateLiveEvent(ctx);
-        updateEvents();
+
+// =========================
+// 🎲 EVENT PACING
+// =========================
+
+// nur ~35% aller Minuten bekommen Action
+if (Math.random() < 0.35) {
+  simulateLiveEvent(ctx);
+}
+updateEvents();
       } catch (e) {
         console.warn("⚠️ Simulation error", e);
       }
@@ -1274,7 +1282,8 @@ if (live.phase === "match_intro") {
   }
 });
 
-pauseMatch("HALFTIME");
+// normale Halbzeitpause
+live.running = false;
 
         saveGame();
       }

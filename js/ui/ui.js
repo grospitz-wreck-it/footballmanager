@@ -417,11 +417,12 @@ document.addEventListener("DOMContentLoaded", () => {
 // =========================
 // 💤 IDLE BROADCAST
 // =========================
-let idleAlreadyShown = false;
+window.idleAlreadyShown =
+  window.idleAlreadyShown || false;
 
 function playIdleBroadcast() {
 
-  if (idleAlreadyShown) return;
+  if (window.idleAlreadyShown) return;
 
   const defs =
     game?.data?.eventDefinitions || [];
@@ -452,7 +453,7 @@ function playIdleBroadcast() {
       )
     ];
 
-  idleAlreadyShown = true;
+  window.idleAlreadyShown = true;
 lastRenderedEventId = null;
   game.events = game.events || {};
   game.events.history =
@@ -490,9 +491,18 @@ function updateUI() {
    // =========================
   // 💤 IDLE EVENT
   // =========================
-  if (!game.match?.live?.running) {
-    playIdleBroadcast();
-  }
+  const live = game.match?.live;
+
+if (
+  !live?.running &&
+  (
+    !live ||
+    live.phase === "bye" ||
+    live.phase === "idle"
+  )
+) {
+  playIdleBroadcast();
+}
   // =========================
   // 💀 GAME OVER
   // =========================
@@ -1137,9 +1147,7 @@ function updateEvents() {
   if (!events?.length) return;
 
   const newest =
-    [...events].reverse().find(
-      (e) => e?.assets?.length,
-    ) || events[events.length - 1];
+  events[events.length - 1];
 
   if (!newest) return;
 
