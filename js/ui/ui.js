@@ -422,30 +422,73 @@ window.idleAlreadyShown =
 
 function playIdleBroadcast() {
 
-  if (window.idleAlreadyShown) return;
+  if (window.idleAlreadyShown) {
+    return;
+  }
 
+  // =========================
+  // 🧠 EVENT SOURCE
+  // =========================
   const defs =
-    game?.data?.eventDefinitions || [];
+
+    (
+      Array.isArray(
+        game?.data?.gameEvents,
+      ) &&
+      game.data.gameEvents.length
+    )
+
+      ? game.data.gameEvents
+
+      : (
+
+        Array.isArray(
+          game?.data?.eventDefinitions,
+        ) &&
+        game.data.eventDefinitions.length
+      )
+
+        ? game.data.eventDefinitions
+
+        : [];
 
   console.log(
     "🧪 IDLE CHECK:",
     defs,
   );
 
-  const idleEvents = defs.filter(
-    (e) =>
-      e.type === "IDLE" &&
-      e.active !== false,
+  // =========================
+  // 🏟 IDLE EVENTS
+  // =========================
+  const idleEvents =
+    defs.filter(
+      (e) =>
+
+        String(e.type || "")
+          .toUpperCase() === "IDLE" &&
+
+        e.active !== false,
+    );
+
+  console.log(
+    "🏟 IDLE EVENTS:",
+    idleEvents,
   );
 
   if (!idleEvents.length) {
+
     console.warn(
       "⚠️ No IDLE events found",
     );
+
     return;
   }
 
+  // =========================
+  // 🎲 RANDOM PICK
+  // =========================
   const event =
+
     idleEvents[
       Math.floor(
         Math.random() *
@@ -453,27 +496,61 @@ function playIdleBroadcast() {
       )
     ];
 
-  window.idleAlreadyShown = true;
-lastRenderedEventId = null;
-  game.events = game.events || {};
+  console.log(
+    "🏟 SELECTED IDLE:",
+    event,
+  );
+
+  // =========================
+  // 🧠 STATE
+  // =========================
+  window.idleAlreadyShown =
+    true;
+
+  lastRenderedEventId = null;
+
+  // =========================
+  // 📦 HISTORY
+  // =========================
+  game.events =
+    game.events || {};
+
   game.events.history =
     game.events.history || [];
 
+  // =========================
+  // 📡 PUSH EVENT
+  // =========================
   game.events.history.push({
-  id: crypto.randomUUID(),
-  type: "IDLE",
-  minute: 0,
-  text: event.title || "",
-  assets: event.assets || [],
-  meta: event,
-});
 
-// 🔥 FORCE FIRST RENDER
-lastRenderedEventId = null;
+    id:
+      crypto.randomUUID(),
 
-requestAnimationFrame(() => {
-  updateEvents();
-});
+    type: "IDLE",
+
+    minute: 0,
+
+    text:
+      event.title ||
+      "Willkommen im Stadion",
+
+    assets:
+      Array.isArray(event.assets)
+        ? event.assets
+        : [],
+
+    meta: event,
+  });
+
+  // =========================
+  // 🔥 FORCE RENDER
+  // =========================
+  lastRenderedEventId = null;
+
+  requestAnimationFrame(() => {
+
+    updateEvents();
+  });
 
   console.log(
     "🏟 IDLE EVENT PLAYED:",
