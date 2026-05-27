@@ -1168,13 +1168,40 @@ function simulateLiveEvent(ctx) {
   // =========================
   // 🛑 SAFETY
   // =========================
-  if (!live) return;
+  if (!live) {
+    return;
+  }
 
-  // 🔥 niemals außerhalb echter Spielphasen
-  if (
-    live.phase !== "first_half" &&
-    live.phase !== "second_half"
-  ) {
+  // =========================
+  // 🎮 ONLY REAL GAMEPLAY
+  // =========================
+  const isGameplayPhase =
+
+    live.phase === "first_half" ||
+    live.phase === "second_half";
+
+  // ❌ niemals außerhalb echter Spielphasen
+  if (!isGameplayPhase) {
+
+    console.log(
+      "⏸ EVENT BLOCKED:",
+      live.phase,
+    );
+
+    return;
+  }
+
+  // =========================
+  // 🎲 GLOBAL EVENT PACING
+  // =========================
+
+  // nur ~3% aller Minuten bekommen echte Action
+  if (Math.random() > 0.03) {
+
+    console.log(
+      "😴 QUIET MINUTE",
+    );
+
     return;
   }
 
@@ -1223,6 +1250,7 @@ function simulateLiveEvent(ctx) {
   if (!attackingTeam) {
 
     attackingTeam =
+
       Math.random() <
       adjustedHomeChance + bias
 
@@ -1235,7 +1263,7 @@ function simulateLiveEvent(ctx) {
   // =========================
   if (
     mod.line > 1 &&
-    Math.random() < 0.08
+    Math.random() < 0.05
   ) {
 
     attackingTeam =
@@ -1257,15 +1285,23 @@ function simulateLiveEvent(ctx) {
   const eventType =
     pickEventByWeight(weights);
 
+  console.log(
+    "⚽ LIVE EVENT:",
+    eventType,
+  );
+
   // =========================
   // 🎮 EXECUTE
   // =========================
   switch (eventType) {
 
+    // =====================
+    // ⚽ SHOT
+    // =====================
     case "shot":
 
-      // 🔥 viel weniger Schüsse
-      if (Math.random() < 0.35) {
+      // massiv reduziert
+      if (Math.random() < 0.18) {
 
         createShot({
           match: ctx.match,
@@ -1276,50 +1312,68 @@ function simulateLiveEvent(ctx) {
 
       break;
 
+    // =====================
+    // 🚫 FOUL
+    // =====================
     case "foul":
 
-      if (Math.random() < 0.25) {
+      if (Math.random() < 0.12) {
         createFoul(ctx);
       }
 
       break;
 
+    // =====================
+    // 🚩 CORNER
+    // =====================
     case "corner":
 
-      if (Math.random() < 0.18) {
+      if (Math.random() < 0.10) {
         createCorner(ctx);
       }
 
       break;
 
+    // =====================
+    // ➡️ PASS
+    // =====================
     case "pass":
 
-      if (Math.random() < 0.45) {
+      if (Math.random() < 0.20) {
         createPass(ctx);
       }
 
       break;
 
+    // =====================
+    // 🕺 DRIBBLE
+    // =====================
     case "dribble":
 
-      if (Math.random() < 0.22) {
+      if (Math.random() < 0.10) {
         createDribble(ctx);
       }
 
       break;
 
+    // =====================
+    // 🛡 INTERCEPTION
+    // =====================
     case "interception":
 
-      if (Math.random() < 0.18) {
+      if (Math.random() < 0.08) {
         createInterception(ctx);
       }
 
       break;
 
+    // =====================
+    // ⚔️ DUEL
+    // =====================
     case "duel":
     default:
 
-      if (Math.random() < 0.30) {
+      if (Math.random() < 0.15) {
         createDuel(ctx);
       }
 
@@ -1335,7 +1389,7 @@ function simulateLiveEvent(ctx) {
   // deutlich ruhigerer Flow
   if (
     eventType === "shot" &&
-    Math.random() < 0.35
+    Math.random() < 0.20
   ) {
 
     switchPossession(ctx);
@@ -1344,7 +1398,7 @@ function simulateLiveEvent(ctx) {
     eventType === "duel"
   ) {
 
-    if (Math.random() < 0.25) {
+    if (Math.random() < 0.15) {
       switchPossession(ctx);
     }
   }
