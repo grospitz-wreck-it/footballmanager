@@ -1527,54 +1527,44 @@ function renderTeam() {
   // =========================
   // 🧠 AUTO BEST XI
   // =========================
-  if (lineup?.slots) {
-    starters = Object.values(lineup.slots)
-      .map((id) =>
-        allPlayers.find(
-          (p) => String(p.id) === String(id) && isPlayerAvailable(p.id),
-        ),
-      )
-      .filter(Boolean);
-
-    const remaining = availablePlayers.filter(
-      (p) => !starters.some((s) => String(s.id) === String(p.id)),
-    );
-
-    while (starters.length < 11 && remaining.length) {
-      starters.push(remaining.shift());
-    }
-  } else {
   let assigned = [];
 
-  if (lineup?.slots) {
-    assigned = Object.values(lineup.slots)
-      .map((id) =>
-        players.find(
-          (p) => String(p.id) === String(id) && isPlayerAvailable(p.id),
-        ),
-      )
-      .filter(Boolean);
+if (lineup?.slots) {
+  assigned = Object.values(lineup.slots)
+    .map((id) =>
+      players.find(
+        (p) =>
+          String(p.id) === String(id) &&
+          isPlayerAvailable(p.id),
+      ),
+    )
+    .filter(Boolean);
 
-    const remaining = players.filter(
-      (p) =>
-        isPlayerAvailable(p.id) &&
-        !assigned.some((sp) => String(sp.id) === String(p.id)),
+  const remaining = players.filter(
+    (p) =>
+      isPlayerAvailable(p.id) &&
+      !assigned.some(
+        (sp) => String(sp.id) === String(p.id),
+      ),
+  );
+
+  while (assigned.length < 11 && remaining.length) {
+    assigned.push(remaining.shift());
+  }
+} else {
+  try {
+    assigned = getBestXI(players, formation);
+  } catch (e) {
+    console.error(
+      "❌ getBestXI failed in preview:",
+      e,
     );
 
-    while (assigned.length < 11 && remaining.length) {
-      assigned.push(remaining.shift());
-    }
-  } else {
-    try {
-      assigned = getBestXI(players, formation);
-    } catch (e) {
-      console.error("❌ getBestXI failed in preview:", e);
-      assigned = players;
-    }
+    assigned = players;
   }
-
-  starters = assigned;
 }
+
+starters = assigned;
 
   // =========================
   // 🪑 BENCH CLEAN
@@ -2290,6 +2280,7 @@ window.startPenaltySequence = function (context = {}) {
 // =========================
 // 📦 EXPORTS
 // =========================
+
 function renderCurrentMatch() {
   console.log("⚽ renderCurrentMatch");
 }
@@ -2297,3 +2288,8 @@ function renderCurrentMatch() {
 function renderSchedule() {
   renderScheduleModule();
 }
+
+export {
+  renderCurrentMatch,
+  renderSchedule,
+};
