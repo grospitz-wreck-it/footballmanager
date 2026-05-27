@@ -1136,14 +1136,6 @@ if (live.running === false) {
     let safety = 0;
 
     while (accumulator >= STEP && safety < 10) {
-<<<<<<< HEAD
-      if (isLivePaused(live)) {
-        lastTime = performance.now();
-        accumulator = 0;
-        break;
-      }
-
-=======
       if(live.phase === "match_intro"){
 
   live.running = false;
@@ -1159,7 +1151,6 @@ if (live.running === false) {
 
   return;
 }
->>>>>>> 8a78a39 (improve broadcast event editor)
       live.minute++;
       document.body?.classList.add("match-live");
 
