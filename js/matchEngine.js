@@ -1526,11 +1526,26 @@ if (live._penaltyPause === true || live._minigamePause === true) {
 }
 
 // =========================
-// ⏸ PAUSE SAFE FIX
+// ⏸ HARD PAUSE
 // =========================
-if (live.running === false) {
+
+// 🔥 Intro darf trotzdem laufen
+const introActive =
+  live.phase === "match_intro";
+
+// 🔥 Halbzeit darf pausieren
+const halftimeActive =
+  live.phase === "halftime";
+
+if (
+  live.running === false &&
+  !introActive &&
+  !halftimeActive
+) {
+
   lastTime = performance.now();
   accumulator = 0;
+
   return;
 }
 
@@ -1548,13 +1563,15 @@ if (live.running === false) {
 // =========================
 if (live.phase === "match_intro") {
 
-  // 🔥 nur einmal triggern
   if (!live._introStarted) {
 
     live._introStarted = true;
-    live.running = false;
 
-    console.log("🎬 MATCH INTRO START");
+    console.log(
+      "🎬 MATCH INTRO START",
+    );
+
+    updateEvents();
 
     setTimeout(() => {
 
@@ -1574,10 +1591,7 @@ if (live.phase === "match_intro") {
     }, 8000);
   }
 
-  // 🔥 verhindert Eventspam
   accumulator = 0;
-
-  // 🔥 nur aktuellen Tick stoppen
   break;
 }
       live.minute++;
