@@ -1,5 +1,5 @@
 // =========================
-// 🧠 CONTENT RESOLVER (FINAL FIXED)
+// 🧠 CONTENT RESOLVER (FINAL STABLE)
 // =========================
 
 import { game } from "../core/state.js";
@@ -7,70 +7,88 @@ import { game } from "../core/state.js";
 // =========================
 // 🔤 NORMALIZE
 // =========================
-function normalize(val){
-  return String(val || "").toLowerCase().trim();
+function normalize(val) {
+  return String(val || "")
+    .toLowerCase()
+    .trim();
 }
 
 // =========================
-// 👤 PLAYER LOOKUP (FIXED)
+// 👤 PLAYER LOOKUP
 // =========================
-function findPlayerById(id){
+function findPlayerById(id) {
 
-  if(!id) return null;
+  if (!id) return null;
 
   const league = game.league?.current;
-  if(!league) return null;
 
-  for(const team of league.teams || []){
+  if (!league) return null;
+
+  for (const team of league.teams || []) {
+
     const player = team.players?.find(
-      p => String(p.id) === String(id)
+      (p) => String(p.id) === String(id),
     );
-    if(player) return player;
+
+    if (player) return player;
   }
 
   return null;
 }
 
-function getPlayerNameById(id){
+function getPlayerNameById(id) {
 
   const player = findPlayerById(id);
 
-  if(!player){
-    console.warn("❌ Player not found:", id);
+  if (!player) {
     return "ein Spieler";
   }
 
-  return player.name || player.Name || "ein Spieler";
+  return (
+    player.name ||
+    player.Name ||
+    "ein Spieler"
+  );
 }
 
 // =========================
-// 🏆 TEAM LOOKUP (FIXED)
+// 🏆 TEAM LOOKUP
 // =========================
-function findTeamById(id){
+function findTeamById(id) {
 
-  if(!id) return null;
+  if (!id) return null;
 
-  return game.league?.current?.teams?.find(
-    t => String(t.id) === String(id)
-  ) || null;
+  return (
+    game.league?.current?.teams?.find(
+      (t) => String(t.id) === String(id),
+    ) || null
+  );
 }
 
-function getTeamNameById(id){
+function getTeamNameById(id) {
 
   const team = findTeamById(id);
 
-  return team?.name || "ein Team";
+  return (
+    team?.name ||
+    "ein Team"
+  );
 }
 
 // =========================
 // 🔧 URL FIX
 // =========================
-function fixUrl(url){
-  if(!url) return null;
+function fixUrl(url) {
+
+  if (!url) return null;
 
   let fixed = url;
 
-  fixed = fixed.replace("/render/image/public/", "/object/public/");
+  fixed = fixed.replace(
+    "/render/image/public/",
+    "/object/public/",
+  );
+
   fixed = encodeURI(fixed);
 
   return fixed;
@@ -79,34 +97,46 @@ function fixUrl(url){
 // =========================
 // 🧼 VALIDATE ASSET
 // =========================
-function isValidAsset(asset){
-  return asset && typeof asset.url === "string" && asset.url.length > 10;
+function isValidAsset(asset) {
+
+  return (
+    asset &&
+    typeof asset.url === "string" &&
+    asset.url.length > 10
+  );
 }
 
 // =========================
 // 🧠 EVENTS SOURCE
 // =========================
-function getEventDefinitions(){
+function getEventDefinitions() {
 
   const defs =
-  (Array.isArray(game?.data?.gameEvents) &&
-    game.data.gameEvents.length
+
+    (
+      Array.isArray(game?.data?.gameEvents) &&
+      game.data.gameEvents.length
+    )
+
       ? game.data.gameEvents
-      : null)
 
-  ||
+      : (
 
-  (Array.isArray(game?.data?.eventDefinitions) &&
-    game.data.eventDefinitions.length
-      ? game.data.eventDefinitions
-      : null)
+        Array.isArray(
+          game?.data?.eventDefinitions,
+        ) &&
+        game.data.eventDefinitions.length
+      )
 
-  ||
+        ? game.data.eventDefinitions
 
-  [];
+        : [];
 
-  if(!Array.isArray(defs)){
-    console.warn("⚠️ No event definitions in state");
+  if (!Array.isArray(defs)) {
+    console.warn(
+      "⚠️ No event definitions in state",
+    );
+
     return [];
   }
 
@@ -114,134 +144,262 @@ function getEventDefinitions(){
 }
 
 // =========================
-// 🎯 MAIN RESOLVER
+// 🎲 WEIGHTED RANDOM
 // =========================
-function weightedRandom(arr){
-  const total = arr.reduce((sum, i) => sum + (i.priority || 1), 0);
+function weightedRandom(arr) {
+
+  const total = arr.reduce(
+    (sum, i) =>
+      sum + (i.priority || 1),
+    0,
+  );
+
   let r = Math.random() * total;
 
-  for(const item of arr){
+  for (const item of arr) {
+
     r -= item.priority || 1;
-    if(r <= 0) return item;
+
+    if (r <= 0) {
+      return item;
+    }
   }
 
   return arr[0];
 }
 
-function resolveEventContent(event){
+// =========================
+// 🧩 EMPTY
+// =========================
+function emptyResult() {
 
-  if(!event){
-    console.warn("⚠️ resolveEventContent: no event");
-    return emptyResult();
-  }
-
-  const definitions = getEventDefinitions();
-  const type = normalize(event.type);
-console.log("🧠 FULL GAME DATA:", game.data);
-
-console.log(
-  "🧠 gameEvents:",
-  game?.data?.gameEvents
-);
-
-console.log(
-  "🧠 eventDefinitions:",
-  game?.data?.eventDefinitions
-);
-
-console.log(
-  "🧠 FINAL DEFINITIONS:",
-  definitions
-);  if(!definitions.length){
-    console.warn("⚠️ No events loaded");
-    return emptyResult();
-  }
-
-  // =========================
-  // 🔍 MATCH
-  // =========================
-  let matches = definitions.filter((e) => {
-
-  const eventType = normalize(event.type);
-
-  const possible = [
-    e.type,
-    e.effect,
-    e.event_type,
-    e.eventType,
-  ]
-    .map(normalize)
-    .filter(Boolean);
-
-  return possible.includes(eventType);
-});
-
- if(!matches.length){
-  // 🔥 KEIN ERROR MEHR
   return {
     text: null,
     assets: [],
-    config: null
+    config: null,
   };
 }
+
+// =========================
+// 🎯 MAIN RESOLVER
+// =========================
+function resolveEventContent(event) {
+
+  if (!event) {
+
+    console.warn(
+      "⚠️ resolveEventContent: no event",
+    );
+
+    return emptyResult();
+  }
+
+  const definitions =
+    getEventDefinitions();
+
+  if (!definitions.length) {
+
+    console.warn(
+      "⚠️ No events loaded",
+    );
+
+    return emptyResult();
+  }
+
+  const eventType =
+    normalize(event.type);
+
+  const minute =
+    Number(event.minute || 0);
+
+  console.log(
+    "📡 RESOLVE EVENT:",
+    event,
+  );
+
+  // =========================
+  // 🔍 TYPE MATCH
+  // =========================
+  let matches = definitions.filter(
+    (e) => {
+
+      const possible = [
+        e.type,
+        e.effect,
+        e.event_type,
+        e.eventType,
+      ]
+        .map(normalize)
+        .filter(Boolean);
+
+      return possible.includes(
+        eventType,
+      );
+    },
+  );
+
+  // =========================
+  // 🧠 PHASE FILTERING
+  // =========================
+  matches = matches.filter((e) => {
+
+    const trigger =
+      normalize(
+        e.trigger || "random",
+      );
+
+    // =====================
+    // 💤 IDLE
+    // =====================
+    if (eventType === "IDLE") {
+
+      return !game.match?.live?.running;
+    }
+
+    // =====================
+    // 🎬 MATCH INTRO
+    // =====================
+    if (
+      eventType === "MATCH_INTRO"
+    ) {
+
+      return minute <= 1;
+    }
+
+    // =====================
+    // ⏸ HALFTIME
+    // =====================
+    if (
+      eventType === "HALFTIME"
+    ) {
+
+      return (
+        minute >= 45 &&
+        minute < 50
+      );
+    }
+
+    // =====================
+    // ⏱ FULLTIME
+    // =====================
+    if (
+      eventType === "FULLTIME"
+    ) {
+
+      return minute >= 90;
+    }
+
+    // =====================
+    // 🎲 RANDOM EVENTS
+    // =====================
+    if (
+      trigger === "random"
+    ) {
+
+      return (
+        minute > 1 &&
+        minute < 90
+      );
+    }
+
+    return true;
+  });
+
+  // =========================
+  // ❌ NOTHING FOUND
+  // =========================
+  if (!matches.length) {
+
+    return emptyResult();
+  }
 
   // =========================
   // 🔥 GUARANTEED FIRST
   // =========================
-  const guaranteed = matches.filter(e => e.is_guaranteed);
+  const guaranteed =
+    matches.filter(
+      (e) => e.is_guaranteed,
+    );
 
-  if(guaranteed.length){
+  if (guaranteed.length) {
     matches = guaranteed;
   }
 
   // =========================
-  // 🧠 COOLDOWN
+  // 🧠 COOLDOWN MEMORY
   // =========================
-  const memory = window.__eventMemory || [];
-  window.__eventMemory = memory;
+  const memory =
+    window.__eventMemory || [];
 
-  matches = matches.filter(e => {
+  window.__eventMemory =
+    memory;
 
-    if(!e.cooldown) return true;
+  matches = matches.filter(
+    (e) => {
 
-    const last = memory.find(m => m.id === e.id);
-    if(!last) return true;
+      if (!e.cooldown) {
+        return true;
+      }
 
-    return (Date.now() - last.time) > (e.cooldown * 1000);
-  });
+      const last =
+        memory.find(
+          (m) => m.id === e.id,
+        );
 
-  if(!matches.length){
-    matches = definitions;
+      if (!last) {
+        return true;
+      }
+
+      return (
+        Date.now() - last.time >
+        e.cooldown * 1000
+      );
+    },
+  );
+
+  if (!matches.length) {
+
+    return emptyResult();
   }
-// =========================
-// 🎲 PROBABILITY ROLL
-// =========================
 
-matches = matches.filter((e) => {
+  // =========================
+  // 🎲 PROBABILITY ROLL
+  // =========================
+  matches = matches.filter(
+    (e) => {
 
-  const probability =
-    Number(e.probability || 0);
+      const probability =
+        Number(
+          e.probability || 0,
+        );
 
-  return Math.random() <= probability;
-});
+      return (
+        Math.random() <=
+        probability
+      );
+    },
+  );
 
-if (!matches.length) {
-  return emptyResult();
-}
+  if (!matches.length) {
+
+    return emptyResult();
+  }
+
   // =========================
   // 🎲 RANDOM PICK
   // =========================
-  const selected = weightedRandom(matches);
+  const selected =
+    weightedRandom(matches);
 
   // =========================
-  // 🧠 MEMORY SAVE
+  // 🧠 SAVE MEMORY
   // =========================
   memory.push({
     id: selected.id,
-    time: Date.now()
+    time: Date.now(),
   });
 
-  if(memory.length > 20){
+  if (memory.length > 20) {
     memory.shift();
   }
 
@@ -250,67 +408,88 @@ if (!matches.length) {
   // =========================
   let assets = [];
 
-  if(Array.isArray(selected.assets)){
+  if (
+    Array.isArray(selected.assets)
+  ) {
+
     assets = selected.assets
       .flat()
       .filter(isValidAsset)
-      .map(asset => ({
+      .map((asset) => ({
         ...asset,
-        url: fixUrl(asset.url)
+        url: fixUrl(asset.url),
       }));
   }
 
-    return {
-    text: event.text || selected.title || null,
+  // =========================
+  // ✅ RESULT
+  // =========================
+  return {
+    text:
+      event.text ||
+      selected.title ||
+      null,
+
     assets,
-    duration: selected.duration || 5, // 🔥 NEU
+
+    duration:
+      selected.duration || 5,
 
     config: {
       id: selected.id,
-      category: selected.category || "default",
-      priority: selected.priority || 1
-    }
+
+      category:
+        selected.category ||
+        "default",
+
+      priority:
+        selected.priority || 1,
+    },
   };
 }
 
 // =========================
-// 🧩 EMPTY
+// 🔥 ENRICH EVENT
 // =========================
-function emptyResult(){
-  return {
-    text: null,
-    assets: [],
-    config: null
-  };
-}
+function enrichEvent(event) {
 
-// =========================
-// 🔥 ENRICH EVENT (FINAL FIX)
-// =========================
-function enrichEvent(event){
+  if (!event) return event;
 
-  if(!event) return event;
+  const player =
+    findPlayerById(
+      event.playerId,
+    );
 
-  const player = findPlayerById(event.playerId);
-  const related = findPlayerById(event.relatedPlayerId);
-  const team = findTeamById(event.teamId);
+  const related =
+    findPlayerById(
+      event.relatedPlayerId,
+    );
 
-  if(event.playerId && !player){
-    console.warn("❌ PLAYER NOT FOUND:", event.playerId);
-  }
+  const team =
+    findTeamById(
+      event.teamId,
+    );
 
   return {
     ...event,
 
-    // 👉 echte Objekte
     player,
     relatedPlayer: related,
     team,
 
-    // 👉 direkt usable strings (für commentary)
-    playerName: player?.name || player?.Name || "ein Spieler",
-    relatedPlayerName: related?.name || related?.Name || null,
-    teamName: team?.name || "ein Team"
+    playerName:
+      player?.name ||
+      player?.Name ||
+      "ein Spieler",
+
+    relatedPlayerName:
+      related?.name ||
+      related?.Name ||
+      null,
+
+    teamName:
+      team?.name ||
+      "ein Team",
   };
 }
 
@@ -319,9 +498,14 @@ function enrichEvent(event){
 // =========================
 export {
   resolveEventContent,
-  enrichEvent
+  enrichEvent,
 };
 
-// optional debug
-window.resolveEventContent = resolveEventContent;
-window.enrichEvent = enrichEvent;
+// =========================
+// 🧪 DEBUG
+// =========================
+window.resolveEventContent =
+  resolveEventContent;
+
+window.enrichEvent =
+  enrichEvent;
