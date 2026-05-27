@@ -411,19 +411,89 @@ async function addAdSet() {
 // =====================
 // INLINE UPDATE CAMPAIGN
 // =====================
-async function saveInlineCampaign(id) {
-  const row = document.querySelector(`[data-row="${id}"]`);
+async function saveInlineGameEvent(id) {
+  const row = document.querySelector(
+    `[data-id="${id}"]`,
+  );
+
+  if (!row) return;
 
   const payload = {
-    name: row.querySelector("[data-field='name']").value,
-    customer: row.querySelector("[data-field='customer']").value,
-    budget: Number(row.querySelector("[data-field='budget']").value || 0),
+    title:
+      row.querySelector("[data-field='title']")
+        ?.value || "",
+
+    type:
+      row.querySelector("[data-field='type']")
+        ?.value || "",
+
+    trigger:
+      row.querySelector("[data-field='trigger']")
+        ?.value || "random",
+
+    probability: Number(
+      row.querySelector(
+        "[data-field='probability']",
+      )?.value || 0,
+    ),
+
+    value: Number(
+      row.querySelector("[data-field='value']")
+        ?.value || 0,
+    ),
+
+    duration: Number(
+      row.querySelector(
+        "[data-field='duration']",
+      )?.value || 0,
+    ),
+
+    cooldown: Number(
+      row.querySelector(
+        "[data-field='cooldown']",
+      )?.value || 0,
+    ),
+
+    priority: Number(
+      row.querySelector(
+        "[data-field='priority']",
+      )?.value || 0,
+    ),
+
+    category:
+      row.querySelector(
+        "[data-field='category']",
+      )?.value || "default",
+
+    is_guaranteed:
+      row.querySelector(
+        "[data-field='is_guaranteed']",
+      )?.value === "true",
   };
 
-  await supabase.from("campaigns").update(payload).eq("id", id);
+  console.log(
+    "💾 SAVE INLINE GAME EVENT:",
+    payload,
+  );
 
-  state.inlineEditId = null;
-  loadCampaigns();
+  const { error } = await supabase
+    .from("event_definitions")
+    .update(payload)
+    .eq("id", id);
+
+  if (error) {
+    console.error(
+      "❌ Inline Game Event Save Failed:",
+      error,
+    );
+
+    alert("Speichern fehlgeschlagen");
+    return;
+  }
+
+  state.inlineGameEventEditId = null;
+
+  await loadGameEvents();
 }
 
 // =====================
@@ -1720,7 +1790,48 @@ function renderGameEvents(list) {
                   value="${e.duration || 0}"
                 >
               </label>
+<label class="field">
+  <span>Cooldown (Sek.)</span>
+  <input
+    data-field="cooldown"
+    type="number"
+    value="${e.cooldown || 0}"
+  >
+</label>
 
+<label class="field">
+  <span>Priorität</span>
+  <input
+    data-field="priority"
+    type="number"
+    value="${e.priority || 0}"
+  >
+</label>
+
+<label class="field">
+  <span>Kategorie</span>
+  <input
+    data-field="category"
+    value="${e.category || "default"}"
+  >
+</label>
+
+<label class="field">
+  <span>Garantiert</span>
+
+  <select data-field="is_guaranteed">
+    <option value="false">
+      Nein
+    </option>
+
+    <option
+      value="true"
+      ${e.is_guaranteed ? "selected" : ""}
+    >
+      Ja
+    </option>
+  </select>
+</label>
             </div>
           `
             : `

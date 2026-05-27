@@ -1461,3 +1461,68 @@ layout.css ersetzen
 .stat.control .donut {
   border-color: var(--accent-tertiary);
 }
+.feedEvent{
+  background:linear-gradient(
+    145deg,
+    #16233d,
+    #1c2d52
+  );
+
+  border:1px solid rgba(255,255,255,0.08);
+
+  border-radius:16px;
+
+  padding:14px;
+
+  margin-bottom:14px;
+
+  overflow:hidden;
+}
+
+.feedHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  margin-bottom:10px;
+}
+
+.feedMinute{
+  color:#94a3b8;
+  font-size:13px;
+}
+
+.feedType{
+  font-size:11px;
+  font-weight:700;
+
+  padding:4px 8px;
+
+  border-radius:999px;
+
+  background:rgba(59,130,246,0.16);
+
+  color:#bfdbfe;
+}
+
+.feedMediaWrap{
+  margin-bottom:12px;
+}
+
+.feedMedia{
+  width:100%;
+  max-height:320px;
+
+  object-fit:cover;
+
+  border-radius:12px;
+
+  display:block;
+
+  background:#000;
+}
+
+.feedText{
+  line-height:1.5;
+  color:#f1f5f9;
+}

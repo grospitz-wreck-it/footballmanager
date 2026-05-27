@@ -137,8 +137,22 @@ function resolveEventContent(event){
 
   const definitions = getEventDefinitions();
   const type = normalize(event.type);
-console.log("EVENT DEFINITIONS:", definitions);
-  if(!definitions.length){
+console.log("🧠 FULL GAME DATA:", game.data);
+
+console.log(
+  "🧠 gameEvents:",
+  game?.data?.gameEvents
+);
+
+console.log(
+  "🧠 eventDefinitions:",
+  game?.data?.eventDefinitions
+);
+
+console.log(
+  "🧠 FINAL DEFINITIONS:",
+  definitions
+);  if(!definitions.length){
     console.warn("⚠️ No events loaded");
     return emptyResult();
   }
@@ -146,17 +160,21 @@ console.log("EVENT DEFINITIONS:", definitions);
   // =========================
   // 🔍 MATCH
   // =========================
-  let matches = definitions.filter(e => {
+  let matches = definitions.filter((e) => {
 
-    const possible = [
-      e.type,
-      e.effect,
-      e.event_type,
-      e.eventType
-    ].map(normalize);
+  const eventType = normalize(event.type);
 
-    return possible.includes(type);
-  });
+  const possible = [
+    e.type,
+    e.effect,
+    e.event_type,
+    e.eventType,
+  ]
+    .map(normalize)
+    .filter(Boolean);
+
+  return possible.includes(eventType);
+});
 
  if(!matches.length){
   // 🔥 KEIN ERROR MEHR
@@ -195,7 +213,21 @@ console.log("EVENT DEFINITIONS:", definitions);
   if(!matches.length){
     matches = definitions;
   }
+// =========================
+// 🎲 PROBABILITY ROLL
+// =========================
 
+matches = matches.filter((e) => {
+
+  const probability =
+    Number(e.probability || 0);
+
+  return Math.random() <= probability;
+});
+
+if (!matches.length) {
+  return emptyResult();
+}
   // =========================
   // 🎲 RANDOM PICK
   // =========================

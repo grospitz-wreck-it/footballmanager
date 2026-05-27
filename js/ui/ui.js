@@ -413,6 +413,72 @@ function setDonut(el, value) {
 document.addEventListener("DOMContentLoaded", () => {
   initColorPicker();
 });
+
+// =========================
+// 💤 IDLE BROADCAST
+// =========================
+let idleAlreadyShown = false;
+
+function playIdleBroadcast() {
+
+  if (idleAlreadyShown) return;
+
+  const defs =
+    game?.data?.eventDefinitions || [];
+
+  console.log(
+    "🧪 IDLE CHECK:",
+    defs,
+  );
+
+  const idleEvents = defs.filter(
+    (e) =>
+      e.type === "IDLE" &&
+      e.active !== false,
+  );
+
+  if (!idleEvents.length) {
+    console.warn(
+      "⚠️ No IDLE events found",
+    );
+    return;
+  }
+
+  const event =
+    idleEvents[
+      Math.floor(
+        Math.random() *
+        idleEvents.length,
+      )
+    ];
+
+  idleAlreadyShown = true;
+lastRenderedEventId = null;
+  game.events = game.events || {};
+  game.events.history =
+    game.events.history || [];
+
+  game.events.history.push({
+  id: crypto.randomUUID(),
+  type: "IDLE",
+  minute: 0,
+  text: event.title || "",
+  assets: event.assets || [],
+  meta: event,
+});
+
+// 🔥 FORCE FIRST RENDER
+lastRenderedEventId = null;
+
+requestAnimationFrame(() => {
+  updateEvents();
+});
+
+  console.log(
+    "🏟 IDLE EVENT PLAYED:",
+    event,
+  );
+}
 // =========================
 // 🔄 GLOBAL UI UPDATE (FIX)
 // =========================
@@ -420,6 +486,13 @@ document.addEventListener("DOMContentLoaded", () => {
 function updateUI() {
   initUI();
   syncMatchLiveState();
+
+   // =========================
+  // 💤 IDLE EVENT
+  // =========================
+  if (!game.match?.live?.running) {
+    playIdleBroadcast();
+  }
   // =========================
   // 💀 GAME OVER
   // =========================
@@ -1054,23 +1127,36 @@ function updateProgress() {
 // 📰 EVENTS
 // =========================
 function updateEvents() {
-  const container = document.getElementById("liveFeed");
+  const container =
+    document.getElementById("liveFeed");
+
   if (!container) return;
 
   const events = game.events?.history;
+
   if (!events?.length) return;
 
   const newest =
-    [...events].reverse().find((e) => e?.assets?.length) ||
-    events[events.length - 1];
+    [...events].reverse().find(
+      (e) => e?.assets?.length,
+    ) || events[events.length - 1];
+
   if (!newest) return;
 
-  console.log("🧪 EVENT DEBUG:", newest);
+  console.log(
+    "🧪 EVENT DEBUG:",
+    newest,
+  );
 
   // =========================
   // 🔁 DUPLICATE GUARD
   // =========================
-  if (newest.id === lastRenderedEventId) return;
+  if (
+    newest.id === lastRenderedEventId
+  ) {
+    return;
+  }
+
   lastRenderedEventId = newest.id;
 
   // =========================
@@ -1083,13 +1169,16 @@ function updateEvents() {
   });
 
   // =========================
-  // 🎬 EVENT ICON (NEU)
+  // 🎬 EVENT ICON
   // =========================
   if (newest.type) {
     try {
       pushEventIcon(newest.type);
     } catch (e) {
-      console.warn("⚠️ pushEventIcon failed", e);
+      console.warn(
+        "⚠️ pushEventIcon failed",
+        e,
+      );
     }
   }
 
@@ -1102,55 +1191,127 @@ function updateEvents() {
     try {
       text = buildCommentary(newest);
     } catch (e) {
-      console.warn("⚠️ Commentary failed", e);
+      console.warn(
+        "⚠️ Commentary failed",
+        e,
+      );
     }
   }
 
-  if (!text) return;
+  if (!text) {
+    text = newest.type || "Event";
+  }
 
   // =========================
-  // 📰 FEED UPDATE
+  // 🎨 INLINE ASSET RENDER
   // =========================
-  const div = document.createElement("div");
+  const assets = newest.assets || [];
+
+  const assetHTML = assets
+    .map((a) => {
+
+      if (!a?.url) return "";
+
+      const isVideo =
+        a.type === "video" ||
+        /\.(mp4|webm|ogg)$/i.test(a.url);
+
+      if (isVideo) {
+        return `
+          <video
+            class="feedMedia"
+            src="${a.url}"
+            autoplay
+            muted
+            loop
+            playsinline
+          ></video>
+        `;
+      }
+
+      return `
+        <img
+          class="feedMedia"
+          src="${a.url}"
+        >
+      `;
+    })
+    .join("");
+
+  // =========================
+  // 📰 FEED ENTRY
+  // =========================
+  const div =
+    document.createElement("div");
+
+  div.className = "feedEvent";
 
   div.innerHTML = `
-    <span style="color:#64748b">${newest.minute}'</span> 
-    <span>${text}</span>
+    <div class="feedHeader">
+      <span class="feedMinute">
+        ${newest.minute}'
+      </span>
+
+      <span class="feedType">
+        ${newest.type || "EVENT"}
+      </span>
+    </div>
+
+    ${
+      assetHTML
+        ? `
+      <div class="feedMediaWrap">
+        ${assetHTML}
+      </div>
+    `
+        : ""
+    }
+
+    <div class="feedText">
+      ${text}
+    </div>
   `;
 
   container.appendChild(div);
 
-  // 👉 optional: autoscroll
-  container.scrollTop = container.scrollHeight;
+  // =========================
+  // 🔽 AUTOSCROLL
+  // =========================
+  container.scrollTop =
+    container.scrollHeight;
 
   // =========================
-  // 🎬 OVERLAY (optional)
+  // 🎬 OVERLAY
   // =========================
+  if (assets.length) {
 
-  console.log("🟢 BEFORE ASSET BLOCK");
-
-  if (newest.assets?.length) {
-    const asset = newest.assets.find(
+    const asset = assets.find(
       (a) =>
         a?.url &&
-        (a.type === "video" ||
+        (
+          a.type === "video" ||
           a.type === "image" ||
-          /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)),
+          /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)
+        ),
     );
 
     if (!asset) {
-      console.warn("❌ No valid media asset found");
+      console.warn(
+        "❌ No valid media asset found",
+      );
       return;
     }
 
     const url = asset.url;
 
-    const isVideo = asset.type === "video" || /\.(mp4|webm|ogg)$/i.test(url);
+    const isVideo =
+      asset.type === "video" ||
+      /\.(mp4|webm|ogg)$/i.test(url);
 
-    console.log("🎥 ASSET CHECK:", asset);
-    console.log("🎥 URL:", url);
-    console.log("🎥 TYPE:", asset.type);
-    console.log("🎥 IS VIDEO:", isVideo);
+    console.log(
+      "🎥 ASSET CHECK:",
+      asset,
+    );
 
     if (isVideo) {
       showVideoOverlay(url, text);
