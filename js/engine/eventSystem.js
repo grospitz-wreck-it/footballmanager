@@ -372,20 +372,144 @@ function getActiveModifiers(){
 // =========================
 function rollRandomEvents(context){
 
-  const events = game.data.events || [];
-  const minute = Number(game.match?.live?.minute ?? 0);
+  const live =
+    game.match?.live;
 
-  events.forEach(e => {
+  // =========================
+  // 🛑 SAFETY
+  // =========================
+  if (!live) {
+    return;
+  }
 
-    if(!e.probability) return;
-    if(e.active === false) return;
-    if(!isEventInScope(e, context)) return;
-    if(!isEventTriggerWindow(e, minute)) return;
-    if(!canTriggerByCooldown(e, minute)) return;
+  // =========================
+  // 🎬 ONLY REAL GAMEPLAY
+  // =========================
+  const isGameplayPhase =
 
-    if(Math.random() < e.probability){
-      markEventTriggered(e, minute);
-      triggerEvent(e.id, context);
+    live.phase === "first_half" ||
+    live.phase === "second_half";
+
+  // ❌ niemals außerhalb echter Spielphasen
+  if (!isGameplayPhase) {
+
+    console.log(
+      "⏸ RANDOM EVENTS BLOCKED:",
+      live.phase,
+    );
+
+    return;
+  }
+
+  // ❌ pausiertes Spiel
+  if (live.running === false) {
+    return;
+  }
+
+  const events =
+    game.data.events || [];
+
+  const minute =
+    Number(
+      live.minute ?? 0,
+    );
+
+  events.forEach((e) => {
+
+    // =====================
+    // 🚫 DISABLED
+    // =====================
+    if (!e.probability) return;
+
+    if (e.active === false)
+      return;
+
+    // =====================
+    // 🚫 SCOPE
+    // =====================
+    if (
+      !isEventInScope(
+        e,
+        context,
+      )
+    ) {
+      return;
+    }
+
+    // =====================
+    // 🚫 WINDOW
+    // =====================
+    if (
+      !isEventTriggerWindow(
+        e,
+        minute,
+      )
+    ) {
+      return;
+    }
+
+    // =====================
+    // 🚫 COOLDOWN
+    // =====================
+    if (
+      !canTriggerByCooldown(
+        e,
+        minute,
+      )
+    ) {
+      return;
+    }
+
+    // =====================
+    // 🚫 SPECIAL EVENTS
+    // =====================
+    const type =
+
+      String(
+        e.type || "",
+      ).toUpperCase();
+
+    if (
+      [
+        "MATCH_INTRO",
+        "HALFTIME",
+        "FULLTIME",
+        "IDLE",
+      ].includes(type)
+    ) {
+      return;
+    }
+
+    // =====================
+    // 🎲 RANDOM ROLL
+    // =====================
+
+    // 🔥 global pacing
+    if (Math.random() > 0.02) {
+      return;
+    }
+
+    if (
+      Math.random() <
+      Number(
+        e.probability || 0,
+      )
+    ) {
+
+      console.log(
+        "🎲 RANDOM EVENT:",
+        e.type,
+      );
+
+      markEventTriggered(
+        e,
+        minute,
+      );
+
+      triggerEvent(
+        e.id,
+        context,
+      );
     }
   });
 }
