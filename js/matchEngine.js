@@ -1218,14 +1218,39 @@ if (live.phase === "match_intro") {
           }
 
           if (ev.trigger === "random") {
-            if (
-              live.minute - ev._lastTrigger > 1 &&
-              Math.random() < (ev.probability || 0)
-            ) {
-              ev._lastTrigger = live.minute;
-              applyGameEventEffect(ev, ctx);
-            }
-          }
+
+  const type =
+    String(ev.type || "")
+      .toUpperCase();
+
+  // =====================
+  // 🚫 SPECIAL EVENTS BLOCK
+  // =====================
+  if (
+    [
+      "MATCH_INTRO",
+      "HALFTIME",
+      "FULLTIME",
+      "IDLE",
+    ].includes(type)
+  ) {
+    return;
+  }
+
+  // =====================
+  // 🎲 NORMAL RANDOM EVENTS
+  // =====================
+  if (
+    live.minute - ev._lastTrigger > 1 &&
+    Math.random() < (ev.probability || 0)
+  ) {
+
+    ev._lastTrigger =
+      live.minute;
+
+    applyGameEventEffect(ev, ctx);
+  }
+}
         });
       }
 
