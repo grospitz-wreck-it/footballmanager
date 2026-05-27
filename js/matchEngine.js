@@ -1189,12 +1189,18 @@ if (live.phase === "match_intro") {
         rollRandomEvents(ctx);
 
 // =========================
-// 🎲 EVENT PACING
+// 🎲 LIVE EVENTS NUR IM SPIEL
 // =========================
 
-// nur ~35% aller Minuten bekommen Action
-if (Math.random() < 0.35) {
-  simulateLiveEvent(ctx);
+if (
+  live.phase === "first_half" ||
+  live.phase === "second_half"
+) {
+
+  // nur manche Minuten bekommen Events
+  if (Math.random() < 0.35) {
+    simulateLiveEvent(ctx);
+  }
 }
 updateEvents();
       } catch (e) {
