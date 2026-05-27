@@ -2066,7 +2066,6 @@ document.addEventListener("click", async (e) => {
 
   await loadGameEvents();
 }
-  }
 
   // =====================
   // CAMPAIGNS
@@ -2132,7 +2131,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // 🔥 GAME EVENTS
-  document.addEventListener("click", (e) => {
+  document.addEventListener("click", async (e) => {
     if (e.target.id === "saveGameEventBtn") {
       saveGameEvent();
     }
