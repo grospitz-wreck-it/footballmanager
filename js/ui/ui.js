@@ -2290,6 +2290,7 @@ function renderSchedule() {
 }
 
 export {
+  updateUI,
   renderCurrentMatch,
   renderSchedule,
 };
