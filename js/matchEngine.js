@@ -1097,9 +1097,19 @@ function isLivePaused(live) {
 }
 
 // =========================
-// 🔁 LOOP
+// 🔁 LOOP + 🛑 LOOP GUARD
 // =========================
+
 function runMatchLoop({ onTick, onEnd } = {}) {
+    // =========================
+  // 🛑 LOOP GUARD
+  // =========================
+  if (window.__matchLoopRunning) {
+    console.warn("⚠️ Match loop already running");
+    return;
+  }
+
+  window.__matchLoopRunning = true;
   if (matchInterval) return;
 
   let lastTime = performance.now();
@@ -1350,7 +1360,7 @@ live.phase = "fulltime";
 
         clearInterval(matchInterval);
         matchInterval = null;
-
+window.__matchLoopRunning = false;
         saveGame();
 
         onEnd?.();
