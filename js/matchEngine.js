@@ -535,178 +535,404 @@ function initMatch(round) {
   const playerMatch = round.find((m) => isMyMatch(m));
 
   // =========================
-  // ⚽ BYE HANDLING (FIX)
-  // =========================
-  if (!playerMatch) {
-    console.warn("⚽ BYE: Team hat spielfrei", round);
+// ⚽ BYE HANDLING
+// =========================
+if (!playerMatch) {
 
-    game.match._scheduleRef = null;
-    game.match.current = null;
+  console.warn(
+    "⚽ BYE: Team hat spielfrei",
+    round,
+  );
 
-    game.match.live = {
-      minute: 0,
-      running: false,
-      score: { home: 0, away: 0 },
-      events: [],
-      phase: "bye",
+  game.match._scheduleRef =
+    null;
 
-      // 🔥 WICHTIG (RESET)
-      _fulltimeEmitted: false,
-    };
-
-    game.match.home = null;
-    game.match.away = null;
-
-    game.match.score = {
-      home: Number(playerMatch.homeGoals ?? playerMatch.result?.home ?? 0),
-      away: Number(playerMatch.awayGoals ?? playerMatch.result?.away ?? 0),
-    };
-
-    return {
-      isBye: true,
-    };
-  }
-
-  // =========================
-  // ⚽ NORMAL MATCH
-  // =========================
-  const homeId = normalizeId(playerMatch.homeTeamId);
-  const awayId = normalizeId(playerMatch.awayTeamId);
-
-  // 🔥 STRICT: KEIN FALLBACK MEHR
-  if (!homeId || !awayId) {
-    console.error("❌ MATCH INIT FAILED (STRICT ID)", playerMatch);
-    return false;
-  }
-
-  // =========================
-  // 🔥 ECHTE SCHEDULE REFERENZ
-  // =========================
-  game.match._scheduleRef = playerMatch;
-
-  // 🔥 NICHT MEHR ALS NEUES OBJEKT KLONEN
-  game.match.current = playerMatch;
-
-  // =========================
-  // 🧠 SAFETY NORMALIZATION
-  // =========================
-  game.match.current.id = game.match.current.id || crypto.randomUUID();
-
-  game.match.current.homeTeamId = homeId;
-  game.match.current.awayTeamId = awayId;
-
-  game.match.current.home = game.match.current.home || playerMatch.home || null;
-
-  game.match.current.away = game.match.current.away || playerMatch.away || null;
-
-  // 🔥 RESULT NICHT RESETTEN
-  if (!game.match.current.result) {
-    game.match.current.result = null;
-  }
-
-  // 🔥 SCORE FIELDS SICHERN
-  game.match.current.homeGoals = Number(game.match.current.homeGoals ?? 0);
-
-  game.match.current.awayGoals = Number(game.match.current.awayGoals ?? 0);
-
-  // 🔥 FLAGS
-  game.match.current.finished = game.match.current.finished || false;
-
-  game.match.current._processed = game.match.current._processed || false;
-  try {
-    autoFillLineup(homeId);
-    autoFillLineup(awayId);
-
-    function getPlayersFromLineup(teamId) {
-      const nid = normalizeId(teamId);
-
-      const myTeamId =
-        normalizeId(game.team?.selectedId) || normalizeId(game.team?.id);
-
-      // 👉 Gegner-Team
-      if (nid !== myTeamId) {
-        return getPlayersOfTeam(teamId);
-      }
-
-      const slots = game.team?.lineup?.slots || {};
-      const ids = Object.values(slots).filter(Boolean);
-
-      // 👉 kein Lineup gesetzt → alle Spieler
-      if (!ids.length) {
-        return getPlayersOfTeam(teamId);
-      }
-
-      // 🔥 HIER IST FIX 3
-      const pool = game.players || [];
-
-      let selected = pool.filter(
-        (p) => ids.includes(normalizeId(p.id)) && isPlayerAvailable(p.id),
-      );
-
-      if (selected.length < 11) {
-        const fallback = getPlayersOfTeam(teamId).filter(
-          (p) =>
-            isPlayerAvailable(p.id) &&
-            !selected.some((sp) => normalizeId(sp.id) === normalizeId(p.id)),
-        );
-
-        while (selected.length < 11 && fallback.length) {
-          selected.push(fallback.shift());
-        }
-      }
-
-      return selected;
-    }
-
-    game.match.current.homePlayers = getPlayersFromLineup(homeId);
-    game.match.current.awayPlayers = getPlayersFromLineup(awayId);
-  } catch (e) {
-    console.warn("⚠️ Player init failed", e);
-  }
+  game.match.current =
+    null;
 
   game.match.live = {
-  minute: 0,
-  running: false,
-  score: { home: 0, away: 0 },
-  events: [],
 
-  // 🎬 BROADCAST INTRO
-  phase: "match_intro",
+    minute: 0,
 
-  possession:
-    Math.random() < 0.5
-      ? playerMatch.homeTeamId
-      : playerMatch.awayTeamId,
+    running: false,
 
-  lastEvent: null,
+    phase: "bye",
 
-  _fulltimeEmitted: false,
-};
+    score: {
+      home: 0,
+      away: 0,
+    },
 
-  game.match.home = {
-    id: homeId,
-    name: getTeamNameById(homeId),
+    events: [],
+
+    possession: null,
+
+    lastEvent: null,
+
+    _introStarted: false,
+    _fulltimeEmitted: false,
+
+    _penaltyPause: false,
+    _minigamePause: false,
+    _minigameType: null,
   };
 
-  game.match.away = {
-    id: awayId,
-    name: getTeamNameById(awayId),
-  };
+  game.match.home = null;
+  game.match.away = null;
 
   game.match.score = {
     home: 0,
     away: 0,
   };
-window.idleAlreadyShown = false;
-  emitMatchEvent("MATCH_INTRO", {
-  homeTeamId: homeId,
-  awayTeamId: awayId,
-  homeTeamName: game.match.home?.name,
-  awayTeamName: game.match.away?.name
-});
 
-  return true;
+  // =========================
+  // 🏟 RESET IDLE
+  // =========================
+  window.idleAlreadyShown =
+    false;
+
+  return {
+    isBye: true,
+  };
 }
+
+// =========================
+// ⚽ NORMAL MATCH
+// =========================
+const homeId =
+  normalizeId(
+    playerMatch.homeTeamId,
+  );
+
+const awayId =
+  normalizeId(
+    playerMatch.awayTeamId,
+  );
+
+// =========================
+// 🔥 STRICT SAFETY
+// =========================
+if (!homeId || !awayId) {
+
+  console.error(
+    "❌ MATCH INIT FAILED",
+    playerMatch,
+  );
+
+  return false;
+}
+
+// =========================
+// 🔥 REAL SCHEDULE REF
+// =========================
+game.match._scheduleRef =
+  playerMatch;
+
+// =========================
+// 🔥 KEEP ORIGINAL OBJECT
+// =========================
+game.match.current =
+  playerMatch;
+
+// =========================
+// 🧠 NORMALIZATION
+// =========================
+game.match.current.id =
+  game.match.current.id ||
+  crypto.randomUUID();
+
+game.match.current.homeTeamId =
+  homeId;
+
+game.match.current.awayTeamId =
+  awayId;
+
+game.match.current.home =
+  game.match.current.home ||
+  playerMatch.home ||
+  null;
+
+game.match.current.away =
+  game.match.current.away ||
+  playerMatch.away ||
+  null;
+
+// =========================
+// 🧠 RESULT SAFETY
+// =========================
+if (!game.match.current.result) {
+  game.match.current.result =
+    null;
+}
+
+game.match.current.homeGoals =
+  Number(
+    game.match.current.homeGoals ??
+    0,
+  );
+
+game.match.current.awayGoals =
+  Number(
+    game.match.current.awayGoals ??
+    0,
+  );
+
+game.match.current.finished =
+  game.match.current.finished ||
+  false;
+
+game.match.current._processed =
+  game.match.current._processed ||
+  false;
+
+// =========================
+// 👥 PLAYER INIT
+// =========================
+try {
+
+  autoFillLineup(homeId);
+  autoFillLineup(awayId);
+
+  function getPlayersFromLineup(
+    teamId,
+  ) {
+
+    const nid =
+      normalizeId(teamId);
+
+    const myTeamId =
+
+      normalizeId(
+        game.team?.selectedId,
+      ) ||
+
+      normalizeId(
+        game.team?.id,
+      );
+
+    // =====================
+    // 👥 OPPONENT
+    // =====================
+    if (nid !== myTeamId) {
+
+      return getPlayersOfTeam(
+        teamId,
+      );
+    }
+
+    const slots =
+      game.team?.lineup?.slots ||
+      {};
+
+    const ids =
+      Object.values(slots)
+        .filter(Boolean);
+
+    // =====================
+    // 🔥 NO LINEUP
+    // =====================
+    if (!ids.length) {
+
+      return getPlayersOfTeam(
+        teamId,
+      );
+    }
+
+    const pool =
+      game.players || [];
+
+    let selected =
+      pool.filter(
+        (p) =>
+
+          ids.includes(
+            normalizeId(p.id),
+          ) &&
+
+          isPlayerAvailable(
+            p.id,
+          ),
+      );
+
+    // =====================
+    // 🧠 FILL UP TO 11
+    // =====================
+    if (selected.length < 11) {
+
+      const fallback =
+
+        getPlayersOfTeam(
+          teamId,
+        ).filter(
+          (p) =>
+
+            isPlayerAvailable(
+              p.id,
+            ) &&
+
+            !selected.some(
+              (sp) =>
+
+                normalizeId(
+                  sp.id,
+                ) ===
+
+                normalizeId(
+                  p.id,
+                ),
+            ),
+        );
+
+      while (
+        selected.length < 11 &&
+        fallback.length
+      ) {
+
+        selected.push(
+          fallback.shift(),
+        );
+      }
+    }
+
+    return selected;
+  }
+
+  game.match.current.homePlayers =
+    getPlayersFromLineup(
+      homeId,
+    );
+
+  game.match.current.awayPlayers =
+    getPlayersFromLineup(
+      awayId,
+    );
+
+} catch (e) {
+
+  console.warn(
+    "⚠️ Player init failed",
+    e,
+  );
+}
+
+// =========================
+// 🎮 LIVE MATCH STATE
+// =========================
+game.match.live = {
+
+  minute: 0,
+
+  running: false,
+
+  phase: "match_intro",
+
+  score: {
+    home: 0,
+    away: 0,
+  },
+
+  events: [],
+
+  possession:
+
+    Math.random() < 0.5
+
+      ? homeId
+      : awayId,
+
+  lastEvent: null,
+
+  // =====================
+  // 🧠 FLAGS
+  // =====================
+  _introStarted: false,
+  _fulltimeEmitted: false,
+
+  _penaltyPause: false,
+  _minigamePause: false,
+  _minigameType: null,
+};
+
+// =========================
+// 🏠 TEAMS
+// =========================
+game.match.home = {
+
+  id: homeId,
+
+  name:
+    getTeamNameById(
+      homeId,
+    ),
+};
+
+game.match.away = {
+
+  id: awayId,
+
+  name:
+    getTeamNameById(
+      awayId,
+    ),
+};
+
+// =========================
+// 📊 SCORE
+// =========================
+game.match.score = {
+  home: 0,
+  away: 0,
+};
+
+// =========================
+// 🏟 RESET IDLE
+// =========================
+window.idleAlreadyShown =
+  false;
+
+// =========================
+// 🏟 PRE-MATCH STADIUM
+// =========================
+try {
+
+  if (
+    typeof playIdleBroadcast ===
+    "function"
+  ) {
+
+    playIdleBroadcast();
+  }
+
+} catch (e) {
+
+  console.warn(
+    "⚠️ Idle broadcast failed",
+    e,
+  );
+}
+
+// =========================
+// 🎬 MATCH INTRO
+// =========================
+emitMatchEvent(
+  "MATCH_INTRO",
+  {
+
+    homeTeamId:
+      homeId,
+
+    awayTeamId:
+      awayId,
+
+    homeTeamName:
+      game.match.home?.name,
+
+    awayTeamName:
+      game.match.away?.name,
+  },
+);
+
+return true;
 
 // =========================
 // ⚽ EVENTS
@@ -724,8 +950,8 @@ function createShot(ctx) {
   if (Math.random() > w.shot) return;
 
   const r = Math.random();
-  const goalChance = 0.08;
-  const saveChance = 0.72;
+  const goalChance = 0.012;
+  const saveChance = 0.9;
 
   if (r < goalChance) {
     if (isHome) {
@@ -935,98 +1161,191 @@ function getTeamStrength(teamId) {
 }
 
 function simulateLiveEvent(ctx) {
+
+  const live =
+    game.match?.live;
+
+  // =========================
+  // 🛑 SAFETY
+  // =========================
+  if (!live) return;
+
+  // 🔥 niemals außerhalb echter Spielphasen
+  if (
+    live.phase !== "first_half" &&
+    live.phase !== "second_half"
+  ) {
+    return;
+  }
+
   updateMomentum();
 
-  const intensity = RULES?.match?.intensity ?? 1;
+  const intensity =
+    RULES?.match?.intensity ?? 1;
 
-  const homeId = ctx.match.homeTeamId;
-  const awayId = ctx.match.awayTeamId;
+  const homeId =
+    ctx.match.homeTeamId;
 
-  const homeStrength = getTeamStrength(homeId);
-  const awayStrength = getTeamStrength(awayId);
+  const awayId =
+    ctx.match.awayTeamId;
 
-  const total = homeStrength + awayStrength;
+  const homeStrength =
+    getTeamStrength(homeId);
 
-  const homeBias = homeStrength / total;
-  const adjustedHomeChance = homeBias + momentum * 0.2;
+  const awayStrength =
+    getTeamStrength(awayId);
+
+  const total =
+    homeStrength + awayStrength;
+
+  const homeBias =
+    homeStrength / total;
+
+  const adjustedHomeChance =
+    homeBias + momentum * 0.2;
 
   // =========================
   // ⚙️ TACTICS
   // =========================
-  const mod = getTacticModifier();
+  const mod =
+    getTacticModifier();
 
   // =========================
   // 🎯 ATTACKING TEAM
   // =========================
-  const bias = mod.attackBias;
+  const bias =
+    mod.attackBias;
 
-  let attackingTeam = game.match?.live?.possession;
+  let attackingTeam =
+    live.possession;
 
   // fallback
   if (!attackingTeam) {
-    attackingTeam = Math.random() < adjustedHomeChance + bias ? homeId : awayId;
+
+    attackingTeam =
+      Math.random() <
+      adjustedHomeChance + bias
+
+        ? homeId
+        : awayId;
   }
 
   // =========================
   // 🔥 HIGH LINE RISIKO
   // =========================
-  if (mod.line > 1 && Math.random() < 0.15) {
-    attackingTeam = attackingTeam === homeId ? awayId : homeId;
+  if (
+    mod.line > 1 &&
+    Math.random() < 0.08
+  ) {
+
+    attackingTeam =
+      attackingTeam === homeId
+        ? awayId
+        : homeId;
   }
 
   // =========================
   // ⚙️ EVENT SYSTEM
   // =========================
-  const weights = getEventWeights(ctx, mod, attackingTeam);
-  const eventType = pickEventByWeight(weights);
+  const weights =
+    getEventWeights(
+      ctx,
+      mod,
+      attackingTeam,
+    );
+
+  const eventType =
+    pickEventByWeight(weights);
 
   // =========================
   // 🎮 EXECUTE
   // =========================
   switch (eventType) {
+
     case "shot":
-      createShot({ match: ctx.match, teamId: attackingTeam });
+
+      // 🔥 viel weniger Schüsse
+      if (Math.random() < 0.35) {
+
+        createShot({
+          match: ctx.match,
+          teamId:
+            attackingTeam,
+        });
+      }
+
       break;
 
     case "foul":
-      createFoul(ctx);
+
+      if (Math.random() < 0.25) {
+        createFoul(ctx);
+      }
+
       break;
 
     case "corner":
-      createCorner(ctx);
+
+      if (Math.random() < 0.18) {
+        createCorner(ctx);
+      }
+
+      break;
+
+    case "pass":
+
+      if (Math.random() < 0.45) {
+        createPass(ctx);
+      }
+
+      break;
+
+    case "dribble":
+
+      if (Math.random() < 0.22) {
+        createDribble(ctx);
+      }
+
+      break;
+
+    case "interception":
+
+      if (Math.random() < 0.18) {
+        createInterception(ctx);
+      }
+
       break;
 
     case "duel":
     default:
-      createDuel(ctx);
-      break;
-    case "pass":
-      createPass(ctx);
-      break;
 
-    case "dribble":
-      createDribble(ctx);
-      break;
+      if (Math.random() < 0.30) {
+        createDuel(ctx);
+      }
 
-    case "interception":
-      createInterception(ctx);
       break;
   }
 
   // =========================
   // 🔁 POSSESSION FLOW
   // =========================
-  const live = game.match?.live;
+  live.lastEvent =
+    eventType;
 
-  if (live) {
-    live.lastEvent = eventType;
+  // deutlich ruhigerer Flow
+  if (
+    eventType === "shot" &&
+    Math.random() < 0.35
+  ) {
 
-    if (eventType === "shot" && Math.random() < 0.6) {
+    switchPossession(ctx);
+
+  } else if (
+    eventType === "duel"
+  ) {
+
+    if (Math.random() < 0.25) {
       switchPossession(ctx);
-    } else if (eventType === "duel") {
-      if (Math.random() < 0.5) {
-        switchPossession(ctx);
-      }
     }
   }
 }
@@ -1078,19 +1397,43 @@ function resumeMatch(reason = "MATCH RESUMED") {
 }
 
 function isLivePaused(live) {
+
   const penaltyActive =
     typeof window !== "undefined" &&
     window.__penaltyActive === true;
 
   const penaltyRootActive =
     typeof document !== "undefined" &&
-    Boolean(document.getElementById("penaltyGameContainer"));
+    Boolean(
+      document.getElementById(
+        "penaltyGameContainer",
+      ),
+    );
+
+  // =========================
+  // 🎬 MATCH INTRO
+  // =========================
+  const introPause =
+    live?.phase === "match_intro";
+
+  // =========================
+  // ⏸ HALFTIME
+  // =========================
+  const halftimePause =
+    live?.phase === "halftime";
 
   return (
+
     !live ||
-    live.running === false ||
+
+    // 🔥 echte Matchpausen
+    introPause ||
+    halftimePause ||
+
+    // 🎮 Minigames
     live._penaltyPause === true ||
     live._minigamePause === true ||
+
     penaltyActive ||
     penaltyRootActive
   );
@@ -1163,17 +1506,25 @@ if (live.phase === "match_intro") {
 
       if (game.match?.live) {
 
-        game.match.live.phase = "first_half";
-        game.match.live.running = true;
+        game.match.live.phase =
+          "first_half";
 
-        console.log("▶ MATCH START");
+        game.match.live.running =
+          true;
+
+        console.log(
+          "▶ MATCH START",
+        );
       }
 
-    }, 4000);
+    }, 8000);
   }
 
+  // 🔥 verhindert Eventspam
   accumulator = 0;
-  return;
+
+  // 🔥 nur aktuellen Tick stoppen
+  break;
 }
       live.minute++;
       document.body?.classList.add("match-live");
