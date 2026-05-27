@@ -1147,10 +1147,10 @@ function updateEvents() {
 
     const isVideo = asset.type === "video" || /\.(mp4|webm|ogg)$/i.test(url);
 
- console.log("🎥 ASSET CHECK:", asset);
-console.log("🎥 URL:", url);
-console.log("🎥 TYPE:", asset.type);
-console.log("🎥 IS VIDEO:", isVideo);
+    console.log("🎥 ASSET CHECK:", asset);
+    console.log("🎥 URL:", url);
+    console.log("🎥 TYPE:", asset.type);
+    console.log("🎥 IS VIDEO:", isVideo);
 
     if (isVideo) {
       showVideoOverlay(url, text);
@@ -1544,35 +1544,37 @@ function renderTeam() {
       starters.push(remaining.shift());
     }
   } else {
-    const lineup = game.team?.lineup;
+  let assigned = [];
 
-    if (lineup?.slots) {
-      assigned = Object.values(lineup.slots)
-        .map((id) =>
-          players.find(
-            (p) => String(p.id) === String(id) && isPlayerAvailable(p.id),
-          ),
-        )
-        .filter(Boolean);
+  if (lineup?.slots) {
+    assigned = Object.values(lineup.slots)
+      .map((id) =>
+        players.find(
+          (p) => String(p.id) === String(id) && isPlayerAvailable(p.id),
+        ),
+      )
+      .filter(Boolean);
 
-      const remaining = players.filter(
-        (p) =>
-          isPlayerAvailable(p.id) &&
-          !assigned.some((sp) => String(sp.id) === String(p.id)),
-      );
+    const remaining = players.filter(
+      (p) =>
+        isPlayerAvailable(p.id) &&
+        !assigned.some((sp) => String(sp.id) === String(p.id)),
+    );
 
-      while (assigned.length < 11 && remaining.length) {
-        assigned.push(remaining.shift());
-      }
-    } else {
-      try {
-        assigned = getBestXI(players, formation);
-      } catch (e) {
-        console.error("❌ getBestXI failed in preview:", e);
-        assigned = players;
-      }
+    while (assigned.length < 11 && remaining.length) {
+      assigned.push(remaining.shift());
+    }
+  } else {
+    try {
+      assigned = getBestXI(players, formation);
+    } catch (e) {
+      console.error("❌ getBestXI failed in preview:", e);
+      assigned = players;
     }
   }
+
+  starters = assigned;
+}
 
   // =========================
   // 🪑 BENCH CLEAN
@@ -2295,131 +2297,3 @@ function renderCurrentMatch() {
 function renderSchedule() {
   renderScheduleModule();
 }
-// =========================
-// ▶ HALFTIME RESUME
-// =========================
-
-<<<<<<< HEAD
-// =========================
-// 🎮 OVERLAY TRIGGER
-// =========================
-
-// =========================
-// 🎮 OVERLAY TRIGGER
-// =========================
-
-let overlayTimeout = null;
-let overlayHideTimeout = null;
-let lastOverlayTime = 0;
-
-// =========================
-// 🖼 IMAGE OVERLAY
-// =========================
-
-function showOverlay(imageUrl, text, duration = 2500) {
-
-  const overlayEl = document.getElementById("matchOverlay");
-  const mediaEl = document.getElementById("overlayMedia");
-  const overlayText = document.getElementById("overlayText");
-
-  if (!overlayEl || !mediaEl || !overlayText) return;
-
-  mediaEl.innerHTML = `
-    <img
-      id="overlayImage"
-      class="overlay-image"
-      src="${imageUrl}"
-    />
-  `;
-
-  overlayText.innerText = text || "";
-
-  overlayEl.classList.remove("hidden");
-  overlayEl.classList.add("show");
-
-  clearTimeout(overlayTimeout);
-
-  overlayTimeout = setTimeout(() => {
-
-    overlayEl.classList.remove("show");
-
-    setTimeout(() => {
-      overlayEl.classList.add("hidden");
-      mediaEl.innerHTML = "";
-    }, 250);
-
-  }, duration);
-}
-
-// =========================
-// 🎥 VIDEO OVERLAY
-// =========================
-
-function showVideoOverlay(videoUrl, text, duration = 4000) {
-
-  const overlayEl = document.getElementById("matchOverlay");
-  const mediaEl = document.getElementById("overlayMedia");
-  const overlayText = document.getElementById("overlayText");
-
-  if (!overlayEl || !mediaEl || !overlayText) return;
-
-  mediaEl.innerHTML = `
-    <video
-      id="overlayVideo"
-      class="overlay-video"
-      autoplay
-      muted
-      playsinline
-    >
-      <source src="${videoUrl}" type="video/mp4">
-    </video>
-  `;
-
-  const videoEl = document.getElementById("overlayVideo");
-
-  videoEl.play().catch(err => {
-    console.warn("🎥 VIDEO PLAY FAILED:", err);
-  });
-
-  overlayText.innerText = text || "";
-
-  overlayEl.classList.remove("hidden");
-  overlayEl.classList.add("show");
-
-  clearTimeout(overlayTimeout);
-
-  overlayTimeout = setTimeout(() => {
-
-    overlayEl.classList.remove("show");
-
-    setTimeout(() => {
-      overlayEl.classList.add("hidden");
-      mediaEl.innerHTML = "";
-    }, 250);
-
-  }, duration);
-}
-=======
-window.resumeHalftime = function () {
-
-  if (!game.match?.live) {
-    console.warn("❌ no live match");
-    return;
-  }
-
-  console.log("▶ RESUME SECOND HALF");
-
-  game.match.live.phase = "second_half";
-
-  resumeMatch("HALFTIME COMPLETE");
-
-  // 🔥 Optional Overlay Cleanup
-  const overlay = document.getElementById("matchOverlay");
-
-  if (overlay) {
-    overlay.classList.remove("show");
-    overlay.classList.add("hidden");
-  }
-};
->>>>>>> 8a78a39 (improve broadcast event editor)
-export { updateUI, renderSchedule, renderCurrentMatch };

@@ -1920,7 +1920,7 @@ async function uploadInlineAssets(eventId, files, table) {
 
   await supabase.from(table).update({ assets: updated }).eq("id", eventId);
 
-  if (table === "events") loadEvents();
+  if (table === "game_events") loadEvents();
   if (table === "event_definitions") loadGameEvents();
 }
 
@@ -2001,114 +2001,132 @@ function renderAssetList() {
     .join("");
 }
 // =====================
-// GLOBAL CLICK HANDLER (FIXED)
+// GLOBAL CLICK HANDLER
 // =====================
 document.addEventListener("click", async (e) => {
+
   const target = e.target.closest("[data-action]");
   if (!target) return;
 
   const a = target.dataset.action;
-  console.log("🖱 ACTION:", a); // 🔥 DEBUG
+
+  console.log("🖱 ACTION:", a);
 
   // =====================
-  // 🖼 ASSET ACTIONS
+  // 🖼 DELETE ASSET
   // =====================
   if (a === "deleteAsset") {
+
     removeAssetFromEvent(
-      e.target.dataset.eventId,
-      e.target.dataset.assetId,
-      e.target.dataset.table,
+      target.dataset.eventId,
+      target.dataset.assetId,
+      target.dataset.table,
     );
   }
 
+  // =====================
+  // 📤 INLINE ASSET UPLOAD
+  // =====================
   if (a === "uploadAssetInline") {
 
-  const id = e.target.dataset.id;
+    const id = target.dataset.id;
 
-  const table =
-    e.target.dataset.table || "game_events";
+    const table =
+      target.dataset.table || "game_events";
 
-  const input = document.querySelector(
-    `input[data-upload="${id}"]`,
-  );
+    const input = document.querySelector(
+      `input[data-upload="${id}"]`
+    );
 
-  if (!input || !input.files.length) {
-    alert("Kein File");
-    return;
+    if (!input || !input.files.length) {
+      alert("Kein File");
+      return;
+    }
+
+    const bucket =
+      table === "game_events"
+        ? "events"
+        : "game-events";
+
+    const uploaded = await uploadFiles(
+      bucket,
+      [...input.files],
+    );
+
+    const { data: current } = await supabase
+      .from(table)
+      .select("assets")
+      .eq("id", id)
+      .single();
+
+    const assets = [
+      ...(current?.assets || []),
+      ...uploaded,
+    ];
+
+    const { error } = await supabase
+      .from(table)
+      .update({ assets })
+      .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      alert("Upload fehlgeschlagen");
+      return;
+    }
+
+    if (table === "game_events") {
+      await loadEvents();
+    }
+
+    if (table === "event_definitions") {
+      await loadGameEvents();
+    }
   }
-
-  const uploaded = await uploadFiles(
-    "game-events",
-    [...input.files],
-  );
-
-  const { data: current } = await supabase
-    .from(table)
-    .select("assets")
-    .eq("id", id)
-    .single();
-
-  const assets = [
-    ...(current?.assets || []),
-    ...uploaded,
-  ];
-
-  const { error } = await supabase
-    .from(table)
-    .update({ assets })
-    .eq("id", id);
-
-  if (error) {
-    console.error(error);
-    alert("Upload fehlgeschlagen");
-    return;
-  }
-
-  await loadGameEvents();
-}
 
   // =====================
   // CAMPAIGNS
   // =====================
   if (a === "delete") {
-    deleteCampaign(e.target.dataset.id);
+    deleteCampaign(target.dataset.id);
   }
 
   // =====================
   // EVENTS
   // =====================
   if (a === "removeEventScopeRef") {
-    removeEventScopeReference(e.target.dataset.ref);
+    removeEventScopeReference(target.dataset.ref);
   }
 
   if (a === "editInlineEvent") {
-    state.inlineEventEditId = e.target.dataset.id;
+    state.inlineEventEditId = target.dataset.id;
     loadEvents();
   }
 
   if (a === "saveInlineEvent") {
-    saveInlineEvent(e.target.dataset.id);
+    saveInlineEvent(target.dataset.id);
   }
 
   if (a === "deleteEvent") {
-    deleteEvent(e.target.dataset.id);
+    deleteEvent(target.dataset.id);
   }
 
   // =====================
-  // 🎮 GAME EVENTS (🔥 FIXED)
+  // 🎮 GAME EVENTS
   // =====================
   if (a === "editGameEventInline") {
-    state.inlineGameEventEditId = e.target.dataset.id;
+    state.inlineGameEventEditId = target.dataset.id;
     loadGameEvents();
   }
 
   if (a === "saveGameEventInline") {
-    saveInlineGameEvent(e.target.dataset.id);
+    saveInlineGameEvent(target.dataset.id);
   }
 
   if (a === "deleteGameEvent") {
-    deleteGameEvent(e.target.dataset.id);
+    deleteGameEvent(target.dataset.id);
   }
+
 });
 
 // =====================
