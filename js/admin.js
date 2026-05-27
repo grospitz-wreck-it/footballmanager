@@ -1650,27 +1650,6 @@ async function saveInlineEvent(id) {
   loadEvents();
 }
 
-async function saveInlineGameEvent(id) {
-  const row = document.querySelector(`[data-id="${id}"]`);
-  if (!row) return;
-
-  const payload = {
-    title: row.querySelector("[data-field='title']").value,
-    type: row.querySelector("[data-field='type']").value,
-    trigger: row.querySelector("[data-field='trigger']").value,
-
-    probability: Number(
-      row.querySelector("[data-field='probability']").value || 0,
-    ),
-    value: Number(row.querySelector("[data-field='value']").value || 0),
-    duration: Number(row.querySelector("[data-field='duration']").value || 0),
-  };
-
-  await supabase.from("event_definitions").update(payload).eq("id", id);
-  state.inlineGameEventEditId = null;
-  loadGameEvents();
-}
-
 // =====================
 // LOAD EVENTS
 // =====================
