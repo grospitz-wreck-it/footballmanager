@@ -692,31 +692,64 @@ async function init() {
     };
 
     if (window.DEBUG) console.log("🧪 DEBUG READY → window.debugData");
-    // =========================
-    // 🎮 GAME EVENTS
-    // =========================
-    const { data: gameEvents } = await supabase
-      .from("event_definitions")
-      .select("*");
+   // =========================
+// 🎮 GAME EVENTS
+// =========================
+const {
+  data: gameEvents,
+  error: gameEventsError,
+} = await supabase
+  .from("event_definitions")
+  .select("*");
 
-    if (window.DEBUG)
-      console.log("🎮 GAME EVENTS LOADED:", gameEvents?.length || 0);
+if (gameEventsError) {
+  console.error(
+    "❌ Game Events load failed:",
+    gameEventsError,
+  );
+} else {
 
-    const { data: matchEvents, error: matchEventsError } = await supabase
-      .from("events")
-      .select("*");
+  console.log(
+    "✅ GAME EVENTS LOADED:",
+    gameEvents?.length || 0,
+  );
 
-    if (matchEventsError) {
-      console.error("❌ Match Events load failed:", matchEventsError);
-    }
+  // 🔥 WICHTIG
+  game.data = game.data || {};
 
-    if (window.DEBUG)
-      console.log("🎮 MATCH EVENTS LOADED:", matchEvents?.length || 0);
+  // 🔥 Resolver nutzt DAS
+  game.data.gameEvents = gameEvents || [];
 
-    // 🔥🔥🔥 DAS HAT GEFEHLT
-    game.data = game.data || {};
-    game.data.eventDefinitions = gameEvents || [];
-    game.data.events = matchEvents || [];
+  // optional legacy support
+  game.data.eventDefinitions = gameEvents || [];
+}
+
+// =========================
+// ⚽ MATCH EVENTS
+// =========================
+const {
+  data: matchEvents,
+  error: matchEventsError,
+} = await supabase
+  .from("events")
+  .select("*");
+
+if (matchEventsError) {
+  console.error(
+    "❌ Match Events load failed:",
+    matchEventsError,
+  );
+} else {
+
+  console.log(
+    "✅ MATCH EVENTS LOADED:",
+    matchEvents?.length || 0,
+  );
+
+  game.data = game.data || {};
+
+  game.data.events = matchEvents || [];
+}
     // =========================
     // 🧠 LEAGUE BUILD (FINAL CLEAN)
     // =========================

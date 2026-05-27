@@ -89,10 +89,21 @@ function isValidAsset(asset){
 function getEventDefinitions(){
 
   const defs =
-    game?.data?.gameEvents ||
-    game?.data?.eventDefinitions ||
-  
-    [];
+  (Array.isArray(game?.data?.gameEvents) &&
+    game.data.gameEvents.length
+      ? game.data.gameEvents
+      : null)
+
+  ||
+
+  (Array.isArray(game?.data?.eventDefinitions) &&
+    game.data.eventDefinitions.length
+      ? game.data.eventDefinitions
+      : null)
+
+  ||
+
+  [];
 
   if(!Array.isArray(defs)){
     console.warn("⚠️ No event definitions in state");
@@ -126,7 +137,7 @@ function resolveEventContent(event){
 
   const definitions = getEventDefinitions();
   const type = normalize(event.type);
-
+console.log("EVENT DEFINITIONS:", definitions);
   if(!definitions.length){
     console.warn("⚠️ No events loaded");
     return emptyResult();
