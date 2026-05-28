@@ -885,52 +885,51 @@ game.match.score = {
 };
 
 // =========================
-// 🏟 RESET IDLE
+// 🎬 MATCH INTRO (DELAYED)
 // =========================
-window.idleAlreadyShown =
-  false;
 
-// =========================
-// 🏟 PRE-MATCH STADIUM
-// =========================
-try {
+// 🏟 Stadion zuerst sichtbar
+setTimeout(() => {
 
-  if (
-    typeof playIdleBroadcast ===
-    "function"
-  ) {
+  try {
+
+    window.idleAlreadyShown =
+      false;
 
     playIdleBroadcast();
+
+  } catch (e) {
+
+    console.warn(
+      "⚠️ Idle failed",
+      e,
+    );
   }
 
-} catch (e) {
+}, 100);
 
-  console.warn(
-    "⚠️ Idle broadcast failed",
-    e,
+// 🎬 Danach Match Intro
+setTimeout(() => {
+
+  emitMatchEvent(
+    "MATCH_INTRO",
+    {
+
+      homeTeamId:
+        homeId,
+
+      awayTeamId:
+        awayId,
+
+      homeTeamName:
+        game.match.home?.name,
+
+      awayTeamName:
+        game.match.away?.name,
+    },
   );
-}
 
-// =========================
-// 🎬 MATCH INTRO
-// =========================
-emitMatchEvent(
-  "MATCH_INTRO",
-  {
-
-    homeTeamId:
-      homeId,
-
-    awayTeamId:
-      awayId,
-
-    homeTeamName:
-      game.match.home?.name,
-
-    awayTeamName:
-      game.match.away?.name,
-  },
-);
+}, 4000);
 
 return true;
 }
@@ -1481,8 +1480,7 @@ function isLivePaused(live) {
     !live ||
 
     // 🔥 echte Matchpausen
-    introPause ||
-    halftimePause ||
+   introPause ||
 
     // 🎮 Minigames
     live._penaltyPause === true ||
@@ -1645,61 +1643,6 @@ updateEvents();
         lastTime = performance.now();
         accumulator = 0;
         break;
-      }
-
-      const gameEvents = game.data?.gameEvents;
-
-      if (Array.isArray(gameEvents)) {
-        gameEvents.forEach((ev) => {
-          if (isLivePaused(live)) return;
-
-          if (ev.active === false) return;
-
-          if (ev.trigger === "always") {
-            if (live.minute % 5 === 0) {
-              applyGameEventEffect(ev, ctx);
-            }
-          }
-
-          if (ev._lastTrigger === undefined) {
-            ev._lastTrigger = -999;
-          }
-
-          if (ev.trigger === "random") {
-
-  const type =
-    String(ev.type || "")
-      .toUpperCase();
-
-  // =====================
-  // 🚫 SPECIAL EVENTS BLOCK
-  // =====================
-  if (
-    [
-      "MATCH_INTRO",
-      "HALFTIME",
-      "FULLTIME",
-      "IDLE",
-    ].includes(type)
-  ) {
-    return;
-  }
-
-  // =====================
-  // 🎲 NORMAL RANDOM EVENTS
-  // =====================
-  if (
-    live.minute - ev._lastTrigger > 1 &&
-    Math.random() < (ev.probability || 0)
-  ) {
-
-    ev._lastTrigger =
-      live.minute;
-
-    applyGameEventEffect(ev, ctx);
-  }
-}
-        });
       }
 
       if (isLivePaused(live)) {
