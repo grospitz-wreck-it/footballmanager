@@ -1498,6 +1498,7 @@ function isLivePaused(live) {
 // =========================
 
 function runMatchLoop({ onTick, onEnd } = {}) {
+  console.log("🚨 RUN MATCH LOOP STARTED");
     // =========================
   // 🛑 LOOP GUARD
   // =========================
@@ -1514,6 +1515,10 @@ function runMatchLoop({ onTick, onEnd } = {}) {
   const STEP = 1000;
 
   matchInterval = setInterval(() => {
+    console.log(
+  "⏱ MATCH LOOP TICK",
+  game.match?.live?.minute,
+);
     const live = game.match?.live;
     const currentMatch = game.match?.current;
 
