@@ -502,55 +502,364 @@ function weightedRandom(arr) {
 // 🧠 GETTER (FINAL FIXED)
 // =========================
 
+// =========================
+// 🧠 SAFE PLAYER RESOLVERS
+// CLEAN / BROADCAST VERSION
+// =========================
+
 function getPlayer(data) {
-  if (!data) return "ein Spieler";
 
-  if (data.playerName) return data.playerName;
+  if (!data) {
+    return "ein Spieler";
+  }
 
-  if (typeof data.player === "string") return data.player;
-  if (typeof data.shooter === "string") return data.shooter;
-  if (typeof data.scorer === "string") return data.scorer;
+  // =========================
+  // 🔥 DIRECT STRINGS
+  // =========================
+  if (
+    typeof data.playerName ===
+    "string"
+  ) {
+    return data.playerName;
+  }
 
-  if (data.player?.name) return data.player.name;
-  if (data.player?.Name) return data.player.Name;
+  if (
+    typeof data.player ===
+    "string"
+  ) {
+    return data.player;
+  }
+
+  if (
+    typeof data.shooter ===
+    "string"
+  ) {
+    return data.shooter;
+  }
+
+  if (
+    typeof data.scorer ===
+    "string"
+  ) {
+    return data.scorer;
+  }
+
+  // =========================
+  // 👤 OBJECTS
+  // =========================
+  if (
+    data.player?.name
+  ) {
+    return data.player.name;
+  }
+
+  if (
+    data.player?.Name
+  ) {
+    return data.player.Name;
+  }
+
+  if (
+    data.shooter?.name
+  ) {
+    return data.shooter.name;
+  }
+
+  if (
+    data.shooter?.Name
+  ) {
+    return data.shooter.Name;
+  }
+
+  if (
+    data.scorer?.name
+  ) {
+    return data.scorer.name;
+  }
+
+  if (
+    data.scorer?.Name
+  ) {
+    return data.scorer.Name;
+  }
+
+  // =========================
+  // 🔥 PLAYER ID FALLBACK
+  // =========================
+  const playerId =
+
+    data.playerId ||
+    data.scorerId ||
+    data.shooterId;
+
+  if (
+    playerId &&
+    Array.isArray(
+      game.players,
+    )
+  ) {
+
+    const found =
+      game.players.find(
+        (p) =>
+
+          String(p.id) ===
+          String(playerId),
+      );
+
+    if (
+      found?.name
+    ) {
+      return found.name;
+    }
+
+    if (
+      found?.Name
+    ) {
+      return found.Name;
+    }
+  }
 
   return "ein Spieler";
 }
 
+// =========================
+// 🧤 KEEPER
+// =========================
 function getKeeper(data) {
-  if (!data) return "der Torwart";
 
-  return (
-    data.keeperName || data.keeper?.Name || data.keeper?.name || "der Torwart"
-  );
+  if (!data) {
+    return "der Keeper";
+  }
+
+  if (
+    typeof data.keeperName ===
+    "string"
+  ) {
+    return data.keeperName;
+  }
+
+  if (
+    data.keeper?.name
+  ) {
+    return data.keeper.name;
+  }
+
+  if (
+    data.keeper?.Name
+  ) {
+    return data.keeper.Name;
+  }
+
+  // 🔥 ID FALLBACK
+  if (
+    data.keeperId &&
+    Array.isArray(
+      game.players,
+    )
+  ) {
+
+    const found =
+      game.players.find(
+        (p) =>
+
+          String(p.id) ===
+          String(
+            data.keeperId,
+          ),
+      );
+
+    if (
+      found?.name
+    ) {
+      return found.name;
+    }
+
+    if (
+      found?.Name
+    ) {
+      return found.Name;
+    }
+  }
+
+  return "der Keeper";
 }
 
+// =========================
+// 🏟 TEAM
+// =========================
 function getTeam(data) {
-  if (!data) return "ein Team";
 
-  // 🔥 wichtig: dein alter funktionierender fallback bleibt!
-  if (data.teamName) return data.teamName;
+  if (!data) {
+    return "ein Team";
+  }
 
-  if (data.team?.name) return data.team.name;
-  if (data.team?.Name) return data.team.Name;
+  // =========================
+  // 🔥 DIRECT TEAM NAME
+  // =========================
+  if (
+    typeof data.teamName ===
+    "string"
+  ) {
+    return data.teamName;
+  }
 
-  // 🔥 DAS WAR DER WICHTIGE TEIL
-  if (data.team) return data.team;
+  // =========================
+  // 🧠 OBJECT TEAM
+  // =========================
+  if (
+    data.team?.name
+  ) {
+    return data.team.name;
+  }
 
-  return "ein Team";
+  if (
+    data.team?.Name
+  ) {
+    return data.team.Name;
+  }
+
+  // =========================
+  // 🔥 STRING TEAM
+  // =========================
+  if (
+    typeof data.team ===
+    "string"
+  ) {
+    return data.team;
+  }
+
+  // =========================
+  // 🔥 TEAM ID FALLBACK
+  // =========================
+  const teamId =
+    data.teamId;
+
+  if (
+    teamId &&
+    typeof getTeamNameById ===
+      "function"
+  ) {
+
+    const name =
+      getTeamNameById(
+        teamId,
+      );
+
+    if (name) {
+      return name;
+    }
+  }
+
+  // =========================
+  // 🔥 MATCH CONTEXT
+  // =========================
+  const home =
+    game.match?.home
+      ?.name;
+
+  const away =
+    game.match?.away
+      ?.name;
+
+  if (
+    home &&
+    away
+  ) {
+
+    return (
+      Math.random() < 0.5
+        ? home
+        : away
+    );
+  }
+
+  return "das Team";
 }
 
+// =========================
+// ⚔️ DUEL
+// =========================
 function getDuel(data) {
-  if (!data) return "zwei Spieler";
 
-  if (data.p1 || data.p2) {
-    const p1 = data.p1 || "Spieler A";
-    const p2 = data.p2 || "Spieler B";
+  if (!data) {
+    return "zwei Spieler";
+  }
+
+  // =========================
+  // 👥 DIRECT PLAYERS
+  // =========================
+  if (
+    data.p1 ||
+    data.p2
+  ) {
+
+    const p1 =
+      data.p1 ||
+      "Spieler A";
+
+    const p2 =
+      data.p2 ||
+      "Spieler B";
+
     return `${p1} gegen ${p2}`;
   }
 
-  if (data.playerName) {
-    return `${data.playerName}`;
+  // =========================
+  // 🧠 PLAYER NAME
+  // =========================
+  if (
+    data.playerName
+  ) {
+    return data.playerName;
+  }
+
+  // =========================
+  // 🔥 RELATED PLAYER
+  // =========================
+  if (
+    data.playerId &&
+    data.relatedPlayerId &&
+    Array.isArray(
+      game.players,
+    )
+  ) {
+
+    const p1 =
+      game.players.find(
+        (p) =>
+
+          String(p.id) ===
+          String(
+            data.playerId,
+          ),
+      );
+
+    const p2 =
+      game.players.find(
+        (p) =>
+
+          String(p.id) ===
+          String(
+            data.relatedPlayerId,
+          ),
+      );
+
+    if (
+      p1 &&
+      p2
+    ) {
+
+      return `${
+        p1.name ||
+        p1.Name ||
+        "Spieler A"
+      } gegen ${
+        p2.name ||
+        p2.Name ||
+        "Spieler B"
+      }`;
+    }
   }
 
   return "zwei Spieler";

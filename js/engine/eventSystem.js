@@ -263,7 +263,7 @@ function triggerEvent(eventId, context = {}){
 
   let def = null;
 
-  const dbEvent = game.data.events?.find(e => e.id === eventId);
+  const dbEvent = game.data.gameEvents?.find(e => e.id === eventId);
 
   if(dbEvent){
     def = mapDbEvent(dbEvent);
@@ -353,7 +353,7 @@ function getActiveModifiers(){
   return activeEvents
     .map(e => {
 
-      const dbEvent = game.data.events?.find(ev => ev.id === e.id);
+      const dbEvent = game.data.gameEvents?.find(ev => ev.id === e.id);
 
       if(dbEvent){
         return {

@@ -74,15 +74,15 @@ export function resolveFoul(context = {}) {
      PENALTY BOX CHECK
      ========================= */
   const inPenaltyBox =
-    attackPosition.x >= 0.12 &&
-    attackPosition.x <= 0.88 &&
-    attackPosition.y <= 0.42;
+  attackPosition.x >= 0.05 &&
+  attackPosition.x <= 0.95 &&
+  attackPosition.y <= 0.75;
 
   console.log("📍 attackPosition:", attackPosition);
   console.log("📦 inPenaltyBox:", inPenaltyBox);
 
   if (inPenaltyBox) {
-    let penaltyChance = 0.38;
+    let penaltyChance = 0.68;
 
     if (context.intensity === "high") {
       penaltyChance += 0.12;

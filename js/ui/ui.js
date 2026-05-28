@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
 window.idleAlreadyShown =
   window.idleAlreadyShown || false;
 
-function playIdleBroadcast() {
+export function playIdleBroadcast() {
 
   if (window.idleAlreadyShown) {
     return;
@@ -547,10 +547,18 @@ function playIdleBroadcast() {
   // =========================
   lastRenderedEventId = null;
 
-  requestAnimationFrame(() => {
+  setTimeout(() => {
 
-    updateEvents();
-  });
+  // 🔥 IDLE als letzter Event erzwingen
+  lastRenderedEventId = null;
+
+  updateEvents();
+
+  console.log(
+    "🏟 IDLE RENDERED",
+  );
+
+}, 100);
 
   console.log(
     "🏟 IDLE EVENT PLAYED:",
@@ -565,19 +573,23 @@ function updateUI() {
   initUI();
   syncMatchLiveState();
 
-   // =========================
-  // 💤 IDLE EVENT
   // =========================
-  const live = game.match?.live;
+// 💤 IDLE EVENT
+// =========================
+const live = game.match?.live;
 
+// 🔥 nur EINMAL beim echten idle
 if (
-  !live?.running &&
-  (
-    !live ||
-    live.phase === "bye" ||
-    live.phase === "idle"
-  )
+  live &&
+  live.phase === "idle" &&
+  !live.running &&
+  !window.idleAlreadyShown
 ) {
+
+  console.log(
+    "🏟 TRIGGER IDLE BROADCAST",
+  );
+
   playIdleBroadcast();
 }
   // =========================
@@ -1290,7 +1302,11 @@ function updateEvents() {
   // =========================
   // 🎨 INLINE ASSET RENDER
   // =========================
-  const assets = newest.assets || [];
+  const assets =
+
+  newest.assets?.length
+    ? newest.assets
+    : newest.meta?.assets || [];
 
   const assetHTML = assets
     .map((a) => {

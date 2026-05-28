@@ -33,7 +33,11 @@ window.importPlayers = importPlayers;
 window.buildAllTeams = buildAllTeams;
 
 // ENGINE
-import { runMatchLoop, initMatch } from "./matchEngine.js";
+import {
+  runMatchLoop,
+  initMatch,
+  startSecondHalf,
+} from "./matchEngine.js";
 import { initMatchEventSlides } from "./engine/matchEventSlideSystem.js";
 
 // SERVICES
@@ -731,7 +735,7 @@ const {
   data: matchEvents,
   error: matchEventsError,
 } = await supabase
-  .from("events")
+  .from("event_definitions")
   .select("*");
 
 if (matchEventsError) {
@@ -1163,52 +1167,50 @@ mainBtn?.addEventListener("click", () => {
 
     startBackgroundSimulation();
 
-    game.match.live.running = true;
-    matchLoopRunning = true;
+game.events = game.events || {};
+game.events.history = [];
 
-    runMatchLoop({
-      onTick: () => {
-        game.ui.dirty = true;
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        matchLoopRunning = false;
-        game.ui.dirty = true;
-        updateMainButtonText();
-      },
-    });
+matchLoopRunning = false;
 
-    game.ui.dirty = true;
-    updateMainButtonText();
-    return;
+game.ui.dirty = true;
+
+updateMainButtonText();
+
+return;
   }
 
   // =========================
   // ⏸ HALFTIME
   // =========================
-  if (live.phase === "halftime" || (live.minute === 45 && !live.running)) {
-    if (matchLoopRunning) return;
+  if (live.phase === "halftime") {
 
-    startBackgroundSimulation();
+  console.log("▶ SECOND HALF RESUME");
 
-    live.phase = "second_half";
-    live.running = true;
-    matchLoopRunning = true;
+  startBackgroundSimulation();
 
-    runMatchLoop({
-      onTick: () => {
-        game.ui.dirty = true;
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        matchLoopRunning = false;
-        game.ui.dirty = true;
-        updateMainButtonText();
-      },
-    });
+  // 🔥 NUR STATE ÄNDERN
+  live.phase = "second_half";
 
-    return;
-  }
+  live.running = true;
+
+  live.minute = Math.max(46, live.minute);
+
+  live.lastEvent = null;
+
+  live.possession =
+    Math.random() < 0.5
+      ? game.match.current?.homeTeamId
+      : game.match.current?.awayTeamId;
+
+  // 🔥 LOOP LÄUFT BEREITS
+  // KEIN runMatchLoop() HIER
+
+  game.ui.dirty = true;
+
+  updateMainButtonText();
+
+  return;
+}
 
   // =========================
   // ▶️ START / RESUME

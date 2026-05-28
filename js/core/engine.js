@@ -28,6 +28,7 @@ import {
   simulateOtherMatches,
   pauseMatch,
   resumeMatch,
+  startSecondHalf,
 } from "../matchEngine.js";
 
 import { saveGame } from "../services/storage.js";
@@ -102,10 +103,14 @@ function handleMainAction() {
 
   if (phase === "live") {
     if (live?.phase === "halftime") {
-      resumeMatch();
-      updateMainButton();
-      return;
-    }
+
+  console.log(
+    "▶ START SECOND HALF BUTTON",
+  );
+  startSecondHalf();
+  updateMainButton();
+  return;
+}
 
     if (live?.running) {
       pauseMatch();
@@ -227,12 +232,25 @@ function startMatch(){
 
   // 🔁 RESET
   game.match.live = {
-    minute: 0,
-    running: false,
-    score: { home: 0, away: 0 },
-    events: [],
-    phase: "first_half",
-  };
+  minute: 0,
+
+  running: false,
+
+  score: {
+    home: 0,
+    away: 0,
+  },
+
+  events: [],
+
+  // 🔥 wichtig
+  phase: "match_intro",
+  possession: null,
+  lastEvent: null,
+  _fulltimeEmitted: false,
+  _introStarted: false,
+  _halftimeShown: false,
+};
 
   game.phase = "live";
 
@@ -314,12 +332,25 @@ function advanceGame() {
   game.match.current = null;
 
   game.match.live = {
-    minute: 0,
-    running: false,
-    score: { home: 0, away: 0 },
-    events: [],
-    phase: "first_half",
-  };
+  minute: 0,
+
+  running: false,
+
+  score: {
+    home: 0,
+    away: 0,
+  },
+
+  events: [],
+
+  // 🔥 wichtig
+  phase: "match_intro",
+  possession: null,
+  lastEvent: null,
+  _fulltimeEmitted: false,
+  _introStarted: false,
+  _halftimeShown: false,
+};
 
   game.phase = "idle";
 
