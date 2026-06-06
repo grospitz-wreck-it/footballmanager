@@ -21,6 +21,969 @@ const state = {
   },
   eventScopeSelection: [],
 };
+let currentBroadcastEvent = null;
+function getBroadcastEvents() {
+  return [
+    ...(state.events || []).map((e) => ({
+      ...e,
+      source: "event",
+    })),
+
+    ...(state.gameEvents || []).map((e) => ({
+      ...e,
+      source: "game",
+    })),
+  ];
+}
+
+function createBroadcastEvent() {
+
+  currentBroadcastEvent = {
+
+    id: null,
+
+    title: "",
+
+    type: "MATCH_INTRO",
+
+    trigger: "always",
+
+    probability: 1,
+
+    hero_asset_id: null,
+
+    assets: [],
+
+    source: "game"
+
+  };
+
+  openBroadcastEditor(
+    currentBroadcastEvent
+  );
+
+}
+function openBroadcastEditor(event) {
+
+  currentBroadcastEvent = event;
+
+  const detail =
+    document.getElementById(
+      "broadcastDetail"
+    );
+
+  if (!detail) return;
+
+  const hero =
+  getAssetByType(
+    event.assets,
+    "hero"
+  )?.url || "";
+
+const crowd =
+  getAssetByType(
+    event.assets,
+    "crowd"
+  )?.url || "";
+
+const overlay =
+  getAssetByType(
+    event.assets,
+    "overlay"
+  )?.url || "";
+
+  detail.innerHTML = `
+
+    <div class="broadcastDetailInner">
+
+      <div class="heroEditor">
+
+  <div
+    class="assetPreview heroPreview"
+    id="selectHeroAsset"
+  >
+
+    ${
+      hero
+        ? `
+          <img
+            class="detailHero"
+            src="${hero}"
+          >
+
+          <button
+            id="removeHeroAsset"
+            type="button"
+            class="assetDelete"
+          >
+            ✕
+          </button>
+        `
+        : `
+          <div
+            class="detailHeroPlaceholder"
+          >
+
+            🖼
+
+            <span>
+              Hero hinzufügen
+            </span>
+
+          </div>
+        `
+    }
+
+  </div>
+
+  <input
+    id="heroUpload"
+    type="file"
+    accept="image/*"
+    hidden
+  >
+
+</div>
+<div class="secondaryAssets">
+
+  <div class="assetSlot">
+
+    <strong>
+      👥 Crowd
+    </strong>
+
+    ${
+      crowd
+        ? `
+          <img
+            class="slotPreview"
+            src="${crowd}"
+          >
+        `
+        : `
+          <div
+            class="slotPlaceholder"
+          >
+            Kein Crowd Asset
+          </div>
+        `
+    }
+
+    <button
+      id="selectCrowdAsset"
+      type="button"
+      class="btn"
+    >
+      Crowd auswählen
+    </button>
+${
+  crowd
+    ? `
+      <button
+        id="removeCrowdAsset"
+        type="button"
+        class="btn btn-danger"
+      >
+        🗑 Crowd entfernen
+      </button>
+    `
+    : ""
+}
+    <input
+      id="crowdUpload"
+      type="file"
+      accept="image/*"
+      hidden
+    >
+
+  </div>
+
+  <div class="assetSlot">
+
+    <strong>
+      📺 Overlay
+    </strong>
+
+    ${
+      overlay
+        ? `
+          <img
+            class="slotPreview"
+            src="${overlay}"
+          >
+        `
+        : `
+          <div
+            class="slotPlaceholder"
+          >
+            Kein Overlay
+          </div>
+        `
+    }
+
+    <button
+      id="selectOverlayAsset"
+      type="button"
+      class="btn"
+    >
+      Overlay auswählen
+    </button>
+${
+  overlay
+    ? `
+      <button
+        id="removeOverlayAsset"
+        type="button"
+        class="btn btn-danger"
+      >
+        🗑 Overlay entfernen
+      </button>
+    `
+    : ""
+}
+    <input
+      id="overlayUpload"
+      type="file"
+      accept="image/*"
+      hidden
+    >
+
+  </div>
+
+</div>
+      <h2 style="margin-bottom:20px;">
+
+        ${
+          event.id
+            ? "Event bearbeiten"
+            : "Neues Event"
+        }
+
+      </h2>
+
+      <div class="detailForm">
+
+        <div class="field">
+
+          <label>Titel</label>
+
+          <input
+            id="detailTitle"
+            type="text"
+            value="${event.title || ""}"
+          >
+
+        </div>
+
+        <div class="field">
+
+          <label>Typ</label>
+
+          <select id="detailType">
+
+            <option
+              value="MATCH_INTRO"
+              ${event.type === "MATCH_INTRO" ? "selected" : ""}
+            >
+              MATCH_INTRO
+            </option>
+
+            <option
+              value="IDLE"
+              ${event.type === "IDLE" ? "selected" : ""}
+            >
+              IDLE
+            </option>
+
+            <option
+              value="PASS"
+              ${event.type === "PASS" ? "selected" : ""}
+            >
+              PASS
+            </option>
+
+            <option
+              value="DUEL"
+              ${event.type === "DUEL" ? "selected" : ""}
+            >
+              DUEL
+            </option>
+
+            <option
+              value="SHOT"
+              ${event.type === "SHOT" ? "selected" : ""}
+            >
+              SHOT
+            </option>
+
+            <option
+              value="SHOT_SAVED"
+              ${event.type === "SHOT_SAVED" ? "selected" : ""}
+            >
+              SHOT_SAVED
+            </option>
+
+            <option
+              value="GOAL"
+              ${event.type === "GOAL" ? "selected" : ""}
+            >
+              GOAL
+            </option>
+
+            <option
+              value="FOUL"
+              ${event.type === "FOUL" ? "selected" : ""}
+            >
+              FOUL
+            </option>
+
+            <option
+              value="PENALTY"
+              ${event.type === "PENALTY" ? "selected" : ""}
+            >
+              PENALTY
+            </option>
+
+            <option
+              value="HALFTIME"
+              ${event.type === "HALFTIME" ? "selected" : ""}
+            >
+              HALFTIME
+            </option>
+
+            <option
+              value="FULLTIME"
+              ${event.type === "FULLTIME" ? "selected" : ""}
+            >
+              FULLTIME
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="field">
+
+          <label>Trigger</label>
+
+          <select id="detailTrigger">
+
+            <option
+              value="always"
+              ${event.trigger === "always" ? "selected" : ""}
+            >
+              always
+            </option>
+
+            <option
+              value="random"
+              ${event.trigger === "random" ? "selected" : ""}
+            >
+              random
+            </option>
+
+            <option
+              value="minute"
+              ${event.trigger === "minute" ? "selected" : ""}
+            >
+              minute
+            </option>
+
+            <option
+              value="score"
+              ${event.trigger === "score" ? "selected" : ""}
+            >
+              score
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="field">
+
+          <label>Wahrscheinlichkeit</label>
+
+          <input
+            id="detailProbability"
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
+            value="${event.probability ?? 1}"
+          >
+
+        </div>
+
+      </div>
+
+      <div class="detailMeta">
+
+        <div>
+
+          <strong>ID</strong><br>
+
+          ${event.id || "Neu"}
+
+        </div>
+
+        <div>
+
+          <strong>Assets</strong><br>
+
+          ${(event.assets || []).length}
+
+        </div>
+
+        <div>
+
+          <strong>Quelle</strong><br>
+
+          ${event.source || "-"}
+
+        </div>
+
+      </div>
+
+      <div class="detailActions">
+
+        <button
+          id="saveBroadcastEvent"
+          class="btn btn-success"
+        >
+          💾 Speichern
+        </button>
+
+        ${
+          event.id
+            ? `
+              <button
+                id="deleteBroadcastEvent"
+                class="btn btn-danger"
+              >
+                🗑 Löschen
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+
+    </div>
+
+  `;
+
+  document
+  .getElementById(
+    "saveBroadcastEvent"
+  )
+  ?.addEventListener(
+    "click",
+    saveBroadcastEvent
+  );
+
+document
+  .getElementById(
+    "deleteBroadcastEvent"
+  )
+  ?.addEventListener(
+    "click",
+    deleteBroadcastEvent
+  );
+
+// =====================
+// HERO PICKER
+// =====================
+
+// =====================
+// HERO PICKER
+// =====================
+
+document
+  .getElementById(
+    "selectHeroAsset"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "heroUpload"
+        )
+        ?.click();
+
+    }
+  );
+
+// =====================
+// CROWD PICKER
+// =====================
+
+document
+  .getElementById(
+    "selectCrowdAsset"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "crowdUpload"
+        )
+        ?.click();
+
+    }
+  );
+// =====================
+// OVERLAY PICKER
+// =====================
+
+document
+  .getElementById(
+    "selectOverlayAsset"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "overlayUpload"
+        )
+        ?.click();
+
+    }
+  );
+  // =====================
+// OVERLAY UPLOAD
+// =====================
+
+document
+  .getElementById(
+    "overlayUpload"
+  )
+  ?.addEventListener(
+    "change",
+    async (e) => {
+
+      const file =
+        e.target.files?.[0];
+
+      if (!file)
+        return;
+
+      try {
+
+        const assetId =
+          crypto.randomUUID();
+
+        const ext =
+          file.name
+            .split(".")
+            .pop();
+
+        const filename =
+          `${assetId}.${ext}`;
+
+        const { error } =
+          await supabase
+            .storage
+            .from(
+              "broadcast-assets"
+            )
+            .upload(
+              filename,
+              file
+            );
+
+        if (error)
+          throw error;
+
+        const {
+          data
+        } = supabase
+          .storage
+          .from(
+            "broadcast-assets"
+          )
+          .getPublicUrl(
+            filename
+          );
+
+        const publicUrl =
+          data.publicUrl;
+
+        console.log(
+          "✅ OVERLAY URL:",
+          publicUrl
+        );
+
+        const existingAssets =
+          currentBroadcastEvent.assets || [];
+
+        const withoutOverlay =
+          existingAssets.filter(
+            asset =>
+              asset?.type !== "overlay"
+          );
+
+        currentBroadcastEvent.assets = [
+
+          ...withoutOverlay,
+
+          {
+            id: assetId,
+            url: publicUrl,
+            type: "overlay"
+          }
+
+        ];
+
+        openBroadcastEditor(
+          currentBroadcastEvent
+        );
+
+      }
+
+      catch (err) {
+
+        console.error(err);
+
+        alert(
+          "Overlay Upload fehlgeschlagen"
+        );
+
+      }
+
+    }
+  );
+// =====================
+// HERO UPLOAD
+// =====================
+
+document
+  .getElementById(
+    "heroUpload"
+  )
+  ?.addEventListener(
+    "change",
+    async (e) => {
+
+      const file =
+        e.target.files?.[0];
+
+      if (!file)
+        return;
+
+      try {
+
+        const assetId =
+          crypto.randomUUID();
+
+        const ext =
+          file.name
+            .split(".")
+            .pop();
+
+        const filename =
+          `${assetId}.${ext}`;
+
+        const { error } =
+          await supabase
+            .storage
+            .from(
+              "broadcast-assets"
+            )
+            .upload(
+              filename,
+              file
+            );
+
+        if (error)
+          throw error;
+
+        const {
+          data
+        } = supabase
+          .storage
+          .from(
+            "broadcast-assets"
+          )
+          .getPublicUrl(
+            filename
+          );
+
+        const publicUrl =
+          data.publicUrl;
+
+        console.log(
+          "✅ HERO URL:",
+          publicUrl
+        );
+
+        currentBroadcastEvent.hero_asset_id =
+          assetId;
+
+        const existingAssets =
+          currentBroadcastEvent.assets || [];
+
+        const withoutHero =
+          existingAssets.filter(
+            asset =>
+              asset?.type !== "hero"
+          );
+
+        currentBroadcastEvent.assets = [
+
+          ...withoutHero,
+
+          {
+            id: assetId,
+            url: publicUrl,
+            type: "hero"
+          }
+
+        ];
+
+        const heroImg =
+          document.querySelector(
+            ".detailHero"
+          );
+
+        if (heroImg) {
+
+          heroImg.src =
+            publicUrl;
+
+        } else {
+
+          openBroadcastEditor(
+            currentBroadcastEvent
+          );
+
+        }
+
+      }
+
+      catch (err) {
+
+        console.error(err);
+
+        alert(
+          "Upload fehlgeschlagen"
+        );
+
+      }
+
+    }
+  );
+  // =====================
+// CROWD UPLOAD
+// =====================
+
+document
+  .getElementById(
+    "crowdUpload"
+  )
+  ?.addEventListener(
+    "change",
+    async (e) => {
+
+      const file =
+        e.target.files?.[0];
+
+      if (!file)
+        return;
+
+      try {
+
+        const assetId =
+          crypto.randomUUID();
+
+        const ext =
+          file.name
+            .split(".")
+            .pop();
+
+        const filename =
+          `${assetId}.${ext}`;
+
+        const { error } =
+          await supabase
+            .storage
+            .from(
+              "broadcast-assets"
+            )
+            .upload(
+              filename,
+              file
+            );
+
+        if (error)
+          throw error;
+
+        const {
+          data
+        } = supabase
+          .storage
+          .from(
+            "broadcast-assets"
+          )
+          .getPublicUrl(
+            filename
+          );
+
+        const publicUrl =
+          data.publicUrl;
+
+        console.log(
+          "✅ CROWD URL:",
+          publicUrl
+        );
+
+        const existingAssets =
+          currentBroadcastEvent.assets || [];
+
+        const withoutCrowd =
+          existingAssets.filter(
+            asset =>
+              asset?.type !== "crowd"
+          );
+
+        currentBroadcastEvent.assets = [
+
+          ...withoutCrowd,
+
+          {
+            id: assetId,
+            url: publicUrl,
+            type: "crowd"
+          }
+
+        ];
+
+        openBroadcastEditor(
+          currentBroadcastEvent
+        );
+
+      }
+
+      catch (err) {
+
+        console.error(err);
+
+        alert(
+          "Crowd Upload fehlgeschlagen"
+        );
+
+      }
+
+    }
+  );
+document
+  .getElementById(
+    "removeHeroAsset"
+  )
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        const heroId =
+          currentBroadcastEvent.hero_asset_id;
+
+        currentBroadcastEvent.assets =
+          (
+            currentBroadcastEvent.assets || []
+          ).filter(
+            asset =>
+              asset?.id !== heroId
+          );
+
+        currentBroadcastEvent.hero_asset_id =
+          null;
+
+        openBroadcastEditor(
+          currentBroadcastEvent
+        );
+
+        renderBroadcastRows();
+
+      }
+
+      catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+  );
+// =====================
+// REMOVE CROWD
+// =====================
+
+document
+  .getElementById(
+    "removeCrowdAsset"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+
+      currentBroadcastEvent.assets =
+        (
+          currentBroadcastEvent.assets || []
+        ).filter(
+          asset =>
+            asset?.type !== "crowd"
+        );
+
+      console.log(
+        "AFTER REMOVE CROWD",
+        currentBroadcastEvent.assets
+      );
+
+      openBroadcastEditor(
+        currentBroadcastEvent
+      );
+
+    }
+  );
+
+// =====================
+// REMOVE OVERLAY
+// =====================
+
+document
+  .getElementById(
+    "removeOverlayAsset"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+
+      currentBroadcastEvent.assets =
+        (
+          currentBroadcastEvent.assets || []
+        ).filter(
+          asset =>
+            asset?.type !== "overlay"
+        );
+
+      openBroadcastEditor(
+        currentBroadcastEvent
+      );
+
+      renderBroadcastRows();
+
+    }
+  );
+
+}
 // =====================
 // HELPERS
 // =====================
@@ -41,7 +1004,21 @@ function clearForm() {
     if (el) el.value = "";
   });
 }
+function getHeroAsset(assets = []) {
+  return assets.find(
+    a => a?.type === "hero"
+  );
+}
+function getAssetByType(
+  assets = [],
+  type
+) {
 
+  return assets.find(
+    a => a?.type === type
+  );
+
+}
 function calculateCampaignKPIs(campaign, data) {
   if (!data || !data.length) return campaign;
 
@@ -412,69 +1389,36 @@ async function addAdSet() {
 // INLINE UPDATE CAMPAIGN
 // =====================
 async function saveInlineGameEvent(id) {
-  const row = document.querySelector(
-    `[data-id="${id}"]`,
-  );
+  const row = document.querySelector(`[data-id="${id}"]`);
 
   if (!row) return;
 
   const payload = {
-    title:
-      row.querySelector("[data-field='title']")
-        ?.value || "",
+    title: row.querySelector("[data-field='title']")?.value || "",
 
-    type:
-      row.querySelector("[data-field='type']")
-        ?.value || "",
+    type: row.querySelector("[data-field='type']")?.value || "",
 
-    trigger:
-      row.querySelector("[data-field='trigger']")
-        ?.value || "random",
+    trigger: row.querySelector("[data-field='trigger']")?.value || "random",
 
     probability: Number(
-      row.querySelector(
-        "[data-field='probability']",
-      )?.value || 0,
+      row.querySelector("[data-field='probability']")?.value || 0,
     ),
 
-    value: Number(
-      row.querySelector("[data-field='value']")
-        ?.value || 0,
-    ),
+    value: Number(row.querySelector("[data-field='value']")?.value || 0),
 
-    duration: Number(
-      row.querySelector(
-        "[data-field='duration']",
-      )?.value || 0,
-    ),
+    duration: Number(row.querySelector("[data-field='duration']")?.value || 0),
 
-    cooldown: Number(
-      row.querySelector(
-        "[data-field='cooldown']",
-      )?.value || 0,
-    ),
+    cooldown: Number(row.querySelector("[data-field='cooldown']")?.value || 0),
 
-    priority: Number(
-      row.querySelector(
-        "[data-field='priority']",
-      )?.value || 0,
-    ),
+    priority: Number(row.querySelector("[data-field='priority']")?.value || 0),
 
-    category:
-      row.querySelector(
-        "[data-field='category']",
-      )?.value || "default",
+    category: row.querySelector("[data-field='category']")?.value || "default",
 
     is_guaranteed:
-      row.querySelector(
-        "[data-field='is_guaranteed']",
-      )?.value === "true",
+      row.querySelector("[data-field='is_guaranteed']")?.value === "true",
   };
 
-  console.log(
-    "💾 SAVE INLINE GAME EVENT:",
-    payload,
-  );
+  console.log("💾 SAVE INLINE GAME EVENT:", payload);
 
   const { error } = await supabase
     .from("event_definitions")
@@ -482,10 +1426,7 @@ async function saveInlineGameEvent(id) {
     .eq("id", id);
 
   if (error) {
-    console.error(
-      "❌ Inline Game Event Save Failed:",
-      error,
-    );
+    console.error("❌ Inline Game Event Save Failed:", error);
 
     alert("Speichern fehlgeschlagen");
     return;
@@ -1127,8 +2068,8 @@ function loadEventTypes() {
     ["CORNER", "🚩 Ecke"],
     ["DUEL", "⚔️ Zweikampf"],
     ["MATCH_INTRO", "🎬 Match Intro"],
-["HALFTIME", "⏸ Halbzeit"],
-["IDLE", "🏟 Stadion Idle"],
+    ["HALFTIME", "⏸ Halbzeit"],
+    ["IDLE", "🏟 Stadion Idle"],
 
     // 🔥 NEUE GAMEPLAY EVENTS
     ["PASS", "➡️ Pass"],
@@ -1558,7 +2499,10 @@ async function loadGameEvents() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  state.gameEvents = data || [];
   renderGameEvents(data || []);
+  populateTypeFilter();
+  renderBroadcastRows();
 }
 
 async function deleteGameEvent(id) {
@@ -1656,7 +2600,10 @@ async function saveInlineEvent(id) {
 async function loadEvents() {
   const { data } = await supabase.from("game_events").select("*");
 
-  renderEvents(data || []);
+  state.events = data || [];
+
+  populateTypeFilter();
+  renderBroadcastRows();
 }
 
 function renderGameEvents(list) {
@@ -1962,7 +2909,469 @@ function renderGameEvents(list) {
     }
   });
 }
+function populateTypeFilter() {
+  const select = document.getElementById("broadcastTypeFilter");
 
+  if (!select) return;
+
+  const types = [
+    ...new Set(
+      getBroadcastEvents()
+        .map((e) => e.type)
+        .filter(Boolean),
+    ),
+  ];
+
+  select.innerHTML = `
+    <option value="">
+      Alle Typen
+    </option>
+    ${types
+      .map(
+        (type) => `
+      <option value="${type}">
+        ${type}
+      </option>
+    `,
+      )
+      .join("")}
+  `;
+}
+function renderBroadcastRows() {
+
+  const root =
+    document.getElementById(
+      "broadcastRows"
+    );
+
+  if (!root) return;
+
+  const search =
+    qs("broadcastSearch")
+      ?.value
+      ?.toLowerCase()
+      ?.trim() || "";
+
+  const type =
+    qs("broadcastTypeFilter")
+      ?.value || "";
+
+  const rows =
+    getBroadcastEvents()
+      .filter((ev) => {
+
+        const title =
+          (
+            ev.title ||
+            ev.name ||
+            ""
+          )
+            .toLowerCase();
+
+        const matchesSearch =
+          !search ||
+          title.includes(search);
+
+        const matchesType =
+          !type ||
+          ev.type === type;
+
+        return (
+          matchesSearch &&
+          matchesType
+        );
+
+      });
+
+  root.innerHTML =
+    rows
+      .map((ev) => {
+
+        let assets =
+          ev.assets;
+
+        // JSON String → Array
+        if (
+          typeof assets ===
+          "string"
+        ) {
+
+          try {
+
+            assets =
+              JSON.parse(
+                assets
+              );
+
+          }
+
+          catch {
+
+            assets = [
+              {
+                url: assets
+              }
+            ];
+
+          }
+
+        }
+
+        if (
+          !Array.isArray(
+            assets
+          )
+        ) {
+
+          assets = [];
+
+        }
+
+        const hero =
+  getHeroAsset(assets)?.url || "";
+
+        const created =
+          ev.created_at
+            ? new Date(
+                ev.created_at
+              ).toLocaleDateString(
+                "de-DE"
+              )
+            : "-";
+
+        return `
+
+          <div
+            class="broadcastRow"
+            data-id="${ev.id}"
+            data-source="${ev.source || "event"}"
+          >
+
+            <div
+              class="broadcastThumb"
+            >
+
+              ${
+                hero
+                  ? `
+                    <img
+                      src="${hero}"
+                    >
+                  `
+                  : `
+                    <span>—</span>
+                  `
+              }
+
+            </div>
+
+            <span>
+              ${ev.type || "EVENT"}
+            </span>
+
+            <span>
+              ${ev.title || ev.name || "-"}
+            </span>
+
+            <span>
+              ${created}
+            </span>
+
+            <span>
+              ${assets.length}
+            </span>
+
+            <span>
+              ›
+            </span>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
+  root
+    .querySelectorAll(
+      ".broadcastRow"
+    )
+    .forEach((row) => {
+
+      row.addEventListener(
+        "click",
+        () => {
+
+          const id =
+            row.dataset.id;
+
+          const event =
+            getBroadcastEvents()
+              .find(
+                e => e.id === id
+              );
+
+          if (!event)
+            return;
+
+          openBroadcastEditor(
+            event
+          );
+
+        }
+      );
+
+    });
+
+}
+
+async function saveBroadcastEvent() {
+
+  if (!currentBroadcastEvent)
+    return;
+
+  const table =
+  currentBroadcastEvent.source === "game"
+    ? "event_definitions"
+    : "game_events";
+
+  console.log(
+    "CURRENT EVENT",
+    structuredClone(
+      currentBroadcastEvent
+    )
+  );
+
+  const payload = {
+
+    title:
+      document.getElementById(
+        "detailTitle"
+      ).value,
+
+    type:
+      document.getElementById(
+        "detailType"
+      ).value,
+
+    trigger:
+      document.getElementById(
+        "detailTrigger"
+      ).value,
+
+    probability: Number(
+      document.getElementById(
+        "detailProbability"
+      ).value
+    ),
+
+    hero_asset_id:
+      currentBroadcastEvent
+        .hero_asset_id || null,
+
+    assets:
+      currentBroadcastEvent
+        .assets || []
+
+  };
+
+  console.log(
+    "💾 SAVE EVENT:",
+    table,
+    payload
+  );
+
+  try {
+
+    // =====================
+    // UPDATE
+    // =====================
+
+    if (
+      currentBroadcastEvent.id
+    ) {
+
+      const { error } =
+        await supabase
+
+          .from(
+            table
+          )
+
+          .update(
+            payload
+          )
+
+          .eq(
+            "id",
+            currentBroadcastEvent.id
+          );
+
+      if (error)
+        throw error;
+
+    }
+
+    // =====================
+    // INSERT
+    // =====================
+
+    else {
+
+      const { data, error } =
+        await supabase
+
+          .from(
+            table
+          )
+
+          .insert([
+            payload
+          ])
+
+          .select()
+
+          .single();
+
+      if (error)
+        throw error;
+
+      currentBroadcastEvent =
+        data;
+
+    }
+
+    await loadEvents();
+    await loadGameEvents();
+
+    renderBroadcastRows();
+
+    alert(
+      "Event gespeichert"
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "❌ SAVE EVENT ERROR",
+      err
+    );
+
+    alert(
+      "Speichern fehlgeschlagen"
+    );
+
+  }
+
+}
+async function deleteBroadcastEvent() {
+
+  if (!currentBroadcastEvent?.id) {
+
+    alert(
+      "Dieses Event wurde noch nicht gespeichert."
+    );
+
+    return;
+
+  }
+
+  const confirmed =
+    confirm(
+      "Event wirklich löschen?"
+    );
+
+  if (!confirmed)
+    return;
+
+  try {
+
+    console.log(
+      "DELETE EVENT",
+      currentBroadcastEvent
+    );
+
+    const table =
+      currentBroadcastEvent.source === "game"
+        ? "event_definitions"
+        : "game_events";
+
+    console.log(
+      "DELETE TABLE",
+      table
+    );
+
+    const {
+      data,
+      error
+    } = await supabase
+
+      .from(
+        table
+      )
+
+      .delete()
+
+      .eq(
+        "id",
+        currentBroadcastEvent.id
+      )
+
+      .select();
+
+    console.log(
+      "DELETE RESULT",
+      data
+    );
+
+    console.log(
+      "DELETE ERROR",
+      error
+    );
+
+    if (error)
+      throw error;
+
+    currentBroadcastEvent =
+      null;
+
+    document.getElementById(
+      "broadcastDetail"
+    ).innerHTML = `
+
+      <div class="emptyState">
+        Event auswählen
+      </div>
+
+    `;
+
+    await loadEvents();
+    await loadGameEvents();
+
+    renderBroadcastRows();
+
+    alert(
+      "Event gelöscht"
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "DELETE FAILED",
+      err
+    );
+
+    alert(
+      "Löschen fehlgeschlagen"
+    );
+
+  }
+
+}
 // =====================
 // DELETE EVENT
 // =====================
@@ -1991,10 +3400,7 @@ async function removeAssetFromEvent(eventId, assetId, table) {
   if (table === "event_definitions") loadGameEvents();
 }
 async function uploadInlineAssets(eventId, files, table) {
-  const bucket =
-  table === "game_events"
-    ? "events"
-    : "game-events";
+  const bucket = table === "game_events" ? "events" : "game-events";
 
   const newAssets = await uploadFiles(bucket, files);
 
@@ -2032,16 +3438,12 @@ function switchTab(tab) {
     loadCampaigns();
   }
 
-  if (tab === "game") {
-    qs("gameEventsTab")?.classList.add("active");
-    qs("tabGameEvents")?.classList.add("active");
-    loadGameEvents();
-  }
+  if (tab === "broadcast") {
+    qs("broadcastTab")?.classList.add("active");
+    qs("tabBroadcast")?.classList.add("active");
 
-  if (tab === "events") {
-    qs("eventsTab")?.classList.add("active");
-    qs("tabEvents")?.classList.add("active");
     loadEvents();
+    loadGameEvents();
   }
 
   if (tab === "insights") {
@@ -2094,7 +3496,6 @@ function renderAssetList() {
 // GLOBAL CLICK HANDLER
 // =====================
 document.addEventListener("click", async (e) => {
-
   const target = e.target.closest("[data-action]");
   if (!target) return;
 
@@ -2106,7 +3507,6 @@ document.addEventListener("click", async (e) => {
   // 🖼 DELETE ASSET
   // =====================
   if (a === "deleteAsset") {
-
     removeAssetFromEvent(
       target.dataset.eventId,
       target.dataset.assetId,
@@ -2118,30 +3518,20 @@ document.addEventListener("click", async (e) => {
   // 📤 INLINE ASSET UPLOAD
   // =====================
   if (a === "uploadAssetInline") {
-
     const id = target.dataset.id;
 
-    const table =
-      target.dataset.table || "game_events";
+    const table = target.dataset.table || "game_events";
 
-    const input = document.querySelector(
-      `input[data-upload="${id}"]`
-    );
+    const input = document.querySelector(`input[data-upload="${id}"]`);
 
     if (!input || !input.files.length) {
       alert("Kein File");
       return;
     }
 
-    const bucket =
-      table === "game_events"
-        ? "events"
-        : "game-events";
+    const bucket = table === "game_events" ? "events" : "game-events";
 
-    const uploaded = await uploadFiles(
-      bucket,
-      [...input.files],
-    );
+    const uploaded = await uploadFiles(bucket, [...input.files]);
 
     const { data: current } = await supabase
       .from(table)
@@ -2149,10 +3539,7 @@ document.addEventListener("click", async (e) => {
       .eq("id", id)
       .single();
 
-    const assets = [
-      ...(current?.assets || []),
-      ...uploaded,
-    ];
+    const assets = [...(current?.assets || []), ...uploaded];
 
     const { error } = await supabase
       .from(table)
@@ -2173,7 +3560,18 @@ document.addEventListener("click", async (e) => {
       await loadGameEvents();
     }
   }
+// =====================
+// 📺 BROADCAST
+// =====================
 
+if (
+  a ===
+  "createBroadcastEvent"
+) {
+
+  createBroadcastEvent();
+
+}
   // =====================
   // CAMPAIGNS
   // =====================
@@ -2216,7 +3614,6 @@ document.addEventListener("click", async (e) => {
   if (a === "deleteGameEvent") {
     deleteGameEvent(target.dataset.id);
   }
-
 });
 
 // =====================
@@ -2246,9 +3643,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
-  qs("tabEvents")?.addEventListener("click", () => switchTab("events"));
+  qs("tabBroadcast")?.addEventListener("click", () => switchTab("broadcast"));
   qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
-  qs("tabGameEvents")?.addEventListener("click", () => switchTab("game"));
 
   // 🔥 INIT LOADS
   loadEventReferenceData();
@@ -2257,4 +3653,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   switchTab("ads");
   loadCampaigns();
+  qs("broadcastSearch")?.addEventListener("input", renderBroadcastRows);
+
+  qs("broadcastTypeFilter")?.addEventListener("change", renderBroadcastRows);
 });

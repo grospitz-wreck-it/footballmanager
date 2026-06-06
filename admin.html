@@ -20,10 +20,15 @@
 
 <!-- TABS -->
 <div class="tabs">
-  <button id="tabAds" class="active">📢 Ads</button>
-  <button id="tabEvents">🎮 Events</button>
-  <button id="tabInsights">📈 Insights</button>
-  <button id="tabGameEvents">🧠 Game</button>
+  <button id="tabAds" class="active">
+    📢 Ads
+  </button>
+  <button id="tabBroadcast">
+    📺 Broadcast
+  </button>
+  <button id="tabInsights">
+    📈 Insights
+  </button>
 </div>
 
 <!-- ========================= -->
@@ -79,7 +84,70 @@
 
 </div> <!-- ✅ ADS TAB ENDE -->
 
+<div id="broadcastTab" class="tabContent">
 
+  <div class="box">
+
+    <h2>📺 Broadcast Director</h2>
+
+    <p class="formIntro">
+      Match Intro, Tore, Duelle, Penalties,
+      Idle Events, Sponsorenmomente und
+      Broadcast-Szenen.
+    </p>
+
+  </div>
+  <div class="broadcastLayout">
+
+  <div class="broadcastTable">
+
+    <div class="broadcastHeader">
+
+  <span>Img</span>
+  <span>Type</span>
+  <span>Titel</span>
+  <span>Erstellt</span>
+  <span>Assets</span>
+  <span></span>
+
+</div>
+<div class="broadcastToolbar">
+
+  <input
+    id="broadcastSearch"
+    type="text"
+    placeholder="Event suchen..."
+  >
+
+  <select id="broadcastTypeFilter">
+    <option value="">
+      Alle Typen
+    </option>
+  </select>
+
+  <button
+  id="newBroadcastEvent"
+  class="btn"
+  data-action="createBroadcastEvent"
+>
+  + Event
+</button>
+
+</div>
+    <div id="broadcastRows"></div>
+
+  </div>
+
+  <div id="broadcastDetail">
+
+    <div class="emptyState">
+      Event auswählen
+    </div>
+
+  </div>
+
+</div>
+</div>
 <!-- ========================= -->
 <!-- EVENTS TAB -->
 <!-- ========================= -->
@@ -243,7 +311,7 @@
 </div>
 
 </div>
-
+</div>
 
 <!-- ========================= -->
 <!-- INSIGHTS TAB -->

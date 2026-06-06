@@ -1662,3 +1662,724 @@ button{
     flex:1;
   }
 }
+#eventsTab,
+#gameEventsTab {
+  display:none;
+}
+/* =========================
+   BROADCAST DIRECTOR
+========================= */
+
+.broadcastLayout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 380px;
+  gap:18px;
+  margin-top:20px;
+}
+
+.broadcastTable{
+
+  background:#111827;
+
+  border-radius:18px;
+
+  overflow:hidden;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  min-width:0;
+}
+
+/* =========================
+   FILTER BAR
+========================= */
+
+.broadcastToolbar{
+
+  display:flex;
+
+  gap:12px;
+
+  padding:14px;
+
+  border-bottom:
+    1px solid rgba(255,255,255,.08);
+}
+
+.broadcastToolbar input{
+
+  flex:1;
+}
+
+.broadcastToolbar select{
+
+  width:220px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.broadcastHeader{
+
+  display:grid;
+
+  grid-template-columns:
+    56px
+    90px
+    minmax(0,1fr)
+    110px
+    70px
+    30px;
+
+  gap:12px;
+
+  align-items:center;
+
+  padding:12px 16px;
+
+  font-size:13px;
+
+  font-weight:700;
+
+  text-transform:uppercase;
+
+  letter-spacing:.04em;
+
+  color:rgba(255,255,255,.7);
+
+  background:
+    rgba(255,255,255,.04);
+
+  border-bottom:
+    1px solid rgba(255,255,255,.08);
+}
+
+/* =========================
+   ROW
+========================= */
+
+.broadcastRow{
+
+  display:grid;
+
+  grid-template-columns:
+    56px
+    90px
+    minmax(0,1fr)
+    110px
+    70px
+    30px;
+
+  gap:12px;
+
+  align-items:center;
+
+  padding:10px 16px;
+
+  min-height:64px;
+
+  cursor:pointer;
+
+  border-bottom:
+    1px solid rgba(255,255,255,.04);
+
+  transition:
+    background .15s ease;
+}
+
+.broadcastRow:hover{
+
+  background:
+    rgba(255,255,255,.04);
+}
+
+.broadcastRow:last-child{
+
+  border-bottom:none;
+}
+
+/* =========================
+   THUMB
+========================= */
+
+.broadcastThumb{
+
+  width:40px;
+  height:40px;
+
+  border-radius:8px;
+
+  overflow:hidden;
+
+  background:#0f172a;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  font-size:11px;
+}
+
+.broadcastThumb img{
+
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  display:block;
+}
+
+/* =========================
+   CELLS
+========================= */
+
+.broadcastType{
+
+  font-size:12px;
+
+  font-weight:700;
+
+  color:#38bdf8;
+}
+
+.broadcastTitle{
+
+  overflow:hidden;
+
+  white-space:nowrap;
+
+  text-overflow:ellipsis;
+
+  font-weight:600;
+}
+
+.broadcastDate{
+
+  color:rgba(255,255,255,.65);
+
+  font-size:13px;
+}
+
+.broadcastAssets{
+
+  text-align:center;
+
+  color:#38bdf8;
+
+  font-weight:700;
+}
+
+.broadcastArrow{
+
+  text-align:center;
+
+  opacity:.6;
+}
+
+/* =========================
+   DETAIL PANEL
+========================= */
+
+#broadcastDetail{
+
+  background:#111827;
+
+  border-radius:18px;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  padding:20px;
+
+  min-height:600px;
+
+  position:sticky;
+
+  top:20px;
+}
+
+.emptyState{
+
+  opacity:.5;
+
+  text-align:center;
+
+  padding-top:120px;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width:1100px){
+
+  .broadcastLayout{
+
+    grid-template-columns:1fr;
+  }
+
+  #broadcastDetail{
+
+    min-height:240px;
+  }
+}
+.detailHero{
+
+  width:100%;
+
+  aspect-ratio:16/9;
+
+  object-fit:cover;
+
+  border-radius:12px;
+
+  margin-bottom:16px;
+}
+
+.detailMeta{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:12px;
+
+  margin:20px 0;
+}
+
+.detailMeta > div{
+
+  padding:12px;
+
+  border-radius:12px;
+
+  background:
+    rgba(255,255,255,.04);
+}
+
+.detailDescription{
+
+  opacity:.8;
+
+  line-height:1.5;
+}
+/* =========================
+   DETAIL FORM
+========================= */
+
+.detailForm{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:14px;
+
+  margin-top:20px;
+}
+
+.field{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:6px;
+}
+
+.fieldFull{
+
+  grid-column:1 / -1;
+}
+
+.field label{
+
+  font-size:12px;
+
+  font-weight:700;
+
+  text-transform:uppercase;
+
+  opacity:.7;
+}
+
+.field input,
+.field textarea{
+
+  width:100%;
+
+  padding:12px 14px;
+
+  border:none;
+
+  border-radius:12px;
+
+  background:#0f172a;
+
+  color:white;
+
+  font-size:14px;
+
+  outline:none;
+
+  border:
+    1px solid rgba(
+      255,
+      255,
+      255,
+      .06
+    );
+}
+
+.field textarea{
+
+  resize:vertical;
+
+  min-height:140px;
+}
+
+.field input:focus,
+.field textarea:focus{
+
+  border-color:
+    rgba(
+      56,
+      189,
+      248,
+      .6
+    );
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.detailActions{
+
+  display:flex;
+
+  gap:12px;
+
+  margin-top:20px;
+}
+
+.detailActions button{
+
+  flex:1;
+}
+/* =========================
+   HERO EDITOR
+========================= */
+
+.heroEditor{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:12px;
+
+  margin-bottom:20px;
+}
+
+.detailHero{
+
+  width:100%;
+
+  height:220px;
+
+  object-fit:cover;
+
+  border-radius:14px;
+
+  border:
+    1px solid rgba(
+      255,
+      255,
+      255,
+      .08
+    );
+
+  background:#0f172a;
+}
+
+.detailHeroPlaceholder{
+
+  width:100%;
+
+  height:220px;
+
+  border-radius:14px;
+
+  background:#0f172a;
+
+  border:
+    1px dashed rgba(
+      255,
+      255,
+      255,
+      .15
+    );
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:10px;
+
+  font-size:42px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .4
+    );
+}
+
+.detailHeroPlaceholder span{
+
+  font-size:13px;
+
+  letter-spacing:.04em;
+
+  text-transform:uppercase;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      .6
+    );
+}
+
+.heroActions{
+
+  display:flex;
+
+  gap:10px;
+}
+
+.heroActions button{
+
+  width:100%;
+}
+
+/* =========================
+   DETAIL META
+========================= */
+
+.detailMeta{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:12px;
+
+  margin-top:18px;
+
+  margin-bottom:20px;
+}
+
+.detailMeta > div{
+
+  padding:12px;
+
+  border-radius:12px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .03
+    );
+
+  border:
+    1px solid rgba(
+      255,
+      255,
+      255,
+      .05
+    );
+
+  font-size:13px;
+}
+
+.detailMeta strong{
+
+  display:block;
+
+  margin-bottom:4px;
+
+  opacity:.65;
+
+  font-size:11px;
+
+  text-transform:uppercase;
+
+  letter-spacing:.05em;
+}
+
+/* =========================
+   DETAIL ACTIONS
+========================= */
+
+.detailActions{
+
+  display:flex;
+
+  gap:12px;
+
+  margin-top:20px;
+}
+
+.detailActions .btn{
+
+  flex:1;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width:768px){
+
+  .detailHero,
+  .detailHeroPlaceholder{
+
+    height:180px;
+  }
+
+  .detailMeta{
+
+    grid-template-columns:1fr;
+  }
+
+  .detailActions{
+
+    flex-direction:column;
+  }
+
+}
+/* =========================
+   SECONDARY ASSETS
+========================= */
+
+.secondaryAssets {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0,1fr)
+    );
+
+  gap: 16px;
+
+  margin-bottom: 24px;
+
+}
+
+.assetSlot {
+
+  background: #111;
+
+  border: 1px solid #2a2a2a;
+
+  border-radius: 12px;
+
+  padding: 14px;
+
+}
+
+.assetSlot strong {
+
+  display: block;
+
+  margin-bottom: 10px;
+
+}
+
+.slotPreview {
+
+  width: 100%;
+
+  height: 140px;
+
+  object-fit: cover;
+
+  border-radius: 10px;
+
+  margin-bottom: 10px;
+
+}
+
+.slotPlaceholder {
+
+  height: 140px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: 1px dashed #444;
+
+  border-radius: 10px;
+
+  margin-bottom: 10px;
+
+  color: #888;
+
+  font-size: 13px;
+
+}
+
+.assetSlot .btn {
+
+  width: 100%;
+
+}
+.assetPreview {
+  position: relative;
+  cursor: pointer;
+}
+
+.assetDelete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 24px;
+  height: 24px;
+
+  border-radius: 50%;
+
+  background: #d93025;
+  color: white;
+
+  border: none;
+
+  cursor: pointer;
+}
