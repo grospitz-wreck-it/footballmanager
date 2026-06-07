@@ -452,6 +452,10 @@ function simulateLiveMatchMinute(round, minute) {
 // ▶️ NEXT MATCH
 // =========================
 function nextMatch() {
+  console.log("🔍 NEXT MATCH STATE", {
+  round: game.league.currentRound,
+  match: game.league.currentMatchIndex,
+});
   const schedule = game.league?.current?.schedule;
   if (!schedule?.length) return null;
 
@@ -518,7 +522,8 @@ function advanceSchedule() {
   // 👉 State setzen
   game.league.currentRound = r;
   game.league.currentMatchIndex = m;
-
+game.ui = game.ui || {};
+game.ui.scheduleDirty = true;
   // 👉 UI SYNC (🔥 wichtig für deinen Swipe-View)
   if (typeof window !== "undefined") {
     window.scheduleViewIndex = r;
@@ -529,6 +534,10 @@ function advanceSchedule() {
     round: r,
     match: m,
   });
+  console.log("➡️ ADVANCE RESULT", {
+  round: game.league.currentRound,
+  match: game.league.currentMatchIndex,
+});
 }
 
 function isMyMatch(match) {
@@ -544,6 +553,7 @@ function isMyMatch(match) {
 // 📅 RENDER
 // =========================
 function renderSchedule() {
+  
   const container = document.getElementById("scheduleView");
   if (!container) return;
 

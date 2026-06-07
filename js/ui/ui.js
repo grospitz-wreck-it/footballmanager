@@ -86,8 +86,13 @@ function initColorPicker() {
     game.ui.dirty = true;
 
     if (game.ui.tab === "schedule") {
-      renderSchedule();
-    }
+  const live = game.match?.live;
+
+  // Während eines Livespiels Spielplan nicht dauernd neu rendern
+  if (!live?.running) {
+    renderSchedule();
+  }
+}
 
     if (typeof showToast === "function") {
       showToast("Farbe aktualisiert");
@@ -672,9 +677,13 @@ if (
     renderTeam();
   }
 
-  if (game.ui.tab === "schedule") {
-    renderSchedule();
-  }
+  if (
+  game.ui.tab === "schedule" &&
+  game.ui.scheduleDirty
+) {
+  renderSchedule();
+  game.ui.scheduleDirty = false;
+}
 
   // =========================
   // ⚙️ TACTICS

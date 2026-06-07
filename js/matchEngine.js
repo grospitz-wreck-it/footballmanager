@@ -1913,6 +1913,11 @@ function runMatchLoop({ onTick, onEnd } = {}) {
           updateTable(match.homeTeamId, match.awayTeamId, hg, ag);
 
           console.log("✅ MATCH FINALIZED", `${hg}:${ag}`);
+          console.log("🏁 FINAL MATCH INFO", {
+  home: match.homeTeamId,
+  away: match.awayTeamId,
+  processed: match._processed,
+});
         }
 
         // =====================
@@ -2025,6 +2030,15 @@ function runMatchLoop({ onTick, onEnd } = {}) {
   // =====================
   window.idleAlreadyShown = false;
 
+
+  // =====================
+// 🔥 RELEASE CURRENT MATCH
+// =====================
+game.match.current = null;
+game.match._scheduleRef = null;
+game.match.live = null;
+
+console.log("🧹 MATCH CLEARED");
   // =====================
   // 🔄 UI REFRESH
   // =====================

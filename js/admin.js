@@ -12,6 +12,8 @@ const state = {
   editEventId: null,
   inlineEditId: null,
   inlineEventEditId: null,
+  partners: [],
+selectedPartner: null,
 
   // 🔥 NEU
   inlineGameEventEditId: null,
@@ -3424,38 +3426,120 @@ async function uploadInlineAssets(eventId, files, table) {
 // TABS
 // =====================
 function switchTab(tab) {
-  document
-    .querySelectorAll(".tabContent")
-    .forEach((t) => t.classList.remove("active"));
-  document
-    .querySelectorAll(".tabs button")
-    .forEach((b) => b.classList.remove("active"));
 
-  // 🔥 FIX: ADS TAB (fehlte)
+  document
+    .querySelectorAll(
+      ".tabContent"
+    )
+    .forEach(
+      t =>
+        t.classList.remove(
+          "active"
+        )
+    );
+
+  document
+    .querySelectorAll(
+      ".tabs button"
+    )
+    .forEach(
+      b =>
+        b.classList.remove(
+          "active"
+        )
+    );
+
+  // =====================
+  // ADS
+  // =====================
+
   if (tab === "ads") {
-    qs("adsTab")?.classList.add("active");
-    qs("tabAds")?.classList.add("active");
+
+    qs("adsTab")
+      ?.classList.add(
+        "active"
+      );
+
+    qs("tabAds")
+      ?.classList.add(
+        "active"
+      );
+
     loadCampaigns();
+
   }
 
-  if (tab === "broadcast") {
-    qs("broadcastTab")?.classList.add("active");
-    qs("tabBroadcast")?.classList.add("active");
+  // =====================
+  // BROADCAST
+  // =====================
+
+  if (
+    tab === "broadcast"
+  ) {
+
+    qs("broadcastTab")
+      ?.classList.add(
+        "active"
+      );
+
+    qs("tabBroadcast")
+      ?.classList.add(
+        "active"
+      );
 
     loadEvents();
     loadGameEvents();
+
   }
 
-  if (tab === "insights") {
-    qs("insightsTab")?.classList.add("active");
-    qs("tabInsights")?.classList.add("active");
+  // =====================
+  // PARTNERS
+  // =====================
+
+  if (
+    tab === "partners"
+  ) {
+
+    qs("partnersTab")
+      ?.classList.add(
+        "active"
+      );
+
+    qs("tabPartners")
+      ?.classList.add(
+        "active"
+      );
+
+    loadPartnerTeams();
+
+  }
+
+  // =====================
+  // INSIGHTS
+  // =====================
+
+  if (
+    tab === "insights"
+  ) {
+
+    qs("insightsTab")
+      ?.classList.add(
+        "active"
+      );
+
+    qs("tabInsights")
+      ?.classList.add(
+        "active"
+      );
 
     destroyChart();
 
     loadInsights();
     loadChart();
-    loadGeoMap(); // 🔥 DAS HAT GEFEHLT
+    loadGeoMap();
+
   }
+
 }
 
 function renderAssetList() {
@@ -3645,10 +3729,28 @@ document.addEventListener("DOMContentLoaded", () => {
   qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
   qs("tabBroadcast")?.addEventListener("click", () => switchTab("broadcast"));
   qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
+qs("tabPartners")
+  ?.addEventListener(
+    "click",
+    () => switchTab("partners")
+  );
+  qs("partnerSearch")
+  ?.addEventListener(
+    "input",
+    renderPartnerList
+  );
 
+qs("partnerLeagueFilter")
+  ?.addEventListener(
+    "change",
+    renderPartnerList
+  );
   // 🔥 INIT LOADS
   loadEventReferenceData();
   loadGameEvents();
+  loadPartnerTeams();
+  loadPartnerLeagues();
+  loadPartners();
   setTimeout(loadEventTypes, 0);
 
   switchTab("ads");
@@ -3657,3 +3759,646 @@ document.addEventListener("DOMContentLoaded", () => {
 
   qs("broadcastTypeFilter")?.addEventListener("change", renderBroadcastRows);
 });
+async function loadPartnerTeams() {
+
+  const { data, error } =
+    await supabase
+
+      .from("teams")
+
+      .select(`
+        *,
+        competitions (
+          id,
+          name
+        )
+      `)
+
+      .order(
+        "display_name"
+      );
+
+  if (error) {
+
+    console.error(
+      "PARTNER TEAMS ERROR",
+      error
+    );
+
+    return;
+
+  }
+
+  state.partners =
+    data || [];
+
+  console.log(
+    "LOADED PARTNER TEAMS",
+    state.partners.length
+  );
+
+  renderPartnerList();
+
+}
+function renderPartnerList() {
+
+  const root =
+    document.getElementById(
+      "partnerList"
+    );
+
+  if (!root)
+    return;
+
+  const search =
+    document
+      .getElementById(
+        "partnerSearch"
+      )
+      ?.value
+      ?.toLowerCase()
+      ?.trim() || "";
+
+  const leagueId =
+    document
+      .getElementById(
+        "partnerLeagueFilter"
+      )
+      ?.value || "";
+
+  const rows =
+    state.partners.filter(
+      team => {
+
+        const teamName =
+          (
+            team.display_name ||
+            team.name ||
+            ""
+          ).toLowerCase();
+
+        const matchesSearch =
+          teamName.includes(
+            search
+          );
+
+        const matchesLeague =
+          !leagueId ||
+          team.competition_id ===
+            leagueId;
+
+        return (
+          matchesSearch &&
+          matchesLeague
+        );
+
+      }
+    );
+
+  root.innerHTML =
+    rows
+      .map(
+        team => `
+
+          <div
+            class="partnerRow"
+            data-id="${team.id}"
+          >
+
+            <div
+              class="partnerName"
+            >
+              ${
+                team.display_name ||
+                team.name
+              }
+            </div>
+
+            <div
+              class="partnerLeague"
+            >
+              🏆 ${
+                team.competitions?.name ||
+                "Keine Liga"
+              }
+            </div>
+
+            <div
+              class="partnerOfficialName"
+            >
+              ${team.name}
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+  root
+    .querySelectorAll(
+      ".partnerRow"
+    )
+    .forEach(row => {
+
+      row.addEventListener(
+        "click",
+        () => {
+
+          openPartnerTeam(
+            row.dataset.id
+          );
+
+        }
+      );
+
+    });
+
+}
+function openPartnerTeam(id) {
+
+  const team =
+  state.partners.find(
+    t => t.id === id
+  );
+
+if (!team)
+  return;
+
+const partner =
+  (
+    state.partnerRecords || []
+  ).find(
+    p =>
+      p.primary_team_id ===
+      team.id
+  );
+
+  document.getElementById(
+    "partnerDetail"
+  ).innerHTML = `
+
+    <div class="partnerHeader">
+
+      <div>
+
+        <h2>
+          ${
+            team.display_name ||
+            team.name
+          }
+        </h2>
+
+        <div class="partnerLeagueBadge">
+
+          🏆 ${
+            team.competitions?.name ||
+            "Keine Liga"
+          }
+
+        </div>
+
+      </div>
+
+      <div
+  class="partnerStatus"
+>
+
+  ${
+    partner
+      ? "🟢 Partner"
+      : "⚪ Kein Partner"
+  }
+
+</div>
+
+    </div>
+
+    <div class="partnerCard">
+
+      <h3>
+        Stammdaten
+      </h3>
+
+      <div class="formGrid">
+
+        <input
+          placeholder="Offizieller Vereinsname"
+          value="${
+  partner?.official_name ||
+  team.name
+}"
+        >
+
+        <input
+          placeholder="Website"
+        >
+
+        <input
+          placeholder="Straße"
+        >
+
+        <input
+          placeholder="PLZ / Ort"
+        >
+
+      </div>
+
+    </div>
+
+    <div class="partnerCard">
+
+      <h3>
+        Ansprechpartner
+      </h3>
+
+      <div class="formGrid">
+
+        <input
+          placeholder="Name"
+        >
+
+        <input
+          placeholder="E-Mail"
+        >
+
+        <input
+          placeholder="Telefon"
+        >
+
+      </div>
+
+    </div>
+
+    <div class="partnerCard">
+
+      <h3>
+        Teams
+      </h3>
+
+      <div
+        class="partnerTeamSearch"
+      >
+
+        <input
+          placeholder="🔍 Team hinzufügen"
+        >
+
+        <button
+          class="btn"
+        >
+          +
+        </button>
+
+      </div>
+
+      <div
+        class="partnerTeams"
+      >
+
+        <div
+          class="partnerTeamItem"
+        >
+
+          ${
+            team.display_name ||
+            team.name
+          }
+
+          <button>
+            ✕
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="partnerCard">
+
+      <h3>
+        Kader
+      </h3>
+
+      <div
+        class="partnerInfoGrid"
+      >
+
+        <div>
+
+          <strong>
+            Status
+          </strong>
+
+          <div>
+            ⚪ Kein Kader
+          </div>
+
+        </div>
+
+        <div>
+
+          <strong>
+            Spieler
+          </strong>
+
+          <div>
+            0
+          </div>
+
+        </div>
+
+        <div>
+
+          <strong>
+            Letzter Import
+          </strong>
+
+          <div>
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="partnerCard">
+
+      <h3>
+        Dokumente
+      </h3>
+
+      <button
+        class="btn"
+      >
+        📄 Dokument hochladen
+      </button>
+
+    </div>
+
+    <div class="partnerCard">
+
+      <h3>
+        Erlöse
+      </h3>
+
+      <div
+        class="partnerInfoGrid"
+      >
+
+        <div>
+
+          <strong>
+            Gesamt
+          </strong>
+
+          <div>
+            0 €
+          </div>
+
+        </div>
+
+        <div>
+
+          <strong>
+            Ausgeschüttet
+          </strong>
+
+          <div>
+            0 €
+          </div>
+
+        </div>
+
+        <div>
+
+          <strong>
+            Offen
+          </strong>
+
+          <div>
+            0 €
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="partnerCard">
+
+      <h3>
+        Notizen
+      </h3>
+
+      <textarea
+        rows="8"
+        placeholder="Interne Notizen..."
+      ></textarea>
+
+    </div>
+
+    <div class="partnerFooter">
+
+  ${
+    partner
+
+      ? `
+
+        <button
+          id="savePartner"
+          class="btn btn-primary"
+        >
+          💾 Partner speichern
+        </button>
+
+      `
+
+      : `
+
+        <button
+          id="createPartner"
+          class="btn btn-primary"
+        >
+          🤝 Partner erstellen
+        </button>
+
+      `
+      
+  }
+
+</div>
+
+  `;
+document
+  .getElementById(
+    "createPartner"
+  )
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        const {
+          data: newPartner,
+          error
+        } =
+          await supabase
+
+            .from(
+              "partners"
+            )
+
+            .insert([{
+
+              primary_team_id:
+                team.id,
+
+              official_name:
+                team.name,
+
+              verified:
+                false
+
+            }])
+
+            .select()
+
+            .single();
+
+        if (error)
+          throw error;
+
+        const {
+          error:
+            teamError
+        } =
+          await supabase
+
+            .from(
+              "partner_teams"
+            )
+
+            .insert([{
+
+              partner_id:
+                newPartner.id,
+
+              team_id:
+                team.id,
+
+              is_primary:
+                true,
+
+              is_verified:
+                false
+
+            }]);
+
+        if (teamError)
+          throw teamError;
+
+        await loadPartners();
+
+        openPartnerTeam(
+          team.id
+        );
+
+      }
+
+      catch (err) {
+
+        console.error(
+  "PARTNER ERROR FULL",
+  err
+);
+
+console.log(
+  err.message
+);
+
+console.log(
+  err.code
+);
+
+console.log(
+  err.details
+);
+
+console.log(
+  err.hint
+);
+
+        alert(
+          JSON.stringify(
+            err,
+            null,
+            2
+          )
+        );
+
+      }
+
+    }
+  );
+}
+
+async function loadPartnerLeagues() {
+
+  const { data } =
+    await supabase
+
+      .from("competitions")
+
+      .select("*")
+      .order("name");
+
+  const select =
+    qs(
+      "partnerLeagueFilter"
+    );
+
+  if (!select)
+    return;
+
+  select.innerHTML = `
+
+    <option value="">
+      Alle Ligen
+    </option>
+
+    ${(
+      data || []
+    ).map(
+      league => `
+
+        <option
+          value="${league.id}"
+        >
+          ${league.name}
+        </option>
+
+      `
+    ).join("")}
+
+  `;
+
+}
+async function loadPartners() {
+
+  const { data } =
+    await supabase
+
+      .from("partners")
+
+      .select("*");
+
+  state.partnerRecords =
+    data || [];
+
+}

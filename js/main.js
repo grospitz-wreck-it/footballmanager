@@ -1184,7 +1184,6 @@ return;
   // =========================
   if (live.phase === "halftime") {
 
-  console.log("▶ SECOND HALF RESUME");
 
   startBackgroundSimulation();
 
@@ -1213,35 +1212,45 @@ return;
 }
 
   // =========================
-  // ▶️ START / RESUME
-  // =========================
-  if (live.running === false) {
-    if (matchLoopRunning) return;
+// ▶️ START / RESUME
+// =========================
+if (live.running === false) {
+  if (matchLoopRunning) return;
 
-    if (live.minute === 0) {
-      live.phase = "first_half";
-    }
-
-    startBackgroundSimulation();
-
-    live.running = true;
-    matchLoopRunning = true;
-
-    runMatchLoop({
-      onTick: () => {
-        game.ui.dirty = true;
-        updateMainButtonText();
-      },
-      onEnd: () => {
-        matchLoopRunning = false;
-        game.ui.dirty = true;
-        updateMainButtonText();
-      },
-    });
-
-    updateMainButtonText();
-    return;
+  if (live.minute === 0) {
+    live.phase = "first_half";
   }
+
+  startBackgroundSimulation();
+
+  live.running = true;
+  matchLoopRunning = true;
+
+  runMatchLoop({
+    onTick: () => {
+      game.ui.dirty = true;
+      updateMainButtonText();
+    },
+
+    onEnd: () => {
+
+
+      // =========================
+      // ⏭ SCHEDULER TEST
+      // =========================
+      advanceSchedule();
+
+      matchLoopRunning = false;
+
+      game.ui.dirty = true;
+
+      updateMainButtonText();
+    },
+  });
+
+  updateMainButtonText();
+  return;
+}
 
   // =========================
   // ⏸ PAUSE

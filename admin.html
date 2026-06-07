@@ -29,6 +29,9 @@
   <button id="tabInsights">
     📈 Insights
   </button>
+  <button id="tabPartners">
+  🤝 Partner
+</button>
 </div>
 
 <!-- ========================= -->
@@ -312,7 +315,69 @@
 
 </div>
 </div>
+<!-- ========================= -->
+<!-- PARTNERS TAB -->
+<!-- ========================= -->
 
+<div
+  id="partnersTab"
+  class="tabContent"
+>
+
+  <div class="partnerLayout">
+
+  <!-- ===================== -->
+  <!-- SIDEBAR -->
+  <!-- ===================== -->
+  <div class="partnerSidebar">
+
+    <div class="partnerFilters">
+
+      <input
+        id="partnerSearch"
+        type="text"
+        placeholder="🔍 Verein suchen..."
+      >
+
+      <select id="partnerLeagueFilter">
+
+        <option value="">
+          Alle Ligen
+        </option>
+
+      </select>
+
+    </div>
+
+    <div id="partnerList"></div>
+
+  </div>
+
+  <!-- ===================== -->
+  <!-- DETAIL -->
+  <!-- ===================== -->
+  <div
+    id="partnerDetail"
+    class="partnerDetail"
+  >
+
+    <div class="emptyState">
+
+      <h3>
+        🤝 Partnerverwaltung
+      </h3>
+
+      <p>
+        Wähle links einen Verein aus.
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
+
+</div>
 <!-- ========================= -->
 <!-- INSIGHTS TAB -->
 <!-- ========================= -->

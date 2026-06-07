@@ -144,8 +144,10 @@ function createUIState(){
     sidebarOpen: false,
     tab: "table",
 
-    // 🔥 optional direkt vorbereitet
-    tacticsOpen: false
+    tacticsOpen: false,
+
+    // 🔥 NEU
+    scheduleDirty: true
   };
 }
 
