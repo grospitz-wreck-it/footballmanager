@@ -1769,22 +1769,38 @@ function runMatchLoop({ onTick, onEnd } = {}) {
       // ⚽ GAMEPLAY
       // =====================
       try {
-        // 🔥 Random Events
-        rollRandomEvents(ctx);
 
-        // 🔥 echtes Gameplay
-        const isGameplayPhase =
-          live.phase === "first_half" || live.phase === "second_half";
+  console.log("🔍 BEFORE rollRandomEvents");
 
-        if (isGameplayPhase) {
-          // 🔥 viel weniger Aktionen
-          simulateLiveEvent(ctx);
-        }
+  rollRandomEvents(ctx);
 
-        updateEvents();
-      } catch (e) {
-        console.warn("⚠️ Simulation error", e);
-      }
+  console.log("🔍 AFTER rollRandomEvents");
+
+
+  const isGameplayPhase =
+    live.phase === "first_half" ||
+    live.phase === "second_half";
+
+  if (isGameplayPhase) {
+
+    console.log("🔍 BEFORE simulateLiveEvent");
+
+    simulateLiveEvent(ctx);
+
+    console.log("🔍 AFTER simulateLiveEvent");
+  }
+
+  console.log("🔍 BEFORE updateEvents");
+
+  updateEvents();
+
+  console.log("🔍 AFTER updateEvents");
+
+} catch (e) {
+
+  console.error("💥 LOOP CRASH", e);
+
+}
 
       // =====================
       // 🛑 HALFTIME

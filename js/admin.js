@@ -76,23 +76,23 @@ function openBroadcastEditor(event) {
 
   if (!detail) return;
 
-  const hero =
+  const heroAsset =
   getAssetByType(
     event.assets,
     "hero"
-  )?.url || "";
+  );
 
-const crowd =
+const crowdAsset =
   getAssetByType(
     event.assets,
     "crowd"
-  )?.url || "";
+  );
 
-const overlay =
+const overlayAsset =
   getAssetByType(
     event.assets,
     "overlay"
-  )?.url || "";
+  );
 
   detail.innerHTML = `
 
@@ -106,12 +106,28 @@ const overlay =
   >
 
     ${
-      hero
-        ? `
-          <img
-            class="detailHero"
-            src="${hero}"
-          >
+  heroAsset
+    ? `
+          ${
+  heroAsset?.mediaType === "video"
+
+    ? `
+      <video
+        class="detailHero"
+        src="${heroAsset.url}"
+        autoplay
+        muted
+        loop
+      ></video>
+    `
+
+    : `
+      <img
+        class="detailHero"
+        src="${heroAsset?.url || ""}"
+      >
+    `
+}
 
           <button
             id="removeHeroAsset"
@@ -141,7 +157,7 @@ const overlay =
   <input
     id="heroUpload"
     type="file"
-    accept="image/*"
+    accept="image/*,video/*"
     hidden
   >
 
@@ -155,21 +171,45 @@ const overlay =
     </strong>
 
     ${
-      crowd
+  crowdAsset
+
+    ? (
+
+      crowdAsset.mediaType === "video"
+
         ? `
+
+          <video
+            class="slotPreview"
+            src="${crowdAsset.url}"
+            autoplay
+            muted
+            loop
+          ></video>
+
+        `
+
+        : `
+
           <img
             class="slotPreview"
-            src="${crowd}"
+            src="${crowdAsset.url}"
           >
+
         `
-        : `
-          <div
-            class="slotPlaceholder"
-          >
-            Kein Crowd Asset
-          </div>
-        `
-    }
+
+    )
+
+    : `
+
+      <div
+        class="slotPlaceholder"
+      >
+        Kein Crowd Asset
+      </div>
+
+    `
+}
 
     <button
       id="selectCrowdAsset"
@@ -179,7 +219,7 @@ const overlay =
       Crowd auswählen
     </button>
 ${
-  crowd
+  crowdAsset
     ? `
       <button
         id="removeCrowdAsset"
@@ -194,7 +234,7 @@ ${
     <input
       id="crowdUpload"
       type="file"
-      accept="image/*"
+      accept="image/*,video/*"
       hidden
     >
 
@@ -207,21 +247,45 @@ ${
     </strong>
 
     ${
-      overlay
+  overlayAsset
+
+    ? (
+
+      overlayAsset.mediaType === "video"
+
         ? `
+
+          <video
+            class="slotPreview"
+            src="${overlayAsset.url}"
+            autoplay
+            muted
+            loop
+          ></video>
+
+        `
+
+        : `
+
           <img
             class="slotPreview"
-            src="${overlay}"
+            src="${overlayAsset.url}"
           >
+
         `
-        : `
-          <div
-            class="slotPlaceholder"
-          >
-            Kein Overlay
-          </div>
-        `
-    }
+
+    )
+
+    : `
+
+      <div
+        class="slotPlaceholder"
+      >
+        Kein Overlay
+      </div>
+
+    `
+}
 
     <button
       id="selectOverlayAsset"
@@ -231,7 +295,7 @@ ${
       Overlay auswählen
     </button>
 ${
-  overlay
+  overlayAsset
     ? `
       <button
         id="removeOverlayAsset"
@@ -246,7 +310,7 @@ ${
     <input
       id="overlayUpload"
       type="file"
-      accept="image/*"
+      accept="image/*,video/*"
       hidden
     >
 
@@ -446,7 +510,15 @@ ${
         </div>
 
       </div>
+<div class="partnerCard">
 
+  <h3>
+    Assets
+  </h3>
+
+  <div id="assetList"></div>
+
+</div>
       <div class="detailActions">
 
         <button
@@ -474,7 +546,10 @@ ${
     </div>
 
   `;
+currentAssets =
+  currentBroadcastEvent.assets || [];
 
+renderAssetList();
   document
   .getElementById(
     "saveBroadcastEvent"
@@ -636,10 +711,13 @@ document
           ...withoutOverlay,
 
           {
-            id: assetId,
-            url: publicUrl,
-            type: "overlay"
-          }
+  id: assetId,
+  url: publicUrl,
+  type: "overlay",
+  mediaType: file.type.startsWith("video")
+    ? "video"
+    : "image"
+}
 
         ];
 
@@ -742,10 +820,13 @@ document
           ...withoutHero,
 
           {
-            id: assetId,
-            url: publicUrl,
-            type: "hero"
-          }
+  id: assetId,
+  url: publicUrl,
+  type: "hero",
+  mediaType: file.type.startsWith("video")
+    ? "video"
+    : "image"
+}
 
         ];
 
@@ -859,10 +940,13 @@ document
           ...withoutCrowd,
 
           {
-            id: assetId,
-            url: publicUrl,
-            type: "crowd"
-          }
+  id: assetId,
+  url: publicUrl,
+  type: "crowd",
+  mediaType: file.type.startsWith("video")
+    ? "video"
+    : "image"
+}
 
         ];
 
@@ -1564,10 +1648,10 @@ function renderCampaigns(list) {
 
   
       ${
-        a.type === "video"
-          ? `<video src="${a?.url || ""}" muted></video>`
-          : `<img src="${a?.url || ""}">`
-      }
+  a.mediaType === "video"
+    ? `<video src="${a.url}" style="height:40px;" muted></video>`
+    : `<img src="${a.url}" style="height:40px;">`
+}
     </div>
   `,
           )
@@ -2645,7 +2729,7 @@ function renderGameEvents(list) {
           </button>
 
           ${
-            a.type === "video"
+            (a.mediaType || a.type) === "video"
               ? `<video src="${a?.url || ""}" muted></video>`
               : `<img src="${a?.url || ""}">`
           }
@@ -3029,8 +3113,10 @@ function renderBroadcastRows() {
 
         }
 
-        const hero =
-  getHeroAsset(assets)?.url || "";
+        const heroAsset =
+  getHeroAsset(
+    assets
+  );
 
         const created =
           ev.created_at
@@ -3053,17 +3139,26 @@ function renderBroadcastRows() {
               class="broadcastThumb"
             >
 
-              ${
-                hero
-                  ? `
-                    <img
-                      src="${hero}"
-                    >
-                  `
-                  : `
-                    <span>—</span>
-                  `
-              }
+             ${
+  heroAsset
+    ? heroAsset.mediaType === "video"
+      ? `
+        <video
+          src="${heroAsset.url}"
+          muted
+          autoplay
+          loop
+        ></video>
+      `
+      : `
+        <img
+          src="${heroAsset.url}"
+        >
+      `
+    : `
+      <span>—</span>
+    `
+}
 
             </div>
 
@@ -3562,7 +3657,7 @@ function renderAssetList() {
       <span style="width:80px;">${a.type}</span>
 
       ${
-        a.type === "video"
+        (a.mediaType || a.type) === "video"
           ? `<video src="${a.url}" style="height:40px;" muted></video>`
           : `<img src="${a.url}" style="height:40px;">`
       }

@@ -1,175 +1,519 @@
+:root{
+  --league-cyan: #22d3ee;
+  --league-blue: #3b82f6;
+  --league-pink: #ec4899;
+
+  --glass:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.08),
+      rgba(255,255,255,.03)
+    );
+
+  --glass-border:
+    rgba(255,255,255,.08);
+
+  --text:
+    #f8fafc;
+
+  --text-soft:
+    rgba(248,250,252,.65);
+}
+
 /* =========================
-🌌 SPLASH BASE
+   🌌 SPLASH SCREEN
 ========================= */
+
 #splash {
   position: fixed;
   inset: 0;
-  z-index: 9999;
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  padding: 20px;
-
-  background:
-    radial-gradient(circle at 20% 20%, rgba(34,197,94,0.15), transparent 40%),
-    radial-gradient(circle at 80% 30%, rgba(59,130,246,0.15), transparent 40%),
-    linear-gradient(180deg, #020617, #000);
-
-  color: white;
-}
-
-#logo {
-  width: clamp(120px, 40vw, 200px);
-  margin-bottom: 10px;
-
-  filter: drop-shadow(0 10px 30px rgba(0,0,0,0.8));
-}
-
-/* =========================
-📦 FORM CONTAINER
-========================= */
-.select-group {
-  width: 100%;
-  max-width: 340px;
+  z-index: 999999;
 
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+
+  justify-content: flex-start;
+
+  min-height: 100dvh;
+
+  overflow-y: auto;
+
+  padding:
+    max(env(safe-area-inset-top), 20px)
+    20px
+    max(env(safe-area-inset-bottom), 20px);
+
+  background:
+  radial-gradient(
+    circle at 15% 15%,
+    rgba(236,72,153,.22),
+    transparent 35%
+  ),
+
+  radial-gradient(
+    circle at 85% 20%,
+    rgba(34,211,238,.20),
+    transparent 35%
+  ),
+
+  radial-gradient(
+    circle at 50% 85%,
+    rgba(59,130,246,.20),
+    transparent 45%
+  ),
+
+  linear-gradient(
+    180deg,
+    #07111f,
+    #020617
+  );
+
+/* =========================
+   ✨ AMBIENT GLOW
+========================= */
+
+#splash::before {
+  content: "";
+
+  position: absolute;
+  inset: -20%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(34,211,238,.12),
+      transparent 50%
+    );
+
+  filter: blur(80px);
+
+  animation: splashGlow 10s ease-in-out infinite;
+
+  pointer-events: none;
+}
+
+@keyframes splashGlow {
+  0% {
+    transform: scale(1);
+    opacity: .6;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: .6;
+  }
 }
 
 /* =========================
-🧱 INPUT (NO GLASS!)
+   🎮 LOGO
 ========================= */
-#plzInput {
+
+#logo {
+  width:min(78vw,250px);
+
+  height:auto;
+
+  margin-top:10px;
+  margin-bottom:20px;
+
+  display:block;
+
+  filter:
+    drop-shadow(0 15px 35px rgba(0,0,0,.6))
+    drop-shadow(0 0 18px rgba(236,72,153,.15))
+    drop-shadow(0 0 28px rgba(34,211,238,.12));
+}
+
+/* =========================
+   📦 SPLASH CONTENT
+========================= */
+
+#splash > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* =========================
+   🪟 FORM CARD
+========================= */
+
+.select-group,
+#plzSearch {
   width: 100%;
-  height: 48px;
-  padding: 0 14px;
-
-  border-radius: 10px;
-  border: 1px solid #1f2937;
-
-  background: #020617;
-  color: white;
-
-  font-size: 14px;
 }
 
-#plzInput:focus {
-  border-color: #22c55e;
-  outline: none;
+#nameInput,
+#plzInput,
+#leagueSelect,
+#teamSelect,
+.custom-select .selected{
+
+  width:100%;
+  height:52px;
+
+  padding:0 16px;
+
+  border-radius:14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(236,72,153,.08),
+      rgba(34,211,238,.05)
+    );
+
+  border:1px solid rgba(255,255,255,.08);
+
+  color:var(--text);
+
+  font-size:15px;
+  font-weight:600;
+
+  transition:.2s;
+}
+
+#nameInput:focus,
+#plzInput:focus,
+#leagueSelect:focus,
+#teamSelect:focus{
+
+  border-color:var(--league-pink);
+
+  box-shadow:
+    0 0 0 3px rgba(236,72,153,.12),
+    0 0 18px rgba(236,72,153,.18);
+}
+
+#nameInput::placeholder,
+#plzInput::placeholder {
+  color: rgba(255,255,255,.45);
 }
 
 /* =========================
-🎛 CUSTOM SELECT
+   🎛 SELECTS
 ========================= */
+
+#leagueSelect,
+#teamSelect {
+  appearance: none;
+  -webkit-appearance: none;
+
+  cursor: pointer;
+
+  color: var(--text);
+  font-weight: 600;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--league-pink) 50%),
+    linear-gradient(135deg, var(--league-cyan) 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
+#leagueSelect option,
+#teamSelect option {
+  background: #111827;
+  color: white;
+}
+
+/* =========================
+   📍 PLZ SEARCH RESULTS
+========================= */
+
+#plzSearch {
+  position: relative;
+}
+
+#leagueResults {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+
+  overflow: hidden;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17,24,39,.98),
+      rgba(2,6,23,.98)
+    );
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.45),
+    0 0 24px rgba(236,72,153,.08);
+
+  z-index: 100;
+}
+
+.league-result {
+  padding: 14px 16px;
+
+  color: white;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    padding-left .15s ease;
+}
+
+.league-result:hover {
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(236,72,153,.18),
+      rgba(34,211,238,.10)
+    );
+
+  padding-left: 20px;
+}
+
+/* =========================
+   🎛 CUSTOM SELECT
+========================= */
+
 .custom-select {
   position: relative;
   width: 100%;
 }
 
-/* Disabled */
 .custom-select.disabled {
-  opacity: 0.4;
+  opacity: .4;
   pointer-events: none;
 }
 
-/* Selected */
 .custom-select .selected {
-  height: 48px;
-  padding: 0 14px;
+
+  height: 54px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  border-radius: 10px;
-  border: 1px solid #1f2937;
+  padding: 0 16px;
 
-  background: #020617;
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(236,72,153,.08),
+      rgba(34,211,238,.05)
+    );
+
+  border: 1px solid rgba(255,255,255,.08);
+
   color: white;
+  font-weight: 600;
 
-  font-size: 14px;
   cursor: pointer;
+
+  transition: .2s ease;
 }
 
-/* Arrow */
+.custom-select .selected:hover {
+
+  border-color: rgba(34,211,238,.25);
+
+  box-shadow:
+    0 0 0 1px rgba(34,211,238,.10);
+}
+
 .custom-select .selected::after {
   content: "▾";
-  opacity: 0.6;
+  color: var(--league-cyan);
 }
 
-/* =========================
-📂 DROPDOWN LIST
-========================= */
 .custom-select .options {
+
   position: absolute;
-  top: calc(100% + 4px);
+
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
 
   display: none;
 
-  background: #020617;
-
-  border: 1px solid #1f2937;
-  border-radius: 10px;
-
   overflow: hidden;
 
-  z-index: 500;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17,24,39,.98),
+      rgba(2,6,23,.98)
+    );
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  backdrop-filter: blur(16px);
+
+  box-shadow:
+    0 20px 40px rgba(0,0,0,.45),
+    0 0 20px rgba(34,211,238,.08);
+
+  z-index: 50;
 }
 
-/* Open */
 .custom-select.open .options {
   display: block;
 }
 
-/* Option */
 .custom-select .option {
-  padding: 12px;
+
+  padding: 14px 16px;
+
+  color: white;
+  font-weight: 500;
+
   cursor: pointer;
-  font-size: 14px;
+
+  transition: .15s ease;
 }
 
 .custom-select .option:hover {
-  background: rgba(255,255,255,0.05);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(236,72,153,.18),
+      rgba(34,211,238,.10)
+    );
+
+  padding-left: 20px;
 }
 
 /* =========================
-📍 PLZ FILTER MODE
+   🚀 BUTTONS
 ========================= */
 
-/* Wenn PLZ aktiv → Liga hervorheben */
-#splash.plz-active #leagueSelect {
-  z-index: 2000;
+#splash button {
+
+  width: 100%;
+  height: 56px;
+
+  border: none;
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ec4899,
+      #8b5cf6,
+      #22d3ee
+    );
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 12px 30px rgba(236,72,153,.25);
+
+  transition:
+    transform .15s ease,
+    box-shadow .15s ease;
 }
 
-/* Team leicht dimmen */
+#splash button:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 18px 40px rgba(236,72,153,.30);
+}
+
+#splash button:active {
+  transform: scale(.98);
+}
+
+#splash button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================
+   📍 FILTER STATE
+========================= */
+
 #splash.plz-active #teamSelect {
-  opacity: 0.3;
+  opacity: .35;
   pointer-events: none;
 }
 
 /* =========================
-🚀 BUTTON
+   🪟 PANEL
 ========================= */
-#splash button {
-  width: 100%;
-  height: 50px;
 
-  border-radius: 10px;
-  border: none;
+.splash-panel {
 
-  font-weight: 700;
+  width: min(420px, 100%);
 
-  background: #22c55e;
-  color: #022c22;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-  cursor: pointer;
+  padding: 20px;
+
+  border-radius: 24px;
+
+  background: var(--glass);
+
+  border: 1px solid var(--glass-border);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.45),
+    0 0 25px rgba(34,211,238,.05);
 }
-#splash button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+
+/* =========================
+   📱 SMALL HEIGHT DEVICES
+========================= */
+
+@media (max-height: 750px) {
+
+  #logo {
+    width: min(70vw, 220px);
+    margin-bottom: 14px;
+  }
+
+  .splash-panel {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  #nameInput,
+  #plzInput,
+  #leagueSelect,
+  #teamSelect {
+    height: 48px;
+  }
 }
