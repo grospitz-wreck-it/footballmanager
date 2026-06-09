@@ -1,4 +1,4 @@
-# ⚽ Kreisliga Manager
+# ⚽ League - A Hard Way Up
 
 Ein minimalistisches Fußball-Manager-Spiel im Stil der 90er Jahre.
 
