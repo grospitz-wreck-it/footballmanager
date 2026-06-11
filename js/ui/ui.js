@@ -2544,14 +2544,28 @@ function showOverlay(url, text = "") {
   const image =
     document.getElementById("gameEventImage");
 
+  const video =
+    document.getElementById("gameEventVideo");
+
   if (!overlay || !image) {
     console.warn("❌ gameEventOverlay missing");
     return;
   }
 
-  // zunächst verstecken
+  // Reset
   overlay.classList.add("hidden");
   overlay.style.display = "none";
+
+  // Video sicher stoppen
+  if (video) {
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+    video.style.display = "none";
+  }
+
+  // Bild aktivieren
+  image.style.display = "block";
 
   image.onload = () => {
     console.log("✅ IMAGE LOADED");
@@ -2560,31 +2574,40 @@ function showOverlay(url, text = "") {
     overlay.style.opacity = "1";
     overlay.style.visibility = "visible";
     overlay.style.zIndex = "999999";
+
     overlay.classList.remove("hidden");
 
     setTimeout(() => {
       overlay.classList.add("hidden");
+      overlay.style.display = "none";
     }, 5000);
   };
 
   image.onerror = (err) => {
-    console.error("❌ IMAGE LOAD FAILED", err, url);
-  };
-const video =
-  document.getElementById("gameEventVideo");
+    console.error(
+      "❌ IMAGE LOAD FAILED",
+      err,
+      url
+    );
 
-if (video) {
-  video.pause();
-  video.style.display = "none";
-}
+    overlay.classList.add("hidden");
+    overlay.style.display = "none";
+  };
+
   image.src = url;
 
   console.log("URL:", url);
   console.log("IMAGE SRC:", image.src);
-  console.log("IMAGE ATTR:", image.getAttribute("src"));
+  console.log(
+    "IMAGE ATTR:",
+    image.getAttribute("src")
+  );
 }
 function showVideoOverlay(url, text = "") {
-  console.log("🎬 SHOW VIDEO OVERLAY", url);
+  console.log(
+    "🎬 SHOW VIDEO OVERLAY",
+    url
+  );
 
   const overlay =
     document.getElementById("gameEventOverlay");
@@ -2595,29 +2618,56 @@ function showVideoOverlay(url, text = "") {
   const video =
     document.getElementById("gameEventVideo");
 
-  if (!overlay || !image || !video) {
-    console.warn("❌ overlay elements missing");
+  if (
+    !overlay ||
+    !image ||
+    !video
+  ) {
+    console.warn(
+      "❌ overlay elements missing"
+    );
     return;
   }
+
+  // Reset
+  overlay.classList.add("hidden");
+  overlay.style.display = "none";
 
   image.style.display = "none";
 
   video.style.display = "block";
-  video.src = url;
-  video.load();
 
-  overlay.style.display = "flex";
-  overlay.style.opacity = "1";
-  overlay.style.visibility = "visible";
-  overlay.style.zIndex = "999999";
+  video.onloadeddata = () => {
+    console.log("✅ VIDEO LOADED");
 
-  overlay.classList.remove("hidden");
+    overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+    overlay.style.visibility = "visible";
+    overlay.style.zIndex = "999999";
 
-  video.play().catch(console.error);
+    overlay.classList.remove("hidden");
+
+    video.play().catch(console.error);
+  };
+
+  video.onerror = (err) => {
+    console.error(
+      "❌ VIDEO LOAD FAILED",
+      err,
+      url
+    );
+
+    overlay.classList.add("hidden");
+    overlay.style.display = "none";
+  };
 
   video.onended = () => {
     overlay.classList.add("hidden");
+    overlay.style.display = "none";
   };
+
+  video.src = url;
+  video.load();
 }
 // =========================
 // 📦 EXPORTS
