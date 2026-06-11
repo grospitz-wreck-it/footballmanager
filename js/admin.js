@@ -1,6 +1,24 @@
 let insightChart = null;
 let currentAssets = [];
 import { supabase } from "./client.js";
+
+const {
+  data: { user }
+} = await supabase.auth.getUser();
+
+if (!user) {
+  location.href = "/";
+  throw new Error("Not authenticated");
+}
+
+const ADMIN_EMAILS = [
+  "grospitz@gmail.com"
+];
+
+if (!ADMIN_EMAILS.includes(user.email)) {
+  location.href = "/";
+  throw new Error("Not authorized");
+}
 // =====================
 // STATE
 // =====================
