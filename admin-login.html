@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Login</title>
+
+  <style>
+    body{
+      font-family:sans-serif;
+      background:#0f172a;
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+      margin:0;
+    }
+
+    .card{
+      width:320px;
+      padding:24px;
+      border-radius:16px;
+      background:#111827;
+    }
+
+    input,
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border-radius:10px;
+      border:none;
+    }
+
+    button{
+      cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <h2>Admin Login</h2>
+
+  <input
+    id="email"
+    type="email"
+    placeholder="E-Mail"
+  >
+
+  <input
+    id="password"
+    type="password"
+    placeholder="Passwort"
+  >
+
+  <button id="loginBtn">
+    Login
+  </button>
+
+  <button id="googleBtn">
+    Google Login
+  </button>
+
+</div>
+
+<script type="module" src="./js/admin-login.js"></script>
+
+</body>
+</html>

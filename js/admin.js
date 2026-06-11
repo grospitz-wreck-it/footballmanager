@@ -2,29 +2,27 @@ let insightChart = null;
 let currentAssets = [];
 import { supabase } from "./client.js";
 
-const {
-  data: { user }
-} = await supabase.auth.getUser();
-
-console.log("USER:", user);
-
 const ADMIN_EMAILS = [
   "grospitz@gmail.com"
 ];
 
+const {
+  data: { user }
+} = await supabase.auth.getUser();
+
 if (!user) {
-  document.body.innerHTML =
-    "<h1>DEBUG: Kein User gefunden</h1>";
+  location.href = "./admin-login.html";
   throw new Error("Not authenticated");
 }
 
 if (!ADMIN_EMAILS.includes(user.email)) {
-  document.body.innerHTML =
-    `<h1>DEBUG: Falscher User</h1><pre>${user.email}</pre>`;
+
+  await supabase.auth.signOut();
+
+  location.href = "./";
+
   throw new Error("Not authorized");
 }
-
-console.log("ADMIN LOGIN OK");
 // =====================
 // STATE
 // =====================
