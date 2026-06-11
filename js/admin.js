@@ -6,19 +6,25 @@ const {
   data: { user }
 } = await supabase.auth.getUser();
 
-if (!user) {
-  location.href = "/";
-  throw new Error("Not authenticated");
-}
+console.log("USER:", user);
 
 const ADMIN_EMAILS = [
   "grospitz@gmail.com"
 ];
 
+if (!user) {
+  document.body.innerHTML =
+    "<h1>DEBUG: Kein User gefunden</h1>";
+  throw new Error("Not authenticated");
+}
+
 if (!ADMIN_EMAILS.includes(user.email)) {
-  location.href = "/";
+  document.body.innerHTML =
+    `<h1>DEBUG: Falscher User</h1><pre>${user.email}</pre>`;
   throw new Error("Not authorized");
 }
+
+console.log("ADMIN LOGIN OK");
 // =====================
 // STATE
 // =====================
