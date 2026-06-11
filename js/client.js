@@ -1,9 +1,11 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-console.log("URL:", SUPABASE_URL);
-console.log("KEY:", SUPABASE_KEY);
-console.log("CLIENT:", supabase);
-console.log("🔥 Supabase Client erstellt");
+export const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
+if (import.meta.env.DEV) {
+  console.log("🔥 Supabase Client erstellt");
+}

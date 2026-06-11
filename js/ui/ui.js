@@ -755,11 +755,20 @@ function initUI() {
   // =========================
   // 🔥 STATE LISTENER
   // =========================
-  on(EVENTS.STATE_CHANGED, () => {
-    if (game.events?.history?.length) {
-      updateEvents();
-    }
-  });
+  on(EVENTS.STATE_CHANGED, (event) => {
+
+  console.log(
+    "🔥 UI RECEIVED STATE_CHANGED",
+    event
+  );
+
+  console.log(
+    "🔥 HISTORY NOW",
+    game.events?.history?.length
+  );
+
+  updateEvents();
+});
 
   // =========================
   // ⚽ PENALTY EVENT LISTENER
@@ -1235,44 +1244,74 @@ function updateProgress() {
 // 📰 EVENTS
 // =========================
 function updateEvents() {
-  const container =
-    document.getElementById("liveFeed");
-
-  if (!container) return;
 
   const events = game.events?.history;
 
-  if (!events?.length) return;
+  console.log(
+    "📚 history length:",
+    events?.length || 0
+  );
+
+  if (!events?.length) {
+    console.warn(
+      "⚠️ no events in history"
+    );
+    return;
+  }
 
   const newest =
-  events[events.length - 1];
+    events[events.length - 1];
 
-  if (!newest) return;
+  if (!newest) {
+    console.warn(
+      "⚠️ newest event missing"
+    );
+    return;
+  }
 
   console.log(
     "🧪 EVENT DEBUG:",
-    newest,
+    newest
   );
 
-  // =========================
-  // 🔁 DUPLICATE GUARD
-  // =========================
+  console.log(
+    "🧪 LAST RENDERED:",
+    lastRenderedEventId
+  );
+
   if (
     newest.id === lastRenderedEventId
   ) {
+    console.warn(
+      "⛔ DUPLICATE BLOCKED:",
+      newest.id
+    );
     return;
   }
+
+  console.log(
+    "✅ EVENT WILL RENDER:",
+    newest.type,
+    newest.id
+  );
 
   lastRenderedEventId = newest.id;
 
   // =========================
   // 📊 TRACKING
   // =========================
-  track("game_event", {
-    minute: newest.minute,
-    text: newest.text || null,
-    type: newest.type || "UNKNOWN",
-  });
+  try {
+    track("game_event", {
+      minute: newest.minute,
+      text: newest.text || null,
+      type: newest.type || "UNKNOWN",
+    });
+  } catch (e) {
+    console.warn(
+      "⚠️ tracking failed",
+      e
+    );
+  }
 
   // =========================
   // 🎬 EVENT ICON
@@ -1283,7 +1322,7 @@ function updateEvents() {
     } catch (e) {
       console.warn(
         "⚠️ pushEventIcon failed",
-        e,
+        e
       );
     }
   }
@@ -1299,7 +1338,7 @@ function updateEvents() {
     } catch (e) {
       console.warn(
         "⚠️ Commentary failed",
-        e,
+        e
       );
     }
   }
@@ -1309,125 +1348,71 @@ function updateEvents() {
   }
 
   // =========================
-  // 🎨 INLINE ASSET RENDER
+  // 🎨 ASSETS
   // =========================
+
   const assets =
+    newest.assets?.length
+      ? newest.assets
+      : newest.meta?.assets || [];
 
-  newest.assets?.length
-    ? newest.assets
-    : newest.meta?.assets || [];
-
-  const assetHTML = assets
-    .map((a) => {
-
-      if (!a?.url) return "";
-
-      const isVideo =
-        a.type === "video" ||
-        /\.(mp4|webm|ogg)$/i.test(a.url);
-
-      if (isVideo) {
-        return `
-          <video
-            class="feedMedia"
-            src="${a.url}"
-            autoplay
-            muted
-            loop
-            playsinline
-          ></video>
-        `;
-      }
-
-      return `
-        <img
-          class="feedMedia"
-          src="${a.url}"
-        >
-      `;
-    })
-    .join("");
+  console.log(
+    "🎨 EVENT ASSETS:",
+    assets
+  );
 
   // =========================
-  // 📰 FEED ENTRY
+  // 📝 EVENT BAR TEXT
   // =========================
-  const div =
-    document.createElement("div");
+  const eventText =
+    document.getElementById("eventText");
 
-  div.className = "feedEvent";
-
-  div.innerHTML = `
-    <div class="feedHeader">
-      <span class="feedMinute">
-        ${newest.minute}'
-      </span>
-
-      <span class="feedType">
-        ${newest.type || "EVENT"}
-      </span>
-    </div>
-
-    ${
-      assetHTML
-        ? `
-      <div class="feedMediaWrap">
-        ${assetHTML}
-      </div>
-    `
-        : ""
-    }
-
-    <div class="feedText">
-      ${text}
-    </div>
-  `;
-
-  container.appendChild(div);
-
-  // =========================
-  // 🔽 AUTOSCROLL
-  // =========================
-  container.scrollTop =
-    container.scrollHeight;
+  if (eventText) {
+    eventText.textContent = text;
+  }
 
   // =========================
   // 🎬 OVERLAY
   // =========================
-  if (assets.length) {
-
-    const asset = assets.find(
-      (a) =>
-        a?.url &&
-        (
-          a.type === "video" ||
-          a.type === "image" ||
-          /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)
-        ),
-    );
-
-    if (!asset) {
-      console.warn(
-        "❌ No valid media asset found",
-      );
-      return;
-    }
-
-    const url = asset.url;
-
-    const isVideo =
-      asset.type === "video" ||
-      /\.(mp4|webm|ogg)$/i.test(url);
-
+  if (!assets.length) {
     console.log(
-      "🎥 ASSET CHECK:",
-      asset,
+      "ℹ️ Event has no media assets"
     );
+    return;
+  }
 
-    if (isVideo) {
-      showVideoOverlay(url, text);
-    } else {
-      showOverlay(url, text);
-    }
+  const asset = assets.find(
+    (a) =>
+      a?.url &&
+      (
+        a.type === "video" ||
+        a.type === "image" ||
+        /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)
+      )
+  );
+
+  if (!asset) {
+    console.warn(
+      "❌ No valid media asset found"
+    );
+    return;
+  }
+
+  const url = asset.url;
+
+  const isVideo =
+    asset.type === "video" ||
+    /\.(mp4|webm|ogg)$/i.test(url);
+
+  console.log(
+    "🎥 ASSET CHECK:",
+    asset
+  );
+
+  if (isVideo) {
+    showVideoOverlay(url, text);
+  } else {
+    showOverlay(url, text);
   }
 }
 // =========================
@@ -2496,14 +2481,15 @@ window.startPenaltySequence = function (context = {}) {
 
           triggerGoalAnimation(isHome ? "home" : "away");
         } else if (result?.saved) {
-          game.events.history.push({
-            id: Date.now(),
-            minute: currentLive.minute,
-            type: "SHOT_SAVED",
-            teamId: context.teamId,
-            teamName: context.teamName,
-            text: "🧤 ELFMETER GEHALTEN!",
-          });
+  game.events.history.push({
+    id: Date.now(),
+    minute: currentLive.minute,
+    type: "PENALTY_SAVED",
+    teamId: context.teamId,
+    teamName: context.teamName,
+    text: "🧤 ELFMETER GEHALTEN!",
+  });
+
         } else {
           game.events.history.push({
             id: Date.now(),
@@ -2548,6 +2534,36 @@ window.startPenaltySequence = function (context = {}) {
     },
   });
 };
+
+function showOverlay(url, text = "") {
+  console.log("🔥 SHOW OVERLAY CALLED", url);
+
+  const overlay =
+    document.getElementById("gameEventOverlay");
+
+  const image =
+    document.getElementById("gameEventImage");
+
+  if (!overlay || !image) {
+    console.warn("❌ gameEventOverlay missing");
+    return;
+  }
+
+  image.src = url;
+console.log("OVERLAY", overlay);
+console.log("IMAGE", image);
+
+overlay.style.display = "flex";
+overlay.style.opacity = "1";
+overlay.style.visibility = "visible";
+overlay.style.zIndex = "999999";
+  overlay.classList.remove("hidden");
+
+  setTimeout(() => {
+    overlay.classList.add("hidden");
+  }, 5000);
+}
+
 // =========================
 // 📦 EXPORTS
 // =========================

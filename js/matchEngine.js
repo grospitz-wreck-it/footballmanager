@@ -952,6 +952,7 @@ function createFoul(ctx) {
 // 🚩 CORNER
 // =========================
 function createCorner(ctx) {
+  console.log("🚩 CREATE CORNER CALLED");
 
   const live =
     game.match?.live;
@@ -1467,11 +1468,16 @@ function simulateLiveEvent(ctx) {
     // =====================
     case "corner":
 
-      if (Math.random() < 0.18) {
-        createCorner(ctx);
-      }
+  console.log("🧪 CORNER ROLL");
 
-      break;
+  if (Math.random() < 0.18) {
+
+    console.log("✅ CORNER PASSED");
+
+    createCorner(ctx);
+  }
+
+  break;
 
     // =====================
     // ➡️ PASS

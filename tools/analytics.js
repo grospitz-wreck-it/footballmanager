@@ -21,19 +21,19 @@ export function getSessionId(){
   return id;
 }
 
-export function track(event, payload = {}){
+export function track(event, payload = {}) {
 
   supabase
     .from("analytics_events")
     .insert({
       event_name: event,
-      payload,
+      meta: payload,
       session_id: getSessionId(),
       user_id: getUserId(),
       created_at: new Date().toISOString()
     })
     .then(({ error }) => {
-      if(error){
+      if (error) {
         console.warn("Tracking failed", error);
       }
     })

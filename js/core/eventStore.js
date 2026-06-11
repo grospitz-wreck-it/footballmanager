@@ -142,6 +142,8 @@ function ensureId(event) {
 // 🧠 CORE PIPELINE (NEU)
 // =========================
 function processEvent(event) {
+    console.log("🔥 PROCESS EVENT CALLED", event);
+
   if (!event) return;
 
   if (!game.events) {
@@ -231,11 +233,19 @@ function processEvent(event) {
       ...enrichMeta(enrichedInput),
     },
   };
-
+console.log("🔥 PUSHING TO HISTORY", finalEvent);
   game.events.history.push(finalEvent);
+  console.log(
+  "🔥 HISTORY LENGTH",
+  game.events.history.length
+);
   game.events.last = finalEvent;
 
   emit(EVENTS.STATE_CHANGED, finalEvent);
+  console.log(
+  "🔥 STATE EMITTED",
+  game.events.history.length
+);
 }
 
 // =========================

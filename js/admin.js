@@ -388,7 +388,12 @@ ${
             >
               SHOT_SAVED
             </option>
-
+<option
+  value="PENALTY_SAVED"
+  ${event.type === "PENALTY_SAVED" ? "selected" : ""}
+>
+  PENALTY_SAVED
+</option>
             <option
               value="GOAL"
               ${event.type === "GOAL" ? "selected" : ""}
@@ -2151,6 +2156,7 @@ function loadEventTypes() {
     ["SHOT", "🎯 Schuss"],
     ["SHOT_SAVED", "🧤 Parade"],
     ["FOUL", "🚫 Foul"],
+    ["PENALTY_SAVED", "🧤 Elfmeter gehalten"],
     ["CORNER", "🚩 Ecke"],
     ["DUEL", "⚔️ Zweikampf"],
     ["MATCH_INTRO", "🎬 Match Intro"],
@@ -2969,7 +2975,7 @@ function renderGameEvents(list) {
           ["FOUL", "🚫 Foul"],
           ["CORNER", "🚩 Ecke"],
           ["DUEL", "⚔️ Zweikampf"],
-
+          ["PENALTY_SAVED", "🧤 Elfmeter gehalten"],
           ["PASS", "➡️ Pass"],
           ["DRIBBLE", "🌀 Dribbling"],
           ["INTERCEPTION", "🛑 Interception"],

@@ -1,0 +1,28 @@
+{
+  "name": "footballmanager",
+  "version": "1.0.0",
+  "description": "Ein minimalistisches Fußball-Manager-Spiel im Stil der 90er Jahre.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grospitz-wreck-it/footballmanager.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/grospitz-wreck-it/footballmanager/issues"
+  },
+  "homepage": "https://github.com/grospitz-wreck-it/footballmanager#readme",
+  "devDependencies": {
+    "vite": "^8.0.16"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1"
+  }
+}

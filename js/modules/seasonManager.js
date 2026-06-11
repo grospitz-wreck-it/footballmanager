@@ -18,12 +18,6 @@ function resetLeagueTable(league) {
   });
 }
 
-function processPlayerProgression() {
-  applySeasonBudget(seasonResult);
-  // Spielerentwicklung / Marktwert / Tier-Upgrades
-  return;
-}
-
 function processClubFinances() {
   // 🔥 PHASE 3+
   // Budget / Sponsoring / Preisgelder
