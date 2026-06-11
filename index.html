@@ -243,7 +243,20 @@
         <canvas id="gameCanvasInner"></canvas>
 
         <div id="gameEventOverlay" class="hidden">
-  <img id="gameEventImage" />
+
+  <img
+    id="gameEventImage"
+    style="display:none;"
+  />
+
+  <video
+    id="gameEventVideo"
+    style="display:none;"
+    muted
+    playsinline
+    preload="auto"
+  ></video>
+
   <div id="gameEventText"></div>
 
 </div>

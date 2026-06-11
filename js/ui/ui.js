@@ -2549,21 +2549,76 @@ function showOverlay(url, text = "") {
     return;
   }
 
-  image.src = url;
-console.log("OVERLAY", overlay);
-console.log("IMAGE", image);
+  // zunächst verstecken
+  overlay.classList.add("hidden");
+  overlay.style.display = "none";
 
-overlay.style.display = "flex";
-overlay.style.opacity = "1";
-overlay.style.visibility = "visible";
-overlay.style.zIndex = "999999";
+  image.onload = () => {
+    console.log("✅ IMAGE LOADED");
+
+    overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+    overlay.style.visibility = "visible";
+    overlay.style.zIndex = "999999";
+    overlay.classList.remove("hidden");
+
+    setTimeout(() => {
+      overlay.classList.add("hidden");
+    }, 5000);
+  };
+
+  image.onerror = (err) => {
+    console.error("❌ IMAGE LOAD FAILED", err, url);
+  };
+const video =
+  document.getElementById("gameEventVideo");
+
+if (video) {
+  video.pause();
+  video.style.display = "none";
+}
+  image.src = url;
+
+  console.log("URL:", url);
+  console.log("IMAGE SRC:", image.src);
+  console.log("IMAGE ATTR:", image.getAttribute("src"));
+}
+function showVideoOverlay(url, text = "") {
+  console.log("🎬 SHOW VIDEO OVERLAY", url);
+
+  const overlay =
+    document.getElementById("gameEventOverlay");
+
+  const image =
+    document.getElementById("gameEventImage");
+
+  const video =
+    document.getElementById("gameEventVideo");
+
+  if (!overlay || !image || !video) {
+    console.warn("❌ overlay elements missing");
+    return;
+  }
+
+  image.style.display = "none";
+
+  video.style.display = "block";
+  video.src = url;
+  video.load();
+
+  overlay.style.display = "flex";
+  overlay.style.opacity = "1";
+  overlay.style.visibility = "visible";
+  overlay.style.zIndex = "999999";
+
   overlay.classList.remove("hidden");
 
-  setTimeout(() => {
-    overlay.classList.add("hidden");
-  }, 5000);
-}
+  video.play().catch(console.error);
 
+  video.onended = () => {
+    overlay.classList.add("hidden");
+  };
+}
 // =========================
 // 📦 EXPORTS
 // =========================
