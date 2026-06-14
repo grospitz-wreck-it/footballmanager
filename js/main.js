@@ -859,14 +859,62 @@ if (matchEventsError) {
 
     // ✅ NACH DEM LOOP
     const leagues = Array.from(leagueMap.values());
+console.log(
+  "🏗 PREPARING LEAGUES",
+  leagues.length
+);
 
-    if (window.DEBUG) console.log("🧪 RAW LEAGUE MAP:", leagueMap);
-    if (window.DEBUG) console.log("🧪 BUILT LEAGUES:", leagues);
+for (const league of leagues) {
+
+  try {
+
+    if (
+      typeof generateSchedule === "function"
+    ) {
+      generateSchedule(league);
+    }
+
+    league.currentRound = 0;
+
+    if (
+      typeof initTable === "function"
+    ) {
+      initTable(league);
+    }
+
+    console.log(
+      "✅ LEAGUE READY:",
+      league.name,
+      "teams:",
+      league.teams?.length || 0,
+      "rounds:",
+      league.schedule?.length || 0
+    );
+
+  } catch (err) {
+
+    console.error(
+      "❌ LEAGUE BUILD FAILED:",
+      league.name,
+      err
+    );
+
+  }
+
+}
 
     game.leagues = leagues;
     game.league = game.league || {};
     game.league.available = leagues;
-
+console.log(
+  "🧪 LEAGUE CHECK",
+  game.leagues.map(l => ({
+    name: l.name,
+    teams: l.teams?.length,
+    rounds: l.schedule?.length,
+    currentRound: l.currentRound
+  }))
+);
     initLeagueSelect(leagues);
 
     if (window.DEBUG) console.log("🏁 Leagues built:", leagues.length);
