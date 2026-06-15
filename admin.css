@@ -1940,12 +1940,7 @@ button.danger{
 /* =====================================================
    CROWD
 ===================================================== */
-
 #previewCrowd{
-<<<<<<< HEAD
-#previewCrowd{
-=======
->>>>>>> 7edd4fb (Fix build)
   z-index:2;
   object-fit:cover;
   opacity:1;
