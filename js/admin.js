@@ -2,12 +2,10 @@ let insightChart = null;
 let currentAssets = [];
 import { supabase } from "./client.js";
 
-const ADMIN_EMAILS = [
-  "grospitz@gmail.com"
-];
+const ADMIN_EMAILS = ["grospitz@gmail.com"];
 
 const {
-  data: { user }
+  data: { user },
 } = await supabase.auth.getUser();
 
 if (!user) {
@@ -16,13 +14,20 @@ if (!user) {
 }
 
 if (!ADMIN_EMAILS.includes(user.email)) {
-
   await supabase.auth.signOut();
 
   location.href = "./";
 
   throw new Error("Not authorized");
 }
+// 👇 HIER EINFÜGEN
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+console.log("USER:", user);
+console.log("SESSION:", session);
+console.log("TOKEN:", session?.access_token);
 // =====================
 // STATE
 // =====================
@@ -35,7 +40,7 @@ const state = {
   inlineEditId: null,
   inlineEventEditId: null,
   partners: [],
-selectedPartner: null,
+  selectedPartner: null,
 
   // 🔥 NEU
   inlineGameEventEditId: null,
@@ -61,9 +66,7 @@ function getBroadcastEvents() {
 }
 
 function createBroadcastEvent() {
-
   currentBroadcastEvent = {
-
     id: null,
 
     title: "",
@@ -78,274 +81,342 @@ function createBroadcastEvent() {
 
     assets: [],
 
-    source: "game"
-
+    source: "game",
   };
 
-  openBroadcastEditor(
-    currentBroadcastEvent
-  );
-
+  openBroadcastEditor(currentBroadcastEvent);
 }
 function openBroadcastEditor(event) {
-
   currentBroadcastEvent = event;
 
-  const detail =
-    document.getElementById(
-      "broadcastDetail"
-    );
+  const detail = document.getElementById("broadcastDetail");
 
   if (!detail) return;
 
-  const heroAsset =
-  getAssetByType(
-    event.assets,
-    "hero"
-  );
+  const heroAsset = getAssetByType(event.assets, "hero");
+  const crowdAsset = getAssetByType(event.assets, "crowd");
+  const overlayAsset = getAssetByType(event.assets, "overlay");
+  const audioAsset = getAssetByType(event.assets, "audio");
 
-const crowdAsset =
-  getAssetByType(
-    event.assets,
-    "crowd"
-  );
+const heroHasFx =
+  heroAsset?.fx?.animation &&
+  heroAsset.fx.animation !== "none";
 
-const overlayAsset =
-  getAssetByType(
-    event.assets,
-    "overlay"
-  );
+const crowdHasFx =
+  crowdAsset?.fx?.animation &&
+  crowdAsset.fx.animation !== "none";
+
+const overlayHasFx =
+  overlayAsset?.fx?.animation &&
+  overlayAsset.fx.animation !== "none";
 
   detail.innerHTML = `
 
     <div class="broadcastDetailInner">
+    <!-- =====================
+🎬 LIVE PREVIEW
+===================== -->
 
-      <div class="heroEditor">
+<div class="broadcastPreviewBox">
 
-  <div
-    class="assetPreview heroPreview"
-    id="selectHeroAsset"
-  >
+  <div id="broadcastPreview">
 
     ${
-  heroAsset
-    ? `
-          ${
-  heroAsset?.mediaType === "video"
-
-    ? `
-      <video
-        class="detailHero"
-        src="${heroAsset.url}"
-        autoplay
-        muted
-        loop
-      ></video>
-    `
-
-    : `
-      <img
-        class="detailHero"
-        src="${heroAsset?.url || ""}"
-      >
-    `
-}
-
-          <button
-            id="removeHeroAsset"
-            type="button"
-            class="assetDelete"
+      heroAsset?.url
+        ? `
+          <img
+            id="previewHero"
+            src="${heroAsset.url}"
           >
-            ✕
-          </button>
         `
-        : `
-          <div
-            class="detailHeroPlaceholder"
+        : ""
+    }
+
+    ${
+      crowdAsset?.url
+        ? `
+          <img
+            id="previewCrowd"
+            src="${crowdAsset.url}"
           >
-
-            🖼
-
-            <span>
-              Hero hinzufügen
-            </span>
-
-          </div>
         `
+        : ""
+    }
+
+    ${
+      overlayAsset?.url
+        ? `
+          <img
+            id="previewOverlay"
+            src="${overlayAsset.url}"
+          >
+        `
+        : ""
     }
 
   </div>
 
-  <input
-    id="heroUpload"
-    type="file"
-    accept="image/*,video/*"
-    hidden
-  >
+  <div class="assetPickerList">
+
+    <div class="assetPickerRow">
+
+      <span>🖼 Hero</span>
+
+      ${
+        heroAsset
+          ? `
+            <div class="assetMiniPreview">
+
+              ${
+                heroAsset.mediaType === "video"
+                  ? `
+                    <video
+                      src="${heroAsset.url}"
+                      muted
+                    ></video>
+                  `
+                  : `
+                    <img
+                      src="${heroAsset.url}"
+                    >
+                  `
+              }
+
+            </div>
+<button
+  class="assetFxMini ${heroHasFx ? "active" : ""}"
+  data-type="hero"
+  type="button"
+>
+  FX
+</button>
+            <button
+              id="removeHeroAsset"
+              class="assetDeleteMini"
+              type="button"
+            >
+              🗑
+            </button>
+          `
+          : `
+            <button
+              id="selectHeroAsset"
+              class="btn btn-small"
+              type="button"
+            >
+              +
+            </button>
+          `
+      }
+
+    </div>
+
+    <div class="assetPickerRow">
+
+      <span>👥 Crowd</span>
+
+      ${
+        crowdAsset
+          ? `
+            <div class="assetMiniPreview">
+
+              ${
+                crowdAsset.mediaType === "video"
+                  ? `
+                    <video
+                      src="${crowdAsset.url}"
+                      muted
+                    ></video>
+                  `
+                  : `
+                    <img
+                      src="${crowdAsset.url}"
+                    >
+                  `
+              }
+
+            </div>
+<button
+  class="assetFxMini ${crowdHasFx ? "active" : ""}"
+  data-type="crowd"
+  type="button"
+>
+  FX
+</button>
+            <button
+              id="removeCrowdAsset"
+              class="assetDeleteMini"
+              type="button"
+            >
+              🗑
+            </button>
+          `
+          : `
+            <button
+              id="selectCrowdAsset"
+              class="btn btn-small"
+              type="button"
+            >
+              +
+            </button>
+          `
+      }
+
+    </div>
+
+    <div class="assetPickerRow">
+
+      <span>📺 Overlay</span>
+
+      ${
+        overlayAsset
+          ? `
+            <div class="assetMiniPreview">
+
+              ${
+                overlayAsset.mediaType === "video"
+                  ? `
+                    <video
+                      src="${overlayAsset.url}"
+                      muted
+                    ></video>
+                  `
+                  : `
+                    <img
+                      src="${overlayAsset.url}"
+                    >
+                  `
+              }
+
+            </div>
+<button
+  class="assetFxMini ${overlayHasFx ? "active" : ""}"
+  data-type="overlay"
+  type="button"
+>
+  FX
+</button>
+            <button
+              id="removeOverlayAsset"
+              class="assetDeleteMini"
+              type="button"
+            >
+              🗑
+            </button>
+          `
+          : `
+            <button
+              id="selectOverlayAsset"
+              class="btn btn-small"
+              type="button"
+            >
+              +
+            </button>
+          `
+      }
+
+    </div>
+    
+    <div class="assetPickerRow">
+
+  <span>🎵 Audio</span>
+
+  ${
+    audioAsset
+      ? `
+        <div class="assetMiniPreview">
+          🎵 ${audioAsset.name || "Audio"}
+        </div>
+
+        <button
+          id="removeAudioAsset"
+          class="assetDeleteMini"
+          type="button"
+        >
+          🗑
+        </button>
+      `
+      : `
+        <button
+          id="selectAudioAsset"
+          class="btn btn-small"
+          type="button"
+        >
+          +
+        </button>
+      `
+  }
 
 </div>
-<div class="secondaryAssets">
 
-  <div class="assetSlot">
-
-    <strong>
-      👥 Crowd
-    </strong>
-
-    ${
-  crowdAsset
-
-    ? (
-
-      crowdAsset.mediaType === "video"
-
-        ? `
-
-          <video
-            class="slotPreview"
-            src="${crowdAsset.url}"
-            autoplay
-            muted
-            loop
-          ></video>
-
-        `
-
-        : `
-
-          <img
-            class="slotPreview"
-            src="${crowdAsset.url}"
-          >
-
-        `
-
-    )
-
-    : `
-
-      <div
-        class="slotPlaceholder"
-      >
-        Kein Crowd Asset
-      </div>
-
-    `
-}
-
-    <button
-      id="selectCrowdAsset"
-      type="button"
-      class="btn"
-    >
-      Crowd auswählen
-    </button>
 ${
-  crowdAsset
+  audioAsset?.url
     ? `
-      <button
-        id="removeCrowdAsset"
-        type="button"
-        class="btn btn-danger"
-      >
-        🗑 Crowd entfernen
-      </button>
+      <audio
+        id="previewAudio"
+        src="${audioAsset.url}"
+        preload="auto"
+      ></audio>
     `
     : ""
 }
-    <input
-      id="crowdUpload"
-      type="file"
-      accept="image/*,video/*"
-      hidden
-    >
 
-  </div>
+</div>
 
-  <div class="assetSlot">
+<div class="assetPickerRow">
 
-    <strong>
-      📺 Overlay
-    </strong>
+  <span>▶ Vorschau</span>
 
-    ${
-  overlayAsset
+  <button
+    id="previewBroadcastBtn"
+    class="btn btn-small"
+    type="button"
+  >
+    ▶
+  </button>
 
-    ? (
+</div>
 
-      overlayAsset.mediaType === "video"
+</div>
+</div>
 
-        ? `
+<div
+  id="assetFxEditor"
+  hidden
+></div>
 
-          <video
-            class="slotPreview"
-            src="${overlayAsset.url}"
-            autoplay
-            muted
-            loop
-          ></video>
+<input
+  id="heroUpload"
+  type="file"
+  accept="image/*,video/*"
+  hidden
+>
 
-        `
+<input
+  id="crowdUpload"
+  type="file"
+  accept="image/*,video/*"
+  hidden
+>
 
-        : `
+<input
+  id="overlayUpload"
+  type="file"
+  accept="image/*,video/*"
+  hidden
+>
 
-          <img
-            class="slotPreview"
-            src="${overlayAsset.url}"
-          >
-
-        `
-
-    )
-
-    : `
-
-      <div
-        class="slotPlaceholder"
-      >
-        Kein Overlay
-      </div>
-
-    `
-}
-
-    <button
-      id="selectOverlayAsset"
-      type="button"
-      class="btn"
-    >
-      Overlay auswählen
-    </button>
-${
-  overlayAsset
-    ? `
-      <button
-        id="removeOverlayAsset"
-        type="button"
-        class="btn btn-danger"
-      >
-        🗑 Overlay entfernen
-      </button>
-    `
-    : ""
-}
-    <input
-      id="overlayUpload"
-      type="file"
-      accept="image/*,video/*"
-      hidden
-    >
-
-  </div>
+<input
+  id="audioUpload"
+  type="file"
+  accept="audio/*"
+  hidden
+>
 
 </div>
       <h2 style="margin-bottom:20px;">
 
-        ${
-          event.id
-            ? "Event bearbeiten"
-            : "Neues Event"
-        }
+        ${event.id ? "Event bearbeiten" : "Neues Event"}
 
       </h2>
 
@@ -537,15 +608,7 @@ ${
         </div>
 
       </div>
-<div class="partnerCard">
 
-  <h3>
-    Assets
-  </h3>
-
-  <div id="assetList"></div>
-
-</div>
       <div class="detailActions">
 
         <button
@@ -573,206 +636,130 @@ ${
     </div>
 
   `;
-currentAssets =
-  currentBroadcastEvent.assets || [];
 
-renderAssetList();
   document
-  .getElementById(
-    "saveBroadcastEvent"
-  )
-  ?.addEventListener(
-    "click",
-    saveBroadcastEvent
-  );
+    .getElementById("saveBroadcastEvent")
+    ?.addEventListener("click", saveBroadcastEvent);
 
-document
-  .getElementById(
-    "deleteBroadcastEvent"
-  )
-  ?.addEventListener(
-    "click",
-    deleteBroadcastEvent
-  );
+  document
+    .getElementById("deleteBroadcastEvent")
+    ?.addEventListener("click", deleteBroadcastEvent);
 
-// =====================
-// HERO PICKER
-// =====================
-
-// =====================
-// HERO PICKER
-// =====================
-
-document
-  .getElementById(
-    "selectHeroAsset"
-  )
-  ?.addEventListener(
-    "click",
-    () => {
-
-      document
-        .getElementById(
-          "heroUpload"
-        )
-        ?.click();
-
-    }
-  );
-
-// =====================
-// CROWD PICKER
-// =====================
-
-document
-  .getElementById(
-    "selectCrowdAsset"
-  )
-  ?.addEventListener(
-    "click",
-    () => {
-
-      document
-        .getElementById(
-          "crowdUpload"
-        )
-        ?.click();
-
-    }
-  );
-// =====================
-// OVERLAY PICKER
-// =====================
-
-document
-  .getElementById(
-    "selectOverlayAsset"
-  )
-  ?.addEventListener(
-    "click",
-    () => {
-
-      document
-        .getElementById(
-          "overlayUpload"
-        )
-        ?.click();
-
-    }
-  );
   // =====================
-// OVERLAY UPLOAD
+  // HERO PICKER
+  // =====================
+
+  // =====================
+  // HERO PICKER
+  // =====================
+
+  document.getElementById("selectHeroAsset")?.addEventListener("click", () => {
+    document.getElementById("heroUpload")?.click();
+  });
+
+  // =====================
+  // CROWD PICKER
+  // =====================
+
+  document.getElementById("selectCrowdAsset")?.addEventListener("click", () => {
+    document.getElementById("crowdUpload")?.click();
+  });
+  // =====================
+  // OVERLAY PICKER
+  // =====================
+
+  document
+    .getElementById("selectOverlayAsset")
+    ?.addEventListener("click", () => {
+      document.getElementById("overlayUpload")?.click();
+    });
+
+// =====================
+// AUDIO PICKER
 // =====================
 
 document
   .getElementById(
-    "overlayUpload"
+    "selectAudioAsset"
   )
   ?.addEventListener(
-    "change",
-    async (e) => {
+    "click",
+    () => {
 
-      const file =
-        e.target.files?.[0];
+      document
+        .getElementById(
+          "audioUpload"
+        )
+        ?.click();
 
-      if (!file)
-        return;
+    }
+  );
+
+  // =====================
+  // OVERLAY UPLOAD
+  // =====================
+
+  document
+    .getElementById("overlayUpload")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+
+      if (!file) return;
 
       try {
+        const assetId = crypto.randomUUID();
 
-        const assetId =
-          crypto.randomUUID();
+        const ext = file.name.split(".").pop();
 
-        const ext =
-          file.name
-            .split(".")
-            .pop();
+        const filename = `${assetId}.${ext}`;
 
-        const filename =
-          `${assetId}.${ext}`;
+        const { error } = await supabase.storage
+          .from("broadcast-assets")
+          .upload(filename, file);
 
-        const { error } =
-          await supabase
-            .storage
-            .from(
-              "broadcast-assets"
-            )
-            .upload(
-              filename,
-              file
-            );
+        if (error) throw error;
 
-        if (error)
-          throw error;
+        const { data } = supabase.storage
+          .from("broadcast-assets")
+          .getPublicUrl(filename);
 
-        const {
-          data
-        } = supabase
-          .storage
-          .from(
-            "broadcast-assets"
-          )
-          .getPublicUrl(
-            filename
-          );
+        const publicUrl = data.publicUrl;
 
-        const publicUrl =
-          data.publicUrl;
+        console.log("✅ OVERLAY URL:", publicUrl);
 
-        console.log(
-          "✅ OVERLAY URL:",
-          publicUrl
+        const existingAssets = currentBroadcastEvent.assets || [];
+
+        const withoutOverlay = existingAssets.filter(
+          (asset) => asset?.type !== "overlay",
         );
 
-        const existingAssets =
-          currentBroadcastEvent.assets || [];
-
-        const withoutOverlay =
-          existingAssets.filter(
-            asset =>
-              asset?.type !== "overlay"
-          );
-
         currentBroadcastEvent.assets = [
-
           ...withoutOverlay,
 
           {
-  id: assetId,
-  url: publicUrl,
-  type: "overlay",
-  mediaType: file.type.startsWith("video")
-    ? "video"
-    : "image"
-}
-
+            id: assetId,
+            url: publicUrl,
+            type: "overlay",
+            mediaType: file.type.startsWith("video") ? "video" : "image",
+          },
         ];
 
-        openBroadcastEditor(
-          currentBroadcastEvent
-        );
-
-      }
-
-      catch (err) {
-
+        openBroadcastEditor(currentBroadcastEvent);
+      } catch (err) {
         console.error(err);
 
-        alert(
-          "Overlay Upload fehlgeschlagen"
-        );
-
+        alert("Overlay Upload fehlgeschlagen");
       }
+    });
 
-    }
-  );
-// =====================
-// HERO UPLOAD
+
+    // =====================
+// AUDIO UPLOAD
 // =====================
 
 document
   .getElementById(
-    "heroUpload"
+    "audioUpload"
   )
   ?.addEventListener(
     "change",
@@ -825,55 +812,32 @@ document
         const publicUrl =
           data.publicUrl;
 
-        console.log(
-          "✅ HERO URL:",
-          publicUrl
-        );
-
-        currentBroadcastEvent.hero_asset_id =
-          assetId;
-
         const existingAssets =
           currentBroadcastEvent.assets || [];
 
-        const withoutHero =
+        const withoutAudio =
           existingAssets.filter(
             asset =>
-              asset?.type !== "hero"
+              asset?.type !== "audio"
           );
 
         currentBroadcastEvent.assets = [
 
-          ...withoutHero,
+          ...withoutAudio,
 
           {
-  id: assetId,
-  url: publicUrl,
-  type: "hero",
-  mediaType: file.type.startsWith("video")
-    ? "video"
-    : "image"
-}
+            id: assetId,
+            url: publicUrl,
+            type: "audio",
+            mediaType: "audio",
+            name: file.name
+          }
 
         ];
 
-        const heroImg =
-          document.querySelector(
-            ".detailHero"
-          );
-
-        if (heroImg) {
-
-          heroImg.src =
-            publicUrl;
-
-        } else {
-
-          openBroadcastEditor(
-            currentBroadcastEvent
-          );
-
-        }
+        openBroadcastEditor(
+          currentBroadcastEvent
+        );
 
       }
 
@@ -882,7 +846,7 @@ document
         console.error(err);
 
         alert(
-          "Upload fehlgeschlagen"
+          "Audio Upload fehlgeschlagen"
         );
 
       }
@@ -890,213 +854,406 @@ document
     }
   );
   // =====================
-// CROWD UPLOAD
-// =====================
+  // HERO UPLOAD
+  // =====================
 
-document
-  .getElementById(
-    "crowdUpload"
-  )
-  ?.addEventListener(
-    "change",
-    async (e) => {
+  document
+    .getElementById("heroUpload")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
 
-      const file =
-        e.target.files?.[0];
-
-      if (!file)
-        return;
+      if (!file) return;
 
       try {
+        const assetId = crypto.randomUUID();
 
-        const assetId =
-          crypto.randomUUID();
+        const ext = file.name.split(".").pop();
 
-        const ext =
-          file.name
-            .split(".")
-            .pop();
+        const filename = `${assetId}.${ext}`;
 
-        const filename =
-          `${assetId}.${ext}`;
+        const { error } = await supabase.storage
+          .from("broadcast-assets")
+          .upload(filename, file);
 
-        const { error } =
-          await supabase
-            .storage
-            .from(
-              "broadcast-assets"
-            )
-            .upload(
-              filename,
-              file
-            );
+        if (error) throw error;
 
-        if (error)
-          throw error;
+        const { data } = supabase.storage
+          .from("broadcast-assets")
+          .getPublicUrl(filename);
 
-        const {
-          data
-        } = supabase
-          .storage
-          .from(
-            "broadcast-assets"
-          )
-          .getPublicUrl(
-            filename
-          );
+        const publicUrl = data.publicUrl;
 
-        const publicUrl =
-          data.publicUrl;
+        console.log("✅ HERO URL:", publicUrl);
 
-        console.log(
-          "✅ CROWD URL:",
-          publicUrl
+        currentBroadcastEvent.hero_asset_id = assetId;
+
+        const existingAssets = currentBroadcastEvent.assets || [];
+
+        const withoutHero = existingAssets.filter(
+          (asset) => asset?.type !== "hero",
         );
 
-        const existingAssets =
-          currentBroadcastEvent.assets || [];
+        currentBroadcastEvent.assets = [
+          ...withoutHero,
 
-        const withoutCrowd =
-          existingAssets.filter(
-            asset =>
-              asset?.type !== "crowd"
-          );
+          {
+            id: assetId,
+            url: publicUrl,
+            type: "hero",
+            mediaType: file.type.startsWith("video") ? "video" : "image",
+          },
+        ];
+
+        const heroImg = document.querySelector(".detailHero");
+
+        if (heroImg) {
+          heroImg.src = publicUrl;
+        } else {
+          openBroadcastEditor(currentBroadcastEvent);
+        }
+      } catch (err) {
+        console.error(err);
+
+        alert("Upload fehlgeschlagen");
+      }
+    });
+  // =====================
+  // CROWD UPLOAD
+  // =====================
+
+  document
+    .getElementById("crowdUpload")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+
+      if (!file) return;
+
+      try {
+        const assetId = crypto.randomUUID();
+
+        const ext = file.name.split(".").pop();
+
+        const filename = `${assetId}.${ext}`;
+
+        const { error } = await supabase.storage
+          .from("broadcast-assets")
+          .upload(filename, file);
+
+        if (error) throw error;
+
+        const { data } = supabase.storage
+          .from("broadcast-assets")
+          .getPublicUrl(filename);
+
+        const publicUrl = data.publicUrl;
+
+        console.log("✅ CROWD URL:", publicUrl);
+
+        const existingAssets = currentBroadcastEvent.assets || [];
+
+        const withoutCrowd = existingAssets.filter(
+          (asset) => asset?.type !== "crowd",
+        );
 
         currentBroadcastEvent.assets = [
-
           ...withoutCrowd,
 
           {
-  id: assetId,
-  url: publicUrl,
-  type: "crowd",
-  mediaType: file.type.startsWith("video")
-    ? "video"
-    : "image"
-}
-
+            id: assetId,
+            url: publicUrl,
+            type: "crowd",
+            mediaType: file.type.startsWith("video") ? "video" : "image",
+          },
         ];
 
-        openBroadcastEditor(
-          currentBroadcastEvent
-        );
-
-      }
-
-      catch (err) {
-
+        openBroadcastEditor(currentBroadcastEvent);
+      } catch (err) {
         console.error(err);
 
-        alert(
-          "Crowd Upload fehlgeschlagen"
-        );
-
+        alert("Crowd Upload fehlgeschlagen");
       }
-
-    }
-  );
-document
-  .getElementById(
-    "removeHeroAsset"
-  )
-  ?.addEventListener(
-    "click",
-    async () => {
-
+    });
+  document
+    .getElementById("removeHeroAsset")
+    ?.addEventListener("click", async () => {
       try {
+        const heroId = currentBroadcastEvent.hero_asset_id;
 
-        const heroId =
-          currentBroadcastEvent.hero_asset_id;
+        currentBroadcastEvent.assets = (
+          currentBroadcastEvent.assets || []
+        ).filter((asset) => asset?.id !== heroId);
 
-        currentBroadcastEvent.assets =
-          (
-            currentBroadcastEvent.assets || []
-          ).filter(
-            asset =>
-              asset?.id !== heroId
-          );
+        currentBroadcastEvent.hero_asset_id = null;
 
-        currentBroadcastEvent.hero_asset_id =
-          null;
-
-        openBroadcastEditor(
-          currentBroadcastEvent
-        );
+        openBroadcastEditor(currentBroadcastEvent);
 
         renderBroadcastRows();
-
-      }
-
-      catch (err) {
-
+      } catch (err) {
         console.error(err);
-
       }
+    });
+  // =====================
+  // REMOVE CROWD
+  // =====================
 
-    }
-  );
-// =====================
-// REMOVE CROWD
-// =====================
+  document.getElementById("removeCrowdAsset")?.addEventListener("click", () => {
+    currentBroadcastEvent.assets = (currentBroadcastEvent.assets || []).filter(
+      (asset) => asset?.type !== "crowd",
+    );
 
-document
-  .getElementById(
-    "removeCrowdAsset"
-  )
-  ?.addEventListener(
-    "click",
-    () => {
+    console.log("AFTER REMOVE CROWD", currentBroadcastEvent.assets);
 
-      currentBroadcastEvent.assets =
-        (
-          currentBroadcastEvent.assets || []
-        ).filter(
-          asset =>
-            asset?.type !== "crowd"
-        );
+    openBroadcastEditor(currentBroadcastEvent);
+  });
 
-      console.log(
-        "AFTER REMOVE CROWD",
-        currentBroadcastEvent.assets
-      );
+  // =====================
+  // REMOVE OVERLAY
+  // =====================
 
-      openBroadcastEditor(
-        currentBroadcastEvent
-      );
+  document
+    .getElementById("removeOverlayAsset")
+    ?.addEventListener("click", () => {
+      currentBroadcastEvent.assets = (
+        currentBroadcastEvent.assets || []
+      ).filter((asset) => asset?.type !== "overlay");
 
-    }
-  );
-
-// =====================
-// REMOVE OVERLAY
-// =====================
-
-document
-  .getElementById(
-    "removeOverlayAsset"
-  )
-  ?.addEventListener(
-    "click",
-    () => {
-
-      currentBroadcastEvent.assets =
-        (
-          currentBroadcastEvent.assets || []
-        ).filter(
-          asset =>
-            asset?.type !== "overlay"
-        );
-
-      openBroadcastEditor(
-        currentBroadcastEvent
-      );
+      openBroadcastEditor(currentBroadcastEvent);
 
       renderBroadcastRows();
+    });
+    document
+  .getElementById(
+    "previewBroadcastBtn"
+  )
+  ?.addEventListener(
+    "click",
+    () => {
+
+      const hero =
+        document.getElementById(
+          "previewHero"
+        );
+
+      const crowd =
+        document.getElementById(
+          "previewCrowd"
+        );
+
+      const overlay =
+        document.getElementById(
+          "previewOverlay"
+        );
+
+      [hero, crowd, overlay]
+        .forEach(el => {
+
+          if (!el) return;
+
+          el.style.animation =
+            "none";
+
+          void el.offsetWidth;
+
+        });
+
+      applyAssetFx(
+        hero,
+        heroAsset?.fx
+      );
+
+      applyAssetFx(
+        crowd,
+        crowdAsset?.fx
+      );
+
+      applyAssetFx(
+        overlay,
+        overlayAsset?.fx
+      );
+
+      const audio =
+        document.getElementById(
+          "previewAudio"
+        );
+
+      if (audio) {
+
+        audio.pause();
+
+        audio.currentTime = 0;
+
+        audio.play().catch(
+          console.error
+        );
+
+      }
+
+    }
+  );
+// =====================
+// REMOVE AUDIO
+// =====================
+
+document
+  .getElementById("removeAudioAsset")
+  ?.addEventListener("click", () => {
+
+    currentBroadcastEvent.assets = (
+      currentBroadcastEvent.assets || []
+    ).filter(
+      (asset) => asset?.type !== "audio"
+    );
+
+    openBroadcastEditor(
+      currentBroadcastEvent
+    );
+
+    renderBroadcastRows();
+
+  });
+// =====================
+// FX EDITOR
+// =====================
+
+document
+  .querySelectorAll(".assetFxMini")
+  .forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+      const type =
+        btn.dataset.type;
+
+      const editor =
+        document.getElementById(
+          "assetFxEditor"
+        );
+
+      if (!editor) return;
+
+      editor.hidden = false;
+
+      const asset =
+  getAssetByType(
+    currentBroadcastEvent.assets,
+    type
+  );
+
+const currentFx =
+  asset?.fx || {};
+
+editor.innerHTML = `
+  <div class="assetFxPanel">
+
+    <h3>
+      FX • ${type}
+    </h3>
+
+    <div class="field">
+
+      <label>
+        Animation
+      </label>
+
+      <select id="fxAnimation">
+
+        <option value="none">
+          none
+        </option>
+
+        <option value="fade">
+          fade
+        </option>
+
+        <option value="zoom">
+          zoom
+        </option>
+
+        <option value="slide-left">
+          slide-left
+        </option>
+
+        <option value="slide-right">
+          slide-right
+        </option>
+
+      </select>
+
+    </div>
+
+    <div class="field">
+
+      <label>
+        Dauer
+      </label>
+
+      <input
+        id="fxDuration"
+        type="number"
+        value="${
+          currentFx.duration || 500
+        }"
+      >
+
+    </div>
+
+  </div>
+`;
+document.getElementById(
+  "fxAnimation"
+).value =
+  currentFx.animation ||
+  "none";
+  document
+  .getElementById(
+    "fxAnimation"
+  )
+  ?.addEventListener(
+    "change",
+    e => {
+
+      updateAssetFx(
+        type,
+        {
+          animation:
+            e.target.value
+        }
+      );
+
+      openBroadcastEditor(
+        currentBroadcastEvent
+      );
 
     }
   );
 
+document
+  .getElementById(
+    "fxDuration"
+  )
+  ?.addEventListener(
+    "input",
+    e => {
+
+      updateAssetFx(
+        type,
+        {
+          duration:
+            Number(
+              e.target.value
+            )
+        }
+      );
+
+    }
+  );
+
+    });
+
+  });
 }
+
+
 // =====================
 // HELPERS
 // =====================
@@ -1118,20 +1275,77 @@ function clearForm() {
   });
 }
 function getHeroAsset(assets = []) {
-  return assets.find(
-    a => a?.type === "hero"
-  );
+  return assets.find((a) => a?.type === "hero");
 }
-function getAssetByType(
-  assets = [],
-  type
+function getAssetByType(assets = [], type) {
+  return assets.find((a) => a?.type === type);
+}
+
+function updateAssetFx(type, fx) {
+
+  const asset = getAssetByType(
+    currentBroadcastEvent.assets,
+    type
+  );
+
+  if (!asset) return;
+
+  asset.fx = {
+    ...(asset.fx || {}),
+    ...fx
+  };
+
+}
+
+function applyAssetFx(
+  element,
+  fx
 ) {
 
-  return assets.find(
-    a => a?.type === type
-  );
+  if (
+    !element ||
+    !fx
+  ) return;
+
+  const duration =
+    fx.duration || 500;
+
+  switch (
+    fx.animation
+  ) {
+
+    case "fade":
+
+      element.style.animation =
+        `fxFade ${duration}ms ease`;
+
+      break;
+
+    case "zoom":
+
+      element.style.animation =
+        `fxZoom ${duration}ms ease`;
+
+      break;
+
+    case "slide-left":
+
+      element.style.animation =
+        `fxSlideLeft ${duration}ms ease`;
+
+      break;
+
+    case "slide-right":
+
+      element.style.animation =
+        `fxSlideRight ${duration}ms ease`;
+
+      break;
+
+  }
 
 }
+
 function calculateCampaignKPIs(campaign, data) {
   if (!data || !data.length) return campaign;
 
@@ -1675,10 +1889,10 @@ function renderCampaigns(list) {
 
   
       ${
-  a.mediaType === "video"
-    ? `<video src="${a.url}" style="height:40px;" muted></video>`
-    : `<img src="${a.url}" style="height:40px;">`
-}
+        a.mediaType === "video"
+          ? `<video src="${a.url}" style="height:40px;" muted></video>`
+          : `<img src="${a.url}" style="height:40px;">`
+      }
     </div>
   `,
           )
@@ -3052,110 +3266,52 @@ function populateTypeFilter() {
   `;
 }
 function renderBroadcastRows() {
-
-  const root =
-    document.getElementById(
-      "broadcastRows"
-    );
+  const root = document.getElementById("broadcastRows");
 
   if (!root) return;
 
-  const search =
-    qs("broadcastSearch")
-      ?.value
-      ?.toLowerCase()
-      ?.trim() || "";
+  const search = qs("broadcastSearch")?.value?.toLowerCase()?.trim() || "";
 
-  const type =
-    qs("broadcastTypeFilter")
-      ?.value || "";
+  const type = qs("broadcastTypeFilter")?.value || "";
 
-  const rows =
-    getBroadcastEvents()
-      .filter((ev) => {
+  const rows = getBroadcastEvents().filter((ev) => {
+    const title = (ev.title || ev.name || "").toLowerCase();
 
-        const title =
-          (
-            ev.title ||
-            ev.name ||
-            ""
-          )
-            .toLowerCase();
+    const matchesSearch = !search || title.includes(search);
 
-        const matchesSearch =
-          !search ||
-          title.includes(search);
+    const matchesType = !type || ev.type === type;
 
-        const matchesType =
-          !type ||
-          ev.type === type;
+    return matchesSearch && matchesType;
+  });
 
-        return (
-          matchesSearch &&
-          matchesType
-        );
+  root.innerHTML = rows
+    .map((ev) => {
+      let assets = ev.assets;
 
-      });
-
-  root.innerHTML =
-    rows
-      .map((ev) => {
-
-        let assets =
-          ev.assets;
-
-        // JSON String → Array
-        if (
-          typeof assets ===
-          "string"
-        ) {
-
-          try {
-
-            assets =
-              JSON.parse(
-                assets
-              );
-
-          }
-
-          catch {
-
-            assets = [
-              {
-                url: assets
-              }
-            ];
-
-          }
-
+      // JSON String → Array
+      if (typeof assets === "string") {
+        try {
+          assets = JSON.parse(assets);
+        } catch {
+          assets = [
+            {
+              url: assets,
+            },
+          ];
         }
+      }
 
-        if (
-          !Array.isArray(
-            assets
-          )
-        ) {
+      if (!Array.isArray(assets)) {
+        assets = [];
+      }
 
-          assets = [];
+      const heroAsset = getHeroAsset(assets);
 
-        }
+      const created = ev.created_at
+        ? new Date(ev.created_at).toLocaleDateString("de-DE")
+        : "-";
 
-        const heroAsset =
-  getHeroAsset(
-    assets
-  );
-
-        const created =
-          ev.created_at
-            ? new Date(
-                ev.created_at
-              ).toLocaleDateString(
-                "de-DE"
-              )
-            : "-";
-
-        return `
+      return `
 
           <div
             class="broadcastRow"
@@ -3168,9 +3324,9 @@ function renderBroadcastRows() {
             >
 
              ${
-  heroAsset
-    ? heroAsset.mediaType === "video"
-      ? `
+               heroAsset
+                 ? heroAsset.mediaType === "video"
+                   ? `
         <video
           src="${heroAsset.url}"
           muted
@@ -3178,15 +3334,15 @@ function renderBroadcastRows() {
           loop
         ></video>
       `
-      : `
+                   : `
         <img
           src="${heroAsset.url}"
         >
       `
-    : `
+                 : `
       <span>—</span>
     `
-}
+             }
 
             </div>
 
@@ -3213,157 +3369,82 @@ function renderBroadcastRows() {
           </div>
 
         `;
+    })
+    .join("");
 
-      })
-      .join("");
+  root.querySelectorAll(".broadcastRow").forEach((row) => {
+    row.addEventListener("click", () => {
+      const id = row.dataset.id;
 
-  root
-    .querySelectorAll(
-      ".broadcastRow"
-    )
-    .forEach((row) => {
+      const event = getBroadcastEvents().find((e) => e.id === id);
 
-      row.addEventListener(
-        "click",
-        () => {
+      if (!event) return;
 
-          const id =
-            row.dataset.id;
-
-          const event =
-            getBroadcastEvents()
-              .find(
-                e => e.id === id
-              );
-
-          if (!event)
-            return;
-
-          openBroadcastEditor(
-            event
-          );
-
-        }
-      );
-
+      openBroadcastEditor(event);
     });
-
+  });
 }
 
 async function saveBroadcastEvent() {
-
-  if (!currentBroadcastEvent)
-    return;
+  if (!currentBroadcastEvent) return;
 
   const table =
-  currentBroadcastEvent.source === "game"
-    ? "event_definitions"
-    : "game_events";
+    currentBroadcastEvent.source === "game"
+      ? "event_definitions"
+      : "game_events";
 
-  console.log(
-    "CURRENT EVENT",
-    structuredClone(
-      currentBroadcastEvent
-    )
-  );
+  console.log("CURRENT EVENT", structuredClone(currentBroadcastEvent));
 
   const payload = {
+    title: document.getElementById("detailTitle").value,
 
-    title:
-      document.getElementById(
-        "detailTitle"
-      ).value,
+    type: document.getElementById("detailType").value,
 
-    type:
-      document.getElementById(
-        "detailType"
-      ).value,
+    trigger: document.getElementById("detailTrigger").value,
 
-    trigger:
-      document.getElementById(
-        "detailTrigger"
-      ).value,
+    probability: Number(document.getElementById("detailProbability").value),
 
-    probability: Number(
-      document.getElementById(
-        "detailProbability"
-      ).value
-    ),
+    hero_asset_id: currentBroadcastEvent.hero_asset_id || null,
 
-    hero_asset_id:
-      currentBroadcastEvent
-        .hero_asset_id || null,
-
-    assets:
-      currentBroadcastEvent
-        .assets || []
-
+    assets: currentBroadcastEvent.assets || [],
   };
 
-  console.log(
-    "💾 SAVE EVENT:",
-    table,
-    payload
-  );
+  console.log("💾 SAVE EVENT:", table, payload);
 
   try {
-
     // =====================
     // UPDATE
     // =====================
 
-    if (
-      currentBroadcastEvent.id
-    ) {
+    if (currentBroadcastEvent.id) {
+      const { error } = await supabase
 
-      const { error } =
-        await supabase
+        .from(table)
 
-          .from(
-            table
-          )
+        .update(payload)
 
-          .update(
-            payload
-          )
+        .eq("id", currentBroadcastEvent.id);
 
-          .eq(
-            "id",
-            currentBroadcastEvent.id
-          );
-
-      if (error)
-        throw error;
-
+      if (error) throw error;
     }
 
     // =====================
     // INSERT
     // =====================
-
     else {
+      const { data, error } = await supabase
 
-      const { data, error } =
-        await supabase
+        .from(table)
 
-          .from(
-            table
-          )
+        .insert([payload])
 
-          .insert([
-            payload
-          ])
+        .select()
 
-          .select()
+        .single();
 
-          .single();
+      if (error) throw error;
 
-      if (error)
-        throw error;
-
-      currentBroadcastEvent =
-        data;
-
+      currentBroadcastEvent = data;
     }
 
     await loadEvents();
@@ -3371,100 +3452,53 @@ async function saveBroadcastEvent() {
 
     renderBroadcastRows();
 
-    alert(
-      "Event gespeichert"
-    );
+    alert("Event gespeichert");
+  } catch (err) {
+    console.error("❌ SAVE EVENT ERROR", err);
 
+    alert("Speichern fehlgeschlagen");
   }
-
-  catch (err) {
-
-    console.error(
-      "❌ SAVE EVENT ERROR",
-      err
-    );
-
-    alert(
-      "Speichern fehlgeschlagen"
-    );
-
-  }
-
 }
 async function deleteBroadcastEvent() {
-
   if (!currentBroadcastEvent?.id) {
-
-    alert(
-      "Dieses Event wurde noch nicht gespeichert."
-    );
+    alert("Dieses Event wurde noch nicht gespeichert.");
 
     return;
-
   }
 
-  const confirmed =
-    confirm(
-      "Event wirklich löschen?"
-    );
+  const confirmed = confirm("Event wirklich löschen?");
 
-  if (!confirmed)
-    return;
+  if (!confirmed) return;
 
   try {
-
-    console.log(
-      "DELETE EVENT",
-      currentBroadcastEvent
-    );
+    console.log("DELETE EVENT", currentBroadcastEvent);
 
     const table =
       currentBroadcastEvent.source === "game"
         ? "event_definitions"
         : "game_events";
 
-    console.log(
-      "DELETE TABLE",
-      table
-    );
+    console.log("DELETE TABLE", table);
 
-    const {
-      data,
-      error
-    } = await supabase
+    const { data, error } = await supabase
 
-      .from(
-        table
-      )
+      .from(table)
 
       .delete()
 
-      .eq(
-        "id",
-        currentBroadcastEvent.id
-      )
+      .eq("id", currentBroadcastEvent.id)
 
       .select();
 
-    console.log(
-      "DELETE RESULT",
-      data
-    );
+    console.log("DELETE RESULT", data);
 
-    console.log(
-      "DELETE ERROR",
-      error
-    );
+    console.log("DELETE ERROR", error);
 
-    if (error)
-      throw error;
+    if (error) throw error;
 
-    currentBroadcastEvent =
-      null;
+    currentBroadcastEvent = null;
 
-    document.getElementById(
-      "broadcastDetail"
-    ).innerHTML = `
+    document.getElementById("broadcastDetail").innerHTML = `
 
       <div class="emptyState">
         Event auswählen
@@ -3477,25 +3511,12 @@ async function deleteBroadcastEvent() {
 
     renderBroadcastRows();
 
-    alert(
-      "Event gelöscht"
-    );
+    alert("Event gelöscht");
+  } catch (err) {
+    console.error("DELETE FAILED", err);
 
+    alert("Löschen fehlgeschlagen");
   }
-
-  catch (err) {
-
-    console.error(
-      "DELETE FAILED",
-      err
-    );
-
-    alert(
-      "Löschen fehlgeschlagen"
-    );
-
-  }
-
 }
 // =====================
 // DELETE EVENT
@@ -3549,156 +3570,68 @@ async function uploadInlineAssets(eventId, files, table) {
 // TABS
 // =====================
 function switchTab(tab) {
+  document
+    .querySelectorAll(".tabContent")
+    .forEach((t) => t.classList.remove("active"));
 
   document
-    .querySelectorAll(
-      ".tabContent"
-    )
-    .forEach(
-      t =>
-        t.classList.remove(
-          "active"
-        )
-    );
-
-  document
-    .querySelectorAll(
-      ".tabs button"
-    )
-    .forEach(
-      b =>
-        b.classList.remove(
-          "active"
-        )
-    );
+    .querySelectorAll(".tabs button")
+    .forEach((b) => b.classList.remove("active"));
 
   // =====================
   // ADS
   // =====================
 
   if (tab === "ads") {
+    qs("adsTab")?.classList.add("active");
 
-    qs("adsTab")
-      ?.classList.add(
-        "active"
-      );
-
-    qs("tabAds")
-      ?.classList.add(
-        "active"
-      );
+    qs("tabAds")?.classList.add("active");
 
     loadCampaigns();
-
   }
 
   // =====================
   // BROADCAST
   // =====================
 
-  if (
-    tab === "broadcast"
-  ) {
+  if (tab === "broadcast") {
+    qs("broadcastTab")?.classList.add("active");
 
-    qs("broadcastTab")
-      ?.classList.add(
-        "active"
-      );
-
-    qs("tabBroadcast")
-      ?.classList.add(
-        "active"
-      );
+    qs("tabBroadcast")?.classList.add("active");
 
     loadEvents();
     loadGameEvents();
-
   }
 
   // =====================
   // PARTNERS
   // =====================
 
-  if (
-    tab === "partners"
-  ) {
+  if (tab === "partners") {
+    qs("partnersTab")?.classList.add("active");
 
-    qs("partnersTab")
-      ?.classList.add(
-        "active"
-      );
-
-    qs("tabPartners")
-      ?.classList.add(
-        "active"
-      );
+    qs("tabPartners")?.classList.add("active");
 
     loadPartnerTeams();
-
   }
 
   // =====================
   // INSIGHTS
   // =====================
 
-  if (
-    tab === "insights"
-  ) {
+  if (tab === "insights") {
+    qs("insightsTab")?.classList.add("active");
 
-    qs("insightsTab")
-      ?.classList.add(
-        "active"
-      );
-
-    qs("tabInsights")
-      ?.classList.add(
-        "active"
-      );
+    qs("tabInsights")?.classList.add("active");
 
     destroyChart();
 
     loadInsights();
     loadChart();
     loadGeoMap();
-
   }
-
 }
 
-function renderAssetList() {
-  const container = document.getElementById("assetList");
-  if (!container) return;
-
-  container.innerHTML = currentAssets
-    .map(
-      (a, i) => `
-    <div style="
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:6px;
-      background:#111;
-      padding:6px;
-      border-radius:6px;
-    ">
-      
-      <span style="width:80px;">${a.type}</span>
-
-      ${
-        (a.mediaType || a.type) === "video"
-          ? `<video src="${a.url}" style="height:40px;" muted></video>`
-          : `<img src="${a.url}" style="height:40px;">`
-      }
-
-      <button onclick="moveAsset(${i}, -1)">⬆️</button>
-      <button onclick="moveAsset(${i}, 1)">⬇️</button>
-
-      <button onclick="removeAsset(${i})">❌</button>
-    </div>
-  `,
-    )
-    .join("");
-}
 // =====================
 // GLOBAL CLICK HANDLER
 // =====================
@@ -3767,18 +3700,13 @@ document.addEventListener("click", async (e) => {
       await loadGameEvents();
     }
   }
-// =====================
-// 📺 BROADCAST
-// =====================
+  // =====================
+  // 📺 BROADCAST
+  // =====================
 
-if (
-  a ===
-  "createBroadcastEvent"
-) {
-
-  createBroadcastEvent();
-
-}
+  if (a === "createBroadcastEvent") {
+    createBroadcastEvent();
+  }
   // =====================
   // CAMPAIGNS
   // =====================
@@ -3826,162 +3754,157 @@ if (
 // =====================
 // INIT
 // =====================
-document.addEventListener("DOMContentLoaded", () => {
+function initAdmin() {
+  // =====================
+  // BASIC ACTIONS
+  // =====================
+
   qs("createCampaignBtn")?.addEventListener("click", createCampaign);
+
   qs("addAdSetBtn")?.addEventListener("click", addAdSet);
+
   qs("addAssetBtn")?.addEventListener("click", addAssets);
+
   qs("createEventBtn")?.addEventListener("click", saveEvent);
+
+  // =====================
+  // EVENT SCOPE
+  // =====================
+
   qs("eventScope")?.addEventListener("change", () => {
     state.eventScopeSelection = [];
-    if (qs("eventScopeSearch")) qs("eventScopeSearch").value = "";
+
+    if (qs("eventScopeSearch")) {
+      qs("eventScopeSearch").value = "";
+    }
+
     syncEventScopeHidden();
     renderEventScopePicker();
   });
+
   qs("eventScopeSearch")?.addEventListener("input", renderEventScopePicker);
+
   qs("eventScopePicker")?.addEventListener("change", (e) => {
     selectEventScopeReference(e.target.value);
   });
 
-  // 🔥 GAME EVENTS
+  // =====================
+  // GAME EVENTS
+  // =====================
+
   document.addEventListener("click", async (e) => {
     if (e.target.id === "saveGameEventBtn") {
       saveGameEvent();
     }
   });
 
-  qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
-  qs("tabBroadcast")?.addEventListener("click", () => switchTab("broadcast"));
-  qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
-qs("tabPartners")
-  ?.addEventListener(
-    "click",
-    () => switchTab("partners")
-  );
-  qs("partnerSearch")
-  ?.addEventListener(
-    "input",
-    renderPartnerList
-  );
+  // =====================
+  // TABS
+  // =====================
 
-qs("partnerLeagueFilter")
-  ?.addEventListener(
-    "change",
-    renderPartnerList
-  );
-  // 🔥 INIT LOADS
+  qs("tabAds")?.addEventListener("click", () => switchTab("ads"));
+
+  qs("tabBroadcast")?.addEventListener("click", () => switchTab("broadcast"));
+
+  qs("tabInsights")?.addEventListener("click", () => switchTab("insights"));
+
+  qs("tabPartners")?.addEventListener("click", () => switchTab("partners"));
+
+  // =====================
+  // PARTNERS
+  // =====================
+
+  qs("partnerSearch")?.addEventListener("input", renderPartnerList);
+
+  qs("partnerLeagueFilter")?.addEventListener("change", renderPartnerList);
+
+  // =====================
+  // BROADCAST
+  // =====================
+
+  qs("broadcastSearch")?.addEventListener("input", renderBroadcastRows);
+
+  qs("broadcastTypeFilter")?.addEventListener("change", renderBroadcastRows);
+
+  // =====================
+  // INIT LOADS
+  // =====================
+
   loadEventReferenceData();
   loadGameEvents();
   loadPartnerTeams();
   loadPartnerLeagues();
   loadPartners();
+
   setTimeout(loadEventTypes, 0);
 
   switchTab("ads");
+
   loadCampaigns();
-  qs("broadcastSearch")?.addEventListener("input", renderBroadcastRows);
+}
 
-  qs("broadcastTypeFilter")?.addEventListener("change", renderBroadcastRows);
-});
+// =====================
+// SAFE INIT
+// =====================
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initAdmin);
+} else {
+  initAdmin();
+}
 async function loadPartnerTeams() {
+  const { data, error } = await supabase
 
-  const { data, error } =
-    await supabase
+    .from("teams")
 
-      .from("teams")
-
-      .select(`
+    .select(
+      `
         *,
         competitions (
           id,
           name
         )
-      `)
+      `,
+    )
 
-      .order(
-        "display_name"
-      );
+    .order("display_name");
 
   if (error) {
-
-    console.error(
-      "PARTNER TEAMS ERROR",
-      error
-    );
+    console.error("PARTNER TEAMS ERROR", error);
 
     return;
-
   }
 
-  state.partners =
-    data || [];
+  state.partners = data || [];
 
-  console.log(
-    "LOADED PARTNER TEAMS",
-    state.partners.length
-  );
+  console.log("LOADED PARTNER TEAMS", state.partners.length);
 
   renderPartnerList();
-
 }
 function renderPartnerList() {
+  const root = document.getElementById("partnerList");
 
-  const root =
-    document.getElementById(
-      "partnerList"
-    );
-
-  if (!root)
-    return;
+  if (!root) return;
 
   const search =
-    document
-      .getElementById(
-        "partnerSearch"
-      )
-      ?.value
-      ?.toLowerCase()
-      ?.trim() || "";
+    document.getElementById("partnerSearch")?.value?.toLowerCase()?.trim() ||
+    "";
 
-  const leagueId =
-    document
-      .getElementById(
-        "partnerLeagueFilter"
-      )
-      ?.value || "";
+  const leagueId = document.getElementById("partnerLeagueFilter")?.value || "";
 
-  const rows =
-    state.partners.filter(
-      team => {
+  const rows = state.partners.filter((team) => {
+    const teamName = (team.display_name || team.name || "").toLowerCase();
 
-        const teamName =
-          (
-            team.display_name ||
-            team.name ||
-            ""
-          ).toLowerCase();
+    const matchesSearch = teamName.includes(search);
 
-        const matchesSearch =
-          teamName.includes(
-            search
-          );
+    const matchesLeague = !leagueId || team.competition_id === leagueId;
 
-        const matchesLeague =
-          !leagueId ||
-          team.competition_id ===
-            leagueId;
+    return matchesSearch && matchesLeague;
+  });
 
-        return (
-          matchesSearch &&
-          matchesLeague
-        );
-
-      }
-    );
-
-  root.innerHTML =
-    rows
-      .map(
-        team => `
+  root.innerHTML = rows
+    .map(
+      (team) => `
 
           <div
             class="partnerRow"
@@ -3991,19 +3914,13 @@ function renderPartnerList() {
             <div
               class="partnerName"
             >
-              ${
-                team.display_name ||
-                team.name
-              }
+              ${team.display_name || team.name}
             </div>
 
             <div
               class="partnerLeague"
             >
-              🏆 ${
-                team.competitions?.name ||
-                "Keine Liga"
-              }
+              🏆 ${team.competitions?.name || "Keine Liga"}
             </div>
 
             <div
@@ -4014,70 +3931,38 @@ function renderPartnerList() {
 
           </div>
 
-        `
-      )
-      .join("");
-
-  root
-    .querySelectorAll(
-      ".partnerRow"
+        `,
     )
-    .forEach(row => {
+    .join("");
 
-      row.addEventListener(
-        "click",
-        () => {
-
-          openPartnerTeam(
-            row.dataset.id
-          );
-
-        }
-      );
-
+  root.querySelectorAll(".partnerRow").forEach((row) => {
+    row.addEventListener("click", () => {
+      openPartnerTeam(row.dataset.id);
     });
-
+  });
 }
 function openPartnerTeam(id) {
+  const team = state.partners.find((t) => t.id === id);
 
-  const team =
-  state.partners.find(
-    t => t.id === id
+  if (!team) return;
+
+  const partner = (state.partnerRecords || []).find(
+    (p) => p.primary_team_id === team.id,
   );
 
-if (!team)
-  return;
-
-const partner =
-  (
-    state.partnerRecords || []
-  ).find(
-    p =>
-      p.primary_team_id ===
-      team.id
-  );
-
-  document.getElementById(
-    "partnerDetail"
-  ).innerHTML = `
+  document.getElementById("partnerDetail").innerHTML = `
 
     <div class="partnerHeader">
 
       <div>
 
         <h2>
-          ${
-            team.display_name ||
-            team.name
-          }
+          ${team.display_name || team.name}
         </h2>
 
         <div class="partnerLeagueBadge">
 
-          🏆 ${
-            team.competitions?.name ||
-            "Keine Liga"
-          }
+          🏆 ${team.competitions?.name || "Keine Liga"}
 
         </div>
 
@@ -4087,11 +3972,7 @@ const partner =
   class="partnerStatus"
 >
 
-  ${
-    partner
-      ? "🟢 Partner"
-      : "⚪ Kein Partner"
-  }
+  ${partner ? "🟢 Partner" : "⚪ Kein Partner"}
 
 </div>
 
@@ -4107,10 +3988,7 @@ const partner =
 
         <input
           placeholder="Offizieller Vereinsname"
-          value="${
-  partner?.official_name ||
-  team.name
-}"
+          value="${partner?.official_name || team.name}"
         >
 
         <input
@@ -4183,10 +4061,7 @@ const partner =
           class="partnerTeamItem"
         >
 
-          ${
-            team.display_name ||
-            team.name
-          }
+          ${team.display_name || team.name}
 
           <button>
             ✕
@@ -4329,7 +4204,6 @@ const partner =
 
   ${
     partner
-
       ? `
 
         <button
@@ -4340,7 +4214,6 @@ const partner =
         </button>
 
       `
-
       : `
 
         <button
@@ -4351,143 +4224,83 @@ const partner =
         </button>
 
       `
-      
   }
 
 </div>
 
   `;
-document
-  .getElementById(
-    "createPartner"
-  )
-  ?.addEventListener(
-    "click",
-    async () => {
-
+  document
+    .getElementById("createPartner")
+    ?.addEventListener("click", async () => {
       try {
+        const { data: newPartner, error } = await supabase
 
-        const {
-          data: newPartner,
-          error
-        } =
-          await supabase
+          .from("partners")
 
-            .from(
-              "partners"
-            )
+          .insert([
+            {
+              primary_team_id: team.id,
 
-            .insert([{
+              official_name: team.name,
 
-              primary_team_id:
-                team.id,
+              verified: false,
+            },
+          ])
 
-              official_name:
-                team.name,
+          .select()
 
-              verified:
-                false
+          .single();
 
-            }])
+        if (error) throw error;
 
-            .select()
+        const { error: teamError } = await supabase
 
-            .single();
+          .from("partner_teams")
 
-        if (error)
-          throw error;
+          .insert([
+            {
+              partner_id: newPartner.id,
 
-        const {
-          error:
-            teamError
-        } =
-          await supabase
+              team_id: team.id,
 
-            .from(
-              "partner_teams"
-            )
+              is_primary: true,
 
-            .insert([{
+              is_verified: false,
+            },
+          ]);
 
-              partner_id:
-                newPartner.id,
-
-              team_id:
-                team.id,
-
-              is_primary:
-                true,
-
-              is_verified:
-                false
-
-            }]);
-
-        if (teamError)
-          throw teamError;
+        if (teamError) throw teamError;
 
         await loadPartners();
 
-        openPartnerTeam(
-          team.id
-        );
+        openPartnerTeam(team.id);
+      } catch (err) {
+        console.error("PARTNER ERROR FULL", err);
 
+        console.log(err.message);
+
+        console.log(err.code);
+
+        console.log(err.details);
+
+        console.log(err.hint);
+
+        alert(JSON.stringify(err, null, 2));
       }
-
-      catch (err) {
-
-        console.error(
-  "PARTNER ERROR FULL",
-  err
-);
-
-console.log(
-  err.message
-);
-
-console.log(
-  err.code
-);
-
-console.log(
-  err.details
-);
-
-console.log(
-  err.hint
-);
-
-        alert(
-          JSON.stringify(
-            err,
-            null,
-            2
-          )
-        );
-
-      }
-
-    }
-  );
+    });
 }
 
 async function loadPartnerLeagues() {
+  const { data } = await supabase
 
-  const { data } =
-    await supabase
+    .from("competitions")
 
-      .from("competitions")
+    .select("*")
+    .order("name");
 
-      .select("*")
-      .order("name");
+  const select = qs("partnerLeagueFilter");
 
-  const select =
-    qs(
-      "partnerLeagueFilter"
-    );
-
-  if (!select)
-    return;
+  if (!select) return;
 
   select.innerHTML = `
 
@@ -4495,10 +4308,9 @@ async function loadPartnerLeagues() {
       Alle Ligen
     </option>
 
-    ${(
-      data || []
-    ).map(
-      league => `
+    ${(data || [])
+      .map(
+        (league) => `
 
         <option
           value="${league.id}"
@@ -4506,22 +4318,18 @@ async function loadPartnerLeagues() {
           ${league.name}
         </option>
 
-      `
-    ).join("")}
+      `,
+      )
+      .join("")}
 
   `;
-
 }
 async function loadPartners() {
+  const { data } = await supabase
 
-  const { data } =
-    await supabase
+    .from("partners")
 
-      .from("partners")
+    .select("*");
 
-      .select("*");
-
-  state.partnerRecords =
-    data || [];
-
+  state.partnerRecords = data || [];
 }

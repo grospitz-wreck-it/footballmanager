@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Ein minimalistisches Fußball-Manager-Spiel im Stil der 90er Jahre.",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview"
   },

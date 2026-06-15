@@ -430,29 +430,9 @@ html, body {
 }
 
 
-#gameEventOverlay {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  background: rgba(0,0,0,0.85);
-}
-
-#gameEventOverlay.hidden {
-  display: none;
-}
-
-#gameEventImage {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
-
-  animation: popIn 0.2s ease;
-}
+/*
 
 @keyframes popIn {
   0% { transform: scale(0.9); opacity: 0; }
@@ -1055,7 +1035,64 @@ layout.css ersetzen
   position: relative;
   overflow: hidden;
 }
+/* =========================
+🎬 BROADCAST LAYER SYSTEM
+========================= */
 
+#gameEventOverlay {
+  position: absolute;
+  inset: 0;
+
+  z-index: 9999;
+
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0,0,0,0.85);
+}
+
+/* ALLE MEDIEN POSITIONIEREN */
+#broadcastHero,
+#broadcastCrowd,
+#broadcastOverlay,
+#gameEventImage,
+#gameEventVideo {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* Hintergrund */
+#broadcastHero {
+  z-index: 1;
+}
+
+/* Publikum */
+#broadcastCrowd {
+  z-index: 2;
+}
+
+/* FX Layer */
+#broadcastOverlay {
+  z-index: 3;
+}
+
+/* Eventbild */
+#gameEventImage {
+  z-index: 10;
+}
+
+/* Eventvideo */
+#gameEventVideo {
+  z-index: 11;
+}
 #gameCanvasInner {
   position: absolute;
   inset: 0;

@@ -13,7 +13,9 @@ import {
   advanceSchedule,
   updateTable, // 🔥 NEU
 } from "../modules/scheduler.js";
-
+import {
+  simulateAllOtherLeagues,
+} from "../modules/leagueSimulation.js";
 import { game } from "./state.js";
 
 import { emit } from "./events.js";
@@ -313,7 +315,7 @@ function startMatch(){
 // =========================
 function advanceGame() {
   advanceSchedule();
-
+simulateAllOtherLeagues();
   const schedule = game.league.schedule;
   const r = game.league.currentRound;
   const m = game.league.currentMatchIndex;

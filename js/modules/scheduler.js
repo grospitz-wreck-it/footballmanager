@@ -266,6 +266,44 @@ function simulateMatchFast(match) {
   updateTable(match.homeTeamId, match.awayTeamId, homeGoals, awayGoals);
 }
 
+function simulateLeagueMatchday(league) {
+  if (!league) return;
+
+  const roundIndex = league.currentRound ?? 0;
+  const round = league.schedule?.[roundIndex];
+
+  if (!round?.length) return;
+
+  round.forEach((match) => {
+
+    if (match._processed) return;
+
+    const homeGoals =
+      Math.floor(Math.random() * 5);
+
+    const awayGoals =
+      Math.floor(Math.random() * 5);
+
+    match.result = {
+      home: homeGoals,
+      away: awayGoals,
+    };
+
+    match.finished = true;
+    match._processed = true;
+
+    updateLeagueTable(
+      league,
+      match.homeTeamId,
+      match.awayTeamId,
+      homeGoals,
+      awayGoals
+    );
+  });
+
+  round._simulated = true;
+}
+
 // =========================
 // 📊 TABLE UPDATE
 // =========================
@@ -323,6 +361,59 @@ function updateTable(homeId, awayId, homeGoals, awayGoals) {
   }
 }
 
+function updateLeagueTable(
+  league,
+  homeId,
+  awayId,
+  homeGoals,
+  awayGoals
+) {
+  const table = league?.table;
+
+  if (!table) return;
+
+  const home =
+    table.find(
+      t => String(t.id) === String(homeId)
+    );
+
+  const away =
+    table.find(
+      t => String(t.id) === String(awayId)
+    );
+
+  if (!home || !away) return;
+
+  home.played++;
+  away.played++;
+
+  home.goalsFor += homeGoals;
+  home.goalsAgainst += awayGoals;
+
+  away.goalsFor += awayGoals;
+  away.goalsAgainst += homeGoals;
+
+  if (homeGoals > awayGoals) {
+    home.points += 3;
+    home.wins++;
+    away.losses++;
+  }
+
+  else if (awayGoals > homeGoals) {
+    away.points += 3;
+    away.wins++;
+    home.losses++;
+  }
+
+  else {
+    home.points++;
+    away.points++;
+
+    home.draws++;
+    away.draws++;
+  }
+}
+
 // =========================
 // 🎯 SIMULATE MATCHDAY
 // =========================
@@ -351,6 +442,28 @@ function simulateMatchday() {
   console.log("⚡ Spieltag simuliert (AI Matches)");
 }
 
+export function simulateAllOtherLeagues() {
+
+  const leagues =
+    game.league?.available || [];
+
+  const currentLeagueId =
+    String(game.league?.current?.id);
+
+  leagues.forEach((league) => {
+
+    if (
+      String(league.id) === currentLeagueId
+    ) {
+      return;
+    }
+
+    simulateLeagueMatchday(league);
+
+    league.currentRound =
+      (league.currentRound || 0) + 1;
+  });
+}
 // =========================
 // ⚡ LIVE SIMULATION ANDERE MATCHES
 // =========================

@@ -26,11 +26,13 @@ import {
   isPlayerSuspended,
   isPlayerInjured,
 } from "../modules/playerAvailability.js";
+import { enqueueOverlay } from "./overlayQueue.js";
 // =========================
 // 🔒 INTERNAL
 // =========================
 game.ui = game.ui || {};
 game.ui.dirty = true;
+game.ui.teamDirty = true;
 
 export function requestUIUpdate() {
   game.ui.dirty = true;
@@ -673,9 +675,13 @@ if (
   // =========================
   // 👥 TEAM
   // =========================
-  if (game.ui.tab === "team") {
-    renderTeam();
-  }
+  if (
+  game.ui.tab === "team" &&
+  game.ui.teamDirty
+) {
+  renderTeam();
+  game.ui.teamDirty = false;
+}
 
   if (
   game.ui.tab === "schedule" &&
@@ -939,14 +945,16 @@ function initUI() {
 
   // 📐 FORMATION
   setupDropdown("formationDropdown", (value) => {
-    game.tactics.formation = value;
+  game.tactics.formation = value;
 
-    if (game.team?.lineup) {
-      game.team.lineup.formation = value;
-    }
+  if (game.team?.lineup) {
+    game.team.lineup.formation = value;
+  }
 
-    requestUIUpdate();
-  });
+  game.ui.teamDirty = true;
+
+  requestUIUpdate();
+});
 
   setupDropdown("presetDropdown", (value) => {
     if (!game.tactics) game.tactics = {};
@@ -1019,7 +1027,7 @@ function initUI() {
 
       // ✅ normales Verhalten
       game.events.history.push({
-        id: Date.now(),
+        id: crypto.randomUUID(),
         minute: game.match.live.minute,
         type: "chance",
         text: "🔥 Große Chance durch taktische Umstellung!",
@@ -1331,7 +1339,10 @@ function updateEvents() {
   // 🧠 TEXT GENERATION
   // =========================
   let text = newest.text;
-
+const assets =
+  newest.assets ||
+  newest.meta?.assets ||
+  [];
   if (!text) {
     try {
       text = buildCommentary(newest);
@@ -1351,69 +1362,153 @@ function updateEvents() {
   // 🎨 ASSETS
   // =========================
 
-  const assets =
-    newest.assets?.length
-      ? newest.assets
-      : newest.meta?.assets || [];
+  
+  
+  
+ // =========================
+// 📝 EVENT BAR TEXT
+// =========================
+const eventText =
+  document.getElementById("eventText");
 
+if (eventText) {
+  eventText.textContent = text;
+}
+
+// =========================
+// 🎨 ASSETS
+// =========================
+if (!assets.length) {
+  console.log("ℹ️ Event has no media assets");
+  return;
+}
+
+// Debug
+assets.forEach((a) => {
   console.log(
-    "🎨 EVENT ASSETS:",
-    assets
+    "🧩 ASSET",
+    a.type,
+    a.url
+  );
+});
+
+// =========================
+// 🎯 PRIORITY
+// hero > crowd > overlay > image > video
+// =========================
+
+const hero =
+  assets.find(
+    (a) =>
+      a?.url &&
+      a.type === "hero"
   );
 
-  // =========================
-  // 📝 EVENT BAR TEXT
-  // =========================
-  const eventText =
-    document.getElementById("eventText");
+const crowd =
+  assets.find(
+    (a) =>
+      a?.url &&
+      a.type === "crowd"
+  );
 
-  if (eventText) {
-    eventText.textContent = text;
-  }
+const overlay =
+  assets.find(
+    (a) =>
+      a?.url &&
+      a.type === "overlay"
+  );
 
-  // =========================
-  // 🎬 OVERLAY
-  // =========================
-  if (!assets.length) {
-    console.log(
-      "ℹ️ Event has no media assets"
-    );
-    return;
-  }
+const image =
+  assets.find(
+    (a) =>
+      a?.url &&
+      a.type === "image"
+  );
 
-  const asset = assets.find(
+const video =
+  assets.find(
     (a) =>
       a?.url &&
       (
         a.type === "video" ||
-        a.type === "image" ||
-        /\.(mp4|webm|ogg|png|jpg|jpeg|webp)$/i.test(a.url)
+        /\.(mp4|webm|ogg)$/i.test(a.url)
       )
   );
 
-  if (!asset) {
-    console.warn(
-      "❌ No valid media asset found"
-    );
-    return;
-  }
-
-  const url = asset.url;
-
-  const isVideo =
-    asset.type === "video" ||
-    /\.(mp4|webm|ogg)$/i.test(url);
+// =========================
+// 🎬 HERO
+// =========================
+if (hero?.url) {
 
   console.log(
-    "🎥 ASSET CHECK:",
-    asset
+    "🦸 USING HERO",
+    hero.url
   );
 
-  if (isVideo) {
-    showVideoOverlay(url, text);
-  } else {
-    showOverlay(url, text);
-  }
+  showBroadcastLayers(assets);
+
+  return;
+}
+
+// =========================
+// 👥 CROWD
+// =========================
+if (crowd?.url) {
+
+  showBroadcastLayers(assets);
+
+  return;
+}
+
+// =========================
+// 🎨 OVERLAY
+// =========================
+if (overlay?.url) {
+
+  showBroadcastLayers(assets);
+
+  return;
+}
+
+// =========================
+// 🖼 IMAGE
+// =========================
+if (image?.url) {
+
+  console.log(
+    "🖼 USING IMAGE",
+    image.url
+  );
+
+  showOverlay(
+    image.url,
+    text
+  );
+
+  return;
+}
+
+// =========================
+// 🎥 VIDEO
+// =========================
+if (video?.url) {
+
+  console.log(
+    "🎥 USING VIDEO",
+    video.url
+  );
+
+  showVideoOverlay(
+    video.url,
+    text
+  );
+
+  return;
+}
+
+console.warn(
+  "❌ No valid media asset found"
+);
 }
 // =========================
 // 📊 TABS
@@ -1448,9 +1543,13 @@ function updateTabs() {
       }
 
       if (name === "team") {
-        const el = document.getElementById("teamView");
-        if (el) el.style.display = "block";
-      }
+  const el = document.getElementById("teamView");
+
+  if (el) {
+    el.style.display = "block";
+  }
+  game.ui.teamDirty = true;
+}
 
       requestUIUpdate();
     };
@@ -1886,15 +1985,19 @@ starters = assigned;
   // 📦 INSERT DOM
   // =========================
 
-  html += `</div>`;
-
   // 🔥 QUICK FIX: verhindert unnötiges Re-Rendern (Flicker Kill)
-  if (container.dataset.renderHash === html) {
-    return;
-  }
-  container.dataset.renderHash = html;
+  const renderHash =
+  starters.map((p) => p.id).join(",") +
+  "|" +
+  benchPlayers.map((p) => p.id).join(",");
 
-  container.innerHTML = html;
+if (container.dataset.renderHash === renderHash) {
+  return;
+}
+
+container.dataset.renderHash = renderHash;
+
+container.innerHTML = html;
 
   // =========================
   // 🍩 TEAM STATS DONUTS (FIX)
@@ -1981,8 +2084,11 @@ starters = assigned;
       }
 
       selectedPlayerId = null;
-      renderTeam();
-      renderTacticStats();
+
+game.ui.teamDirty = true;
+requestUIUpdate();
+
+renderTacticStats();
     };
   });
 
@@ -2471,7 +2577,7 @@ window.startPenaltySequence = function (context = {}) {
           };
 
           game.events.history.push({
-            id: Date.now(),
+            id: crypto.randomUUID(),
             minute: currentLive.minute,
             type: "GOAL",
             teamId: context.teamId,
@@ -2482,7 +2588,7 @@ window.startPenaltySequence = function (context = {}) {
           triggerGoalAnimation(isHome ? "home" : "away");
         } else if (result?.saved) {
   game.events.history.push({
-    id: Date.now(),
+    id: crypto.randomUUID(),
     minute: currentLive.minute,
     type: "PENALTY_SAVED",
     teamId: context.teamId,
@@ -2492,7 +2598,7 @@ window.startPenaltySequence = function (context = {}) {
 
         } else {
           game.events.history.push({
-            id: Date.now(),
+            id: crypto.randomUUID(),
             minute: currentLive.minute,
             type: "SHOT_MISS",
             teamId: context.teamId,
@@ -2536,139 +2642,340 @@ window.startPenaltySequence = function (context = {}) {
 };
 
 function showOverlay(url, text = "") {
-  console.log("🔥 SHOW OVERLAY CALLED", url);
 
-  const overlay =
-    document.getElementById("gameEventOverlay");
+  enqueueOverlay(() => {
 
-  const image =
-    document.getElementById("gameEventImage");
+    return new Promise((resolve) => {
 
-  const video =
-    document.getElementById("gameEventVideo");
+      console.log(
+        "🔥 SHOW OVERLAY CALLED",
+        url
+      );
 
-  if (!overlay || !image) {
-    console.warn("❌ gameEventOverlay missing");
-    return;
-  }
+      const overlay =
+        document.getElementById(
+          "gameEventOverlay"
+        );
 
-  // Reset
-  overlay.classList.add("hidden");
-  overlay.style.display = "none";
+      const image =
+        document.getElementById(
+          "gameEventImage"
+        );
 
-  // Video sicher stoppen
-  if (video) {
-    video.pause();
-    video.removeAttribute("src");
-    video.load();
-    video.style.display = "none";
-  }
+      const video =
+        document.getElementById(
+          "gameEventVideo"
+        );
 
-  // Bild aktivieren
-  image.style.display = "block";
+      if (!overlay || !image) {
 
-  image.onload = () => {
-    console.log("✅ IMAGE LOADED");
+        console.warn(
+          "❌ gameEventOverlay missing"
+        );
 
-    overlay.style.display = "flex";
-    overlay.style.opacity = "1";
-    overlay.style.visibility = "visible";
-    overlay.style.zIndex = "999999";
+        resolve();
+        return;
+      }
 
-    overlay.classList.remove("hidden");
+      // Reset
+      overlay.classList.add(
+        "hidden"
+      );
 
-    setTimeout(() => {
-      overlay.classList.add("hidden");
-      overlay.style.display = "none";
-    }, 5000);
-  };
+      overlay.style.display =
+        "none";
 
-  image.onerror = (err) => {
-    console.error(
-      "❌ IMAGE LOAD FAILED",
-      err,
-      url
-    );
+      // Video sicher stoppen
+      if (video) {
 
-    overlay.classList.add("hidden");
-    overlay.style.display = "none";
-  };
+        video.pause();
 
-  image.src = url;
+        video.removeAttribute(
+          "src"
+        );
 
-  console.log("URL:", url);
-  console.log("IMAGE SRC:", image.src);
-  console.log(
-    "IMAGE ATTR:",
-    image.getAttribute("src")
-  );
+        video.load();
+
+        video.style.display =
+          "none";
+      }
+
+      // Bild aktivieren
+      image.style.display =
+        "block";
+
+      image.onload = () => {
+
+        console.log(
+          "✅ IMAGE LOADED"
+        );
+
+        overlay.style.display =
+          "flex";
+
+        overlay.style.opacity =
+          "1";
+
+        overlay.style.visibility =
+          "visible";
+
+        overlay.style.zIndex =
+          "999999";
+
+        overlay.classList.remove(
+          "hidden"
+        );
+
+        setTimeout(() => {
+
+          overlay.classList.add(
+            "hidden"
+          );
+
+          overlay.style.display =
+            "none";
+
+          resolve();
+
+        }, 5000);
+      };
+
+      image.onerror = (err) => {
+
+        console.error(
+          "❌ IMAGE LOAD FAILED",
+          err,
+          url
+        );
+
+        overlay.classList.add(
+          "hidden"
+        );
+
+        overlay.style.display =
+          "none";
+
+        resolve();
+      };
+
+      image.src = url;
+
+      console.log("URL:", url);
+
+      console.log(
+        "IMAGE SRC:",
+        image.src
+      );
+
+      console.log(
+        "IMAGE ATTR:",
+        image.getAttribute("src")
+      );
+
+    });
+
+  });
+
 }
 function showVideoOverlay(url, text = "") {
-  console.log(
-    "🎬 SHOW VIDEO OVERLAY",
-    url
-  );
+
+  enqueueOverlay(() => {
+
+    return new Promise((resolve) => {
+
+      console.log(
+        "🎬 SHOW VIDEO OVERLAY",
+        url
+      );
+
+      const overlay =
+        document.getElementById("gameEventOverlay");
+
+      const image =
+        document.getElementById("gameEventImage");
+
+      const video =
+        document.getElementById("gameEventVideo");
+
+      if (
+        !overlay ||
+        !image ||
+        !video
+      ) {
+        console.warn(
+          "❌ overlay elements missing"
+        );
+
+        resolve();
+        return;
+      }
+
+      // =========================
+      // RESET
+      // =========================
+      overlay.classList.add("hidden");
+      overlay.style.display = "none";
+
+      image.style.display = "none";
+
+      video.pause();
+      video.currentTime = 0;
+
+      video.onloadeddata = null;
+      video.onended = null;
+      video.onerror = null;
+
+      video.style.display = "block";
+
+      // =========================
+      // VIDEO LOADED
+      // =========================
+      video.onloadeddata = () => {
+
+        console.log(
+          "✅ VIDEO LOADED"
+        );
+
+        overlay.style.display =
+          "flex";
+
+        overlay.style.opacity =
+          "1";
+
+        overlay.style.visibility =
+          "visible";
+
+        overlay.style.zIndex =
+          "999999";
+
+        overlay.classList.remove(
+          "hidden"
+        );
+
+        video.play().catch((err) => {
+
+          console.error(
+            "❌ VIDEO PLAY FAILED",
+            err
+          );
+
+          overlay.classList.add(
+            "hidden"
+          );
+
+          overlay.style.display =
+            "none";
+
+          resolve();
+        });
+      };
+
+      // =========================
+      // VIDEO ERROR
+      // =========================
+      video.onerror = (err) => {
+
+        console.error(
+          "❌ VIDEO LOAD FAILED",
+          err,
+          url
+        );
+
+        overlay.classList.add(
+          "hidden"
+        );
+
+        overlay.style.display =
+          "none";
+
+        resolve();
+      };
+
+      // =========================
+      // VIDEO FINISHED
+      // =========================
+      video.onended = () => {
+
+        console.log(
+          "🏁 VIDEO FINISHED"
+        );
+
+        overlay.classList.add(
+          "hidden"
+        );
+
+        overlay.style.display =
+          "none";
+
+        video.pause();
+        video.currentTime = 0;
+
+        resolve();
+      };
+
+      // =========================
+      // LOAD VIDEO
+      // =========================
+      video.removeAttribute("src");
+video.load();
+      video.src = url;
+      video.load();
+
+    });
+
+  });
+
+}
+
+
+function showBroadcastLayers(assets) {
 
   const overlay =
     document.getElementById("gameEventOverlay");
 
-  const image =
-    document.getElementById("gameEventImage");
+  const hero =
+    document.getElementById("broadcastHero");
 
-  const video =
-    document.getElementById("gameEventVideo");
+  const crowd =
+    document.getElementById("broadcastCrowd");
 
-  if (
-    !overlay ||
-    !image ||
-    !video
-  ) {
-    console.warn(
-      "❌ overlay elements missing"
-    );
-    return;
+  const fx =
+    document.getElementById("broadcastOverlay");
+
+  const heroAsset =
+    assets.find(a => a.type === "hero");
+
+  const crowdAsset =
+    assets.find(a => a.type === "crowd");
+
+  const overlayAsset =
+    assets.find(a => a.type === "overlay");
+
+  hero.style.display =
+    heroAsset ? "block" : "none";
+
+  crowd.style.display =
+    crowdAsset ? "block" : "none";
+
+  fx.style.display =
+    overlayAsset ? "block" : "none";
+
+  if (heroAsset) {
+    hero.src = heroAsset.url;
   }
 
-  // Reset
-  overlay.classList.add("hidden");
-  overlay.style.display = "none";
+  if (crowdAsset) {
+    crowd.src = crowdAsset.url;
+  }
 
-  image.style.display = "none";
+  if (overlayAsset) {
+    fx.src = overlayAsset.url;
+  }
 
-  video.style.display = "block";
-
-  video.onloadeddata = () => {
-    console.log("✅ VIDEO LOADED");
-
-    overlay.style.display = "flex";
-    overlay.style.opacity = "1";
-    overlay.style.visibility = "visible";
-    overlay.style.zIndex = "999999";
-
-    overlay.classList.remove("hidden");
-
-    video.play().catch(console.error);
-  };
-
-  video.onerror = (err) => {
-    console.error(
-      "❌ VIDEO LOAD FAILED",
-      err,
-      url
-    );
-
-    overlay.classList.add("hidden");
-    overlay.style.display = "none";
-  };
-
-  video.onended = () => {
-    overlay.classList.add("hidden");
-    overlay.style.display = "none";
-  };
-
-  video.src = url;
-  video.load();
+  overlay.classList.remove("hidden");
+  overlay.style.display = "flex";
 }
+
 // =========================
 // 📦 EXPORTS
 // =========================

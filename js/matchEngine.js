@@ -779,19 +779,6 @@ function initMatch(round) {
     }
   }, 100);
 
-  // 🎬 Danach Match Intro
-  setTimeout(() => {
-    emitMatchEvent("MATCH_INTRO", {
-      homeTeamId: homeId,
-
-      awayTeamId: awayId,
-
-      homeTeamName: game.match.home?.name,
-
-      awayTeamName: game.match.away?.name,
-    });
-  }, 8000);
-
   return true;
 }
 // =========================
