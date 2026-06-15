@@ -1942,13 +1942,12 @@ button.danger{
 ===================================================== */
 
 #previewCrowd{
-
+#previewCrowd{
   z-index:2;
-
   object-fit:cover;
-
-  opacity:0;
+  opacity:1;
 }
+
 
 
 /* =====================================================
@@ -1956,14 +1955,10 @@ button.danger{
 ===================================================== */
 
 #previewOverlay{
-
   z-index:3;
-
   object-fit:contain;
-
   pointer-events:none;
-
-  opacity:0;
+  opacity:1;
 }
 
 
