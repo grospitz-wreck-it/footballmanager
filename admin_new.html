@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        MatchDay Manager
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="./admin.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet/dist/leaflet.css"
+    >
+
+</head>
+
+<body>
+
+    <button
+        id="toggleDebug"
+        class="debugToggle"
+    >
+        🐞
+    </button>
+
+    <div class="appShell">
+
+        <!-- ===================================== -->
+        <!-- TOPBAR -->
+        <!-- ===================================== -->
+
+        <header class="topbar">
+
+            <div class="topbarBrand">
+
+                <div class="brandIcon">
+                    ⚽
+                </div>
+
+                <div class="brandContent">
+
+                    <div class="brandEyebrow">
+                        MATCHDAY PLATFORM
+                    </div>
+
+                    <h1>
+                        Ad Manager
+                    </h1>
+
+                </div>
+
+            </div>
+
+            <nav class="mainNavigation">
+
+                <button
+                    id="tabDashboard"
+                    class="navButton active"
+                >
+                    Dashboard
+                </button>
+
+                <button
+                    id="tabAds"
+                    class="navButton"
+                >
+                    Ads
+                </button>
+
+                <button
+                    id="tabBroadcast"
+                    class="navButton"
+                >
+                    Broadcast
+                </button>
+
+                <button
+                    id="tabInsights"
+                    class="navButton"
+                >
+                    Insights
+                </button>
+
+                <button
+                    id="tabPartners"
+                    class="navButton"
+                >
+                    Partner
+                </button>
+
+            </nav>
+
+        </header>
+
+        <!-- ===================================== -->
+        <!-- DASHBOARD -->
+        <!-- ===================================== -->
+
+        <section
+            id="dashboardTab"
+            class="page active"
+        >
+
+            <div class="pageHeader">
+
+                <div>
+
+                    <div class="eyebrow">
+                        OVERVIEW
+                    </div>
+
+                    <h2>
+                        Dashboard
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <div class="dashboardGrid">
+
+                <div class="workspacePanel">
+
+                    Dashboard Inhalte folgen später.
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ===================================== -->
+        <!-- ADS -->
+        <!-- ===================================== -->
+
+        <section
+            id="adsTab"
+            class="page"
+        >
+
+            <div class="adsWorkspace">
+
+                <!-- ============================== -->
+                <!-- CUSTOMER SIDEBAR -->
+                <!-- ============================== -->
+
+                <aside class="customerSidebar">
+
+                    <div class="sidebarHeader">
+
+                        <div>
+
+                            <div class="eyebrow">
+                                CUSTOMERS
+                            </div>
+
+                            <h3>
+                                Kunden
+                            </h3>
+
+                        </div>
+
+                        <button
+                            id="createCustomerBtn"
+                            class="sidebarAddButton"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                    <div class="sidebarSearch">
+
+                        <input
+                            id="customerSearch"
+                            type="text"
+                            placeholder="Kunde suchen..."
+                        >
+
+                    </div>
+
+                    <div
+                        id="customerList"
+                        class="customerList"
+                    >
+
+                        <!-- renderCustomerSidebar() -->
+
+                    </div>
+
+                </aside>
+
+                <!-- ============================== -->
+                <!-- MAIN EDITOR -->
+                <!-- ============================== -->
+
+                <main class="adsEditor">
+
+                    <div class="editorTopbar">
+
+                        <div>
+
+                            <div class="eyebrow">
+                                CAMPAIGN EDITOR
+                            </div>
+
+                            <h2>
+                                Kampagnenverwaltung
+                            </h2>
+
+                        </div>
+
+                        <div class="editorActions">
+
+                            <button
+                                id="createCampaignBtn"
+                                class="primaryButton"
+                            >
+                                Kampagne speichern
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ========================== -->
+                    <!-- KUNDE -->
+                    <!-- ========================== -->
+
+                    <section class="editorPanel">
+
+                        <div class="panelHeader">
+
+                            <h3>
+                                Kunde
+                            </h3>
+
+                        </div>
+
+                        <div class="formGrid">
+
+                            <div class="field">
+
+                                <label>
+                                    Kundenname
+                                </label>
+
+                                <input
+                                    id="campaignCustomer"
+                                    type="text"
+                                    placeholder="PUMA"
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Website
+                                </label>
+
+                                <input
+                                    id="campaignLink"
+                                    type="text"
+                                    placeholder="https://..."
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- ========================== -->
+                    <!-- KAMPAGNE -->
+                    <!-- ========================== -->
+
+                    <section class="editorPanel">
+
+                        <div class="panelHeader">
+
+                            <h3>
+                                Kampagne
+                            </h3>
+
+                        </div>
+
+                        <div class="formGrid">
+
+                            <div class="field">
+
+                                <label>
+                                    Kampagnenname
+                                </label>
+
+                                <input
+                                    id="campaignName"
+                                    type="text"
+                                    placeholder="Sommerkampagne"
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Budget
+                                </label>
+
+                                <input
+                                    id="campaignBudget"
+                                    type="number"
+                                    placeholder="5000"
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Startdatum
+                                </label>
+
+                                <input
+                                    id="campaignStart"
+                                    type="date"
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Enddatum
+                                </label>
+
+                                <input
+                                    id="campaignEnd"
+                                    type="date"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+                    <!-- ========================== -->
+                    <!-- TARGETING -->
+                    <!-- ========================== -->
+
+                    <section class="editorPanel">
+
+                        <div class="panelHeader">
+
+                            <h3>
+                                Targeting
+                            </h3>
+
+                        </div>
+
+                        <div class="formGrid">
+
+                            <div class="field">
+
+                                <label>
+                                    Bundesländer
+                                </label>
+
+                                <input
+                                    id="targetStates"
+                                    type="text"
+                                    placeholder="Bayern, NRW ..."
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Städte
+                                </label>
+
+                                <input
+                                    id="targetCities"
+                                    type="text"
+                                    placeholder="München, Hamburg ..."
+                                >
+
+                            </div>
+
+                            <div class="field full">
+
+                                <label>
+                                    Vereine
+                                </label>
+
+                                <input
+                                    id="targetTeams"
+                                    type="text"
+                                    placeholder="FC Bayern, HSV ..."
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- ========================== -->
+                    <!-- AD SETUP -->
+                    <!-- ========================== -->
+
+                    <section class="editorPanel">
+
+                        <div class="panelHeader">
+
+                            <h3>
+                                Ad Setup
+                            </h3>
+
+                            <button
+                                id="addAdSetBtn"
+                                class="primaryButton small"
+                            >
+                                + Ad Set hinzufügen
+                            </button>
+
+                        </div>
+
+                        <div class="formGrid">
+
+                            <div class="field">
+
+                                <label>
+                                    Ad Type
+                                </label>
+
+                                <select id="adType">
+
+                                    <option value="interstitial">
+                                        Interstitial
+                                    </option>
+
+                                    <option value="banner">
+                                        Banner
+                                    </option>
+
+                                    <option value="video">
+                                        Rewarded Video
+                                    </option>
+
+                                    <option value="branded">
+                                        Branded
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Placement
+                                </label>
+
+                                <input
+                                    id="adPlacement"
+                                    type="text"
+                                    placeholder="match_intro"
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Frequency / User
+                                </label>
+
+                                <input
+                                    id="freqUser"
+                                    type="number"
+                                    placeholder="1"
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Frequency / Day
+                                </label>
+
+                                <input
+                                    id="freqDay"
+                                    type="number"
+                                    placeholder="3"
+                                >
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>
+                                    Daily Limit
+                                </label>
+
+                                <input
+                                    id="dailyLimit"
+                                    type="number"
+                                    placeholder="10000"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- ========================== -->
+                    <!-- ASSET STUDIO -->
+                    <!-- ========================== -->
+
+                    <section class="editorPanel">
+
+                        <div class="panelHeader">
+
+                            <h3>
+                                Creative Assets
+                            </h3>
+
+                        </div>
+
+                        <div class="assetStudio">
+
+                            <div class="uploadZone">
+
+                                <input
+                                    id="assetUpload"
+                                    type="file"
+                                    multiple
+                                >
+
+                                <button
+                                    id="addAssetBtn"
+                                    class="primaryButton"
+                                >
+                                    Assets hochladen
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="assetList"
+                                class="assetGrid"
+                            >
+
+                                <!-- renderAssetList() -->
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- ========================== -->
+                    <!-- CAMPAIGN LIBRARY -->
+                    <!-- ========================== -->
+
+                    <section class="editorPanel campaignLibrary">
+
+                        <div class="panelHeader">
+
+                            <div>
+
+                                <div class="eyebrow">
+                                    CAMPAIGNS
+                                </div>
+
+                                <h3>
+                                    Kampagnen Übersicht
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="campaignList"
+                            class="campaignList"
+                        >
+
+                            <!-- renderCampaigns() -->
+
+                        </div>
+
+                    </section>
+
+                </main>
+
+                <!-- ============================== -->
+                <!-- SUMMARY SIDEBAR -->
+                <!-- ============================== -->
+
+                <aside class="summarySidebar">
+
+                    <section class="summaryPanel">
+
+                        <div class="summaryHeader">
+
+                            <div class="eyebrow">
+                                CUSTOMER
+                            </div>
+
+                            <h3>
+                                Übersicht
+                            </h3>
+
+                        </div>
+
+                        <div class="summaryHero">
+
+                            <div class="summaryLogo">
+
+                                ⚽
+
+                            </div>
+
+                            <div>
+
+                                <strong
+                                    id="summaryCustomer"
+                                >
+                                    Kein Kunde
+                                </strong>
+
+                                <div
+                                    id="summaryCampaign"
+                                >
+                                    Keine Kampagne
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <section class="summaryPanel">
+
+                        <div class="metricRow">
+
+                            <span>
+                                Budget
+                            </span>
+
+                            <strong
+                                id="summaryBudget"
+                            >
+                                0 €
+                            </strong>
+
+                        </div>
+
+                        <div class="metricRow">
+
+                            <span>
+                                Ad Sets
+                            </span>
+
+                            <strong
+                                id="summaryAdSets"
+                            >
+                                0
+                            </strong>
+
+                        </div>
+
+                        <div class="metricRow">
+
+                            <span>
+                                Impressions
+                            </span>
+
+                            <strong
+                                id="summaryImpressions"
+                            >
+                                0
+                            </strong>
+
+                        </div>
+
+                        <div class="metricRow">
+
+                            <span>
+                                Revenue
+                            </span>
+
+                            <strong
+                                id="summaryRevenue"
+                            >
+                                0 €
+                            </strong>
+
+                        </div>
+
+                    </section>
+
+                    <section class="summaryPanel">
+
+                        <div class="eyebrow">
+                            STATUS
+                        </div>
+
+                        <div
+                            id="campaignHealth"
+                            class="statusBadge"
+                        >
+                            Entwurf
+                        </div>
+
+                    </section>
+
+                </aside>
+
+            </div>
+
+        </section>
+        <!-- ===================================== -->
+        <!-- BROADCAST -->
+        <!-- ===================================== -->
+
+        <section
+            id="broadcastTab"
+            class="page"
+        >
+
+            <div class="broadcastWorkspace">
+
+                <!-- ============================== -->
+                <!-- EVENT LIBRARY -->
+                <!-- ============================== -->
+
+                <aside class="broadcastLibrary">
+
+                    <div class="libraryHeader">
+
+                        <div>
+
+                            <div class="eyebrow">
+                                EVENT LIBRARY
+                            </div>
+
+                            <h2>
+                                Broadcast Studio
+                            </h2>
+
+                        </div>
+
+                        <button
+                            id="newBroadcastEvent"
+                            class="primaryButton small"
+                        >
+                            + Event
+                        </button>
+
+                    </div>
+
+                    <!-- SEARCH -->
+
+                    <div class="librarySearch">
+
+                        <input
+                            id="broadcastSearch"
+                            type="text"
+                            placeholder="Event suchen..."
+                        >
+
+                    </div>
+
+                    <!-- FILTER -->
+
+                    <div class="libraryFilter">
+
+                        <select
+                            id="broadcastTypeFilter"
+                        >
+
+                            <option value="">
+                                Alle Typen
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- EVENT LIST -->
+
+                    <div
+                        id="broadcastRows"
+                        class="broadcastRows"
+                    >
+
+                        <!-- renderBroadcastRows() -->
+
+                    </div>
+
+                </aside>
+
+                <!-- ============================== -->
+                <!-- STAGE -->
+                <!-- ============================== -->
+
+                <main class="broadcastStage">
+
+                    <!-- TOOLBAR -->
+
+                    <section class="stageToolbar">
+
+                        <button class="toolbarAction">
+                            🎬 Intro
+                        </button>
+
+                        <button class="toolbarAction">
+                            ⚽ Goal
+                        </button>
+
+                        <button class="toolbarAction">
+                            🎯 Shot
+                        </button>
+
+                        <button class="toolbarAction">
+                            🚩 Corner
+                        </button>
+
+                        <button class="toolbarAction">
+                            ⏸ Halftime
+                        </button>
+
+                        <button class="toolbarAction">
+                            🏁 Fulltime
+                        </button>
+
+                    </section>
+
+                    <!-- LIVE STAGE -->
+
+                    <section class="previewPanel">
+
+                        <div class="panelHeader">
+
+                            <div>
+
+                                <div class="eyebrow">
+                                    LIVE PREVIEW
+                                </div>
+
+                                <h3>
+                                    Event Stage
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                        <div class="previewStage">
+
+                            <div
+                                id="broadcastPreviewStage"
+                                class="previewCanvas"
+                            >
+
+                                <div class="previewPlaceholder">
+
+                                    Vorschau
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="previewControls">
+
+                            <button>
+                                ▶
+                            </button>
+
+                            <button>
+                                ⏸
+                            </button>
+
+                            <button>
+                                ↻
+                            </button>
+
+                            <div class="timelineSpacer"></div>
+
+                            <span>
+                                00:00 / 00:08
+                            </span>
+
+                        </div>
+
+                    </section>
+
+                    <!-- TIMELINE -->
+
+                    <section class="timelinePanel">
+
+                        <div class="panelHeader">
+
+                            <div>
+
+                                <div class="eyebrow">
+                                    TIMELINE
+                                </div>
+
+                                <h3>
+                                    Layers
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+                        <div class="timelineEditor">
+
+                            <!-- HERO -->
+
+                            <div class="timelineTrack">
+
+                                <div class="trackLabel">
+
+                                    Hero
+
+                                </div>
+
+                                <div class="trackLane">
+
+                                    <div class="timelineClip heroClip">
+
+                                        Hero Asset
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- CROWD -->
+
+                            <div class="timelineTrack">
+
+                                <div class="trackLabel">
+
+                                    Crowd
+
+                                </div>
+
+                                <div class="trackLane">
+
+                                    <div class="timelineClip crowdClip">
+
+                                        Crowd Loop
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- OVERLAY -->
+
+                            <div class="timelineTrack">
+
+                                <div class="trackLabel">
+
+                                    Overlay
+
+                                </div>
+
+                                <div class="trackLane">
+
+                                    <div class="timelineClip overlayClip">
+
+                                        Overlay
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- AUDIO -->
+
+                            <div class="timelineTrack">
+
+                                <div class="trackLabel">
+
+                                    Audio
+
+                                </div>
+
+                                <div class="trackLane">
+
+                                    <div class="timelineClip audioClip">
+
+                                        Audio Track
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- EVENT OVERVIEW -->
+
+                    <section class="broadcastOverview">
+
+                        <div class="overviewCard">
+
+                            <span>
+                                Events
+                            </span>
+
+                            <strong>
+                                0
+                            </strong>
+
+                        </div>
+
+                        <div class="overviewCard">
+
+                            <span>
+                                Assets
+                            </span>
+
+                            <strong>
+                                0
+                            </strong>
+
+                        </div>
+
+                        <div class="overviewCard">
+
+                            <span>
+                                Trigger
+                            </span>
+
+                            <strong>
+                                Live
+                            </strong>
+
+                        </div>
+
+                    </section>
+
+                </main>
+
+                <!-- ============================== -->
+                <!-- INSPECTOR -->
+                <!-- ============================== -->
+
+                <aside
+                    id="broadcastDetail"
+                    class="broadcastInspector"
+                >
+
+                    <div class="emptyInspector">
+
+                        <div class="eyebrow">
+                            EVENT INSPECTOR
+                        </div>
+
+                        <h3>
+                            Event auswählen
+                        </h3>
+
+                        <p>
+                            Wähle links ein Event aus oder
+                            erstelle ein neues Event.
+                        </p>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+        <!-- ===================================== -->
+        <!-- INSIGHTS -->
+        <!-- ===================================== -->
+
+        <section
+            id="insightsTab"
+            class="page"
+        >
+
+            <div class="pageHeader">
+
+                <div>
+
+                    <div class="eyebrow">
+                        ANALYTICS
+                    </div>
+
+                    <h2>
+                        Insights
+                    </h2>
+
+                </div>
+
+            </div>
+
+            <!-- KPI ROW -->
+
+            <div class="kpiGrid">
+
+                <div class="metricCard">
+
+                    <span>
+                        DAU
+                    </span>
+
+                    <strong
+                        id="insightDAU"
+                    >
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="metricCard">
+
+                    <span>
+                        Sessions
+                    </span>
+
+                    <strong
+                        id="insightSessions"
+                    >
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="metricCard">
+
+                    <span>
+                        Matches
+                    </span>
+
+                    <strong
+                        id="insightMatches"
+                    >
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="metricCard">
+
+                    <span>
+                        Avg Session
+                    </span>
+
+                    <strong
+                        id="insightAvg"
+                    >
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="metricCard">
+
+                    <span>
+                        MPS
+                    </span>
+
+                    <strong
+                        id="insightMPS"
+                    >
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <!-- CHART -->
+
+            <section class="workspacePanel">
+
+                <div class="panelHeader">
+
+                    <div>
+
+                        <div class="eyebrow">
+                            PERFORMANCE
+                        </div>
+
+                        <h3>
+                            Analytics
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <canvas
+                    id="insightChart"
+                ></canvas>
+
+            </section>
+
+            <!-- MAP + TOP REGIONS -->
+
+            <div class="insightGrid">
+
+                <section class="workspacePanel">
+
+                    <div class="panelHeader">
+
+                        <h3>
+                            Regionen
+                        </h3>
+
+                    </div>
+
+                    <div
+                        id="geoMap"
+                        style="height:520px;"
+                    ></div>
+
+                </section>
+
+                <section class="workspacePanel">
+
+                    <div class="panelHeader">
+
+                        <h3>
+                            Top Regionen
+                        </h3>
+
+                    </div>
+
+                    <div
+                        id="topRegions"
+                    ></div>
+
+                </section>
+
+            </div>
+
+            <!-- MONETIZATION -->
+
+            <section class="workspacePanel">
+
+                <div class="panelHeader">
+
+                    <div>
+
+                        <div class="eyebrow">
+                            REVENUE
+                        </div>
+
+                        <h3>
+                            Monetization
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="insightMonetization"
+                ></div>
+
+            </section>
+
+        </section>
+
+        <!-- ===================================== -->
+        <!-- PARTNER -->
+        <!-- ===================================== -->
+
+        <section
+            id="partnersTab"
+            class="page"
+        >
+
+            <div class="partnerWorkspace">
+
+                <!-- ========================== -->
+                <!-- SIDEBAR -->
+                <!-- ========================== -->
+
+                <aside class="partnerSidebar">
+
+                    <div class="sidebarHeader">
+
+                        <div>
+
+                            <div class="eyebrow">
+                                CLUBS
+                            </div>
+
+                            <h3>
+                                Vereine
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                    <div class="sidebarSearch">
+
+                        <input
+                            id="partnerSearch"
+                            type="text"
+                            placeholder="Verein suchen..."
+                        >
+
+                    </div>
+
+                    <div class="sidebarFilter">
+
+                        <select
+                            id="partnerLeagueFilter"
+                        >
+
+                            <option value="">
+                                Alle Ligen
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div
+                        id="partnerList"
+                        class="partnerList"
+                    >
+
+                        <!-- renderPartnerList() -->
+
+                    </div>
+
+                </aside>
+
+                <!-- ========================== -->
+                <!-- DETAIL -->
+                <!-- ========================== -->
+
+                <main
+                    id="partnerDetail"
+                    class="partnerDetail"
+                >
+
+                    <div class="emptyInspector">
+
+                        <div class="eyebrow">
+                            PARTNER MANAGEMENT
+                        </div>
+
+                        <h2>
+                            Verein auswählen
+                        </h2>
+
+                        <p>
+                            Wähle links einen Verein aus,
+                            um die Partnerdaten zu bearbeiten.
+                        </p>
+
+                    </div>
+
+                </main>
+
+            </div>
+
+        </section>
+        <!-- ===================================== -->
+        <!-- LEGACY CONTAINER -->
+        <!-- Für JS Kompatibilität -->
+        <!-- ===================================== -->
+
+        <div
+            id="eventsTab"
+            class="page"
+            style="display:none;"
+        ></div>
+
+        <div
+            id="gameEventsTab"
+            class="page"
+            style="display:none;"
+        ></div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- EXTERNAL LIBRARIES -->
+    <!-- ===================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- ===================================== -->
+    <!-- APP -->
+    <!-- ===================================== -->
+
+    <script
+        type="module"
+        src="./admin.js"
+    ></script>
+
+</body>
+
+</html>
